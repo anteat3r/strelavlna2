@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 ctx.fillStyle = "#f1effc";
 
 //struct for bock with x and y component and target x and y component
-class block {
+class Block {
     constructor(x, y, target_x, target_y, destroy_x, destroy_y) {
         this.x = x;
         this.y = y;
@@ -15,14 +15,14 @@ class block {
     }
 }
 
-class pos {
+class Pos {
     constructor(x, y) {
         this.x = x;
         this.y = y;
     }
 }
 
-class void_ {
+class Void {
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -32,12 +32,12 @@ class void_ {
 }
 
 /**
- * @param {void_} void__ 
- * @param {void_[]} list 
+ * @param {Void} void__ 
+ * @param {Void[]} list 
  * @returns {int}
 */
-function voidIndex(void__, list){
-  return list.find((e) => e.x == void__.x && e.y == void__.y) ?? -1;
+function voidIndex(void_, list){
+  return list.find((e) => e.x == void_.x && e.y == void_.y) ?? -1;
     // for(let i = 0; i < list.length; i++){
     //     if (list[i].x == void__.x && list[i].y == void__.y){
     //         return i;
@@ -46,6 +46,10 @@ function voidIndex(void__, list){
     // return -1;
 }
 
+/**
+ * @param {Block[]} blocks 
+ * @param {number} k 
+*/
 function uppdate_blocks(blocks, k){
     for(let i=0;i<blocks.length;i++){
         blocks[i].x += (blocks[i].target_x - blocks[i].x)*k;
@@ -87,7 +91,7 @@ function generate_random_blocks(n){
         let y = Math.floor(Math.random()*10);
         if (canvas_semitarget[y][x] == 1) {
             canvas_semitarget[y][x] = 0;
-            canvas_accual.push(new block(x, y, x, y, -1, -1));
+            canvas_accual.push(new Block(x, y, x, y, -1, -1));
         }else{
             i--;
         }
@@ -126,25 +130,25 @@ function change_screen(starting_canvas, target_canvas){
                 for(let x = 0; x < 22 && delta_N != 0; x++){
                     if (starting_canvas[y][x] == 0){
                         if (x+1 < 22 && modified_canvas[y][x+1] == 1){
-                            canvas_accual.push(new block(x, y, x+1, y, -1, -1));
+                            canvas_accual.push(new Block(x, y, x+1, y, -1, -1));
                             modified_canvas[y][x+1] = 0;
                             delta_N --;
                             continue;
                         }
                         if (y+1 < 10 && modified_canvas[y+1][x] == 1){
-                            canvas_accual.push(new block(x, y, x, y+1, -1, -1));
+                            canvas_accual.push(new Block(x, y, x, y+1, -1, -1));
                             modified_canvas[y+1][x] = 0;
                             delta_N --;
                             continue;
                         }
                         if (x-1 > 0 && modified_canvas[y][x-1] == 1){
-                            canvas_accual.push(new block(x, y, x-1, y, -1, -1));
+                            canvas_accual.push(new Block(x, y, x-1, y, -1, -1));
                             modified_canvas[y][x-1] = 0;
                             delta_N --;
                             continue;
                         }
                         if (y-1 > 0 && modified_canvas[y-1][x] == 1){
-                            canvas_accual.push(new block(x, y, x, y-1, -1, -1));
+                            canvas_accual.push(new Block(x, y, x, y-1, -1, -1));
                             modified_canvas[y-1][x] = 0;
                             delta_N --;
                             continue;
@@ -158,7 +162,7 @@ function change_screen(starting_canvas, target_canvas){
                 for(let x = 0; x < 22 && delta_N != 0; x++){
                     if (modified_canvas[y][x] == 0){
                         if (x+1 < 22 && modified_canvas[y][x+1] == 0){
-                            let idx = blockIndex(new block(x, y, x, y, -1, -1), canvas_accual);
+                            let idx = blockIndex(new Block(x, y, x, y, -1, -1), canvas_accual);
                             // canvas_accual.indexOf(block(x, y, x, y, -1, -1));
                             canvas_accual[idx].target_x = x+1;
                             canvas_accual[idx].target_y = y;
@@ -170,7 +174,7 @@ function change_screen(starting_canvas, target_canvas){
                             continue;
                         }
                         if (y+1 < 10 && modified_canvas[y+1][x] == 0){
-                            let idx = blockIndex(new block(x, y, x, y, -1, -1), canvas_accual);
+                            let idx = blockIndex(new Block(x, y, x, y, -1, -1), canvas_accual);
                             // let idx = canvas_accual.indexOf(block(x, y, x, y, -1, -1));
                             canvas_accual[idx].target_x = x;
                             canvas_accual[idx].target_y = y+1;
@@ -182,7 +186,7 @@ function change_screen(starting_canvas, target_canvas){
                             continue;
                         }
                         if (x-1 > 0 && modified_canvas[y][x-1] == 0){
-                            let idx = blockIndex(new block(x, y, x, y, -1, -1), canvas_accual);
+                            let idx = blockIndex(new Block(x, y, x, y, -1, -1), canvas_accual);
                             // let idx = canvas_accual.indexOf(block(x, y, x, y, -1, -1));
                             canvas_accual[idx].target_x = x-1;
                             canvas_accual[idx].target_y = y;
@@ -194,7 +198,7 @@ function change_screen(starting_canvas, target_canvas){
                             continue;
                         }
                         if (y-1 > 0 && modified_canvas[y-1][x] == 0){
-                            let idx = blockIndex(new block(x, y, x, y, -1, -1), canvas_accual);
+                            let idx = blockIndex(new Block(x, y, x, y, -1, -1), canvas_accual);
                             // let idx = canvas_accual.indexOf(block(x, y, x, y, -1, -1));
                             canvas_accual[idx].target_x = x;
                             canvas_accual[idx].target_y = y-1;
@@ -218,10 +222,10 @@ function change_screen(starting_canvas, target_canvas){
     for(let y = 0; y < 10; y++){
         for(let x = 0; x < 22; x++){
             if(starting_canvas[y][x] == 1){
-                voids.push(new void_(x, y, -1, -1));
+                voids.push(new Void(x, y, -1, -1));
             }
             if(target_canvas[y][x] == 1){
-                target_voids.push(new pos(x, y));
+                target_voids.push(new Pos(x, y));
             }
         }
     }
@@ -267,14 +271,14 @@ function uppdate_voids(){
         dy = 0;
     }
 
-    let i = blockIndex(new block(0, 0, voids[idx].x + dx, voids[idx].y + dy, 0, 0), canvas_accual);
+    let i = blockIndex(new Block(0, 0, voids[idx].x + dx, voids[idx].y + dy, 0, 0), canvas_accual);
     if (i != -1){
         canvas_accual[i].target_x = voids[idx].x;
         canvas_accual[i].target_y = voids[idx].y;
         voids[idx].x += dx;
         voids[idx].y += dy;
     }else{
-        i = voidIndex(new void_(voids[idx].x + dx, voids[idx].y + dy, -1, -1), voids);
+        i = voidIndex(new Void(voids[idx].x + dx, voids[idx].y + dy, -1, -1), voids);
         if (i != -1){
 
         }
