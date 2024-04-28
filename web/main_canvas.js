@@ -4,34 +4,46 @@ const ctx = canvas.getContext("2d");
 ctx.fillStyle = "#f1effc";
 
 //struct for bock with x and y component and target x and y component
-function block(x, y, target_x, target_y, destroy_x, destroy_y){
-    this.x = x;
-    this.y = y;
-    this.target_x = target_x;
-    this.target_y = target_y;
-    this.destroy_x = destroy_x;
-    this.destroy_y = destroy_y;
-}
-
-function pos(x, y){
-    this.x = x;
-    this.y = y;
-}
-
-function void_(x, y, destination_x, destination_y){
-    this.x = x;
-    this.y = y;
-    this.destination_x = x;
-    this.destination_y = y;
-}
-
-function voidIndex(void_, list){
-    for(let i = 0; i < list.length; i++){
-        if (list[i].x == void_.x && list[i].y == void_.y){
-            return i;
-        }
+class block {
+    constructor(x, y, target_x, target_y, destroy_x, destroy_y) {
+        this.x = x;
+        this.y = y;
+        this.target_x = target_x;
+        this.target_y = target_y;
+        this.destroy_x = destroy_x;
+        this.destroy_y = destroy_y;
     }
-    return -1;
+}
+
+class pos {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class void_ {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.destination_x = x;
+        this.destination_y = y;
+    }
+}
+
+/**
+ * @param {void_} void__ 
+ * @param {void_[]} list 
+ * @returns {int}
+*/
+function voidIndex(void__, list){
+  return list.find((e) => e.x == void__.x && e.y == void__.y) ?? -1;
+    // for(let i = 0; i < list.length; i++){
+    //     if (list[i].x == void__.x && list[i].y == void__.y){
+    //         return i;
+    //     }
+    // }
+    // return -1;
 }
 
 function uppdate_blocks(blocks, k){
@@ -91,9 +103,6 @@ function blockIndex(block, list){
     return -1;
 }
 
-
-
-
 function count_blocks(trgt_canvas){
     i = 0;
     for(let y = 0; y < 10; y++){
@@ -106,7 +115,7 @@ function count_blocks(trgt_canvas){
     return i;
 }
 
-function change_sceen(starting_canvas, target_canvas){
+function change_screen(starting_canvas, target_canvas){
     let delta_N = count_blocks(target_canvas) - count_blocks(starting_canvas);
 
     console.log(delta_N);
@@ -230,9 +239,6 @@ function change_sceen(starting_canvas, target_canvas){
         }
         target_voids.splice(idx, 1);
     }
-
-
-
 }
 
 function uppdate_voids(){
@@ -285,7 +291,7 @@ function uppdate_voids(){
             }else{
                 new_target_canvas = target_canvas+1;
             }
-            change_sceen(canvas_targets[target_canvas].slice(), canvas_targets[new_target_canvas].slice());
+            change_screen(canvas_targets[target_canvas].slice(), canvas_targets[new_target_canvas].slice());
             target_canvas = new_target_canvas;
             setTimeout(() => {
                 for(let i = 0; i < canvas_accual.length; i++){
@@ -344,9 +350,7 @@ var canvas_accual = [];
 
 var canvas_semitarget = [];
 
-// var correction_paths = [];
 var voids = [];
-
 
 var target_canvas = 0;
 
@@ -357,10 +361,8 @@ var corner = 4;
 generate_random_blocks(count_blocks(canvas_targets[target_canvas]));
 draw_blocks();
 
-setTimeout(() => {change_sceen(canvas_semitarget.slice(), canvas_targets[target_canvas].slice());}, 3000);
+setTimeout(() => {change_screen(canvas_semitarget.slice(), canvas_targets[target_canvas].slice());}, 3000);
 setTimeout(() => {uppdate_voids();}, 3000);
-
-
 
 //main animation loop
 function animate() {
@@ -368,24 +370,6 @@ function animate() {
     uppdate_blocks(canvas_accual, 0.3);
 
     draw_blocks();
-
-
-    
-
-
-
-
-
-
 }
 
 animate();
-
-
-// //this will change the background color of the main page every second
-// setInterval(() => {
-//     document.body.style.backgroundColor = `rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)})`;
-// }, 1);
-
-
-
