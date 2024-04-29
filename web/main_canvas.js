@@ -37,13 +37,13 @@ class Void {
  * @returns {int}
 */
 function voidIndex(void_, list){
-  return list.find((e) => e.x == void_.x && e.y == void_.y) ?? -1;
-    // for(let i = 0; i < list.length; i++){
-    //     if (list[i].x == void__.x && list[i].y == void__.y){
-    //         return i;
-    //     }
-    // }
-    // return -1;
+//   return list.find((e) => e.x == void_.x && e.y == void_.y) ?? -1;
+    for(let i = 0; i < list.length; i++){
+        if (list[i].x == void_.x && list[i].y == void_.y){
+            return i;
+        }
+    }
+    return -1;
 }
 
 /**
@@ -222,7 +222,7 @@ function change_screen(starting_canvas, target_canvas){
     for(let y = 0; y < 10; y++){
         for(let x = 0; x < 22; x++){
             if(starting_canvas[y][x] == 1){
-                voids.push(new Void(x, y, -1, -1));
+                voids.push(new Void(x, y));
             }
             if(target_canvas[y][x] == 1){
                 target_voids.push(new Pos(x, y));
@@ -279,9 +279,6 @@ function uppdate_voids(){
         voids[idx].y += dy;
     }else{
         i = voidIndex(new Void(voids[idx].x + dx, voids[idx].y + dy, -1, -1), voids);
-        if (i != -1){
-
-        }
         voids[i].x -= dx;
         voids[i].y -= dy;
         voids[idx].x += dx;
