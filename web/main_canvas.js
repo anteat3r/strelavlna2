@@ -1,3 +1,6 @@
+/**
+ * @type {HTMLCanvasElement}
+*/
 const canvas = document.getElementById("main-canvas");
 
 const ctx = canvas.getContext("2d");
@@ -37,13 +40,13 @@ class Void {
  * @returns {int}
 */
 function voidIndex(void_, list){
-//   return list.find((e) => e.x == void_.x && e.y == void_.y) ?? -1;
-    for(let i = 0; i < list.length; i++){
-        if (list[i].x == void_.x && list[i].y == void_.y){
-            return i;
-        }
-    }
-    return -1;
+  return list.findIndex((e) => e.x == void_.x && e.y == void_.y) ?? -1;
+    // for(let i = 0; i < list.length; i++){
+    //     if (list[i].x == void__.x && list[i].y == void__.y){
+    //         return i;
+    //     }
+    // }
+    // return -1;
 }
 
 /**
@@ -64,14 +67,14 @@ function uppdate_blocks(blocks, k){
 }
 
 //function that will draw all the blocks onto the canvas
-function draw_blocks(){
+function draw_blocks() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     //clearing the previous frame
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //drawing the blocks
-    for(let i=0;i<canvas_accual.length;i++){
+    for (let block of canvas_accual) {
         ctx.beginPath();
-        ctx.roundRect(30*canvas_accual[i].x, 30*canvas_accual[i].y, spacing, spacing, corner);
+        ctx.roundRect(30*block.x, 30*block.y, spacing, spacing, corner);
         ctx.fill();
     }
 }

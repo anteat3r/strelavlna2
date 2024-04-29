@@ -245,6 +245,16 @@ a:hover{
     margin-inline: 10px;
 }
 
+.mv-10{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.mv-20{
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 .blue-top{
     border-top: 4px var(--color-main) solid;
     border-radius: 4px;
@@ -255,6 +265,11 @@ a:hover{
     border-bottom: 4px var(--color-main) solid;
     border-radius: 4px;
     padding-bottom: 10px;
+}
+.blue-left{
+    border-left: 4px var(--color-main) solid;
+    border-radius: 4px;
+    padding-left: 10px;
 }
 
 .gray-section{
