@@ -254,6 +254,10 @@ a:hover{
     margin-top: 20px;
     margin-bottom: 20px;
 }
+.mv-100{
+    margin-top: 100px;
+    margin-bottom: 100px;
+}
 
 .blue-top{
     border-top: 4px var(--color-main) solid;
