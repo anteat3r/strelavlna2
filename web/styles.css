@@ -270,7 +270,7 @@ a:hover{
     border-radius: 4px;
     padding-bottom: 10px;
 }
-.blue-left{
+.blue-left {
     border-left: 4px var(--color-main) solid;
     border-radius: 4px;
     padding-left: 10px;
@@ -305,4 +305,10 @@ a:hover{
 
 #footer-element{
     margin-inline: 15%;
+}
+
+.big-border-left {
+    border-left: 4px var(--color-main) solid;
+    border-radius: 4px;
+    padding-left: 20px;
 }
