@@ -66,12 +66,30 @@ a:hover{
 .nav5 {grid-area: n5}
 .header1 {grid-area: h1}
 .header2 {grid-area: h2}
+.m-a0 {grid-area: ma0}
+.m-a1 {grid-area: ma1}
+.m-a2 {grid-area: ma2}
+.m-a3 {grid-area: ma3}
+.m-b0 {grid-area: mb0}
+.m-b1 {grid-area: mb1}
+.m-b2 {grid-area: mb2}
+.m-b3 {grid-area: mb3}
+.m-c0 {grid-area: mc0}
+.m-c1 {grid-area: mc1}
+.m-c2 {grid-area: mc2}
+.m-c3 {grid-area: mc3}
+
 
 .header1 {
     max-width: 700px;
     margin-inline: 10%;
-    margin: auto;
     min-width: 390px;
+    padding: 20px;
+    height: 300px;
+    font-size: 48px;
+    font-weight: 700;
+    color: white;
+    line-height: 60px;
 }
 .header2{
     margin-inline: 10%;
@@ -95,7 +113,70 @@ a:hover{
     grid-template: 
         'f1 f2 f3 f4';
 }
+
+.grid-main-a{
+    padding-left: 20%;
+    padding-right: 5%;
+    background-color: white;
+    padding-top: 40px;
+    padding-bottom: 100px;
+    display: grid;
+    grid-template:
+        'ma0 ma0 ma0'
+        'ma1 ma2 ma3'; 
+        
+}
+
+.main-a-element{
+    font-size: 18px;
+    max-width: 400px;
+    margin-inline: 10%;
+}
+
+.grid-main-b{
+    padding-left: 20%;
+    padding-right: 5%;
+    background-color: var(--color-white);
+    padding-top: 40px;
+    padding-bottom: 100px;
+    display: grid;
+    grid-template: 
+    'mb0'
+    'mb1'
+    'mb2'
+    'mb3'
+}
+
+.grid-main-c{
+    padding-left: 20%;
+    padding-right: 5%;
+    background-color: white;
+    padding-top: 40px;
+    padding-bottom: 100px;
+    display: grid;
+    grid-template: 
+        'mc0 mc0 mc0'
+        'mc1 mc2 mc3';
+}
+
+.main-c-element{
+    max-width: 400px;
+    margin-left: 30px;
+}
+
+.main-b-element{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    max-width: 400px;
+    margin-left: 30px;
+}
 @media (max-width: 1100px){
+    .grid-main-c{
+        padding-left: 5%;
+    }
+    .grid-main-a{
+        padding-left: 5%;
+    }
     .grid-header{
         grid-template: 
             'h1'
@@ -125,6 +206,23 @@ a:hover{
 }
 
 @media (max-width: 700px){
+    .grid-main-a{
+        grid-template: 
+        'ma0'
+        'ma1'
+        'ma2'
+        'ma3'
+    }
+    .grid-main-c{
+        grid-template: 
+        'mc0'
+        'mc1'
+        'mc2'
+        'mc3'
+    }
+    .grid-main-b{
+        padding-left: 5%;
+    }
     .grid-header{
         grid-template: 
             'h1'
@@ -132,6 +230,9 @@ a:hover{
     .header2{
         display: none;
     }      
+    .header1{
+        min-width: 80%;
+    }
     .grid-footer{
         grid-template: 
             'f1' 
@@ -157,9 +258,16 @@ a:hover{
     }
     #logo{
         margin-bottom: 20px;
+        width: 80%;
+        max-width: 446px;
+        height: auto;
     }
     .nav2{
         border: none;
+    }
+    .header1{
+        font-size: 40px;
+        line-height: 55px;
     }
 }
 
