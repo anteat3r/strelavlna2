@@ -433,3 +433,14 @@ a:hover{
     border-radius: 4px;
     padding-left: 20px;
 }
+
+.icon{
+    margin-inline: 3px;
+    font-size: 16px;
+}
+
+.link{
+    font-weight: 900;
+    text-decoration: none;
+    color: black;
+}
