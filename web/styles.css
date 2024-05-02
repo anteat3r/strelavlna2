@@ -51,11 +51,117 @@ a:hover{
 .nav-element{
     text-decoration: none;
     color: white;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
-    margin-inline: 40px;
+    margin: auto;
+}
+.footer-element1 {grid-area: f1}
+.footer-element2 {grid-area: f2}
+.footer-element3 {grid-area: f3}
+.footer-element4 {grid-area: f4}
+.nav1 {grid-area: n1}
+.nav2 {grid-area: n2}
+.nav3 {grid-area: n3}
+.nav4 {grid-area: n4}
+.nav5 {grid-area: n5}
+.header1 {grid-area: h1}
+.header2 {grid-area: h2}
+
+.header1 {
+    max-width: 700px;
+    margin-inline: 10%;
+    margin: auto;
+    min-width: 390px;
+}
+.header2{
+    margin-inline: 10%;
+    margin: auto;
+    padding-right: 50px;
+    padding-left: 5%;
 }
 
+.grid-header{
+    display: grid;
+    grid-template: 'h1 h2';
+}
+
+.grid-nav{
+    display: grid;
+    grid-template: 'n1 n2 n3 n4 n5';
+    text-align: center;
+}
+.grid-footer{
+    display: grid;
+    grid-template: 
+        'f1 f2 f3 f4';
+}
+@media (max-width: 1100px){
+    .grid-header{
+        grid-template: 
+            'h1'
+            'h2'
+    }
+    .grid-footer{
+        grid-template: 
+            /* 'n1'
+            'n2 n3 n4 n5' */
+            'f1 f2'
+            'f3 f4';
+    }
+    .grid-nav{
+        grid-template:
+            'n1 n1 n1 n1'
+            'n2 n3 n4 n5'
+    }
+    #logo{
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        border-bottom: var(--color-main-light) 2px solid;
+    }
+    #navbar{
+        border-bottom: var(--color-main-light) 2px solid;
+    }
+    
+}
+
+@media (max-width: 700px){
+    .grid-header{
+        grid-template: 
+            'h1'
+    } 
+    .header2{
+        display: none;
+    }      
+    .grid-footer{
+        grid-template: 
+            'f1' 
+            'f2'
+            'f3'
+            'f4';
+    }
+    .grid-nav{
+        grid-template:
+            'n1'
+            'n2'
+            'n3'
+            'n4'
+            'n5' ;
+    }
+    .footer-element{
+    margin: auto;
+    }
+    .nav-element{
+        padding-top: 10px;
+        padding-bottom: 10px;
+        border-top: var(--color-main-light) 2px solid;
+    }
+    #logo{
+        margin-bottom: 20px;
+    }
+    .nav2{
+        border: none;
+    }
+}
 
 
 .nav-element::before {
@@ -105,8 +211,8 @@ a:hover{
 
 .row-segment{
     /* width: 100vw; */
-    padding-top: 40px;
-    padding-bottom: 40px;
+    padding-top: 30px;
+    padding-bottom: 30px;
     margin: 0px;
 }
 
@@ -118,10 +224,16 @@ a:hover{
 .flex{
     display: flex;
 }
+
 .center-content{
     justify-content: center;
     align-items: center;
 }
+
+.center{
+    justify-content: center;
+}
+
 .inline{
     display: inline-block;
 }
@@ -196,8 +308,7 @@ a:hover{
     -khtml-user-drag: none;
     -moz-user-drag: none;
     -o-user-drag: none;
-    user-drag: none;
-
+    -user-drag: none;
     cursor: pointer;
 }
 
@@ -209,7 +320,6 @@ a:hover{
 #basics{
     padding: 20px;
     height: 300px;
-    width: 700px;
     font-size: 48px;
     font-weight: 700;
     color: white;
@@ -275,6 +385,11 @@ a:hover{
     border-radius: 4px;
     padding-left: 10px;
 }
+.gray-top{
+    border-top: 3px var(--color-gray) solid;
+    border-radius: 3px;
+    padding-top: 5px;
+}
 
 .gray-section{
     padding-left: 20%;
@@ -294,6 +409,7 @@ a:hover{
     color: white;
     padding-top: 40px;
     padding-bottom: 100px;
+    width: 100%;
 }
 
 .f-20{
@@ -303,9 +419,14 @@ a:hover{
     font-size: 18px;
 }
 
-#footer-element{
+
+.footer-element{
     margin-inline: 15%;
+    max-width: 300px;
+    min-width: 250px;
 }
+
+
 
 .big-border-left {
     border-left: 4px var(--color-main) solid;
