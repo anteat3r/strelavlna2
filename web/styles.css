@@ -79,6 +79,9 @@ a:hover{
 .m-c2 {grid-area: mc2}
 .m-c3 {grid-area: mc3}
 
+header {
+    padding-bottom: 50px;
+}
 
 .header1 {
     max-width: 700px;
