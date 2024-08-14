@@ -1,3 +1,4 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 :root{
     /* font-family: 'Lexend'; */
     font-family: system-ui;
@@ -81,9 +82,6 @@ a:hover{
 .m-c2 {grid-area: mc2}
 .m-c3 {grid-area: mc3}
 
-header {
-    padding-bottom: 50px;
-}
 
 .header1 {
     max-width: 700px;
@@ -585,4 +583,21 @@ header {
     font-weight: 900;
     text-decoration: none;
     color: black;
+}
+.link::after {
+    content: '\f35d'; 
+    font-family: 'Font Awesome 6 Free'; 
+    font-weight: 1000; 
+    font-size: 0.9em; 
+    margin-left: 0.2em; 
+    display: inline-block;
+    vertical-align: middle;
+    color: #000;
+    padding-bottom: 3px;
+}
+
+.container{
+    max-width: 3000px; /* Adjust this value as necessary */
+    margin: 0 auto; /* Centers the container */
+    /* padding: 0 20px; Adds some padding on the sides */
 }
