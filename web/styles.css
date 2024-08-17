@@ -1,3 +1,4 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 :root{
     /* font-family: 'Lexend'; */
     font-family: system-ui;
@@ -12,6 +13,8 @@
 }
 body{
     margin: 0px;
+    width: 100vw;
+    overflow-x: hidden;
     /* background-color: rgb(0, 183, 255); */
 }
 
@@ -79,15 +82,12 @@ a:hover{
 .m-c2 {grid-area: mc2}
 .m-c3 {grid-area: mc3}
 
-header {
-    padding-bottom: 50px;
-}
 
 .header1 {
     max-width: 700px;
-    margin-inline: 10%;
-    min-width: 390px;
-    padding: 20px;
+    margin: 5%;
+    margin-left: 10vw;
+    min-width: 30vw;
     height: 300px;
     font-size: 48px;
     font-weight: 700;
@@ -95,14 +95,14 @@ header {
     line-height: 60px;
 }
 .header2{
-    margin-inline: 10%;
     margin: auto;
-    padding-right: 50px;
-    padding-left: 5%;
+    max-width: 45vw;
+    padding-right: 5vw;
 }
 
 .grid-header{
     display: grid;
+    max-width: 100vw;
     grid-template: 'h1 h2';
 }
 
@@ -113,16 +113,17 @@ header {
 }
 .grid-footer{
     display: grid;
+    max-width: 100vw;
     grid-template: 
         'f1 f2 f3 f4';
 }
 
 .grid-main-a{
-    padding-left: 20%;
-    padding-right: 5%;
+    margin-left: 20%;
+    margin-right: 5%;
     background-color: white;
-    padding-top: 40px;
-    padding-bottom: 100px;
+    margin-top: 40px;
+    margin-bottom: 100px;
     display: grid;
     grid-template:
         'ma0 ma0 ma0'
@@ -138,6 +139,7 @@ header {
 
 .grid-main-b{
     padding-left: 20%;
+    max-width: 100vw;
     padding-right: 5%;
     background-color: var(--color-white);
     padding-top: 40px;
@@ -151,11 +153,11 @@ header {
 }
 
 .grid-main-c{
-    padding-left: 20%;
-    padding-right: 5%;
+    margin-left: 20%;
+    margin-right: 5%;
     background-color: white;
-    padding-top: 40px;
-    padding-bottom: 100px;
+    margin-top: 40px;
+    margin-bottom: 100px;
     display: grid;
     grid-template: 
         'mc0 mc0 mc0'
@@ -173,12 +175,26 @@ header {
     max-width: 400px;
     margin-left: 30px;
 }
+.footer-element{
+    margin-inline: 10%;
+    max-width: 300px;
+    min-width: 160px;
+    width: 20vw;
+}
 @media (max-width: 1100px){
+    .header1{
+        margin: auto;
+    }
+    .header2{
+        margin: auto;
+        max-width: 90vw;
+        padding: 0px;
+    }
     .grid-main-c{
-        padding-left: 5%;
+        margin-left: 5%;
     }
     .grid-main-a{
-        padding-left: 5%;
+        margin-left: 5%;
     }
     .grid-header{
         grid-template: 
@@ -187,10 +203,12 @@ header {
     }
     .grid-footer{
         grid-template: 
-            /* 'n1'
-            'n2 n3 n4 n5' */
             'f1 f2'
             'f3 f4';
+    }
+    .footer-element{
+        width: 40vw;
+        margin-inline: auto;
     }
     .grid-nav{
         grid-template:
@@ -226,15 +244,24 @@ header {
     .grid-main-b{
         padding-left: 5%;
     }
+    .main-b-element{
+        max-width: 100vw;
+    }
     .grid-header{
         grid-template: 
             'h1'
+            'h2'
     } 
     .header2{
-        display: none;
+        max-width: 80vw;
     }      
     .header1{
         min-width: 80%;
+        font-size: 40px;
+        line-height: 55px;
+        height: auto;
+        margin: auto;
+        max-width: 80vw;
     }
     .grid-footer{
         grid-template: 
@@ -252,7 +279,8 @@ header {
             'n5' ;
     }
     .footer-element{
-    margin: auto;
+        margin: auto;
+        width: 70vw;
     }
     .nav-element{
         padding-top: 10px;
@@ -268,9 +296,14 @@ header {
     .nav2{
         border: none;
     }
+}
+@media (max-width:300px){
+    .m-b0{
+        font-size: 12vw
+    }
     .header1{
-        font-size: 40px;
-        line-height: 55px;
+        font-size: 14vw;
+        line-height: 17vw;
     }
 }
 
@@ -531,11 +564,7 @@ header {
 }
 
 
-.footer-element{
-    margin-inline: 15%;
-    max-width: 300px;
-    min-width: 250px;
-}
+
 
 
 
@@ -554,4 +583,21 @@ header {
     font-weight: 900;
     text-decoration: none;
     color: black;
+}
+.link::after {
+    content: '\f35d'; 
+    font-family: 'Font Awesome 6 Free'; 
+    font-weight: 1000; 
+    font-size: 0.9em; 
+    margin-left: 0.2em; 
+    display: inline-block;
+    vertical-align: middle;
+    color: #000;
+    padding-bottom: 3px;
+}
+
+.container{
+    max-width: 3000px; /* Adjust this value as necessary */
+    margin: 0 auto; /* Centers the container */
+    /* padding: 0 20px; Adds some padding on the sides */
 }
