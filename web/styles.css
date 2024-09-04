@@ -601,3 +601,108 @@ a:hover{
     margin: 0 auto; /* Centers the container */
     /* padding: 0 20px; Adds some padding on the sides */
 }
+
+#this_year_canvas{
+    background-color: var(--color-white);
+    display: block;
+}
+
+#register-card{
+    background-color: var(--color-main);
+    border-radius: 10px;
+    max-width: 250px;
+    padding: 20px;
+}
+
+#register-card h2{
+    color: white;
+    font-size: 30px;
+    display: flex;
+    justify-content: center;
+    margin: 0px;
+    padding-bottom: 10px;
+    border-bottom: #6d55ef dashed 3px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+#register-card #schoolid{
+    width: calc(95% - 20px);
+    display: block;
+    margin: 0 auto;
+    border-radius: 10px;
+    outline: none;
+    border: none;
+    height: 40px;
+    padding-inline: 10px;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+#register-caerd #search-container{
+    position: relative;
+    display: inline-block;
+}
+
+.region{
+    fill: none;
+    stroke: #8b7be7;
+    stroke-width: 2px;
+}
+
+.region-selector-ready{
+    fill: #8b7be700;
+    stroke: #8b7be7;
+    stroke-width: 2px;
+    transition: fill 0.5s ease-out;
+}
+.region-selector-hover{
+    fill: #8b7be738;
+    stroke: #8b7be7;
+    stroke-width: 2px;
+    transition: fill 0s;
+
+}
+
+.region-selector-hidden{
+    fill: none;
+    stroke: none;
+}
+
+.region-selector-notready{
+    fill: #8b7be700;
+    stroke: #8b7be736;
+    stroke-width: 2px;
+    transition: stroke 0.5s ease-out;
+}
+
+.subregion{
+    stroke-width: 0.5px;
+}
+
+#return-button{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    height: 20px;
+    width: 20px;
+    padding: 0px;
+    background-color: #8b7be7;
+
+}
+
+#return-button i{
+    font-size: 15px;
+    margin: 0px;
+    color: #f3f1ff;
+}
+
+.return-button-shown{
+    display: block;
+}
+
+.return-button-hidden{
+    display: none;
+
+}
