@@ -35,7 +35,7 @@ class Void {
 }
 
 /**
- * @param {Void} void__ 
+ * @param {Void} void_ 
  * @param {Void[]} list 
  * @returns {int}
 */
