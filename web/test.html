@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <link href="css/style.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <input type="number" value="0" id="kraj">
+    <form>
+      <input type="text" list="schools" name="school" id="schooli" style="width: 100%;">
+      <datalist id="schools">
+        
+      </datalist>
+    </form>
+    <script>
+      const schools = $("#schooli");
+      const kraj = $("#kraj");
+      const scs = $("#schools");
+      schools.keydown(function(e){
+        $.ajax({
+          url: "http://localhost:8090/school/" + kraj.val() + "/" + schools.val(),
+          success: function(res){
+            const sc = new Set(res.split(";"));
+            scs.children().each(function(i){
+              if (typeof i == "number") return;
+              if (!sc.has(i.attr("value"))) {
+                i.remove();
+                sc.remove(i.attr("value"))
+              }
+            })
+            for (const i of sc) {
+              scs.append($("<option>", {value: i}));
+            }
+          },
+        })
+      });
+    </script>
+  </body>
+</html>
