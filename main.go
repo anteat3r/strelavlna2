@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/anteat3r/strelavlna2/src"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
@@ -19,6 +20,10 @@ func main() {
         os.DirFS("../web/"),
         false,
       ),
+    )
+    e.Router.GET(
+      "/school",
+      src.SchoolQueryEndp(app.Dao()),
     )
     return nil
   })
