@@ -32,7 +32,7 @@ function generateFluid(){
     p = []
     for(let i = 0; i < 20; i++){
         o.push(Math.random()*100);
-        k.push(Math.random()*1);
+        k.push(Math.random()*0.3);
         p.push((Math.random()+0.15)*0.3);
     }
 
@@ -40,7 +40,7 @@ function generateFluid(){
         a = 0
         b = 0
         for(let j = 0; j < 10; j++){
-            r = (Math.random()-0.5)*1.5;
+            r = (Math.random()-0.5)*1.1;
             a += Math.sin(i*p[j]+o[j])*k[j]/p[j] + r*r*r;
             b += Math.cos(i*p[j+10]+o[j+10])*k[j+10]/p[j+10];
         }
@@ -104,85 +104,7 @@ function renderFluid(){
 
 }
 
-function checkForPossibleDrop(){
-    possibility = [];
-    for(let i = 0; i < topFluid.length; i++){
-        if (topFluidSpeed[i] > 1.2){
-            possibility.push(i);
-        }
-    }
-    if (possibility.length== 0) {
-        return
-    }
-    idx = possibility[Math.round(Math.random()*(possibility.length-1))];
-    // console.log(idx);
-    droplets.push(new Droplet(idx*spacing, topFluid[idx]-dropletSize/2, topFluidSpeed[idx]));
-    // console.log(droplets[droplets.length-1]);
-}
 
-function updateDrops(g){
-    for(let i = 0; i < droplets.length; i++){
-        droplets[i].speedY += g;
-        droplets[i].y += droplets[i].speedY;
-        if (droplets[i].y >= 700-bottomFluid[droplets[i].x/spacing]){
-            bottomFluidSpeed[droplets[i].x/spacing-2] -= 1;
-            bottomFluidSpeed[droplets[i].x/spacing-1] -= 2;
-            bottomFluidSpeed[droplets[i].x/spacing] -= 5;
-            bottomFluidSpeed[droplets[i].x/spacing+1] -= 2;
-            bottomFluidSpeed[droplets[i].x/spacing+2] -= 1;
-
-            for (let j = 0; j < bottomFluidSpeed.length; j++){
-                bottomFluidSpeed[j] += 11/bottomFluidSpeed.length;
-            }
-            droplets.splice(i, 1);
-        }
-    }
-}
-
-function hexToRgb(hex) {
-    // Remove the hash at the start if it's there
-    hex = hex.replace(/^#/, '');
-    
-    // Parse the 3 or 6 digit hex into an integer
-    let bigint = parseInt(hex, 16);
-    let r, g, b;
-
-    if (hex.length === 3) {
-        r = (bigint >> 8) & 0xF;
-        g = (bigint >> 4) & 0xF;
-        b = bigint & 0xF;
-        // Convert 4-bit values to 8-bit
-        r = (r << 4) | r;
-        g = (g << 4) | g;
-        b = (b << 4) | b;
-    } else {
-        r = (bigint >> 16) & 0xFF;
-        g = (bigint >> 8) & 0xFF;
-        b = bigint & 0xFF;
-    }
-
-    return {r, g, b};
-}
-
-function interpolateColor(color1, color2, factor) {
-    const c1 = hexToRgb(color1);
-    const c2 = hexToRgb(color2);
-
-    const r = Math.round(c1.r + factor * (c2.r - c1.r));
-    const g = Math.round(c1.g + factor * (c2.g - c1.g));
-    const b = Math.round(c1.b + factor * (c2.b - c1.b));
-
-    return `rgb(${r}, ${g}, ${b})`;
-}
-
-function renderDrops(){
-    for(let i = 0; i < droplets.length; i++){
-        ctx.fillStyle = interpolateColor("#3118ba", "#14B8FF", droplets[i].y/(700-bottomOftset));
-        ctx.beginPath();
-        ctx.arc(droplets[i].x, droplets[i].y, dropletSize, 0, Math.PI * 2, false);
-        ctx.fill();
-    }
-}
 
 generateFluid();
 
