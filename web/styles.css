@@ -81,6 +81,9 @@ a:hover{
 .m-c1 {grid-area: mc1}
 .m-c2 {grid-area: mc2}
 .m-c3 {grid-area: mc3}
+.reg0 {grid-area: reg0}
+.reg1 {grid-area: reg1}
+.reg2 {grid-area: reg2}
 
 
 .header1 {
@@ -98,6 +101,21 @@ a:hover{
     margin: auto;
     max-width: 45vw;
     padding-right: 5vw;
+}
+
+.reg-grid{
+    display: grid;
+    grid-template:
+        'reg0 reg0' 
+        'reg1 reg2';
+    margin: auto;
+    width: 60vw;
+    margin-top: 3%;
+    margin-bottom: calc(28vh - 5vw);
+}
+
+.reg-element{
+    margin: auto;
 }
 
 .grid-header{
@@ -181,6 +199,20 @@ a:hover{
     min-width: 160px;
     width: 20vw;
 }
+#summary-title{
+    /* font-weight: 500; */
+    font-family: 'Lexend';
+    padding-bottom: 20px;
+    width: 300px;
+    margin-bottom: 70px;
+    margin-left: 3%;
+}
+
+@media (max-width: 1400px){
+    .reg-grid{
+        width: 80vw;
+    }
+}
 @media (max-width: 1100px){
     .header1{
         margin: auto;
@@ -223,9 +255,24 @@ a:hover{
     #navbar{
         border-bottom: var(--color-main-light) 2px solid;
     }
-    
+    .reg-grid{
+        width: 90vw;
+        margin-bottom: 10vh;
+    }
 }
 
+@media (max-width: 900px){
+    .reg-grid{
+        grid-template:
+            'reg0' 
+            'reg1'
+            'reg2';
+        width: 60vw;
+    }
+    .summary-card-dark-blue{
+        margin-bottom: 100px;
+    }
+}
 @media (max-width: 700px){
     .grid-main-a{
         grid-template: 
@@ -296,7 +343,20 @@ a:hover{
     .nav2{
         border: none;
     }
+    .reg-grid{
+        width: 90vw;
+    }
+    #summary-title{
+        margin-left: 10%;
+    }
 }
+
+@media (max-width:400px){
+    #summary-title{
+        margin-left: 0%;
+    }
+}
+
 @media (max-width:300px){
     .m-b0{
         font-size: 12vw
@@ -540,12 +600,14 @@ a:hover{
     background-color: var(--color-white);
     padding-top: 40px;
     padding-bottom: 100px;
+    padding-right: 15%;
 }
 .white-section{
     padding-left: 20%;
     background-color: white;
     padding-top: 40px;
     padding-bottom: 100px;
+    padding-right: 15%;
 }
 .black-section{
     /* padding-left: 20%; */
@@ -554,6 +616,8 @@ a:hover{
     padding-top: 40px;
     padding-bottom: 100px;
     width: 100%;
+    font-family: 'Lexend';
+    margin: 0;
 }
 
 .f-20{
@@ -600,11 +664,15 @@ a:hover{
     max-width: 3000px; /* Adjust this value as necessary */
     margin: 0 auto; /* Centers the container */
     /* padding: 0 20px; Adds some padding on the sides */
+    min-height: 100vh;
 }
 
 #this_year_canvas{
     background-color: var(--color-white);
     display: block;
+    object-fit: cover;
+    width: 100%;
+    height: 120px;
 }
 
 #register-card{
@@ -707,25 +775,20 @@ a:hover{
 
 }
 
-#summary-title{
-    font-weight: 500;
-    font-family: 'Lexend';
-}
 
-#summary-wrapper{
+/* #summary-wrapper{
     border-top: #000 solid 3px;
-}
+} */
 
 .summary-card{
     border: 10px solid;
     border-radius: 10px;
-    margin: 50px;
     max-width: 300px;
 }
 
 .summary-card-title{
-    margin: 15px;
-    margin-top: 10px;
+    margin: 25px;
+    margin-top: 15px;
     padding-bottom: 20px;
     border-bottom: #000 dashed 3px;
     font-weight: 500;
@@ -735,27 +798,34 @@ a:hover{
 .summary-card-content{
     font-family: 'Lexend';
     font-size: 18px;
-    margin: 15px;
-    margin-top: 40px;
+    margin: 25px;
+    margin-top: 30px;
 }
 
-.summary-card-button-wrapper{
+.summary-card-button-wrapper-grid{
     margin: 15px;
-    margin-top: 50px;
-    display: flex;
-    justify-content: space-between;
+    margin-top: 40px;
+    margin-bottom: 10px;
+    display: grid;
+    grid-template: 
+        'button'
+        'text';
 }
 
 .summary-card-button{
     cursor: pointer;
     font-family: 'Lexend';
-    font-size: 20px;
+    font-size: 23px;
     font-weight: 500;
-    padding: 10px;  
+    padding: 13px;  
     padding-inline: 15px;
     border-radius: 10px;
     color: white;
-    padding-top: 8px;
+    padding-top: 10px;
+    grid-area: button;
+    width: 200px;
+    margin: auto;
+    margin-bottom: 20px;
 }
 
 .summary-card-dark-blue{
@@ -799,14 +869,17 @@ a:hover{
 
 .summary-card-timer-icon{
     margin: 10px;
-    position: relative;
+    text-align: center;
+    /* position: relative; */
+
 }
 .summary-card-timer-text{
-    position: absolute;
+    /* position: absolute; */
     font-family: 'Lexend';
-    font-size: 11px;
+    font-size: 13px;
     margin-left: 5px;
     margin-top: 0;
     width: 100px;
     top: 3px;
+    grid-area: text;
 }
