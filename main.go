@@ -35,6 +35,15 @@ func main() {
     )
 
     e.Router.GET(
+      "/contests",
+      src.ContestsEndp(app.Dao(), false),
+    )
+    e.Router.GET(
+      "/contests/after",
+      src.ContestsEndp(app.Dao(), true),
+    )
+
+    e.Router.GET(
       "/play/:team",
       src.PlayWsEndpoint(app.Dao()),
     )

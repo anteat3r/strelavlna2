@@ -6,7 +6,14 @@ import (
 	"github.com/pocketbase/pocketbase/daos"
 )
 
-var Dao *daos.Dao
+var (
+  Dao *daos.Dao
+
+  costs = map[string]int{
+    "A": 10,
+  }
+
+)
 
 func DBSell(team string, prob string) (money int, oerr error) {
   oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
@@ -27,11 +34,11 @@ func DBSell(team string, prob string) (money int, oerr error) {
       i++
     }
     if !found { return errors.New("sold:prob not owned") }
-    newbought = newbought[:len(bought)-2]
+    newbought = newbought[:len(bought)-1]
 
     rec.Set("bought", newbought)
     money = rec.GetInt("money")
-    rec.Set("money", money + 23)
+    rec.Set("money", money + costs[""])
     err = txDao.SaveRecord(rec)
 
     return nil

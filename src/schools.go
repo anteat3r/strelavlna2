@@ -1,6 +1,7 @@
 package src
 
 import (
+	"encoding/json"
 	"os"
 	"strconv"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/tools/types"
+  log "github.com/anteat3r/golog"
 )
 
 func SchoolQueryEndp(dao *daos.Dao) echo.HandlerFunc {
@@ -28,6 +30,33 @@ func SchoolQueryEndp(dao *daos.Dao) echo.HandlerFunc {
       if i != len(res)-1 { nres += "*" }
     }
     return c.String(200, nres)
+  }
+}
+
+func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
+  return func(c echo.Context) error {
+    res := []struct{
+      Type string `db:"type" json:"type"`
+      Name string `db:"name" json:"name"`
+      OnlineRound types.DateTime `db:"online_round" json:"online_round"`
+      FinalRound types.DateTime `db:"final_round" json:"final_round"`
+      RegistrationStart types.DateTime `db:"registration_start" json:"registration_start"`
+      RegistrationEnd types.DateTime `db:"registration_end" json:"registration_end"`
+    }{}
+    var err error
+    if after {
+      err = dao.DB().
+       NewQuery("SELECT * FROM contests WHERE registration_start < date('now')").
+       All(&res)
+    } else {
+      err = dao.DB().
+       NewQuery("SELECT * FROM contests").
+       All(&res)
+    }
+    if err != nil { log.Error(err) ;return err }
+    out, err := json.Marshal(res)
+    if err != nil { return err }
+    return c.String(200, string(out))
   }
 }
 
