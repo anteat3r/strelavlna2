@@ -870,6 +870,9 @@ a:hover{
 .summary-card-button-dark-blue{
     background-color: var(--color-main);
 }
+.summary-card-button-light-blue{
+    background-color: #2593be;
+}
 .summary-card-button-gray{
     background-color: #a7a7a7;
     cursor: not-allowed;
