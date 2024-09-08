@@ -34,14 +34,14 @@ func PlayerWsHandleMsg(
   case "sell":
     if len(m) != 2 { return eIm(msg) }
     prob := m[1]
-    err := DBSell(team, prob)
+    _, err := DBSell(team, prob)
     if err != nil { return err }
     tchan<- "sold:" + prob
 
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
-    prob, err := DBBuy(team, diff)
+    prob, _, err := DBBuy(team, diff)
     if err != nil { return err }
     tchan<- "bought:" + prob
   }
