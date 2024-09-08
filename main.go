@@ -12,6 +12,7 @@ import (
 
 func main() {
   app := pocketbase.New()
+  src.Dao = app.Dao()
 
   app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
     e.Router.GET(
@@ -21,10 +22,23 @@ func main() {
         false,
       ),
     )
+
+    e.Router.File("/archive", "../web/archive.html")
+    e.Router.File("/register", "../web/register.html")
+    e.Router.File("/rules", "../web/rules.html")
+    e.Router.File("/this_year", "../web/this_year.html")
+
+    // PathParams o (okres)
     e.Router.GET(
       "/school",
       src.SchoolQueryEndp(app.Dao()),
     )
+
+    e.Router.GET(
+      "/play/:team",
+      src.PlayWsEndpoint(app.Dao()),
+    )
+
     return nil
   })
 
