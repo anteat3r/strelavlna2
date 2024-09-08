@@ -12,6 +12,7 @@ import (
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/tools/types"
+  log "github.com/anteat3r/golog"
 )
 
 func SchoolQueryEndp(dao *daos.Dao) echo.HandlerFunc {
@@ -45,14 +46,14 @@ func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
     var err error
     if after {
       err = dao.DB().
-       NewQuery("SELECT * FROM contests WHERE registration_start > NOW()").
+       NewQuery("SELECT * FROM contests WHERE registration_start < date('now')").
        All(&res)
     } else {
       err = dao.DB().
        NewQuery("SELECT * FROM contests").
        All(&res)
     }
-    if err != nil { return err }
+    if err != nil { log.Error(err) ;return err }
     out, err := json.Marshal(res)
     if err != nil { return err }
     return c.String(200, string(out))
