@@ -12,6 +12,7 @@ import (
 
 func main() {
   app := pocketbase.New()
+  src.Dao = app.Dao()
 
   app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
     e.Router.GET(

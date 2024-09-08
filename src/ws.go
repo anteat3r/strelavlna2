@@ -2,13 +2,12 @@ package src
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 
+	log "github.com/anteat3r/golog"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/daos"
-  log "github.com/anteat3r/golog"
 )
 
 var upgrader = websocket.Upgrader{
@@ -22,16 +21,14 @@ type CachedProb struct {
 }
 
 var (
-  ActiveContest = ""
+  ActiveContest = "ccwxcxbrroofuzl"
   ActiveProbs = []CachedProb{}
 
   nErr = errors.New
 
-  TeamChanMap = make(map[string]chan Msg)
+  TeamChanMap = make(map[string]chan string)
   TeamChanMapMutex = sync.Mutex{}
 )
-
-type Msg fmt.Stringer
 
 /// PathParam team (id of team)
 func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
@@ -52,7 +49,8 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     TeamChanMapMutex.Lock()
     teamchan, ok := TeamChanMap[teamid]
     if !ok {
-      TeamChanMap[teamid] = make(chan Msg)
+      teamchan = make(chan string, 10)
+      TeamChanMap[teamid] = teamchan
     }
     TeamChanMapMutex.Unlock()
 
@@ -62,22 +60,66 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
   }
 }
 
-func PlayerWsLoop(conn *websocket.Conn, team string, tchan chan Msg) {
+func WriteTeamChan(teamid string, msg string) {
+  TeamChanMapMutex.Lock()
+  res := TeamChanMap[teamid]
+  TeamChanMapMutex.Unlock()
+  res<- msg
+}
+
+func PlayerWsLoop(conn *websocket.Conn, team string, tchan chan string) {
+  wsrchan := make(chan string)
+  perchan := make(chan string)
+  go func(){
+    for {
+      p, rm, err := conn.ReadMessage()
+      if err != nil {
+        log.Error(err)
+        conn.Close()
+        break
+      }
+      if p != websocket.TextMessage {
+        log.Error("not text msg: ", p, rm)
+        continue
+      }
+      m := string(rm)
+      wsrchan<- m
+    }
+  }()
   loop: for {
     select {
     case m, ok := <-tchan:
-      if !ok { break loop }
-      log.Info(m)
-      // PlayerWsHandleMsg(team, m)
-    default:
-      m, p, e := conn.ReadMessage()
-      log.Info(m, p, e)
+      if !ok {
+        log.Info("chan closed")
+        break loop
+      }
+      err := conn.WriteMessage(websocket.TextMessage, []byte(m))
+      if err != nil {
+        log.Error(err)
+        conn.Close()
+        break loop
+      }
+    case m, ok := <-perchan:
+      if !ok {
+        log.Info("chan closed")
+        break loop
+      }
+      err := conn.WriteMessage(websocket.TextMessage, []byte(m))
+      if err != nil {
+        log.Error(err)
+        conn.Close()
+        break loop
+      }
+    case m, ok := <-wsrchan:
+      if !ok {
+        log.Info("r chan closed")
+        break loop
+      }
+      err := PlayerWsHandleMsg(team, m, tchan, perchan)
+      if err != nil {
+        perchan<- "err:" + err.Error()
+      }
     }
   }
 }
 
-// func PlayerWsHandleMsg(team string, msg Msg) {
-//   switch m := msg.(type) {
-//
-//   }
-// }
