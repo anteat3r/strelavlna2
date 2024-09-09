@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Testing</title>
+    <link href="styles.css" rel="stylesheet">
+  </head>
+  <body>
+
+    <button id="btn">Send</button>
+    <script>
+      let ws = new WebSocket("ws://localhost:8090/play/cybpd5f3rqjxcgf");
+      ws.addEventListener("message", (e) => {
+        console.log(e);
+      })
+      document.querySelector("#btn").addEventListener("click", (e) => {
+        ws.send("idk");
+      })
+    </script>
+  
+  </body>
+</html>
