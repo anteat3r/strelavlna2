@@ -23,7 +23,7 @@ func SchoolQueryEndp(dao *daos.Dao) echo.HandlerFunc {
 		err := dao.DB().
 			NewQuery("SELECT plny_nazev FROM skoly WHERE okres LIKE {:okres}").
 			Bind(dbx.Params{
-				"okres": c.QueryParam("o"),
+				"okres": c.QueryParam("o") + "%",
 			}).All(&res)
 		if err != nil {
 			return err
