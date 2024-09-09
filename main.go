@@ -30,8 +30,13 @@ func main() {
 
     // PathParams o (okres)
     e.Router.GET(
-      "/school",
+      "/schools",
       src.SchoolQueryEndp(app.Dao()),
+    )
+
+    e.Router.GET(
+      "/school",
+      src.SingleSchoolEndp(app.Dao()),
     )
 
     e.Router.GET(

@@ -71,6 +71,22 @@ func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
 	}
 }
 
+func SingleSchoolEndp(dao *daos.Dao) echo.HandlerFunc {
+  return func(c echo.Context) error {
+    res := struct{
+      Name string `db:"name" json:"name"`
+    }{}
+    err := dao.DB().
+      NewQuery("SELECT name FROM skoly WHERE id = {:id} LIMIT 1").
+      Bind(dbx.Params{"id": c.PathParam("id")}).
+      One(&res)
+    if err != nil { return err }
+    out, err := json.Marshal(res)
+    if err != nil { return err }
+    return c.String(200, string(out))
+  }
+}
+
 func tint(s string) int {
 	r, _ := strconv.Atoi(s)
 	return r
