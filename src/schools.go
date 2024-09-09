@@ -87,6 +87,12 @@ func SingleSchoolEndp(dao *daos.Dao) echo.HandlerFunc {
   }
 }
 
+// func TeamRegisterEndp(dao *daos.Dao) echo.HandlerFunc {
+//   return func(c echo.Context) error {
+//
+//   }
+// }
+
 func tint(s string) int {
 	r, _ := strconv.Atoi(s)
 	return r
