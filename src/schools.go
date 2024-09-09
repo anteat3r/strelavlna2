@@ -74,10 +74,10 @@ func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
 func SingleSchoolEndp(dao *daos.Dao) echo.HandlerFunc {
   return func(c echo.Context) error {
     res := struct{
-      Name string `db:"name" json:"name"`
+      Name string `db:"cely_nazev" json:"cely_nazev"`
     }{}
     err := dao.DB().
-      NewQuery("SELECT name FROM skoly WHERE id = {:id} LIMIT 1").
+      NewQuery("SELECT cely_nazev FROM skoly WHERE id = {:id} LIMIT 1").
       Bind(dbx.Params{"id": c.PathParam("id")}).
       One(&res)
     if err != nil { return err }
@@ -87,6 +87,21 @@ func SingleSchoolEndp(dao *daos.Dao) echo.HandlerFunc {
   }
 }
 
+func SingleContestEndp(dao *daos.Dao) echo.HandlerFunc {
+  return func(c echo.Context) error {
+    res := struct{
+      Name string `db:"name" json:"name"`
+    }{}
+    err := dao.DB().
+      NewQuery("SELECT name FROM contests WHERE id = {:id} LIMIT 1").
+      Bind(dbx.Params{"id": c.PathParam("id")}).
+      One(&res)
+    if err != nil { return err }
+    out, err := json.Marshal(res)
+    if err != nil { return err }
+    return c.String(200, string(out))
+  }
+}
 // func TeamRegisterEndp(dao *daos.Dao) echo.HandlerFunc {
 //   return func(c echo.Context) error {
 //
