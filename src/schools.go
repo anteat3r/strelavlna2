@@ -21,7 +21,7 @@ func SchoolQueryEndp(dao *daos.Dao) echo.HandlerFunc {
 			Name string `db:"plny_nazev"`
 		}{}
 		err := dao.DB().
-			NewQuery("SELECT plny_nazev FROM skoly WHERE okres = {:okres}").
+			NewQuery("SELECT plny_nazev FROM skoly WHERE okres LIKE {:okres}").
 			Bind(dbx.Params{
 				"okres": c.QueryParam("o"),
 			}).All(&res)
