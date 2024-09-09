@@ -40,6 +40,11 @@ func main() {
     )
 
     e.Router.GET(
+      "/api/contest/:id",
+      src.SingleContestEndp(app.Dao()),
+    )
+
+    e.Router.GET(
       "/api/contests",
       src.ContestsEndp(app.Dao(), false),
     )
