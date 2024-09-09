@@ -30,23 +30,38 @@ func main() {
 
     // PathParams o (okres)
     e.Router.GET(
-      "/school",
+      "/api/schools",
       src.SchoolQueryEndp(app.Dao()),
     )
 
     e.Router.GET(
-      "/contests",
+      "/api/school/:id",
+      src.SingleSchoolEndp(app.Dao()),
+    )
+
+    e.Router.GET(
+      "/api/contest/:id",
+      src.SingleContestEndp(app.Dao()),
+    )
+
+    e.Router.GET(
+      "/api/contests",
       src.ContestsEndp(app.Dao(), false),
     )
     e.Router.GET(
-      "/contests/after",
+      "/api/contests/after",
       src.ContestsEndp(app.Dao(), true),
     )
 
     e.Router.GET(
-      "/play/:team",
+      "/api/play/:team",
       src.PlayWsEndpoint(app.Dao()),
     )
+
+    // e.Router.POST(
+    //   "/api/register",
+    //   
+    // )
 
     return nil
   })
