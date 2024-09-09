@@ -35,7 +35,7 @@ func main() {
     )
 
     e.Router.GET(
-      "/school",
+      "/school/:id",
       src.SingleSchoolEndp(app.Dao()),
     )
 
