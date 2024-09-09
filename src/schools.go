@@ -42,7 +42,8 @@ func SchoolQueryEndp(dao *daos.Dao) echo.HandlerFunc {
 func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		res := []struct {
-			Type              string         `db:"subject" json:"subject"`
+			Id                string         `db:"id" json:"id"`
+			Subject           string         `db:"subject" json:"subject"`
 			Name              string         `db:"name" json:"name"`
 			OnlineRound       types.DateTime `db:"online_round" json:"online_round"`
 			FinalRound        types.DateTime `db:"final_round" json:"final_round"`

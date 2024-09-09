@@ -684,14 +684,16 @@ a:hover{
 }
 
 #register-card{
-    background-color: var(--color-main);
+    background-color: var(--color-white);
+    border: #8b7be7 2px solid;
     border-radius: 10px;
-    max-width: 250px;
+    width: 80%;
+    max-width: 900px;
     padding: 20px;
 }
 
 #register-card h2{
-    color: white;
+    color: #1c05a0;
     font-size: 30px;
     display: flex;
     justify-content: center;
@@ -699,7 +701,7 @@ a:hover{
     padding-bottom: 10px;
     border-bottom: #6d55ef dashed 3px;
     margin-bottom: 20px;
-    font-weight: 500;
+    font-weight: 700;
     letter-spacing: 1px;
 }
 
@@ -753,23 +755,31 @@ a:hover{
     transition: stroke 0.5s ease-out;
 }
 
+.district-selector-selected{
+    fill: #73c7e979;
+    stroke: #7bc5e7;
+    stroke-width: 2px;
+}
+
+
+
 .subregion{
     stroke-width: 0.5px;
 }
 
 #return-button{
     position: absolute;
-    top: 10px;
+    top: 20px;
     left: 10px;
-    height: 20px;
-    width: 20px;
+    height: 30px;
+    width: 30px;
     padding: 0px;
-    background-color: #8b7be7;
+    background-color: #543ed4;
 
 }
 
 #return-button i{
-    font-size: 15px;
+    font-size: 20px;
     margin: 0px;
     color: #f3f1ff;
 }
@@ -869,28 +879,318 @@ a:hover{
 }
 .summary-card-button-dark-blue{
     background-color: var(--color-main);
+    transition: all 0.3s ease-out;
+
 }
 .summary-card-button-light-blue{
     background-color: #2593be;
+    transition: all 0.3s ease-out;
 }
+
+.summary-card-button-dark-blue:hover{
+    background-color: #3c1fe2;
+    box-shadow: 0px 0px 20px 0px #907cff7e;
+    transition: all 0s;
+}
+.summary-card-button-light-blue:hover{
+    background-color: #1fa6db;
+    box-shadow: 0px 0px 20px 0px #37baee7e;
+    transition: all 0s;
+}
+
+.summary-card-timer-wrapper {
+    height: 1.5em;  /* Set to fit the height of one line of text */
+    overflow: hidden;
+    position: relative;
+}
+
+
 .summary-card-button-gray{
     background-color: #a7a7a7;
     cursor: not-allowed;
 }
 
 .summary-card-timer-icon{
-    margin: 10px;
     text-align: center;
-    /* position: relative; */
 
 }
-.summary-card-timer-text{
+.summary-card-timer-text-wrapper{
     /* position: absolute; */
     font-family: 'Lexend';
     font-size: 13px;
     margin-left: 5px;
     margin-top: 0;
-    width: 100px;
+    /* width: 100px; */
     top: 3px;
     grid-area: text;
+    height: 17px;
+    overflow: hidden;
+}
+
+.summary-card-timer-wrapper{
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    gap: 3px;
+}
+.summary-card-sliding-text{
+    position: relative;
+}
+
+.summary-card-sliding-text-up{
+    top: 0;
+    transition: all 0.3s ease-out;
+}
+
+.summary-card-sliding-text-down{
+    top: -16px;
+    transition: all 0.3s ease-out;
+
+}
+
+#loading-animation-canvas{
+    margin-bottom: 100px;
+}
+
+.form-wrapper{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 40px;
+}
+
+#register-title{
+    font-size: 100px;
+    color: #000000;
+
+}
+
+#register-inner-wrapper{
+    display: flex;
+    justify-content: left;
+    align-items: left;
+    flex-direction: column;
+    padding: 20px;
+    font-family: 'Lexend';
+}
+
+.register-label{
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+.register-label-small{
+    font-size: 17px;
+}
+
+.register-text-input{
+    /* decoration: none; */
+    border: #bdb4f1 2px solid;
+    border-radius: 4px;
+    height: 20px;
+    font-family: 'Lexend';
+    font-size: 15px;
+    padding-inline: 4px;
+    outline: none;
+    transition: border-color 0.3s ease-out;
+    margin-bottom: 20px;
+    max-width: 400px;
+}
+
+.register-school-input{
+    border: #bdb4f1 2px solid;
+    border-radius: 4px;
+    height: 20px;
+    font-family: 'Lexend';
+    font-size: 15px;
+    padding-inline: 4px;
+    outline: none;
+    margin-bottom: 3px;
+    width:calc(100% - 12px);
+    
+    transition: border-color 0.3s ease-out;
+}
+
+.register-text-input:focus{
+    border: #5c45df 2px solid;
+    transition: border-color 0s;
+}
+.register-school-input:focus{
+    border: #5c45df 2px solid;
+    transition: border-color 0s;
+}
+
+.register-number-input{
+    /* decoration: none; */
+    border: #bdb4f1 2px solid;
+    border-radius: 4px;
+    height: 25px;
+    width: 25px;
+    font-family: 'Lexend';
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.3s ease-out;
+    margin-bottom: 3px;
+    text-align: center;
+    padding: 0px;
+}
+.register-number-input:focus{
+    /* decoration: none; */
+    border: #5c45df 2px solid;
+    transition: border-color 0s;
+}
+
+#player-name-selector-top-wrapper{
+    /* margin-top: 50px; */
+    max-width: 400px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    border-bottom: #bdb4f1 2px solid;
+}
+
+#school-selector-top-wrapper{
+    /* max-width: 800px; */
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    border-bottom: #bdb4f1 2px solid;
+}
+
+.no-arrows::-webkit-inner-spin-button,
+.no-arrows::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* For Firefox */
+.no-arrows {
+    -moz-appearance: textfield;
+}
+
+/* To handle general appearance if needed */
+.no-arrows {
+    appearance: none;
+}
+#school-dropdown-icon{
+    cursor: pointer;
+    font-size: 20px;
+    color: #6853e0;
+}
+
+.school-dropdown-icon-normal{
+    transform: rotate(0deg) translateY(5px);
+    transition: transform 0.2s ease-out;
+}
+.school-dropdown-icon-toggle{
+    transform: rotate(180deg) translateY(5px);
+    transition: transform 0.2s ease-out;
+}
+
+
+#register-players-dropdown-icon{
+    cursor: pointer;
+    font-size: 20px;
+    color: #6853e0;
+}
+.register-players-dropdown-icon-normal{
+    transform:rotate(0deg) translateY(5px);
+    transition: transform 0.2s ease-out;
+}
+
+.register-players-dropdown-icon-toggle{
+    transform:rotate(180deg) translateY(5px);
+    transition: transform 0.2s ease-out;
+
+}
+
+#player-name-selector-wrapper{
+    margin-top: 0px;
+    overflow: hidden;
+    padding-top: 20px;
+    margin-bottom: 50px;
+}
+
+.player-name-selector-wrapper-normal{
+    max-height: 0px;
+    transition: max-height 0.5s ease-out;
+}
+.player-name-selector-wrapper-toggle{
+    max-height: 250px;
+    transition: max-height 0.5s ease-out;
+}
+
+#school-selector-wrapper{
+    max-width: 600px;
+    margin-top: 0px;
+    overflow: hidden;
+    padding-top: 20px;
+    margin-bottom: 50px;
+    position: relative;
+    display: inline-block;
+}
+
+.school-selector-wrapper-normal{
+    max-height: 0px;
+    transition: max-height 0.5s ease-out;
+}
+.school-selector-wrapper-toggle{
+    max-height: 350px;
+    transition: max-height 0.5s ease-out;
+}
+
+
+.player-name-input-wrapper{
+    display: flex;
+    flex-direction:row;
+    justify-content: left;
+    gap: 10px;
+    color: #404040;
+}
+
+.autocomplete {
+    position: relative;
+    display: inline-block;
+    width: 75%;
+    max-width: 600px;
+}
+
+.autocomplete-items {
+    position: absolute;
+    border: 1px solid #d4d4d4;
+    border-bottom: none;
+    border-top: none;
+    z-index: 99;
+    /*position the autocomplete items to be the same width as the container:*/
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 400px;
+    overflow-y: scroll;
+}
+
+.autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #fff; 
+    border-bottom: 1px solid #8b7be7; 
+    transition: background-color 0.3s ease-out;
+
+}
+
+.autocomplete-items div:hover {
+    background-color: #e1dcfa; 
+    transition: background-color 0s;
+}
+
+.autocomplete-active {
+    background-color: #4b31db !important; 
+    color: #ffffff; 
+}
+
+#register-button{
+    max-width: 200px;
+    font-family: 'Lexend';
+    font-size: 20px;
+    color: white;
+    background-color: #543ed4;
 }

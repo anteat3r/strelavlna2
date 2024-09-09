@@ -4,43 +4,71 @@ const template = document.getElementById("summary-card-template");
 
 
 
-fetch("http://localhost:8090/contests")
+fetch("https://strela-vlna.gchd.cz/api/contests")
     .then(response => response.json())
     .then(data => {
         console.log(data[0]);
         let i = 0;
         for (const competition of data) {
+            const online_round_date =  new Date(competition.online_round).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'');
+            const final_round_date = new Date(competition.final_round).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'');
+            const competition_registration_start_date = new Date(competition.registration_start).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'');
+            const competition_registration_end_date = new Date(competition.registration_end).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'');
+            const can_register = new Date(competition.registration_start) <= new Date() && new Date(competition.registration_end) >= new Date()
+            console.log(can_register);
+            console.log(competition.name);
+            var summary_card_timer_text;
+            if (new Date(competition.registration_start) > new Date()){
+                summary_card_timer_text = `<span>Registrace začíná ${competition_registration_start_date}</span>`
+            }else if(new Date(competition.registration_end) >= new Date()){
+                summary_card_timer_text = `<span class="summary-card-sliding-text summary-card-sliding-text-up">Registrace právě probíhá <br> Registrace končí ${competition_registration_end_date}</span>`
+            }else{
+                summary_card_timer_text = `<span>Registrace skončila ${competition_registration_end_date}</span>`
+            }
             cw.innerHTML += `
             <div class="summary-card ${i%2 ==0 ? "summary-card-dark-blue" : "summary-card-light-blue"} reg-element reg1">
                 <h1 class="summary-card-title">${competition.name}</h1>
                 <p class="summary-card-content">
                     <b>${competition.subject == "math" ? "Matematika" : competition.subject == "physics" ? "Fyzika" : "Oboje"}</b><br>
                     <br>
-                    Online kolo: ${new Date(competition.online_round).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'') }<br>
-                    Prezenční kolo: ${new Date(competition.final_round).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'') }<br>
+                    Online kolo: ${online_round_date}<br>
+                    Prezenční kolo: ${final_round_date}<br>
                 </p>
                 <div class="summary-card-button-wrapper-grid">
-                    <i class="far fa-clock summary-card-timer-icon"><span class="summary-card-timer-text">${new Date(competition.registration_start) > new Date() ? "Registrace začíná" : "Registrace právě probíhá"} ${new Date(competition.registration_start) > new Date() ? new Date(competition.registration_start).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'') : "" }</span></i>
-                    <button class="summary-card-button ${new Date(competition.registration_start) > new Date() ? "summary-card-button-gray" : i%2 == 0 ? "summary-card-button-dark-blue" : "summary-card-button-light-blue"}">Registrovat</button>
+                    <div class="summary-card-timer-wrapper">
+                        <i class="far fa-clock summary-card-timer-icon"></i>
+                        <div class="summary-card-timer-text-wrapper">${summary_card_timer_text}</div>
+                    </div>
+                    <button class="summary-card-button ${can_register ? i%2 == 0 ? "summary-card-button-dark-blue" : "summary-card-button-light-blue": "summary-card-button-gray"}" id="${competition.id}">Registrovat</button>
                 </div>
             </div>
             `
             i++;
         }
+        const buttons = document.getElementsByClassName("summary-card-button");
 
-    });
 
-// cw.innerHTML += `
-// <div class="summary-card summary-card-dark-blue reg-element reg1">
-//           <h1 class="summary-card-title">Pražská střela 2024</h1>
-//           <p class="summary-card-content">
-//             <b>Matematika</b><br>
-//             <br>
-//             Online kolo: 26. 11. 2024<br>
-//             Prezenční kolo: 3. 12. 2024
-//           </p>
-//           <div class="summary-card-button-wrapper-grid">
-//             <i class="far fa-clock summary-card-timer-icon"><span class="summary-card-timer-text">Registrace začíná 11. 9. 2024</span></i>
-//             <button class="summary-card-button summary-card-button-gray">Registrovat</button>
-//           </div>
-//         </div>`;
+        for (const button of buttons) {
+            if (!button.classList.contains("summary-card-button-gray")) {
+                button.addEventListener("click", function(){
+                    window.location.href = `register.html?id=${this.id}`;
+                })
+            }
+        }
+
+        const sliding_texts = document.getElementsByClassName("summary-card-sliding-text");
+        setInterval(() => {
+            for (const text of sliding_texts) {
+                if (text.classList.contains("summary-card-sliding-text-down")) {
+                    text.classList.add("summary-card-sliding-text-up");
+                    text.classList.remove("summary-card-sliding-text-down");
+                } else {
+                    text.classList.add("summary-card-sliding-text-down");
+                    text.classList.remove("summary-card-sliding-text-up");
+                }
+            }
+        }, 6000);
+
+    }
+);
+
