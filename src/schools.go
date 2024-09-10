@@ -195,10 +195,6 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       Code,
       CompSubject,
       CompName,
-      OnlineRound,
-      FinalRound,
-      RegistrationStart,
-      RegistrationEnd,
       School,
       TeamName,
       Email,
@@ -207,14 +203,14 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       Player3,
       Player4,
       Player5 string
+      OnlineRound,
+      FinalRound,
+      RegistrationStart,
+      RegistrationEnd types.DateTime
     }{
       rec.Id,
       comp.GetString("subject"),
       comp.GetString("name"),
-      comp.GetString("online_round"),
-      comp.GetString("final_round"),
-      comp.GetString("registration_start"),
-      comp.GetString("registration_end"),
       school.GetString("plny_nazev"),
       rec.GetString("name"),
       rec.GetString("email"),
@@ -223,6 +219,10 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       rec.GetString("player3"),
       rec.GetString("player4"),
       rec.GetString("player5"),
+      comp.GetDateTime("online_round"),
+      comp.GetDateTime("final_round"),
+      comp.GetDateTime("registration_start"),
+      comp.GetDateTime("registration_end"),
     })
     if err != nil { return err }
 
