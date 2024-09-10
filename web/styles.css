@@ -993,7 +993,9 @@ a:hover{
     outline: none;
     transition: border-color 0.3s ease-out;
     margin-bottom: 20px;
-    max-width: 400px;
+    max-width: 200px;
+    width: 80%;
+    /* width: 50px; */
 }
 
 .register-school-input{
@@ -1193,4 +1195,58 @@ a:hover{
     font-size: 20px;
     color: white;
     background-color: #543ed4;
+}
+
+.email-input-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    row-gap: 5px;
+    column-gap: 20px;
+    
+    flex-wrap: wrap;
+}
+
+.email-check-code-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    gap: 5px;
+}
+
+.mail-check-input{
+    height: 21px;
+    width: 21px;
+}
+
+#mail-check-button{
+    height: 26px;
+    border: none;
+    padding: 2px;
+    padding-right: 5px;
+    padding-left: 10px;
+    background-color: #8c7eda;
+    color: white;
+}
+
+.fa-arrow-right-from-bracket{
+    margin-left: 5px;
+    margin-right: 2px;
+}
+
+#email-sent-message{
+    margin-top: 5px;
+    margin-left: 10px;
+    font-size: 12px;
+    font-family: 'Lexend';
+    color:#414141
+}
+
+.hidden{
+    display: none;
+}
+
+.correct-code{
+    border-color: #84d8ff;
+    background-color: #7bc5e731;
 }

@@ -263,6 +263,14 @@ dropdown_icon_school.addEventListener("click", function(){
 });
 
 const player_count = document.getElementById("player-conunt");
+const player_name = document.getElementById("player-name");
+
+player_count.addEventListener("keydown", function(e){
+    if (e.key === "Enter") {
+        this.blur();
+    }
+});
+
 player_count.addEventListener("blur", function(){
     let num = parseInt(this.value);
     if(num > 5){
@@ -288,7 +296,13 @@ player_count.addEventListener("blur", function(){
                 </div>`);
         }
     }
+    if(!dropdown_icon_players.classList.contains("register-players-dropdown-icon-toggle")){
+        dropdown_icon_players.click();
+    }
+    
+
 });
+
 
 const school_search_box = document.getElementById("school");
 
@@ -305,12 +319,10 @@ school_search_box.addEventListener("focus", function(){
 function find_schools(){
     school_search_box.placeholder = "Počkejte prosím...";
 
-    console.log(districtNames[district]);
     fetch(`https://strela-vlna.gchd.cz/api/schools?o=${districtNames[district]}`)
         .then(response => response.text())
         .then(data => {
             schools = data.split("*");
-            console.log(schools);
             school_search_box.removeEventListener("input", arguments.callee);
             school_search_box.removeEventListener("keydown", arguments.callee);
             autocomplete(school_search_box, schools);
@@ -321,6 +333,100 @@ function find_schools(){
         }
     );
 }
+
+const team_mail_input = document.getElementById("team-mail");
+const mail_check_button = document.getElementById("mail-check-button");
+const mail_check_digits_wrapper = document.getElementsByClassName("email-check-code-wrapper")[0];
+const email_sent_message = document.getElementById("email-sent-message");
+var mail_check_digits = [];
+var correct_code = "1234";
+var last_sent_email = "";
+
+for (let i = 1; i < 5; i++){
+    mail_check_digits.push(document.getElementById(i.toString()));
+    mail_check_digits[i-1].addEventListener("keydown", function(e){
+        const was_empty = mail_check_digits[i-1].value == "";
+        if(!isNaN(parseInt(e.key)) && !was_empty){
+            mail_check_digits[i-1].value = "";
+        }
+            
+            
+        setTimeout(() => {
+            // Your custom code goes here, running after the default input behavior
+            if(!isNaN(parseInt(e.key))){
+            
+                if(i == 4){
+                    mail_check_digits[3].blur();
+                }else{
+                    mail_check_digits[i].focus();
+                }
+            }
+            if(e.key == "Backspace"){
+                if(i > 1 && was_empty){
+                    mail_check_digits[i-2].value = "";
+                    mail_check_digits[i-2].focus();
+                }
+            }
+
+            if(mail_check_digits.every(x => x.value != "") && mail_check_digits.map(x => x.value).join("") == correct_code){
+                mail_check_digits.forEach(x => x.classList.add("correct-code"));
+                email_sent_message.innerHTML = `*Váš email je ověřený`;
+                email_sent_message.classList.remove("hidden");
+            }else{
+                mail_check_digits.forEach(x => x.classList.remove("correct-code"));
+                email_sent_message.innerHTML = `*Poslali jsme vám email s kódem na adresu: ${last_sent_email}`;
+                if(last_sent_email == ""){
+                    email_sent_message.classList.add("hidden");
+                }
+            }
+            
+        }, 0);
+        
+    })
+}
+
+mail_check_button.addEventListener("click", function(){
+    const random_digits = Math.floor(1000 + Math.random() * 9000);
+    last_sent_email = team_mail_input.value;
+    fetch("https://strela-vlna.gchd.cz/api/mail-check", {
+        method: 'POST',
+        body: new URLSearchParams({
+            email: team_mail_input.value,
+            code: random_digits.toString()
+        })
+    })
+    .then(response => response.text())
+    .then(data => {
+        if(data == "OK"){
+            mail_check_digits_wrapper.classList.remove("hidden");
+            email_sent_message.classList.remove("hidden");
+            email_sent_message.innerHTML = `*Poslali jsme vám email s kódem na adresu: ${last_sent_email}`;
+            correct_code = random_digits.toString();
+        }else{
+            last_sent_email = ""
+            alert('Nelze  odeslat email! Zkuste to prosím později.');
+        }
+    });
+    
+    
+});
+
+team_mail_input.addEventListener("keydown", function(e){
+    if (e.key === "Enter") {
+        this.blur();
+    }
+})
+
+team_mail_input.addEventListener("blur", function(){
+    if(this.validity.valid){
+        mail_check_button.classList.remove("hidden");
+        mail_check_digits_wrapper.classList.remove("hidden");
+    }else{
+        mail_check_button.classList.add("hidden");
+        mail_check_digits_wrapper.classList.add("hidden");
+        email_sent_message.classList.add("hidden");
+    }
+})
 
 const register_button = document.getElementById("register-button");
 
@@ -333,9 +439,7 @@ register_button.addEventListener("click", function(){
         alert('Zadejte prosím platný email');
         return;
     }
-    console.log(document.getElementById("player-name-selector-wrapper").getElementsByClassName("player-name-input-wrapper")[0]);
     for(const member of document.getElementById("player-name-selector-wrapper").getElementsByClassName("player-name-input-wrapper")){
-        console.log(member.querySelector('input'));
         if(member.querySelector('input').value == ""){
             alert('Vplňte prosím všechna jména členů týmu');
             return;
@@ -345,12 +449,11 @@ register_button.addEventListener("click", function(){
         alert('Zadejte prosím platnou školu');
         return;
     }
-    console.log("ready");
 
     const register_card = document.getElementById("register-card");
     var formData = new FormData(register_card);
     formData.append('id', new URLSearchParams(window.location.search).get('id'));
-
+    console.log(formData.values());
     fetch("https://strela-vlna.gchd.cz/api/register", {
         method: 'POST',
         body: formData
@@ -359,40 +462,14 @@ register_button.addEventListener("click", function(){
     .then(data => {
         console.log(data);
         if(data == "OK"){
-            alert('Registrace byla úspešn  dokon ena!');
+            window.location.href = "registration_succsessful.html";
+            
         }else{
             alert('Registrace selhala!');
         }
     });
     
     
-    
-    const formData = new FormData();
-
-
-
-
-
-
-    formData.append('teamName', document.getElementById("team-name").value);
-    formData.append('teamMail', document.getElementById("team-mail").value);
-    formData.append('school', school_search_box.value);
-    for(const member of document.getElementById("player-name-selector-wrapper").getElementsByClassName("player-name-input-wrapper")){
-        formData.append('teamMembers', member.querySelector('input').value);
-    }
-    fetch("https://strela-vlna.gchd.cz/api/register", {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-        console.log(data);
-        if(data == "OK"){
-            alert('Registrace byla úspěšně dokončena!');
-        }else{
-            alert('Registrace selhala!');
-        }
-    });
 });
 
 function update(){
@@ -403,6 +480,7 @@ function update(){
 update();
 
 
+//this code is copied from w3schools, yea, I know, Im lazy...
 
 function autocomplete(inp, arr) {
     /*the autocomplete function takes two arguments,
