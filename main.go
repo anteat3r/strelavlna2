@@ -58,6 +58,11 @@ func main() {
       src.MailCheckEndp(app.Dao(), app.NewMailClient()),
     )
 
+    e.Router.POST(
+      "/api/register",
+      src.TeamRegisterEndp(app.Dao()),
+    )
+
     e.Router.GET(
       "/api/play/:team",
       src.PlayWsEndpoint(app.Dao()),

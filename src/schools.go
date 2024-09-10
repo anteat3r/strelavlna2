@@ -136,11 +136,56 @@ func MailCheckEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
   }
 }
 
-// func TeamRegisterEndp(dao *daos.Dao) echo.HandlerFunc {
-//   return func(c echo.Context) error {
-//
-//   }
-// }
+func TeamRegisterEndp(dao *daos.Dao) echo.HandlerFunc {
+  return func(c echo.Context) error {
+    res := struct{
+      ContestId string `form:"id"`
+      TeamName string `form:"team_name"`
+      Email string `form:"team_email"`
+      PlayerName1 string `form:"player_name_1"`
+      PlayerName2 string `form:"player_name_2"`
+      PlayerName3 string `form:"player_name_3"`
+      PlayerName4 string `form:"player_name_4"`
+      PlayerName5 string `form:"player_name_5"`
+      SchoolName string `form:"school_name"`
+    }{}
+    err := c.Bind(&res)
+    if err != nil { return err }
+
+    comp, err := dao.FindRecordById("contests", res.ContestId)
+    if err != nil { return err }
+
+    if comp.GetDateTime("registration_start").Time().After(time.Now()) {
+      return c.String(400, "contest registration has not yet started")
+    }
+
+    if comp.GetDateTime("registration_end").Time().Before(time.Now()) {
+      return c.String(400, "contest registration has already ended")
+    }
+
+    school, err := dao.FindFirstRecordByData("skoly", "cely_nazev", res.SchoolName)
+    if err != nil { return err }
+
+    coll, err := dao.FindCollectionByNameOrId("teams")
+    if err != nil { return err }
+
+    rec := models.NewRecord(coll)
+    rec.Set("contest", comp.Id)
+    rec.Set("school", school.Id)
+    rec.Set("name", res.TeamName)
+    rec.Set("email", res.Email)
+    rec.Set("player1", res.PlayerName1)
+    rec.Set("player2", res.PlayerName2)
+    rec.Set("player3", res.PlayerName3)
+    rec.Set("player4", res.PlayerName4)
+    rec.Set("player5", res.PlayerName5)
+
+    err = dao.SaveRecord(rec)
+    log.Info(rec.Id)
+    return c.String(500, "DEBUG")
+
+  }
+}
 
 func tint(s string) int {
 	r, _ := strconv.Atoi(s)
