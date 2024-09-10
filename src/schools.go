@@ -124,14 +124,33 @@ func MailCheckEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     }{}
     err := c.Bind(&res)
     if err != nil { return err }
+
+    tmpls, err := dao.FindFirstRecordByData("texts", "name", "mail_check_mail")
+    if err != nil { return err }
+
+    var renbuf bytes.Buffer
+    tmpl, err := template.New("mail_check_mail").Parse(tmpls.GetString("text"))
+    if err != nil { return err }
+
+    err = tmpl.Execute(&renbuf, struct{
+      Code,
+      Email string
+    }{
+      res.Code,
+      res.Email,
+    })
+    if err != nil { return err }
+
+    msg := renbuf.String()
+
     err = mailerc.Send(&mailer.Message{
       From: mail.Address{
         Address: "strela-vlna@gchd.cz",
-        Name: "Střela Vlna boťák",
+        Name: "Střela Vlna",
       },
       To: []mail.Address{{Address: res.Email}},
       Subject: "Ověřovací kód emailu",
-      HTML: "Nebudu to zdržovat: " + res.Code,
+      HTML: msg,
     })
     if err != nil { return err }
     return c.String(200, "OK")
@@ -202,11 +221,11 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       Player2,
       Player3,
       Player4,
-      Player5 string
+      Player5,
       OnlineRound,
       FinalRound,
       RegistrationStart,
-      RegistrationEnd types.DateTime
+      RegistrationEnd string
     }{
       rec.Id,
       comp.GetString("subject"),
@@ -219,10 +238,10 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       rec.GetString("player3"),
       rec.GetString("player4"),
       rec.GetString("player5"),
-      comp.GetDateTime("online_round"),
-      comp.GetDateTime("final_round"),
-      comp.GetDateTime("registration_start"),
-      comp.GetDateTime("registration_end"),
+      comp.GetDateTime("online_round").Time().Format("1.2.2006 15:04:05"),
+      comp.GetDateTime("final_round").Time().Format("1.2.2006 15:04:05"),
+      comp.GetDateTime("registration_start").Time().Format("1.2.2006 15:04:05"),
+      comp.GetDateTime("registration_end").Time().Format("1.2.2006 15:04:05"),
     })
     if err != nil { return err }
 
@@ -231,7 +250,7 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     err = mailerc.Send(&mailer.Message{
       From: mail.Address{
         Address: "strela-vlna@gchd.cz",
-        Name: "Střela Vlna boťák",
+        Name: "Střela Vlna",
       },
       To: []mail.Address{{Address: res.Email}},
       Subject: "Registrace do soutěže" + comp.GetString("name"),
