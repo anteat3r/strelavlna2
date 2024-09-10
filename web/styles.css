@@ -19,10 +19,10 @@ input::-webkit-inner-spin-button {
 }
 
 /* Firefox */
-input[type=number] {
-  -moz-appearance: textfield;
-  /* appearance: textfield; */
-}
+/* input[type=number] { */
+/*   -moz-appearance: textfield; */
+/*   /* appearance: textfield; */ */
+/* } */
 
 body{
     margin: 0px;
