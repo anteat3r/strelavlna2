@@ -53,14 +53,16 @@ func main() {
       src.ContestsEndp(app.Dao(), true),
     )
 
+    mailer := app.NewMailClient()
+
     e.Router.POST(
       "/api/mailcheck",
-      src.MailCheckEndp(app.Dao(), app.NewMailClient()),
+      src.MailCheckEndp(app.Dao(), mailer),
     )
 
     e.Router.POST(
       "/api/register",
-      src.TeamRegisterEndp(app.Dao()),
+      src.TeamRegisterEndp(app.Dao(), mailer),
     )
 
     e.Router.GET(
