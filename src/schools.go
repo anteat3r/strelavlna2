@@ -1,7 +1,9 @@
 package src
 
 import (
+	"bytes"
 	"encoding/json"
+	"html/template"
 	"net/mail"
 	"os"
 	"strconv"
@@ -12,6 +14,7 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/daos"
+	"github.com/pocketbase/pocketbase/mails"
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/tools/mailer"
 	"github.com/pocketbase/pocketbase/tools/types"
@@ -136,7 +139,7 @@ func MailCheckEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
   }
 }
 
-func TeamRegisterEndp(dao *daos.Dao) echo.HandlerFunc {
+func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
   return func(c echo.Context) error {
     res := struct{
       ContestId string `form:"id"`
@@ -181,9 +184,60 @@ func TeamRegisterEndp(dao *daos.Dao) echo.HandlerFunc {
     rec.Set("player5", res.PlayerName5)
 
     err = dao.SaveRecord(rec)
-    log.Info(rec.Id)
-    return c.String(500, "DEBUG")
+    if err != nil { return err }
 
+    tmpls, err := dao.FindFirstRecordByData("texts", "name", "login_mail")
+    if err != nil { return err }
+
+    var renbuf bytes.Buffer
+    tmpl, err := template.New("login_mail").Parse(tmpls.GetString("text"))
+    if err != nil { return err }
+    err = tmpl.Execute(&renbuf, struct{
+      CompSubject,
+      CompName,
+      OnlineRound,
+      FinalRound,
+      RegistrationStart,
+      RegistrationEnd,
+      School,
+      TeamName,
+      Email,
+      Player1,
+      Player2,
+      Player3,
+      Player4,
+      Player5 string
+    }{
+      comp.GetString("subject"),
+      comp.GetString("name"),
+      comp.GetString("online_round"),
+      comp.GetString("final_round"),
+      comp.GetString("registration_start"),
+      comp.GetString("registration_end"),
+      school.GetString("plny_nazev"),
+      rec.GetString("name"),
+      rec.GetString("email"),
+      rec.GetString("player1"),
+      rec.GetString("player2"),
+      rec.GetString("player3"),
+      rec.GetString("player4"),
+      rec.GetString("player5"),
+    })
+    if err != nil { return err }
+
+    msg := renbuf.String()
+
+    err = mailerc.Send(&mailer.Message{
+      From: mail.Address{
+        Address: "strela-vlna@gchd.cz",
+        Name: "Střela Vlna boťák",
+      },
+      To: []mail.Address{{Address: res.Email}},
+      Subject: "Registrace do soutěže" + comp.GetString("name"),
+      HTML: msg,
+    })
+    if err != nil { return err }
+    return c.String(200, "OK")
   }
 }
 
