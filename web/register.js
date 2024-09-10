@@ -450,6 +450,8 @@ team_mail_input.addEventListener("blur", function(){
 const register_button = document.getElementById("register-button");
 
 register_button.addEventListener("click", function(){
+    this.disabled = true;
+    
     if(document.getElementById("team-name").value == ""){
         alert('Zadejte prosím název týmu');
         return;
@@ -494,6 +496,8 @@ register_button.addEventListener("click", function(){
         }else{
             alert('Registrace selhala!');
         }
+        this.disabled = false;
+
     });
     
     
