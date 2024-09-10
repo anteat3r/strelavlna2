@@ -693,7 +693,7 @@ a:hover{
 }
 
 #register-card h2{
-    color: #1c05a0;
+    color: #231b75;
     font-size: 30px;
     display: flex;
     justify-content: center;
@@ -702,7 +702,7 @@ a:hover{
     border-bottom: #6d55ef dashed 3px;
     margin-bottom: 20px;
     font-weight: 700;
-    letter-spacing: 1px;
+    font-family: 'Lexend';
 }
 
 #register-card #schoolid{
@@ -962,7 +962,6 @@ a:hover{
 #register-title{
     font-size: 100px;
     color: #000000;
-
 }
 
 #register-inner-wrapper{
@@ -1225,7 +1224,7 @@ a:hover{
     padding: 2px;
     padding-right: 5px;
     padding-left: 10px;
-    background-color: #8c7eda;
+    background-color: #543ed4;
     color: white;
 }
 
@@ -1247,6 +1246,6 @@ a:hover{
 }
 
 .correct-code{
-    border-color: #84d8ff;
+    border-color: #64ceff;
     background-color: #7bc5e731;
 }
