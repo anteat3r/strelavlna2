@@ -1,7 +1,10 @@
 package src
 
 import (
+	"bytes"
 	"encoding/json"
+	"html/template"
+	"net/mail"
 	"os"
 	"strconv"
 	"strings"
@@ -12,6 +15,7 @@ import (
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
+	"github.com/pocketbase/pocketbase/tools/mailer"
 	"github.com/pocketbase/pocketbase/tools/types"
 )
 
@@ -75,10 +79,10 @@ func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
 func SingleSchoolEndp(dao *daos.Dao) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		res := struct {
-			Name string `db:"cely_nazev" json:"cely_nazev"`
+			Name string `db:"plny_nazev" json:"plny_nazev"`
 		}{}
 		err := dao.DB().
-			NewQuery("SELECT cely_nazev FROM skoly WHERE id = {:id} LIMIT 1").
+			NewQuery("SELECT plny_nazev FROM skoly WHERE id = {:id} LIMIT 1").
 			Bind(dbx.Params{"id": c.PathParam("id")}).
 			One(&res)
 		if err != nil {
@@ -112,11 +116,131 @@ func SingleContestEndp(dao *daos.Dao) echo.HandlerFunc {
 	}
 }
 
-// func TeamRegisterEndp(dao *daos.Dao) echo.HandlerFunc {
-//   return func(c echo.Context) error {
-//
-//   }
-// }
+func MailCheckEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
+  return func(c echo.Context) error {
+    res := struct{
+      Email string `json:"email"`
+      Code string `json:"code"`
+    }{}
+    err := c.Bind(&res)
+    if err != nil { return err }
+    err = mailerc.Send(&mailer.Message{
+      From: mail.Address{
+        Address: "strela-vlna@gchd.cz",
+        Name: "Střela Vlna boťák",
+      },
+      To: []mail.Address{{Address: res.Email}},
+      Subject: "Ověřovací kód emailu",
+      HTML: "Nebudu to zdržovat: " + res.Code,
+    })
+    if err != nil { return err }
+    return c.String(200, "OK")
+  }
+}
+
+func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
+  return func(c echo.Context) error {
+    res := struct{
+      ContestId string `form:"id"`
+      TeamName string `form:"team_name"`
+      Email string `form:"team_email"`
+      PlayerName1 string `form:"player_name_1"`
+      PlayerName2 string `form:"player_name_2"`
+      PlayerName3 string `form:"player_name_3"`
+      PlayerName4 string `form:"player_name_4"`
+      PlayerName5 string `form:"player_name_5"`
+      SchoolName string `form:"school_name"`
+    }{}
+    err := c.Bind(&res)
+    if err != nil { return err }
+
+    comp, err := dao.FindRecordById("contests", res.ContestId)
+    if err != nil { return err }
+
+    if comp.GetDateTime("registration_start").Time().After(time.Now()) {
+      return c.String(400, "contest registration has not yet started")
+    }
+
+    if comp.GetDateTime("registration_end").Time().Before(time.Now()) {
+      return c.String(400, "contest registration has already ended")
+    }
+
+    school, err := dao.FindFirstRecordByData("skoly", "plny_nazev", res.SchoolName)
+    if err != nil { return err }
+
+    coll, err := dao.FindCollectionByNameOrId("teams")
+    if err != nil { return err }
+
+    rec := models.NewRecord(coll)
+    rec.Set("contest", comp.Id)
+    rec.Set("school", school.Id)
+    rec.Set("name", res.TeamName)
+    rec.Set("email", res.Email)
+    rec.Set("player1", res.PlayerName1)
+    rec.Set("player2", res.PlayerName2)
+    rec.Set("player3", res.PlayerName3)
+    rec.Set("player4", res.PlayerName4)
+    rec.Set("player5", res.PlayerName5)
+
+    err = dao.SaveRecord(rec)
+    if err != nil { return err }
+
+    tmpls, err := dao.FindFirstRecordByData("texts", "name", "login_mail")
+    if err != nil { return err }
+
+    var renbuf bytes.Buffer
+    tmpl, err := template.New("login_mail").Parse(tmpls.GetString("text"))
+    if err != nil { return err }
+    err = tmpl.Execute(&renbuf, struct{
+      Code,
+      CompSubject,
+      CompName,
+      School,
+      TeamName,
+      Email,
+      Player1,
+      Player2,
+      Player3,
+      Player4,
+      Player5 string
+      OnlineRound,
+      FinalRound,
+      RegistrationStart,
+      RegistrationEnd types.DateTime
+    }{
+      rec.Id,
+      comp.GetString("subject"),
+      comp.GetString("name"),
+      school.GetString("plny_nazev"),
+      rec.GetString("name"),
+      rec.GetString("email"),
+      rec.GetString("player1"),
+      rec.GetString("player2"),
+      rec.GetString("player3"),
+      rec.GetString("player4"),
+      rec.GetString("player5"),
+      comp.GetDateTime("online_round"),
+      comp.GetDateTime("final_round"),
+      comp.GetDateTime("registration_start"),
+      comp.GetDateTime("registration_end"),
+    })
+    if err != nil { return err }
+
+    msg := renbuf.String()
+
+    err = mailerc.Send(&mailer.Message{
+      From: mail.Address{
+        Address: "strela-vlna@gchd.cz",
+        Name: "Střela Vlna boťák",
+      },
+      To: []mail.Address{{Address: res.Email}},
+      Subject: "Registrace do soutěže" + comp.GetString("name"),
+      HTML: msg,
+    })
+    if err != nil { return err }
+    return c.String(200, "OK")
+  }
+}
 
 func tint(s string) int {
 	r, _ := strconv.Atoi(s)
