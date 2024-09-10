@@ -192,6 +192,7 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     tmpl, err := template.New("login_mail").Parse(tmpls.GetString("text"))
     if err != nil { return err }
     err = tmpl.Execute(&renbuf, struct{
+      Code,
       CompSubject,
       CompName,
       OnlineRound,
@@ -207,6 +208,7 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       Player4,
       Player5 string
     }{
+      rec.Id,
       comp.GetString("subject"),
       comp.GetString("name"),
       comp.GetString("online_round"),
