@@ -2,6 +2,7 @@ package src
 
 import (
 	"encoding/json"
+	"net/mail"
 	"os"
 	"strconv"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
+	"github.com/pocketbase/pocketbase/tools/mailer"
 	"github.com/pocketbase/pocketbase/tools/types"
 )
 
@@ -110,6 +112,28 @@ func SingleContestEndp(dao *daos.Dao) echo.HandlerFunc {
 		}
 		return c.String(200, string(out))
 	}
+}
+
+func MailCheckEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
+  return func(c echo.Context) error {
+    res := struct{
+      Email string `json:"email"`
+      Code string `json:"code"`
+    }{}
+    err := c.Bind(&res)
+    if err != nil { return err }
+    err = mailerc.Send(&mailer.Message{
+      From: mail.Address{
+        Address: "strela-vlna@gchd.cz",
+        Name: "Střela Vlna boťák",
+      },
+      To: []mail.Address{{Address: res.Email}},
+      Subject: "Ověřovací kód emailu",
+      HTML: "Nebudu to zdržovat: " + res.Code,
+    })
+    if err != nil { return err }
+    return c.String(200, "")
+  }
 }
 
 // func TeamRegisterEndp(dao *daos.Dao) echo.HandlerFunc {
