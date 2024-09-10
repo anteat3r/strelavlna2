@@ -77,10 +77,10 @@ func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
 func SingleSchoolEndp(dao *daos.Dao) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		res := struct {
-			Name string `db:"cely_nazev" json:"cely_nazev"`
+			Name string `db:"plny_nazev" json:"plny_nazev"`
 		}{}
 		err := dao.DB().
-			NewQuery("SELECT cely_nazev FROM skoly WHERE id = {:id} LIMIT 1").
+			NewQuery("SELECT plny_nazev FROM skoly WHERE id = {:id} LIMIT 1").
 			Bind(dbx.Params{"id": c.PathParam("id")}).
 			One(&res)
 		if err != nil {
@@ -163,7 +163,7 @@ func TeamRegisterEndp(dao *daos.Dao) echo.HandlerFunc {
       return c.String(400, "contest registration has already ended")
     }
 
-    school, err := dao.FindFirstRecordByData("skoly", "cely_nazev", res.SchoolName)
+    school, err := dao.FindFirstRecordByData("skoly", "plny_nazev", res.SchoolName)
     if err != nil { return err }
 
     coll, err := dao.FindCollectionByNameOrId("teams")
