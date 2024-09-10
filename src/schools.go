@@ -132,7 +132,7 @@ func MailCheckEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       HTML: "Nebudu to zdržovat: " + res.Code,
     })
     if err != nil { return err }
-    return c.String(200, "")
+    return c.String(200, "OK")
   }
 }
 
