@@ -53,6 +53,11 @@ func main() {
       src.ContestsEndp(app.Dao(), true),
     )
 
+    e.Router.POST(
+      "/api/mailcheck",
+      src.MailCheckEndp(app.Dao(), app.NewMailClient()),
+    )
+
     e.Router.GET(
       "/api/play/:team",
       src.PlayWsEndpoint(app.Dao()),
