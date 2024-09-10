@@ -243,10 +243,11 @@ const id = urlParams.get('id');
 fetch(`https://strela-vlna.gchd.cz/api/contest/${id}`)
     .then(response => response.json())
     .then(data => {
-        document.getElementById("register-title").innerHTML+= data.name;
+        document.getElementById("register-title").innerHTML = data.name;
 });
 
-
+const dropdown_playeres_wrapper_clickable = document.getElementById("player-name-selector-top-wrapper");
+const dropdown_schools_wrapper_clickable = document.getElementById("school-selector-top-wrapper");
 const dropdown_icon_players = document.getElementById("register-players-dropdown-icon");
 const dropdown_players = document.getElementById('player-name-selector-wrapper');
 const dropdown_icon_school = document.getElementById("school-dropdown-icon");
@@ -260,6 +261,20 @@ dropdown_icon_players.addEventListener("click", function(){
 dropdown_icon_school.addEventListener("click", function(){
     this.classList.toggle("school-dropdown-icon-toggle");
     dropdown_school.classList.toggle("school-selector-wrapper-toggle");
+});
+
+dropdown_playeres_wrapper_clickable.addEventListener("click", function(e){
+    if(e.target === dropdown_playeres_wrapper_clickable){
+        dropdown_icon_players.classList.toggle("register-players-dropdown-icon-toggle");
+        dropdown_players.classList.toggle("player-name-selector-wrapper-toggle");
+    }
+});
+
+dropdown_schools_wrapper_clickable.addEventListener("click", function(e){
+    if(e.target === dropdown_schools_wrapper_clickable){
+        dropdown_icon_school.classList.toggle("school-dropdown-icon-toggle");
+        dropdown_school.classList.toggle("school-selector-wrapper-toggle");
+    }
 });
 
 const player_count = document.getElementById("player-conunt");
@@ -292,7 +307,7 @@ player_count.addEventListener("blur", function(){
             dropdown_players.insertAdjacentHTML('beforeend',
             `   <div class="player-name-input-wrapper">
                     <label class="register-label-small">Člen ${i+1}.</label>
-                    <input type="text" id="player-name" class="register-text-input" placeholder="Jméno" name="player_name">
+                    <input type="text" id="player-name" class="register-text-input" placeholder="Jméno" name="player_name_${i+1}">
                 </div>`);
         }
     }
@@ -339,7 +354,7 @@ const mail_check_button = document.getElementById("mail-check-button");
 const mail_check_digits_wrapper = document.getElementsByClassName("email-check-code-wrapper")[0];
 const email_sent_message = document.getElementById("email-sent-message");
 var mail_check_digits = [];
-var correct_code = "1234";
+var correct_code = "";
 var last_sent_email = "";
 
 for (let i = 1; i < 5; i++){
@@ -388,12 +403,16 @@ for (let i = 1; i < 5; i++){
 mail_check_button.addEventListener("click", function(){
     const random_digits = Math.floor(1000 + Math.random() * 9000);
     last_sent_email = team_mail_input.value;
-    fetch("https://strela-vlna.gchd.cz/api/mail-check", {
+    fetch("https://strela-vlna.gchd.cz/api/mailcheck", {
+        headers: {
+            "Content-Type": "application/json"
+        },
         method: 'POST',
-        body: new URLSearchParams({
+        body: JSON.stringify({
             email: team_mail_input.value,
             code: random_digits.toString()
         })
+
     })
     .then(response => response.text())
     .then(data => {
@@ -403,8 +422,8 @@ mail_check_button.addEventListener("click", function(){
             email_sent_message.innerHTML = `*Poslali jsme vám email s kódem na adresu: ${last_sent_email}`;
             correct_code = random_digits.toString();
         }else{
-            last_sent_email = ""
-            alert('Nelze  odeslat email! Zkuste to prosím později.');
+            last_sent_email = "";
+            alert('Nelze odeslat email! Zkuste to prosím později.');
         }
     });
     
@@ -418,7 +437,7 @@ team_mail_input.addEventListener("keydown", function(e){
 })
 
 team_mail_input.addEventListener("blur", function(){
-    if(this.validity.valid){
+    if(this.validity.valid && team_mail_input.value != ""){
         mail_check_button.classList.remove("hidden");
         mail_check_digits_wrapper.classList.remove("hidden");
     }else{
@@ -453,8 +472,16 @@ register_button.addEventListener("click", function(){
     const register_card = document.getElementById("register-card");
     var formData = new FormData(register_card);
     formData.append('id', new URLSearchParams(window.location.search).get('id'));
+    for(let i = 1; i <= 5; i++){
+        if(!formData.has(`player_name_${i}`)){
+            formData.append(`player_name_${i}`, "");
+        }
+    }
     console.log(formData.values());
     fetch("https://strela-vlna.gchd.cz/api/register", {
+        headers: {
+            // "Content-Type": "application/x-www-form-urlencoded"
+        },
         method: 'POST',
         body: formData
     })
