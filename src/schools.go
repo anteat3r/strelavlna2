@@ -23,7 +23,7 @@ func SchoolQueryEndp(dao *daos.Dao) echo.HandlerFunc {
 		err := dao.DB().
 			NewQuery("SELECT plny_nazev FROM skoly WHERE okres LIKE {:okres}").
 			Bind(dbx.Params{
-				"okres": c.QueryParam("o"),
+				"okres": c.QueryParam("o") + "%",
 			}).All(&res)
 		if err != nil {
 			return err
@@ -42,8 +42,8 @@ func SchoolQueryEndp(dao *daos.Dao) echo.HandlerFunc {
 func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		res := []struct {
-      Id                string         `db:"id" json:"id"`
-			Type              string         `db:"subject" json:"subject"`
+			Id                string         `db:"id" json:"id"`
+			Subject           string         `db:"subject" json:"subject"`
 			Name              string         `db:"name" json:"name"`
 			OnlineRound       types.DateTime `db:"online_round" json:"online_round"`
 			FinalRound        types.DateTime `db:"final_round" json:"final_round"`
@@ -73,36 +73,45 @@ func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
 }
 
 func SingleSchoolEndp(dao *daos.Dao) echo.HandlerFunc {
-  return func(c echo.Context) error {
-    res := struct{
-      Name string `db:"cely_nazev" json:"cely_nazev"`
-    }{}
-    err := dao.DB().
-      NewQuery("SELECT cely_nazev FROM skoly WHERE id = {:id} LIMIT 1").
-      Bind(dbx.Params{"id": c.PathParam("id")}).
-      One(&res)
-    if err != nil { return err }
-    out, err := json.Marshal(res)
-    if err != nil { return err }
-    return c.String(200, string(out))
-  }
+	return func(c echo.Context) error {
+		res := struct {
+			Name string `db:"cely_nazev" json:"cely_nazev"`
+		}{}
+		err := dao.DB().
+			NewQuery("SELECT cely_nazev FROM skoly WHERE id = {:id} LIMIT 1").
+			Bind(dbx.Params{"id": c.PathParam("id")}).
+			One(&res)
+		if err != nil {
+			return err
+		}
+		out, err := json.Marshal(res)
+		if err != nil {
+			return err
+		}
+		return c.String(200, string(out))
+	}
 }
 
 func SingleContestEndp(dao *daos.Dao) echo.HandlerFunc {
-  return func(c echo.Context) error {
-    res := struct{
-      Name string `db:"name" json:"name"`
-    }{}
-    err := dao.DB().
-      NewQuery("SELECT name FROM contests WHERE id = {:id} LIMIT 1").
-      Bind(dbx.Params{"id": c.PathParam("id")}).
-      One(&res)
-    if err != nil { return err }
-    out, err := json.Marshal(res)
-    if err != nil { return err }
-    return c.String(200, string(out))
-  }
+	return func(c echo.Context) error {
+		res := struct {
+			Name string `db:"name" json:"name"`
+		}{}
+		err := dao.DB().
+			NewQuery("SELECT name FROM contests WHERE id = {:id} LIMIT 1").
+			Bind(dbx.Params{"id": c.PathParam("id")}).
+			One(&res)
+		if err != nil {
+			return err
+		}
+		out, err := json.Marshal(res)
+		if err != nil {
+			return err
+		}
+		return c.String(200, string(out))
+	}
 }
+
 // func TeamRegisterEndp(dao *daos.Dao) echo.HandlerFunc {
 //   return func(c echo.Context) error {
 //
