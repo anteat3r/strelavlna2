@@ -226,7 +226,19 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     err = dao.SaveRecord(rec)
     if err != nil { return err }
 
+    return nil
+  }
+}
+
+func TeamRegisterSendEmail(res *models.Record, dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
+  return func(c echo.Context) error {
     tmpls, err := dao.FindFirstRecordByData("texts", "name", "reg_mail")
+    if err != nil { return err }
+
+    school, err := dao.FindRecordById("skoly", res.GetString("school"))
+    if err != nil { return err }
+
+    comp, err := dao.FindRecordById("contests", res.GetString("contest"))
     if err != nil { return err }
 
     var renbuf bytes.Buffer
@@ -249,17 +261,17 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       RegistrationStart,
       RegistrationEnd string
     }{
-      rec.Id,
+      res.Id,
       comp.GetString("subject"),
       comp.GetString("name"),
       school.GetString("plny_nazev"),
-      rec.GetString("name"),
-      rec.GetString("email"),
-      rec.GetString("player1"),
-      rec.GetString("player2"),
-      rec.GetString("player3"),
-      rec.GetString("player4"),
-      rec.GetString("player5"),
+      res.GetString("name"),
+      res.GetString("email"),
+      res.GetString("player1"),
+      res.GetString("player2"),
+      res.GetString("player3"),
+      res.GetString("player4"),
+      res.GetString("player5"),
       comp.GetDateTime("online_round").Time().Format("1.2.2006 15:04:05"),
       comp.GetDateTime("final_round").Time().Format("1.2.2006 15:04:05"),
       comp.GetDateTime("registration_start").Time().Format("1.2.2006 15:04:05"),
@@ -274,7 +286,7 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
         Address: "strela-vlna@gchd.cz",
         Name: "Střela Vlna",
       },
-      To: []mail.Address{{Address: res.Email}},
+      To: []mail.Address{{Address: res.GetString("email")}},
       Subject: "Registrace do soutěže" + comp.GetString("name"),
       HTML: msg,
     })
@@ -310,6 +322,9 @@ func TeamRegisterConfirmEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerF
     rec.Load(res.PublicExport())
 
     err = dao.SaveRecord(rec)
+    if err != nil { return err }
+
+    err = dao.DeleteRecord(res)
     if err != nil { return err }
 
     tmpls, err := dao.FindFirstRecordByData("texts", "name", "reg_confirm")
