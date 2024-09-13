@@ -187,8 +187,8 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
 
     eres := struct{ Count int `db:"COUNT(*)"` }{}
     err = dao.DB().
-      NewQuery("SELECT COUNT(*) FROM teams WHERE email = {:email}").
-      Bind(dbx.Params{"email": res.Email}).
+    NewQuery("SELECT COUNT(*) FROM teams WHERE email = {:email} AND contest = {:comp}").
+      Bind(dbx.Params{"email": res.Email, "comp": res.ContestId}).
       One(&eres)
 
     if err != nil { return err }
@@ -197,8 +197,8 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
 
     eres = struct{ Count int `db:"COUNT(*)"` }{}
     err = dao.DB().
-      NewQuery("SELECT COUNT(*) FROM teams_reg_req WHERE email = {:email}").
-      Bind(dbx.Params{"email": res.Email}).
+    NewQuery("SELECT COUNT(*) FROM teams WHERE email = {:email} AND contest = {:comp}").
+      Bind(dbx.Params{"email": res.Email, "comp": res.ContestId}).
       One(&eres)
 
     if err != nil { return err }
