@@ -3,12 +3,17 @@ package main
 import (
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/anteat3r/strelavlna2/src"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/cron"
+	"github.com/pocketbase/pocketbase/tools/types"
+
+	log "github.com/anteat3r/golog"
 )
 
 func customHTTPErrorHandler(c echo.Context, err error) {
@@ -27,6 +32,32 @@ func main() {
 
   app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
     e.Router.HTTPErrorHandler = customHTTPErrorHandler
+    mailer := app.NewMailClient()
+
+    sched := cron.New()
+
+    sched.MustAdd(
+      "emailsend",
+      "@hourly",
+      func() {
+        recs, err := app.Dao().FindRecordsByFilter(
+          "teams_reg_req",
+          `id != ""`,
+          "-created",
+          0, 0,
+        )
+        if err != nil { log.Error(err); return }
+        for _, rec := range recs {
+          dt := rec.GetDateTime("updated").Time()
+          if !time.Now().After(dt.Add(time.Hour * 6)) { continue }
+          src.TeamRegisterSendEmail(rec, app.Dao(), mailer)
+          ndt, _ := types.ParseDateTime(time.Now().Add(time.Hour * 24 * 7 * 10000))
+          rec.Set("updated", ndt)
+          err = app.Dao().SaveRecord(rec)
+          if err != nil { log.Error(err) }
+        }
+      },
+    )
 
     e.Router.GET(
       "/*",
@@ -65,8 +96,6 @@ func main() {
       "/api/contests/after",
       src.ContestsEndp(app.Dao(), true),
     )
-
-    mailer := app.NewMailClient()
 
     e.Router.POST(
       "/api/mailcheck",
