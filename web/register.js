@@ -12,6 +12,18 @@ var zoomState = 0;
 var viewboxPosition = [-70, 0, 370, 185];
 const viewboxPositions = [[-70, 0, 370, 185], [-20, 30, 190, 95], [40, 0, 130, 65], [-45, 0, 170, 85], [-80, 30, 140, 70], [-80, 70, 200, 100], [-15, 100, 180, 90], [50, 85, 160, 80], [90, 100, 170, 85], [150, 110, 120, 60], [150, 40, 190, 95], [100, 40, 200, 100], [75, 60, 120, 60], [70, 25, 110, 55]]
 
+const urlParams = new URLSearchParams(window.location.search);
+const id = urlParams.get('id');
+const player_count = document.getElementById("player-conunt");
+const player_name = document.getElementById("player-name");
+const school_search_box = document.getElementById("school");
+const team_mail_input = document.getElementById("team-mail");
+const email_sent_message = document.getElementById("email-sent-message");
+const register_button = document.getElementById("register-button");
+
+const maxSearchDepth = 15;
+
+
 const districtNames = {
     "0": "Praha",
     "1-1": "Praha-západ",
@@ -128,6 +140,7 @@ regionSelector.addEventListener('mousemove', e => {
 });
 
 regionSelector.addEventListener('click', e => {
+    if(district_selected){return;}
     const point = regionSelector.createSVGPoint();
     point.x = e.clientX;
     point.y = e.clientY;
@@ -237,8 +250,6 @@ function animateViewbox(k){
 }
 
 
-const urlParams = new URLSearchParams(window.location.search);
-const id = urlParams.get('id');
 
 fetch(`https://strela-vlna.gchd.cz/api/contest/${id}`)
     .then(response => response.json())
@@ -276,9 +287,6 @@ dropdown_schools_wrapper_clickable.addEventListener("click", function(e){
         dropdown_school.classList.toggle("school-selector-wrapper-toggle");
     }
 });
-
-const player_count = document.getElementById("player-conunt");
-const player_name = document.getElementById("player-name");
 
 player_count.addEventListener("keydown", function(e){
     if (e.key === "Enter") {
@@ -319,7 +327,6 @@ player_count.addEventListener("blur", function(){
 });
 
 
-const school_search_box = document.getElementById("school");
 
 school_search_box.addEventListener("focus", function(){
     if (!district_selected){
@@ -349,8 +356,7 @@ function find_schools(){
     );
 }
 
-const team_mail_input = document.getElementById("team-mail");
-const email_sent_message = document.getElementById("email-sent-message");
+
 
 
 team_mail_input.addEventListener("keydown", function(e){
@@ -360,7 +366,7 @@ team_mail_input.addEventListener("keydown", function(e){
 })
 
 
-const register_button = document.getElementById("register-button");
+
 
 register_button.addEventListener("click", function(){
     this.disabled = true;
@@ -428,7 +434,6 @@ function update(){
 
 update();
 
-const maxLength = 15;
 function autocomplete(inp, arr) {
     var currentFocus;
 
@@ -447,7 +452,7 @@ function autocomplete(inp, arr) {
             let index = arr[i].toUpperCase().indexOf(val.toUpperCase());
             if (index > -1) {
                 matchCount++;
-                if (matchCount <= maxLength) {
+                if (matchCount <= maxSearchDepth) {
                     b = document.createElement("DIV");
                     b.innerHTML = arr[i].substr(0, index) +
                         "<strong>" + arr[i].substr(index, val.length) + "</strong>" +
@@ -463,12 +468,11 @@ function autocomplete(inp, arr) {
             }
         }
 
-        // If more than 10 matches, add "and more..." item
-        if (matchCount > maxLength) {
+        if (matchCount > maxSearchDepth) {
             const moreItem = document.createElement("DIV");
             moreItem.textContent = "a další...";
-            moreItem.style.color = "#888"; // Styling to differentiate it
-            moreItem.style.pointerEvents = "none"; // Make it non-clickable
+            moreItem.style.color = "#888";
+            moreItem.style.pointerEvents = "none";
             a.appendChild(moreItem);
         }
     });
