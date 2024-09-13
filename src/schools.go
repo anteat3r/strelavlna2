@@ -209,7 +209,7 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     school, err := dao.FindFirstRecordByData("skoly", "plny_nazev", res.SchoolName)
     if err != nil { return err }
 
-    coll, err := dao.FindCollectionByNameOrId("teams")
+    coll, err := dao.FindCollectionByNameOrId("teams_reg_req")
     if err != nil { return err }
 
     rec := models.NewRecord(coll)
