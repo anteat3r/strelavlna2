@@ -9,7 +9,6 @@ import (
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
-  log "github.com/anteat3r/golog"
 )
 
 func customHTTPErrorHandler(c echo.Context, err error) {
@@ -18,8 +17,6 @@ func customHTTPErrorHandler(c echo.Context, err error) {
 		code = he.Code
 	}
 
-  log.Error(err)
-	
   c.String(code, err.Error())
 }
 
