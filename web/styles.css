@@ -1206,6 +1206,13 @@ a:hover{
     font-size: 20px;
     color: white;
     background-color: #543ed4;
+    transition: all 0.3s ease-out;
+}
+
+#register-button:hover{
+    background-color: #7b5ee8;
+    box-shadow: 0px 0px 20px 0px #907cff7e;
+    transition: all 0s;
 }
 
 .email-input-wrapper{
@@ -1260,4 +1267,10 @@ a:hover{
 .correct-code{
     border-color: #64ceff;
     background-color: #7bc5e731;
+}
+
+.register-button-disabled{
+    background-color: #636363 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
 }

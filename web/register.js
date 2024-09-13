@@ -12,6 +12,18 @@ var zoomState = 0;
 var viewboxPosition = [-70, 0, 370, 185];
 const viewboxPositions = [[-70, 0, 370, 185], [-20, 30, 190, 95], [40, 0, 130, 65], [-45, 0, 170, 85], [-80, 30, 140, 70], [-80, 70, 200, 100], [-15, 100, 180, 90], [50, 85, 160, 80], [90, 100, 170, 85], [150, 110, 120, 60], [150, 40, 190, 95], [100, 40, 200, 100], [75, 60, 120, 60], [70, 25, 110, 55]]
 
+const urlParams = new URLSearchParams(window.location.search);
+const id = urlParams.get('id');
+const player_count = document.getElementById("player-conunt");
+const player_name = document.getElementById("player-name");
+const school_search_box = document.getElementById("school");
+const team_mail_input = document.getElementById("team-mail");
+const email_sent_message = document.getElementById("email-sent-message");
+const register_button = document.getElementById("register-button");
+
+const maxSearchDepth = 15;
+
+
 const districtNames = {
     "0": "Praha",
     "1-1": "Praha-západ",
@@ -128,6 +140,7 @@ regionSelector.addEventListener('mousemove', e => {
 });
 
 regionSelector.addEventListener('click', e => {
+    if(district_selected){return;}
     const point = regionSelector.createSVGPoint();
     point.x = e.clientX;
     point.y = e.clientY;
@@ -237,8 +250,6 @@ function animateViewbox(k){
 }
 
 
-const urlParams = new URLSearchParams(window.location.search);
-const id = urlParams.get('id');
 
 fetch(`https://strela-vlna.gchd.cz/api/contest/${id}`)
     .then(response => response.json())
@@ -276,9 +287,6 @@ dropdown_schools_wrapper_clickable.addEventListener("click", function(e){
         dropdown_school.classList.toggle("school-selector-wrapper-toggle");
     }
 });
-
-const player_count = document.getElementById("player-conunt");
-const player_name = document.getElementById("player-name");
 
 player_count.addEventListener("keydown", function(e){
     if (e.key === "Enter") {
@@ -319,7 +327,6 @@ player_count.addEventListener("blur", function(){
 });
 
 
-const school_search_box = document.getElementById("school");
 
 school_search_box.addEventListener("focus", function(){
     if (!district_selected){
@@ -349,86 +356,8 @@ function find_schools(){
     );
 }
 
-const team_mail_input = document.getElementById("team-mail");
-const mail_check_button = document.getElementById("mail-check-button");
-const mail_check_digits_wrapper = document.getElementsByClassName("email-check-code-wrapper")[0];
-const email_sent_message = document.getElementById("email-sent-message");
-var mail_check_digits = [];
-var correct_code = "";
-var last_sent_email = "";
 
-for (let i = 1; i < 5; i++){
-    mail_check_digits.push(document.getElementById(i.toString()));
-    mail_check_digits[i-1].addEventListener("keydown", function(e){
-        const was_empty = mail_check_digits[i-1].value == "";
-        if(!isNaN(parseInt(e.key)) && !was_empty){
-            mail_check_digits[i-1].value = "";
-        }
-            
-            
-        setTimeout(() => {
-            // Your custom code goes here, running after the default input behavior
-            if(!isNaN(parseInt(e.key))){
-            
-                if(i == 4){
-                    mail_check_digits[3].blur();
-                }else{
-                    mail_check_digits[i].focus();
-                }
-            }
-            if(e.key == "Backspace"){
-                if(i > 1 && was_empty){
-                    mail_check_digits[i-2].value = "";
-                    mail_check_digits[i-2].focus();
-                }
-            }
 
-            if(mail_check_digits.every(x => x.value != "") && mail_check_digits.map(x => x.value).join("") == correct_code){
-                mail_check_digits.forEach(x => x.classList.add("correct-code"));
-                email_sent_message.innerHTML = `*Váš email je ověřený`;
-                email_sent_message.classList.remove("hidden");
-            }else{
-                mail_check_digits.forEach(x => x.classList.remove("correct-code"));
-                email_sent_message.innerHTML = `*Poslali jsme vám email s kódem na adresu: ${last_sent_email}`;
-                if(last_sent_email == ""){
-                    email_sent_message.classList.add("hidden");
-                }
-            }
-            
-        }, 10);
-        
-    })
-}
-
-mail_check_button.addEventListener("click", function(){
-    const random_digits = Math.floor(1000 + Math.random() * 9000);
-    last_sent_email = team_mail_input.value;
-    fetch("https://strela-vlna.gchd.cz/api/mailcheck", {
-        headers: {
-            "Content-Type": "application/json"
-        },
-        method: 'POST',
-        body: JSON.stringify({
-            email: team_mail_input.value,
-            code: random_digits.toString()
-        })
-
-    })
-    .then(response => response.text())
-    .then(data => {
-        if(data == "OK"){
-            mail_check_digits_wrapper.classList.remove("hidden");
-            email_sent_message.classList.remove("hidden");
-            email_sent_message.innerHTML = `*Poslali jsme vám email s kódem na adresu: ${last_sent_email}`;
-            correct_code = random_digits.toString();
-        }else{
-            last_sent_email = "";
-            alert('Nelze odeslat email! Zkuste to prosím později.');
-        }
-    });
-    
-    
-});
 
 team_mail_input.addEventListener("keydown", function(e){
     if (e.key === "Enter") {
@@ -436,41 +365,36 @@ team_mail_input.addEventListener("keydown", function(e){
     }
 })
 
-team_mail_input.addEventListener("blur", function(){
-    if(this.validity.valid && team_mail_input.value != ""){
-        mail_check_button.classList.remove("hidden");
-        mail_check_digits_wrapper.classList.remove("hidden");
-    }else{
-        mail_check_button.classList.add("hidden");
-        mail_check_digits_wrapper.classList.add("hidden");
-        email_sent_message.classList.add("hidden");
-    }
-})
 
-const register_button = document.getElementById("register-button");
+
 
 register_button.addEventListener("click", function(){
     this.disabled = true;
     
     if(document.getElementById("team-name").value == ""){
         alert('Zadejte prosím název týmu');
+        this.disabled = false;
         return;
     }
     if(!document.getElementById("team-mail").validity.valid || document.getElementById("team-mail").value == ""){
         alert('Zadejte prosím platný email');
+        this.disabled = false;
         return;
     }
     for(const member of document.getElementById("player-name-selector-wrapper").getElementsByClassName("player-name-input-wrapper")){
         if(member.querySelector('input').value == ""){
             alert('Vplňte prosím všechna jména členů týmu');
-            return;
+        this.disabled = false;
+        return;
         }
     }
     if(schools.indexOf(school_search_box.value) == -1){
         alert('Zadejte prosím platnou školu');
+        this.disabled = false;
         return;
     }
 
+    this.classList.add("register-button-disabled");
     const register_card = document.getElementById("register-card");
     var formData = new FormData(register_card);
     formData.append('id', new URLSearchParams(window.location.search).get('id'));
@@ -510,102 +434,91 @@ function update(){
 
 update();
 
-
-//this code is copied from w3schools, yea, I know, Im lazy...
-
 function autocomplete(inp, arr) {
-    /*the autocomplete function takes two arguments,
-    the text field element and an array of possible autocompleted values:*/
     var currentFocus;
-    /*execute a function when someone writes in the text field:*/
+
     inp.addEventListener("input", function(e) {
         var a, b, i, val = this.value;
-        /*close any already open lists of autocompleted values*/
         closeAllLists();
-        if (!val) { return false;}
+        if (!val) { return false; }
         currentFocus = -1;
-        /*create a DIV element that will contain the items (values):*/
         a = document.createElement("DIV");
         a.setAttribute("id", this.id + "autocomplete-list");
         a.setAttribute("class", "autocomplete-items");
-        /*append the DIV element as a child of the autocomplete container:*/
         this.parentNode.appendChild(a);
-        /*for each item in the array...*/
+
+        let matchCount = 0; // Count matching items
         for (i = 0; i < arr.length; i++) {
-          /*check if the item starts with the same letters as the text field value:*/
-          if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
-            /*create a DIV element for each matching element:*/
-            b = document.createElement("DIV");
-            /*make the matching letters bold:*/
-            b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
-            b.innerHTML += arr[i].substr(val.length);
-            /*insert a input field that will hold the current array item's value:*/
-            b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
-            /*execute a function when someone clicks on the item value (DIV element):*/
-            b.addEventListener("click", function(e) {
-                /*insert the value for the autocomplete text field:*/
-                inp.value = this.getElementsByTagName("input")[0].value;
-                /*close the list of autocompleted values,
-                (or any other open lists of autocompleted values:*/
-                closeAllLists();
-            });
-            a.appendChild(b);
-          }
+            let index = arr[i].toUpperCase().indexOf(val.toUpperCase());
+            if (index > -1) {
+                matchCount++;
+                if (matchCount <= maxSearchDepth) {
+                    b = document.createElement("DIV");
+                    b.innerHTML = arr[i].substr(0, index) +
+                        "<strong>" + arr[i].substr(index, val.length) + "</strong>" +
+                        arr[i].substr(index + val.length);
+                    b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+                    
+                    b.addEventListener("click", function(e) {
+                        inp.value = this.getElementsByTagName("input")[0].value;
+                        closeAllLists();
+                    });
+                    a.appendChild(b);
+                }
+            }
+        }
+
+        if (matchCount > maxSearchDepth) {
+            const moreItem = document.createElement("DIV");
+            moreItem.textContent = "a další...";
+            moreItem.style.color = "#888";
+            moreItem.style.pointerEvents = "none";
+            a.appendChild(moreItem);
         }
     });
-    /*execute a function presses a key on the keyboard:*/
+
     inp.addEventListener("keydown", function(e) {
         var x = document.getElementById(this.id + "autocomplete-list");
         if (x) x = x.getElementsByTagName("div");
         if (e.keyCode == 40) {
-          /*If the arrow DOWN key is pressed,
-          increase the currentFocus variable:*/
-          currentFocus++;
-          /*and and make the current item more visible:*/
-          addActive(x);
-        } else if (e.keyCode == 38) { //up
-          /*If the arrow UP key is pressed,
-          decrease the currentFocus variable:*/
-          currentFocus--;
-          /*and and make the current item more visible:*/
-          addActive(x);
+            currentFocus++;
+            addActive(x);
+        } else if (e.keyCode == 38) {
+            currentFocus--;
+            addActive(x);
         } else if (e.keyCode == 13) {
-          /*If the ENTER key is pressed, prevent the form from being submitted,*/
-          e.preventDefault();
-          if (currentFocus > -1) {
-            /*and simulate a click on the "active" item:*/
-            if (x) x[currentFocus].click();
-          }
+            e.preventDefault();
+            if (currentFocus > -1) {
+                if (x) x[currentFocus].click();
+            }
         }
     });
+
     function addActive(x) {
-      /*a function to classify an item as "active":*/
-      if (!x) return false;
-      /*start by removing the "active" class on all items:*/
-      removeActive(x);
-      if (currentFocus >= x.length) currentFocus = 0;
-      if (currentFocus < 0) currentFocus = (x.length - 1);
-      /*add class "autocomplete-active":*/
-      x[currentFocus].classList.add("autocomplete-active");
+        if (!x) return false;
+        removeActive(x);
+        if (currentFocus >= x.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (x.length - 1);
+        x[currentFocus].classList.add("autocomplete-active");
     }
+
     function removeActive(x) {
-      /*a function to remove the "active" class from all autocomplete items:*/
-      for (var i = 0; i < x.length; i++) {
-        x[i].classList.remove("autocomplete-active");
-      }
-    }
-    function closeAllLists(elmnt) {
-      /*close all autocomplete lists in the document,
-      except the one passed as an argument:*/
-      var x = document.getElementsByClassName("autocomplete-items");
-      for (var i = 0; i < x.length; i++) {
-        if (elmnt != x[i] && elmnt != inp) {
-          x[i].parentNode.removeChild(x[i]);
+        for (var i = 0; i < x.length; i++) {
+            x[i].classList.remove("autocomplete-active");
         }
-      }
     }
-    /*execute a function when someone clicks in the document:*/
+
+    function closeAllLists(elmnt) {
+        var x = document.getElementsByClassName("autocomplete-items");
+        for (var i = 0; i < x.length; i++) {
+            if (elmnt != x[i] && elmnt != inp) {
+                x[i].parentNode.removeChild(x[i]);
+            }
+        }
+    }
+
     document.addEventListener("click", function (e) {
         closeAllLists(e.target);
     });
 }
+

@@ -73,7 +73,6 @@ function updateFluid(acc, dt){
         bottomFluidSpeed[i]*=0.9997;
     }
     for(let i = 0; i < topFluid.length; i++){
-        // console.log(topFluid[20]);
         topFluid[i] += topFluidSpeed[i]*dt;
         bottomFluid[i] += bottomFluidSpeed[i]*dt;
     }
@@ -91,17 +90,6 @@ function renderFluid(){
     ctx.lineTo(canvas.width, 0);
     ctx.closePath();
     ctx.fill();
-
-    // ctx.fillStyle = "#14B8FF";
-    // ctx.beginPath();
-    // ctx.moveTo(0, canvas.height);
-    // for(let i = 0; i < bottomFluid.length; i++){
-    //     ctx.lineTo(i*spacing, 700-bottomFluid[i]);
-    // }
-    // ctx.lineTo(canvas.width, canvas.height);
-    // ctx.closePath();
-    // ctx.fill();
-
 }
 
 
@@ -112,12 +100,6 @@ function animate() {
     requestAnimationFrame(animate);
     updateFluid(1, 1);
     renderFluid();
-    // if(Math.round(Math.random()*50)==0){
-    //     checkForPossibleDrop();
-    // }
-    // updateDrops(1);
-    // renderDrops();
-    // console.log(droplets[0]);
 }
 
 animate();
