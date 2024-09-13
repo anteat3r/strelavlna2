@@ -286,7 +286,7 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
 // PathParam regreq
 func TeamRegisterConfirmEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
   return func(c echo.Context) error {
-    res, err := dao.FindRecordById("team_reg_req", c.PathParam("regreq"))
+    res, err := dao.FindRecordById("teams_reg_req", c.PathParam("regreq"))
     if err != nil { return err }
 
     comp, err := dao.FindRecordById("contests", res.GetString("contest"))
