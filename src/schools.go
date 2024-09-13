@@ -300,7 +300,7 @@ func TeamRegisterConfirmEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerF
       return c.String(400, "contest registration has already ended")
     }
 
-    school, err := dao.FindFirstRecordByData("skoly", "plny_nazev", res.GetString("school"))
+    school, err := dao.FindRecordById("skoly", res.GetString("school"))
     if err != nil { return err }
 
     coll, err := dao.FindCollectionByNameOrId("teams")
