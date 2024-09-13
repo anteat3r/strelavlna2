@@ -1,20 +1,36 @@
 package main
 
 import (
-	"log"
+	"net/http"
 	"os"
 
 	"github.com/anteat3r/strelavlna2/src"
+	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+  log "github.com/anteat3r/golog"
 )
+
+func customHTTPErrorHandler(c echo.Context, err error) {
+	code := http.StatusInternalServerError
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+	}
+
+  log.Error(err)
+	
+  c.String(code, err.Error())
+}
+
 
 func main() {
   app := pocketbase.New()
   src.Dao = app.Dao()
 
   app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+    e.Router.HTTPErrorHandler = customHTTPErrorHandler
+
     e.Router.GET(
       "/*",
       apis.StaticDirectoryHandler(
@@ -66,6 +82,11 @@ func main() {
     )
 
     e.Router.GET(
+      "/api/regconfirm/:regreq",
+      src.TeamRegisterConfirmEndp(app.Dao(), mailer),
+    )
+
+    e.Router.GET(
       "/api/play/:team",
       src.PlayWsEndpoint(app.Dao()),
     )
@@ -79,6 +100,6 @@ func main() {
   })
 
   if err := app.Start(); err != nil {
-    log.Fatal(err)
+    panic(err)
   }
 }
