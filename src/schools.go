@@ -189,6 +189,7 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     eres := struct{ Id string `db:"id"` }{}
     err = dao.DB().
       NewQuery("SELECT id FROM teams WHERE email = {:email}").
+      Bind(dbx.Params{"email": res.Email}).
       One(&eres)
 
     if err != sql.ErrNoRows { return errors.New("email already in use")}
@@ -196,6 +197,7 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     eres = struct{ Id string `db:"id"` }{}
     err = dao.DB().
       NewQuery("SELECT id FROM teams_regreq WHERE email = {:email}").
+      Bind(dbx.Params{"email": res.Email}).
       One(&eres)
 
     if err != sql.ErrNoRows { return errors.New("email already in use")}
