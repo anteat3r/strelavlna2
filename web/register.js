@@ -428,7 +428,7 @@ function update(){
 
 update();
 
-
+const maxLength = 15;
 function autocomplete(inp, arr) {
     var currentFocus;
 
@@ -441,24 +441,35 @@ function autocomplete(inp, arr) {
         a.setAttribute("id", this.id + "autocomplete-list");
         a.setAttribute("class", "autocomplete-items");
         this.parentNode.appendChild(a);
-        
+
+        let matchCount = 0; // Count matching items
         for (i = 0; i < arr.length; i++) {
-            // Check if the input value exists anywhere in the array item
             let index = arr[i].toUpperCase().indexOf(val.toUpperCase());
             if (index > -1) {
-                b = document.createElement("DIV");
-                // Highlight the matching part of the word
-                b.innerHTML = arr[i].substr(0, index) +
-                    "<strong>" + arr[i].substr(index, val.length) + "</strong>" +
-                    arr[i].substr(index + val.length);
-                b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
-                
-                b.addEventListener("click", function(e) {
-                    inp.value = this.getElementsByTagName("input")[0].value;
-                    closeAllLists();
-                });
-                a.appendChild(b);
+                matchCount++;
+                if (matchCount <= maxLength) {
+                    b = document.createElement("DIV");
+                    b.innerHTML = arr[i].substr(0, index) +
+                        "<strong>" + arr[i].substr(index, val.length) + "</strong>" +
+                        arr[i].substr(index + val.length);
+                    b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+                    
+                    b.addEventListener("click", function(e) {
+                        inp.value = this.getElementsByTagName("input")[0].value;
+                        closeAllLists();
+                    });
+                    a.appendChild(b);
+                }
             }
+        }
+
+        // If more than 10 matches, add "and more..." item
+        if (matchCount > maxLength) {
+            const moreItem = document.createElement("DIV");
+            moreItem.textContent = "a další...";
+            moreItem.style.color = "#888"; // Styling to differentiate it
+            moreItem.style.pointerEvents = "none"; // Make it non-clickable
+            a.appendChild(moreItem);
         }
     });
 
