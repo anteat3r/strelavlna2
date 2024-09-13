@@ -2,7 +2,6 @@ package src
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"html/template"
