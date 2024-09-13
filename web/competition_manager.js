@@ -2,12 +2,9 @@ const cw = document.getElementById("competition-wrapper");
 const template = document.getElementById("summary-card-template");
 
 
-
-
 fetch("https://strela-vlna.gchd.cz/api/contests")
     .then(response => response.json())
     .then(data => {
-        console.log(data[0]);
         let i = 0;
         for (const competition of data) {
             const online_round_date =  new Date(competition.online_round).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'');
@@ -15,8 +12,6 @@ fetch("https://strela-vlna.gchd.cz/api/contests")
             const competition_registration_start_date = new Date(competition.registration_start).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'');
             const competition_registration_end_date = new Date(competition.registration_end).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'');
             const can_register = new Date(competition.registration_start) <= new Date() && new Date(competition.registration_end) >= new Date()
-            console.log(can_register);
-            console.log(competition.name);
             var summary_card_timer_text;
             if (new Date(competition.registration_start) > new Date()){
                 summary_card_timer_text = `<span>Registrace začíná ${competition_registration_start_date}</span>`

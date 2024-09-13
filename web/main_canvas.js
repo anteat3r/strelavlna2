@@ -3,8 +3,8 @@
 */
 const canvas = document.getElementById("main-canvas");
 
-const ctx = canvas.getContext("2d");
-ctx.fillStyle = "#f1effc";
+const loading_ctx = canvas.getContext("2d");
+loading_ctx.fillStyle = "#f1effc";
 
 //struct for bock with x and y component and target x and y component
 class Block {
@@ -41,12 +41,6 @@ class Void {
 */
 function voidIndex(void_, list){
   return list.findIndex((e) => e.x == void_.x && e.y == void_.y) ?? -1;
-    // for(let i = 0; i < list.length; i++){
-    //     if (list[i].x == void__.x && list[i].y == void__.y){
-    //         return i;
-    //     }
-    // }
-    // return -1;
 }
 
 /**
@@ -68,14 +62,14 @@ function uppdate_blocks(blocks, k){
 
 //function that will draw all the blocks onto the canvas
 function draw_blocks() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    loading_ctx.clearRect(0, 0, canvas.width, canvas.height)
     //clearing the previous frame
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    loading_ctx.clearRect(0, 0, canvas.width, canvas.height);
     //drawing the blocks
     for (let block of canvas_accual) {
-        ctx.beginPath();
-        ctx.roundRect(30*block.x, 30*block.y, spacing, spacing, corner);
-        ctx.fill();
+        loading_ctx.beginPath();
+        loading_ctx.roundRect(30*block.x, 30*block.y, spacing, spacing, corner);
+        loading_ctx.fill();
     }
 }
 
@@ -125,7 +119,6 @@ function count_blocks(trgt_canvas){
 function change_screen(starting_canvas, target_canvas){
     let delta_N = count_blocks(target_canvas) - count_blocks(starting_canvas);
 
-    // console.log(delta_N);
     if (delta_N != 0){
         let modified_canvas = starting_canvas.slice();
         if (delta_N > 0){
@@ -166,7 +159,6 @@ function change_screen(starting_canvas, target_canvas){
                     if (modified_canvas[y][x] == 0){
                         if (x+1 < 22 && modified_canvas[y][x+1] == 0){
                             let idx = blockIndex(new Block(x, y, x, y, -1, -1), canvas_accual);
-                            // canvas_accual.indexOf(block(x, y, x, y, -1, -1));
                             canvas_accual[idx].target_x = x+1;
                             canvas_accual[idx].target_y = y;
                             canvas_accual[idx].destroy_x = x+1;
@@ -178,7 +170,6 @@ function change_screen(starting_canvas, target_canvas){
                         }
                         if (y+1 < 10 && modified_canvas[y+1][x] == 0){
                             let idx = blockIndex(new Block(x, y, x, y, -1, -1), canvas_accual);
-                            // let idx = canvas_accual.indexOf(block(x, y, x, y, -1, -1));
                             canvas_accual[idx].target_x = x;
                             canvas_accual[idx].target_y = y+1;
                             canvas_accual[idx].destroy_x = x;
@@ -190,7 +181,6 @@ function change_screen(starting_canvas, target_canvas){
                         }
                         if (x-1 > 0 && modified_canvas[y][x-1] == 0){
                             let idx = blockIndex(new Block(x, y, x, y, -1, -1), canvas_accual);
-                            // let idx = canvas_accual.indexOf(block(x, y, x, y, -1, -1));
                             canvas_accual[idx].target_x = x-1;
                             canvas_accual[idx].target_y = y;
                             canvas_accual[idx].destroy_x = x-1;
@@ -202,7 +192,6 @@ function change_screen(starting_canvas, target_canvas){
                         }
                         if (y-1 > 0 && modified_canvas[y-1][x] == 0){
                             let idx = blockIndex(new Block(x, y, x, y, -1, -1), canvas_accual);
-                            // let idx = canvas_accual.indexOf(block(x, y, x, y, -1, -1));
                             canvas_accual[idx].target_x = x;
                             canvas_accual[idx].target_y = y-1;
                             canvas_accual[idx].destroy_x = x;
@@ -383,11 +372,6 @@ var target_canvas = 0;
 var spacing = 29.5;
 var corner = 4;
 
-for(let i = 0; i < canvas_targets.length; i++){
-    let delta_N = count_blocks(canvas_targets[i]) - count_blocks(canvas_targets[0]);
-    console.log(count_blocks(canvas_targets[i]))
-    console.log(delta_N);
-}
 
 generate_random_blocks(count_blocks(canvas_targets[target_canvas]));
 draw_blocks();
