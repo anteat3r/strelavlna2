@@ -186,21 +186,25 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       return c.String(400, "contest registration has already ended")
     }
 
-    eres := struct{ Id string `db:"id"` }{}
+    eres := struct{ Count int `db:"COUNT(*)"` }{}
     err = dao.DB().
-      NewQuery("SELECT id FROM teams WHERE email = {:email}").
+      NewQuery("SELECT COUNT(*) FROM teams WHERE email = {:email}").
       Bind(dbx.Params{"email": res.Email}).
       One(&eres)
 
-    if err != sql.ErrNoRows { return errors.New("email already in use")}
+    if err != nil { return err }
 
-    eres = struct{ Id string `db:"id"` }{}
+    if eres.Count > 0 { return errors.New("email already in use")}
+
+    eres = struct{ Count int `db:"COUNT(*)"` }{}
     err = dao.DB().
-      NewQuery("SELECT id FROM teams_regreq WHERE email = {:email}").
+      NewQuery("SELECT COUNT(*) FROM teams_reg_req WHERE email = {:email}").
       Bind(dbx.Params{"email": res.Email}).
       One(&eres)
 
-    if err != sql.ErrNoRows { return errors.New("email already in use")}
+    if err != nil { return err }
+
+    if eres.Count > 0 { return errors.New("email already in use")}
 
 
     school, err := dao.FindFirstRecordByData("skoly", "plny_nazev", res.SchoolName)
@@ -283,7 +287,7 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
 // PathParam regreq
 func TeamRegisterConfirmEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
   return func(c echo.Context) error {
-    res, err := dao.FindRecordById("team_regreq", c.PathParam("regreq"))
+    res, err := dao.FindRecordById("team_reg_req", c.PathParam("regreq"))
     if err != nil { return err }
 
     comp, err := dao.FindRecordById("contests", res.GetString("contest"))

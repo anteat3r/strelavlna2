@@ -421,6 +421,8 @@ register_button.addEventListener("click", function(){
             alert('Registrace selhala!');
         }
         this.disabled = false;
+        this.classList.remove("register-button-disabled");
+
 
     });
     
