@@ -403,7 +403,7 @@ register_button.addEventListener("click", function(){
         }
     }
     this.classList.add("register-button-disabled");
-    var reponse_text = "";
+    var reponse;
     fetch("https://strela-vlna.gchd.cz/api/register", {
         headers: {
             // "Content-Type": "application/x-www-form-urlencoded"
@@ -411,9 +411,11 @@ register_button.addEventListener("click", function(){
         method: 'POST',
         body: formData
     })
-    .then(response => response.text())
+    .then(response => {reponse = response; return reponse.text()})
     .then(data => {
-        if(data == "OK"){
+        
+        console.log(reponse.ok);
+        if(reponse.ok){
             window.location.href = "registration_request_succsessful.html";
             
         }else{
@@ -421,6 +423,7 @@ register_button.addEventListener("click", function(){
         }
         this.disabled = false;
         this.classList.remove("register-button-disabled");
+    
 
     });
     
