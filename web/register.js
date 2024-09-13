@@ -394,7 +394,6 @@ register_button.addEventListener("click", function(){
         return;
     }
 
-    this.classList.add("register-button-disabled");
     const register_card = document.getElementById("register-card");
     var formData = new FormData(register_card);
     formData.append('id', new URLSearchParams(window.location.search).get('id'));
@@ -403,7 +402,8 @@ register_button.addEventListener("click", function(){
             formData.append(`player_name_${i}`, "");
         }
     }
-    console.log(formData.values());
+    this.classList.add("register-button-disabled");
+    var reponse_text = "";
     fetch("https://strela-vlna.gchd.cz/api/register", {
         headers: {
             // "Content-Type": "application/x-www-form-urlencoded"
@@ -413,16 +413,14 @@ register_button.addEventListener("click", function(){
     })
     .then(response => response.text())
     .then(data => {
-        console.log(data);
         if(data == "OK"){
             window.location.href = "registration_request_succsessful.html";
             
         }else{
-            alert('Registrace selhala!');
+            alert(`Registrace selhala: ${data}`);
         }
         this.disabled = false;
         this.classList.remove("register-button-disabled");
-
 
     });
     
