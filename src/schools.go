@@ -2,7 +2,9 @@ package src
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"html/template"
 	"net/mail"
 	"os"
@@ -183,6 +185,21 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     if comp.GetDateTime("registration_end").Time().Before(time.Now()) {
       return c.String(400, "contest registration has already ended")
     }
+
+    eres := struct{ Id string `db:"id"` }{}
+    err = dao.DB().
+      NewQuery("SELECT id FROM teams WHERE email = {:email}").
+      One(&eres)
+
+    if err != sql.ErrNoRows { return errors.New("email already in use")}
+
+    eres = struct{ Id string `db:"id"` }{}
+    err = dao.DB().
+      NewQuery("SELECT id FROM teams_regreq WHERE email = {:email}").
+      One(&eres)
+
+    if err != sql.ErrNoRows { return errors.New("email already in use")}
+
 
     school, err := dao.FindFirstRecordByData("skoly", "plny_nazev", res.SchoolName)
     if err != nil { return err }
