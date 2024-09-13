@@ -3,8 +3,8 @@
 */
 const canvas = document.getElementById("main-canvas");
 
-const ctx = canvas.getContext("2d");
-ctx.fillStyle = "#f1effc";
+const loading_ctx = canvas.getContext("2d");
+loading_ctx.fillStyle = "#f1effc";
 
 //struct for bock with x and y component and target x and y component
 class Block {
@@ -62,14 +62,14 @@ function uppdate_blocks(blocks, k){
 
 //function that will draw all the blocks onto the canvas
 function draw_blocks() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    loading_ctx.clearRect(0, 0, canvas.width, canvas.height)
     //clearing the previous frame
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    loading_ctx.clearRect(0, 0, canvas.width, canvas.height);
     //drawing the blocks
     for (let block of canvas_accual) {
-        ctx.beginPath();
-        ctx.roundRect(30*block.x, 30*block.y, spacing, spacing, corner);
-        ctx.fill();
+        loading_ctx.beginPath();
+        loading_ctx.roundRect(30*block.x, 30*block.y, spacing, spacing, corner);
+        loading_ctx.fill();
     }
 }
 

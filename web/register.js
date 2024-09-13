@@ -415,12 +415,14 @@ register_button.addEventListener("click", function(){
     .then(data => {
         console.log(data);
         if(data == "OK"){
-            window.location.href = "registration_succsessful.html";
+            window.location.href = "registration_request_succsessful.html";
             
         }else{
             alert('Registrace selhala!');
         }
         this.disabled = false;
+        this.classList.remove("register-button-disabled");
+
 
     });
     
