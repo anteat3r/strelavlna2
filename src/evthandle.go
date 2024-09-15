@@ -36,9 +36,9 @@ func PlayerWsHandleMsg(
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
-    prob, money, err := DBBuy(team, diff)
+    prob, money, name, err := DBBuy(team, diff)
     if err != nil { return err }
-    tchan.Send("bought", prob)
+    tchan.Send("bought", prob, diff, strconv.Itoa(money), name)
   }
 
   return nil
