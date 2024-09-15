@@ -9,12 +9,15 @@ var target_opacity = [0, 0, 0, 0, 0, 0, 0];
 
 var is_loading_running = false;
 
+var animation_color = "#ffffff";
+
 
 
 function draw() {
     loading_ctx.clearRect(0, 0, loading_canvas.width, loading_canvas.height);
     for (const [index, position] of accual_positions.entries()) {
-        loading_ctx.fillStyle = `rgba(227, 227, 242, ${opacity[index]})`;
+        let color = hexToRgb(animation_color);
+        loading_ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity[index]})`;
         loading_ctx.beginPath();
         loading_ctx.roundRect(position[0], position[1], 30, 30, 5);
         loading_ctx.fill();
@@ -52,6 +55,15 @@ function updateAccualPositions(k){
         accual_positions[i][1] += (positions[target_positions[i]][1] - accual_positions[i][1])*k
         opacity[i] += (target_opacity[i] - opacity[i])*k;
     }
+}
+
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
 }
 
 function frame(){

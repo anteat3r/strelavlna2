@@ -21,7 +21,7 @@ fetch("https://strela-vlna.gchd.cz/api/contests")
                 summary_card_timer_text = `<span>Registrace skončila ${competition_registration_end_date}</span>`
             }
             cw.innerHTML += `
-            <div class="summary-card ${i%2 ==0 ? "summary-card-dark-blue" : "summary-card-light-blue"} reg-element reg1">
+            <div class="card ${i%2 ==0 ? "card-main" : "card-play"} reg-element reg1">
                 <h1 class="summary-card-title">${competition.name}</h1>
                 <p class="summary-card-content">
                     <b>${competition.subject == "math" ? "Matematika" : competition.subject == "physics" ? "Fyzika" : "Oboje"}</b><br>
@@ -34,7 +34,7 @@ fetch("https://strela-vlna.gchd.cz/api/contests")
                         <i class="far fa-clock summary-card-timer-icon"></i>
                         <div class="summary-card-timer-text-wrapper">${summary_card_timer_text}</div>
                     </div>
-                    <button class="summary-card-button ${can_register ? i%2 == 0 ? "summary-card-button-dark-blue" : "summary-card-button-light-blue": "summary-card-button-gray"}" id="${competition.id}">Registrovat</button>
+                    <button class="summary-card-button ${can_register ? i%2 == 0 ? "submit-button-main" : "submit-button-play": "summary-card-button-gray"}" id="${competition.id}">Registrovat</button>
                 </div>
             </div>
             `

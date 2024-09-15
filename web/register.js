@@ -315,7 +315,7 @@ player_count.addEventListener("blur", function(){
             dropdown_players.insertAdjacentHTML('beforeend',
             `   <div class="player-name-input-wrapper">
                     <label class="register-label-small">Člen ${i+1}.</label>
-                    <input type="text" id="player-name" class="register-text-input" placeholder="Jméno" name="player_name_${i+1}">
+                    <input type="text" id="player-name" class="text-input input-main" placeholder="Jméno" name="player_name_${i+1}">
                 </div>`);
         }
     }
@@ -414,7 +414,6 @@ register_button.addEventListener("click", function(){
     .then(response => {reponse = response; return reponse.text()})
     .then(data => {
         
-        console.log(reponse.ok);
         if(reponse.ok){
             window.location.href = "registration_request_succsessful.html";
             
