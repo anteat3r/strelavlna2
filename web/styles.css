@@ -3,11 +3,25 @@
     /* font-family: 'Lexend'; */
     font-family: system-ui;
     --color-main: #3118ba; /*#39CE84*/
-    --color-main-light: #3d24ca;
-    --color-white: #f8f7ff;
+    --color-main-light: #4c33da;
+    --color-main-white: #f8f7ff;
+    --color-main-dark: #231b75;
+    --color-main-glow: #907cff7e;
+
+    --color-secondary: #2593be;
+    --color-secondary-light: #3eb1df;
+    --color-secondary-white: #f2fcff;
+    --color-secondary-dark: #0f455a;
+    --color-secondary-glow: #7cdaff7e;
+
+    --color-black: #000000;
+    --color-black-light: #333333;
+    --color-black-white: #f3f3f3;
+    --color-black-glow: #0000007e;
+    
     --color-lightgray: #ebe8f7;
     --color-gray: #353538;
-    --color-black: #121114;
+
     padding: 0px;
     margin: 0px;
 }
@@ -273,11 +287,10 @@ a:hover{
     #logo{
         padding-bottom: 20px;
         margin-bottom: 20px;
-        border-bottom: var(--color-main-light) 2px solid;
     }
-    #navbar{
+    /* #navbar{
         border-bottom: var(--color-main-light) 2px solid;
-    }
+    } */
     .reg-grid{
         width: 90vw;
         margin-bottom: 10vh;
@@ -353,6 +366,9 @@ a:hover{
         padding-top: 10px;
         padding-bottom: 10px;
         border-top: var(--color-main-light) 2px solid;
+    }
+    .nav-element-play{
+        border-top: var(--color-secondary-light) 2px solid;
     }
     #logo{
         margin-bottom: 20px;
@@ -508,6 +524,10 @@ a:hover{
 .color-background-black{
     background-color: var(--color-black);
 }
+.color-background-secondary{
+    background-color: var(--color-secondary);
+}
+
 
 .color-text-main{
     color: var(--color-main);
@@ -537,9 +557,12 @@ a:hover{
 }
 
 
-#navbar{
+/* #navbar{
     border-bottom: var(--color-main-light) 2px solid;
 }
+#navbar-secondary{
+    border-bottom: var(--color-secondary-light) 2px solid;
+} */
 
 #basics{
     padding: 20px;
@@ -695,40 +718,51 @@ a:hover{
     height: 120px;
 }
 
-#register-card{
-    background-color: var(--color-white);
-    border: #8b7be7 2px solid;
+.form-default{
+
     border-radius: 10px;
     width: 80%;
     max-width: 900px;
     padding: 20px;
 }
-
-#register-card h2{
-    color: #231b75;
+.form-default h2{
     font-size: 30px;
     display: flex;
     justify-content: center;
     margin: 0px;
     padding-bottom: 10px;
-    border-bottom: #6d55ef dashed 3px;
     margin-bottom: 20px;
     font-weight: 700;
     font-family: 'Lexend';
 }
 
-#register-card #schoolid{
-    width: calc(95% - 20px);
-    display: block;
-    margin: 0 auto;
-    border-radius: 10px;
-    outline: none;
-    border: none;
-    height: 40px;
-    padding-inline: 10px;
-    font-size: 20px;
-    font-weight: 900;
+.form-main{
+    background-color: var(--color-main-white);
+    border: var(--color-main-light) 2px solid;
 }
+.form-main h2{
+    color: var(--color-main-dark);
+    border-bottom: var(--color-main-light) dashed 3px;
+}
+
+.form-play{
+    background-color: var(--color-secondary-white);
+    border: var(--color-secondary-light) 2px solid;
+}
+.form-play h2{
+    color: var(--color-secondary-dark);
+    border-bottom: var(--color-secondary-light) dashed 3px;
+}
+
+.form-admin{
+    background-color: var(--color-black-white);
+    border: var(--color-black-light) 2px solid;
+}
+.form-admin h2{
+    color: var(--color-black-dark);
+    border-bottom: var(--color-black-light) dashed 3px;
+}
+
 
 #register-caerd #search-container{
     position: relative;
@@ -810,7 +844,7 @@ a:hover{
     border-top: #000 solid 3px;
 } */
 
-.summary-card{
+.card{
     border: 10px solid;
     border-radius: 10px;
     max-width: 300px;
@@ -858,9 +892,9 @@ a:hover{
     margin-bottom: 20px;
 }
 
-.summary-card-dark-blue{
+.card-main{
     border-color: var(--color-main);
-    box-shadow: 0px 0px 10px 0px #907cff inset;
+    box-shadow: 0px 0px 10px 0px var(--color-main-glow) inset;
     background-image: repeating-linear-gradient(
         45deg,
         #e7e4fa 0,
@@ -874,9 +908,9 @@ a:hover{
 
 }
 
-.summary-card-light-blue{
+.card-play{
     border-color: #2593be;
-    box-shadow: 0px 0px 10px 0px #7ddaff inset;
+    box-shadow: 0px 0px 10px 0px var(--color-secondary-glow) inset;
     background-image: repeating-linear-gradient(
         45deg,
         #e4f1fa 0,
@@ -960,20 +994,12 @@ a:hover{
 
 }
 
-#loading-animation-canvas{
-    margin: 80px;
-}
 
 .form-wrapper{
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 40px;
-}
-
-#register-title{
-    font-size: 100px;
-    color: #000000;
 }
 
 #register-inner-wrapper{
@@ -993,24 +1019,29 @@ a:hover{
     font-size: 17px;
 }
 
-.register-text-input{
-    /* decoration: none; */
-    border: #bdb4f1 2px solid;
+.text-input{
     border-radius: 4px;
     height: 20px;
     font-family: 'Lexend';
     font-size: 15px;
     padding-inline: 4px;
     outline: none;
-    transition: border-color 0.3s ease-out;
     margin-bottom: 20px;
     max-width: 200px;
     width: 80%;
-    /* width: 50px; */
 }
-
-.register-school-input{
-    border: #bdb4f1 2px solid;
+.number-input{
+    border-radius: 4px;
+    height: 25px;
+    width: 25px;
+    font-family: 'Lexend';
+    font-size: 15px;
+    outline: none;
+    margin-bottom: 3px;
+    text-align: center;
+    padding: 0px;
+}
+.school-input{
     border-radius: 4px;
     height: 20px;
     font-family: 'Lexend';
@@ -1019,38 +1050,35 @@ a:hover{
     outline: none;
     margin-bottom: 3px;
     width:calc(100% - 12px);
-    
-    transition: border-color 0.3s ease-out;
 }
 
-.register-text-input:focus{
-    border: #5c45df 2px solid;
-    transition: border-color 0s;
+.input-main{
+    border: var(--color-main-light) 2px solid;
+    transition: border-color 0.3s ease-out;
 }
-.register-school-input:focus{
-    border: #5c45df 2px solid;
+.input-main:focus{
+    border: var(--color-main) 2px solid;
     transition: border-color 0s;
 }
 
-.register-number-input{
-    /* decoration: none; */
-    border: #bdb4f1 2px solid;
-    border-radius: 4px;
-    height: 25px;
-    width: 25px;
-    font-family: 'Lexend';
-    font-size: 15px;
-    outline: none;
+.input-play{
+    border: var(--color-secondary-light) 2px solid;
     transition: border-color 0.3s ease-out;
-    margin-bottom: 3px;
-    text-align: center;
-    padding: 0px;
 }
-.register-number-input:focus{
-    /* decoration: none; */
-    border: #5c45df 2px solid;
+.input-play:focus{
+    border: var(--color-secondary) 2px solid;
     transition: border-color 0s;
 }
+
+.input-admin{
+    border: var(--color-black-light) 2px solid;
+    transition: border-color 0.3s ease-out;
+}
+.input-admin:focus{
+    border: var(--color-black) 2px solid;
+    transition: border-color 0s;
+}
+
 
 #player-name-selector-top-wrapper{
     /* margin-top: 50px; */
@@ -1058,7 +1086,7 @@ a:hover{
     display: flex;
     justify-content: space-between;
     flex-direction: row;
-    border-bottom: #bdb4f1 2px solid;
+    border-bottom: #000000 2px solid;
 }
 
 #school-selector-top-wrapper{
@@ -1087,7 +1115,6 @@ a:hover{
 #school-dropdown-icon{
     cursor: pointer;
     font-size: 20px;
-    color: #6853e0;
 }
 
 .school-dropdown-icon-normal{
@@ -1205,15 +1232,8 @@ a:hover{
     font-family: 'Lexend';
     font-size: 20px;
     color: white;
-    background-color: #543ed4;
-    transition: all 0.3s ease-out;
 }
 
-#register-button:hover{
-    background-color: #7b5ee8;
-    box-shadow: 0px 0px 20px 0px #907cff7e;
-    transition: all 0s;
-}
 
 .email-input-wrapper{
     display: flex;
@@ -1273,4 +1293,151 @@ a:hover{
     background-color: #636363 !important;
     box-shadow: none !important;
     cursor: not-allowed !important;
+}
+
+.navbar-main{
+    background-color: var(--color-main);
+    border-bottom: var(--color-main-light) 2px solid;
+}
+
+.navbar-play{
+    background-color: var(--color-secondary);
+    border-bottom: var(--color-secondary-light) 2px solid;
+}
+
+.navbar-admin{
+    background-color: var(--color-black);
+    border-bottom: var(--color-gray) 2px solid;
+}
+
+.submit-button-main{
+    
+    max-width: 200px;
+    font-family: 'Lexend';
+    font-size: 20px;
+    color: white;
+    background-color: var(--color-main);
+    transition: all 0.3s ease-out;
+    
+}
+.submit-button-main:hover{
+    background-color: var(--color-main-light);
+    box-shadow: 0px 0px 20px 0px var(--color-main-glow);
+    transition: all 0s;
+}
+
+.submit-button-play{
+    max-width: 200px;
+    font-family: 'Lexend';
+    font-size: 20px;
+    color: white;
+    background-color: var(--color-secondary);
+    transition: all 0.3s ease-out;
+}
+.submit-button-play:hover{
+    background-color: var(--color-secondary-light);
+    box-shadow: 0px 0px 20px 0px var(--color-secondary-glow);
+    transition: all 0s;
+}
+
+.submit-button-admin{
+    max-width: 200px;
+    font-family: 'Lexend';
+    font-size: 20px;
+    color: white;
+    background-color: var(--color-black);
+    transition: all 0.3s ease-out;
+}
+.submit-button-admin:hover{
+    background-color: var(--color-black-light);
+    box-shadow: 0px 0px 20px 0px var(--color-black-glow);
+    transition: all 0s;
+}
+
+.border-main{
+    border-color: var(--color-main-light) !important;
+}
+.border-play{
+    border-color: var(--color-secondary-light) !important;
+}
+.border-admin{
+    border-color: var(--color-black-light) !important;
+}
+
+.color-main{
+    color: var(--color-main) !important;
+}
+.color-main-light{
+    color: var(--color-main-light) !important;
+}
+.color-play{
+    color: var(--color-secondary) !important;
+}
+.color-play-light{
+    color: var(--color-secondary-light) !important;
+}
+.color-admin{
+    color: var(--color-black) !important;
+}
+.color-admin-light{
+    color: var(--color-black-light) !important;
+}
+
+.flex-row{
+    display: flex;
+    flex-direction: row;
+}
+
+.flex-culumn{
+    display: flex;
+    flex-direction: column;
+}
+
+.space-between{
+    justify-content: space-between;
+}
+.wrap{
+    flex-wrap: wrap;
+}
+.float-left{
+    float: left;
+}
+.float-right{
+    float: right;
+}
+
+
+.margin-10{
+    margin: 10px;
+}
+.margin-20{
+    margin: 20px;
+}
+.margin-30{
+    margin: 30px;
+}
+.margin-40{
+    margin: 40px;
+}
+.margin-50{
+    margin: 50px;
+}
+
+.lexend{
+    font-family: 'Lexend';
+}
+.font-10{
+    font-size: 10px;
+}
+.font-12{
+    font-size: 12px;
+}
+.font-15{
+    font-size: 15px;
+}
+.font-20{
+    font-size: 20px;
+}
+.font-25{
+    font-size: 25px;
 }
