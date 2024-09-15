@@ -37,10 +37,10 @@ func PlayChackEndpoint(dao *daos.Dao) echo.HandlerFunc {
   return func(c echo.Context) error {
 
     teamid := c.QueryParam("id")
-    if teamid == "" { return c.String(400, "not running") }
+    if teamid == "" { return c.String(400, "invalid") }
 
     team, err := dao.FindRecordById("teams", teamid)
-    if err != nil { return c.String(400, "not running") }
+    if err != nil { return c.String(400, "invalid") }
     cont := team.GetString("contest")
 
     if cont != ActiveContest { return c.String(400, "not running") }
