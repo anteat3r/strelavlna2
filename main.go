@@ -116,6 +116,11 @@ func main() {
     )
 
     e.Router.GET(
+      "/api/validate_play",
+      src.PlayChackEndpoint(app.Dao()),
+    )
+
+    e.Router.GET(
       "/api/play/:team",
       src.PlayWsEndpoint(app.Dao()),
     )

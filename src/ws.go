@@ -16,11 +16,6 @@ var upgrader = websocket.Upgrader{
   WriteBufferSize: 1024,
 }
 
-type CachedProb struct {
-  id string
-  diff string
-}
-
 type TeamChans []chan string
 func (c TeamChans) Send(msg... string) {
   resmsg := strings.Join(msg, DELIM)
@@ -31,7 +26,6 @@ func (c TeamChans) Send(msg... string) {
 
 var (
   ActiveContest = "ccwxcxbrroofuzl"
-  ActiveProbs = []CachedProb{}
 
   nErr = errors.New
 
@@ -39,6 +33,22 @@ var (
   TeamChanMapMutex = sync.Mutex{}
 )
 
+func PlayChackEndpoint(dao *daos.Dao) echo.HandlerFunc {
+  return func(c echo.Context) error {
+
+    teamid := c.QueryParam("id")
+    if teamid == "" { return c.String(400, "") }
+
+    team, err := dao.FindRecordById("teams", teamid)
+    if err != nil { return c.String(400, "") }
+    cont := team.GetString("contest")
+
+    if cont != ActiveContest { return c.String(400, "") }
+
+    return c.String(200, "")
+  }
+}
+    
 /// PathParam team (id of team)
 func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
   return func(c echo.Context) error {
@@ -79,7 +89,12 @@ func WriteTeamChan(teamid string, msg string) {
   res.Send(msg)
 }
 
-func PlayerWsLoop(conn *websocket.Conn, team string, perchan chan string, tchan TeamChans) {
+func PlayerWsLoop(
+  conn *websocket.Conn,
+  team string,
+  perchan chan string,
+  tchan TeamChans,
+) {
   wsrchan := make(chan string)
   go func(){
     for {
