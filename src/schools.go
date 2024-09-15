@@ -230,69 +230,67 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
   }
 }
 
-func TeamRegisterSendEmail(res *models.Record, dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
-  return func(c echo.Context) error {
-    tmpls, err := dao.FindFirstRecordByData("texts", "name", "reg_mail")
-    if err != nil { return err }
+func TeamRegisterSendEmail(res *models.Record, dao *daos.Dao, mailerc mailer.Mailer) error {
+  tmpls, err := dao.FindFirstRecordByData("texts", "name", "reg_mail")
+  if err != nil { return err }
 
-    school, err := dao.FindRecordById("skoly", res.GetString("school"))
-    if err != nil { return err }
+  school, err := dao.FindRecordById("skoly", res.GetString("school"))
+  if err != nil { return err }
 
-    comp, err := dao.FindRecordById("contests", res.GetString("contest"))
-    if err != nil { return err }
+  comp, err := dao.FindRecordById("contests", res.GetString("contest"))
+  if err != nil { return err }
 
-    var renbuf bytes.Buffer
-    tmpl, err := template.New("reg_mail").Parse(tmpls.GetString("text"))
-    if err != nil { return err }
-    err = tmpl.Execute(&renbuf, struct{
-      Code,
-      CompSubject,
-      CompName,
-      School,
-      TeamName,
-      Email,
-      Player1,
-      Player2,
-      Player3,
-      Player4,
-      Player5,
-      OnlineRound,
-      FinalRound,
-      RegistrationStart,
-      RegistrationEnd string
-    }{
-      res.Id,
-      comp.GetString("subject"),
-      comp.GetString("name"),
-      school.GetString("plny_nazev"),
-      res.GetString("name"),
-      res.GetString("email"),
-      res.GetString("player1"),
-      res.GetString("player2"),
-      res.GetString("player3"),
-      res.GetString("player4"),
-      res.GetString("player5"),
-      comp.GetDateTime("online_round").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("final_round").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("registration_start").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("registration_end").Time().Format("1.2.2006 15:04:05"),
-    })
-    if err != nil { return err }
+  var renbuf bytes.Buffer
+  tmpl, err := template.New("reg_mail").Parse(tmpls.GetString("text"))
+  if err != nil { return err }
+  err = tmpl.Execute(&renbuf, struct{
+    Code,
+    CompSubject,
+    CompName,
+    School,
+    TeamName,
+    Email,
+    Player1,
+    Player2,
+    Player3,
+    Player4,
+    Player5,
+    OnlineRound,
+    FinalRound,
+    RegistrationStart,
+    RegistrationEnd string
+  }{
+    res.Id,
+    comp.GetString("subject"),
+    comp.GetString("name"),
+    school.GetString("plny_nazev"),
+    res.GetString("name"),
+    res.GetString("email"),
+    res.GetString("player1"),
+    res.GetString("player2"),
+    res.GetString("player3"),
+    res.GetString("player4"),
+    res.GetString("player5"),
+    comp.GetDateTime("online_round").Time().Format("1.2.2006 15:04:05"),
+    comp.GetDateTime("final_round").Time().Format("1.2.2006 15:04:05"),
+    comp.GetDateTime("registration_start").Time().Format("1.2.2006 15:04:05"),
+    comp.GetDateTime("registration_end").Time().Format("1.2.2006 15:04:05"),
+  })
+  if err != nil { return err }
 
-    msg := renbuf.String()
+  msg := renbuf.String()
 
-    err = mailerc.Send(&mailer.Message{
-      From: mail.Address{
-        Address: "strela-vlna@gchd.cz",
-        Name: "Střela Vlna",
-      },
-      To: []mail.Address{{Address: res.GetString("email")}},
-      Subject: "Registrace do soutěže" + comp.GetString("name"),
-      HTML: msg,
-    })
-    if err != nil { return err }
-    return c.String(200, "OK")
-  }
+  err = mailerc.Send(&mailer.Message{
+    From: mail.Address{
+      Address: "strela-vlna@gchd.cz",
+      Name: "Střela Vlna",
+    },
+    To: []mail.Address{{Address: res.GetString("email")}},
+    Subject: "Registrace do soutěže" + comp.GetString("name"),
+    HTML: msg,
+  })
+  if err != nil { return err }
+  return nil
 }
 
 // PathParam regreq
