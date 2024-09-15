@@ -59,6 +59,8 @@ func main() {
       },
     )
 
+    sched.Start()
+
     e.Router.GET(
       "/*",
       apis.StaticDirectoryHandler(
