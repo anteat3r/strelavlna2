@@ -26,46 +26,46 @@
       </header>
       
       <div class="form-wrapper">
-        <form action="#" method="post" id="register-card" autocomplete="off">
+        <form action="#" method="post" id="register-form" autocomplete="off" class="form-default form-main">
 
           <h2 id="register-title">¯\_(ツ)_/¯</h2>
           <div id="register-inner-wrapper">
             <label class="register-label">Název týmu:</label>
-            <input type="text" id="team-name" class="register-text-input" name="team_name">
+            <input type="text" id="team-name" class="text-input input-main" name="team_name">
             <label class="register-label">Email týmu:</label>
-            <input type="email" id="team-mail" class="register-text-input" name="team_email" style="margin-bottom: 10px;">
+            <input type="email" id="team-mail" class="text-input input-main" name="team_email" style="margin-bottom: 10px;">
             <label class="register-label" style="margin-top:40px;">Členové týmu:</label>
-            <div id="player-name-selector-top-wrapper">
+            <div id="player-name-selector-top-wrapper" class="border-main">
               <i class="fa-solid fa-angle-up register-players-dropdown-icon-normal" id="register-players-dropdown-icon"></i>
-              <input value="5" type="number" id="player-conunt" class="register-number-input no-arrows" name="player_count">
+              <input value="5" type="number" id="player-conunt" class="number-input input-main no-arrows" name="player_count">
             </div>
             <div id="player-name-selector-wrapper" class="player-name-selector-wrapper-normal">
               <div class="player-name-input-wrapper">
                 <label class="register-label-small">Člen 1.</label>
-                <input type="text" id="player-name" class="register-text-input" placeholder="Jméno" name="player_name_1">
+                <input type="text" id="player-name" class="text-input input-main" placeholder="Jméno" name="player_name_1">
               </div>
               <div class="player-name-input-wrapper">
                 <label class="register-label-small">Člen 2.</label>
-                <input type="text" id="player-name" class="register-text-input" placeholder="Jméno" name="player_name_2">
+                <input type="text" id="player-name" class="text-input input-main" placeholder="Jméno" name="player_name_2">
               </div>
               <div class="player-name-input-wrapper">
                 <label class="register-label-small">Člen 3.</label>
-                <input type="text" id="player-name" class="register-text-input" placeholder="Jméno" name="player_name_3">
+                <input type="text" id="player-name" class="text-input input-main" placeholder="Jméno" name="player_name_3">
               </div>
               <div class="player-name-input-wrapper">
                 <label class="register-label-small">Člen 4.</label>
-                <input type="text" id="player-name" class="register-text-input" placeholder="Jméno" name="player_name_4">
+                <input type="text" id="player-name" class="text-input input-main" placeholder="Jméno" name="player_name_4">
               </div>
               <div class="player-name-input-wrapper">
                 <label class="register-label-small">Člen 5.</label>
-                <input type="text" id="player-name" class="register-text-input" placeholder="Jméno" name="player_name_5">
+                <input type="text" id="player-name" class="text-input input-main" placeholder="Jméno" name="player_name_5">
               </div>
             </div>
             <label class="register-label" style="margin-top:40px;">Škola:</label>
-            <div id="school-selector-top-wrapper">
-              <i class="fa-solid fa-angle-up school-dropdown-icon-normal" id="school-dropdown-icon"></i>
+            <div id="school-selector-top-wrapper" class="border-main">
+              <i class="fa-solid fa-angle-up school-dropdown-icon-normal color-main" id="school-dropdown-icon"></i>
               <div class="autocomplete">
-                <input type="text" id="school" class="register-school-input" placeholder="Vyberte kraj a okres z mapy" name="school_name">
+                <input type="text" id="school" class="school-input input-main" placeholder="Vyberte kraj a okres z mapy" name="school_name">
               </div>
             </div>
             <div id="school-selector-wrapper" class="school-selector-wrapper-normal">
@@ -345,10 +345,10 @@
                     id="13-5" class="subregion"/>
                 </g>
               </svg>
-              <button type="button" id="return-button" class="return-button-shown return-button-hidden"><i class="fas fa-arrow-left"></i></button>
+              <button type="button" id="return-button" class="return-button-shown return-button-hidden submit-button-main"><i class="fas fa-arrow-left"></i></button>
 
             </div>
-            <button type="button" id="register-button">Registrovat</button>
+            <button type="button" id="register-button" class="submit-button-main">Registrovat</button>
           </div>
           </div>
         </form>
