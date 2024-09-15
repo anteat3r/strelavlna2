@@ -1,16 +1,9 @@
 package src
 
-import "strings"
-
-type testStringMsg struct { msg string }
-func (m testStringMsg) String() string {
-  return m.msg
-}
-
-type SellMsg struct { prob string }
-func (m SellMsg) String() string {
-  return "sell:" + m.prob
-}
+import (
+	"strconv"
+	"strings"
+)
 
 type InvalidMsgError struct { msg string }
 func (e InvalidMsgError) Error() string {
@@ -21,29 +14,31 @@ func eIm(msg string) InvalidMsgError {
   return InvalidMsgError{msg}
 }
 
+const DELIM = ":"
+
 func PlayerWsHandleMsg(
   team string,
   msg string,
-  tchan chan string,
   perchan chan string,
+  tchan TeamChans,
 ) error {
-  m := strings.Split(msg, ":")
+  m := strings.Split(msg, DELIM)
   if len(m) == 0 { return eIm(msg) }
   switch m[0] {
 
   case "sell":
     if len(m) != 2 { return eIm(msg) }
     prob := m[1]
-    _, err := DBSell(team, prob)
+    money, err := DBSell(team, prob)
     if err != nil { return err }
-    tchan<- "sold:" + prob
+    tchan.Send("sold", prob, strconv.Itoa(money))
 
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
-    prob, _, err := DBBuy(team, diff)
+    prob, money, name, err := DBBuy(team, diff)
     if err != nil { return err }
-    tchan<- "bought:" + prob
+    tchan.Send("bought", prob, diff, strconv.Itoa(money), name)
   }
 
   return nil
