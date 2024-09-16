@@ -125,6 +125,26 @@ func main() {
       src.PlayWsEndpoint(app.Dao()),
     )
 
+    e.Router.GET(
+      "/api/admin/loadactivec",
+      func(c echo.Context) error {
+        return c.String(200, src.ActiveContest)
+      },
+      apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/setactivec",
+      func(c echo.Context) error {
+        if c.QueryParam("i") == "" {
+          return c.String(400, "invalid param")
+        }
+        src.ActiveContest = c.QueryParam("i")
+        return c.String(200, "")
+      },
+      apis.RequireAdminAuth(),
+    )
+
     // e.Router.POST(
     //   "/api/register",
     //   

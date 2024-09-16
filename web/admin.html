@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin</title>
+  </head>
+  <body>
+
+    <h1 id="title"></h1>
+    <input type="email" id="auth-email">
+    <input type="password" id="auth-pass">
+    <button id="auth-login">Login</button>
+
+    <br>
+
+    <h1>Aktivní soutěž</h1>
+    <button id="activec-load">Načíst</button>
+    <input type="text" id="activec-inp">
+    <button id="activec-set">Nastavit</button>
+
+    <br>
+
+    <h1>Proměnné v templatech</h1>
+    <h2>reg_confirm (potvrzení registrace do soutěže)</h2>
+    <ul>
+      <li>Code (kód týmu)</li>
+      <li>CompSubject</li>
+      <li>CompName</li>
+      <li>School</li>
+      <li>TeamName</li>
+      <li>Email</li>
+      <li>Player1</li>
+      <li>Player2</li>
+      <li>Player3</li>
+      <li>Player4</li>
+      <li>Player5</li>
+      <li>OnlineRound (formát 1.2.2006 15:04:05)</li>
+      <li>FinalRound (formát 1.2.2006 15:04:05)</li>
+      <li>RegistrationStart (formát 1.2.2006 15:04:05)</li>
+      <li>RegistrationEnd (formát 1.2.2006 15:04:05)</li>
+    </ul>
+
+    <h2>reg_mail (odkaz na potvrzení emailu)</h2>
+    <ul>
+      <li>Code (kód potvrzení registrace týmu)</li>
+      <li>CompSubject</li>
+      <li>CompName</li>
+      <li>School</li>
+      <li>TeamName</li>
+      <li>Email</li>
+      <li>Player1</li>
+      <li>Player2</li>
+      <li>Player3</li>
+      <li>Player4</li>
+      <li>Player5</li>
+      <li>OnlineRound (formát 1.2.2006 15:04:05)</li>
+      <li>FinalRound (formát 1.2.2006 15:04:05)</li>
+      <li>RegistrationStart (formát 1.2.2006 15:04:05)</li>
+      <li>RegistrationEnd (formát 1.2.2006 15:04:05)</li>
+    </ul>
+
+    <script src="pocketbase.umd.js"></script>
+    <script type="text/javascript" defer>
+      function $(a) { return document.querySelector(a); }
+
+      const pb = new PocketBase("https://strela-vlna.gchd.cz");
+      $("#title").innerHTML = pb.authStore.model.email;
+
+      $("#auth-login").addEventListener("click", async (e) => {
+        await pb.admins.authWithPassword(
+          $("#auth-email").value,
+          $("#auth-pass").value,
+        );
+      });
+
+      $("#activec-load").addEventListener("click", async (e) => {
+        const res = await pb.send("/api/admin/loadactivec");
+        const sres = await res.text();
+        $("#activec-inp").value = sres;
+      })
+
+      $("activec-set").addEventListener("click", async (e) => {
+        await pb.send(`/api/admin/setactivec?i=${ $("#activec-inp").value }`);
+      })
+    </script>
+  </body>
+</html>
