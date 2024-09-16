@@ -16,6 +16,24 @@ var (
 
 )
 
+func SliceExclude[T comparable](s []T, v T) (res []T, found bool) {
+  i := 0
+  found = false
+  res = make([]T, len(s))
+  for _, p := range s {
+    if p == v {
+      found = true
+      continue
+    }
+    res[i] = p
+    i++
+  }
+  if found {
+    res = res[:len(s)-1]
+  }
+  return
+}
+
 func DBSell(team string, prob string) (money int, oerr error) {
   oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
     rec, err := txDao.FindRecordById("teams", team)
@@ -25,22 +43,12 @@ func DBSell(team string, prob string) (money int, oerr error) {
     if err != nil { return err }
     
     bought := rec.GetStringSlice("bought")
-    newbought := make([]string, len(bought))
 
-    i := 0
-    found := false
-    for _, p := range bought {
-      if p == prob {
-        found = true
-        continue
-      }
-      newbought[i] = p
-      i++
-    }
+    newbought, found := SliceExclude(bought, prob)
     if !found { return errors.New("sell" + DELIM + "prob not owned") }
-    newbought = newbought[:len(bought)-1]
 
     rec.Set("bought", newbought)
+    rec.Set("sold", append(rec.GetStringSlice("sold"), prob))
     money = rec.GetInt("money")
     rec.Set("money", money + Costs[probrec.GetString("diff")])
     err = txDao.SaveRecord(rec)
@@ -63,27 +71,8 @@ func DBBuy(team string, diff string) (id string, money int, name string, oerr er
       return errors.New("buy" + DELIM + "not enough money")
     }
 
-    comp, err := txDao.FindRecordById("contests", teamrec.GetString("contest"))
-    if err != nil { return err }
-
     found := ""
-    for _, probid := range comp.GetStringSlice("probs") {
-      if slices.Contains(teamrec.GetStringSlice("bought"), probid) {
-        continue
-      }
-
-      if slices.Contains(teamrec.GetStringSlice("pending"), probid) {
-        continue
-      }
-
-      if slices.Contains(teamrec.GetStringSlice("solved"), probid) {
-        continue
-      }
-
-      if slices.Contains(teamrec.GetStringSlice("sold"), probid) {
-        continue
-      }
-
+    for _, probid := range teamrec.GetStringSlice("free") {
       prob, err := txDao.FindRecordById("probs", probid)
       if err != nil { return err }
 
@@ -101,8 +90,11 @@ func DBBuy(team string, diff string) (id string, money int, name string, oerr er
     prob, err := txDao.FindRecordById("probs", found)
     if err != nil { return err }
 
-    teamrec.Set("money", teamrec.GetInt("money") - Costs[diff])
+    newfree, _ := SliceExclude(teamrec.GetStringSlice("free"), found)
+
+    teamrec.Set("free", newfree)
     teamrec.Set("bought", append(teamrec.GetStringSlice("bought"), found))
+    teamrec.Set("money", teamrec.GetInt("money") - Costs[diff])
     err = txDao.SaveRecord(teamrec)
     if err != nil { return err }
 
