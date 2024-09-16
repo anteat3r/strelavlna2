@@ -46,7 +46,12 @@ func main() {
           "-created",
           0, 0,
         )
-        if err != nil { log.Error(err); return }
+        if err != nil {
+          if err.Error() != "sql: no rows in result set" {
+            log.Error(err)
+          }
+          return
+        }
         for _, rec := range recs {
           dt := rec.GetDateTime("updated").Time()
           if !time.Now().After(dt.Add(time.Hour * 6)) { continue }
