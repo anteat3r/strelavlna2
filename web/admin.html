@@ -84,7 +84,11 @@
       })
 
       $("activec-set").addEventListener("click", async (e) => {
-        await pb.send(`/api/admin/setactivec?i=${ $("#activec-inp").value }`);
+        const res = await fetch(
+          `/api/admin/setactivec?i=${ $("#activec-inp").value }`,
+          {headers: {"Authorization": pb.authStore.token},
+        })
+        console.log(res);
       })
     </script>
   </body>
