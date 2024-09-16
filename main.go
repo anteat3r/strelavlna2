@@ -150,6 +150,15 @@ func main() {
       apis.RequireAdminAuth(),
     )
 
+    e.Router.GET(
+      "/api/admin/setactivecem",
+      func(c echo.Context) error {
+        src.ActiveContest = ""
+        return c.String(200, "")
+      },
+      apis.RequireAdminAuth(),
+    )
+
     // e.Router.POST(
     //   "/api/register",
     //   
