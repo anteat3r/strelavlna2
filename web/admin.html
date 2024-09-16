@@ -68,7 +68,9 @@
       function $(a) { return document.querySelector(a); }
 
       const pb = new PocketBase("https://strela-vlna.gchd.cz");
-      $("#title").innerHTML = pb.authStore.model.email;
+      if (pb.authStore.isValid) {
+        $("#title").innerHTML = pb.authStore.model.email;
+      }
 
       $("#auth-login").addEventListener("click", async (e) => {
         let res = await pb.admins.authWithPassword(
