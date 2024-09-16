@@ -18,6 +18,7 @@
     <button id="activec-load">Načíst</button>
     <input type="text" id="activec-inp">
     <button id="activec-set">Nastavit</button>
+    <button id="activec-set-empty">Nastavit na ""</button>
 
     <br>
 
@@ -79,13 +80,22 @@
           "/api/admin/loadactivec",
           {headers: {"Authorization": pb.authStore.token},
         })
-        const sres = await res.text();
+        let sres = await res.text();
+        if (sres == "") { sres = "<nil> <nil>" }
         $("#activec-inp").value = sres;
       });
 
       $("#activec-set").addEventListener("click", async (e) => {
         const res = await fetch(
           `/api/admin/setactivec?i=${ $("#activec-inp").value }`,
+          {headers: {"Authorization": pb.authStore.token},
+        })
+        console.log(res);
+      });
+
+      $("#activec-set-empty").addEventListener("click", async (e) => {
+        const res = await fetch(
+          "/api/admin/setactivecem",
           {headers: {"Authorization": pb.authStore.token},
         })
         console.log(res);
