@@ -145,6 +145,7 @@ func main() {
           return c.String(400, "invalid param")
         }
         src.ActiveContest = c.QueryParam("i")
+        app.Logger().Info(`ActiveContest set to "` + src.ActiveContest + `" by ` + apis.RequestInfo(c).Admin.Email)
         return c.String(200, "")
       },
       apis.RequireAdminAuth(),
@@ -154,6 +155,7 @@ func main() {
       "/api/admin/setactivecem",
       func(c echo.Context) error {
         src.ActiveContest = ""
+        app.Logger().Info(`ActiveContest set to "" by ` + apis.RequestInfo(c).Admin.Email)
         return c.String(200, "")
       },
       apis.RequireAdminAuth(),
