@@ -135,7 +135,7 @@
 
       $("#costs-set").addEventListener("click", async (e) => {
         const res = await fetch(
-          `/api/admin/setcosts?k=${ $("#costs-key-inp").value }&v={ $("#costs-val-inp").value }`,
+          `/api/admin/setcosts?k=${ $("#costs-key-inp").value }&v=${ $("#costs-val-inp").value }`,
           {headers: {"Authorization": pb.authStore.token},
         })
         let sres = await res.text();
