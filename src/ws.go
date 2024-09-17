@@ -33,7 +33,7 @@ var (
   TeamChanMapMutex = sync.Mutex{}
 )
 
-func PlayChackEndpoint(dao *daos.Dao) echo.HandlerFunc {
+func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
   return func(c echo.Context) error {
 
     teamid := c.QueryParam("id")
@@ -45,7 +45,15 @@ func PlayChackEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     if cont != ActiveContest { return c.String(400, "not running") }
 
-    return c.String(200, "running")
+    TeamChanMapMutex.Lock()
+    players, ok := TeamChanMap[teamid]
+    TeamChanMapMutex.Unlock()
+
+    if !ok { return c.String(200, "free") }
+
+    if len(players) >= 5 { return c.String(400, "full") }
+
+    return c.String(200, "free")
   }
 }
     
