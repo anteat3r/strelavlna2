@@ -68,11 +68,12 @@
     <h1>Editor ceníku</h1>
     <p id="costs-p">&approx;&approx;&approx;</p>
     <button id="costs-load">Načíst</button>
-    <br>
+    <!-- <br> -->
     <input type="text" id="costs-key-inp">
-    <br>
+    <!-- <br> -->
     <input type="text" id="costs-val-inp">
     <button id="costs-set">Nastavit</button>
+    <button id="costs-rem">Smazat</button>
 
     <script src="pocketbase.umd.js"></script>
     <script type="text/javascript" defer>
@@ -138,8 +139,16 @@
           {headers: {"Authorization": pb.authStore.token},
         })
         let sres = await res.text();
-        if (sres == "") { sres = "<nil> <nil>" }
-        $("#costs-p").innerHTML = sres;
+        console.log(sres);
+      });
+
+      $("#costs-rem").addEventListener("click", async (e) => {
+        const res = await fetch(
+          `/api/admin/remcosts?k=${ $("#costs-key-inp").value }`,
+          {headers: {"Authorization": pb.authStore.token},
+        })
+        let sres = await res.text();
+        console.log(sres);
       });
     </script>
   </body>

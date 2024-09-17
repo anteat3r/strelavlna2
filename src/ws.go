@@ -20,17 +20,23 @@ type TeamChans []chan string
 func (c TeamChans) Send(msg... string) {
   resmsg := strings.Join(msg, DELIM)
   for _, ch := range c {
+    if ch == nil { continue }
     ch<- resmsg
   }
 }
 
+type TeamChanPair struct {
+  ln int
+  ch TeamChans
+}
+
 var (
-  ActiveContest = "ccwxcxbrroofuzl"
+  ActiveContest = ""
 
   nErr = errors.New
 
-  TeamChanMap = make(map[string]TeamChans)
-  TeamChanMapMutex = sync.Mutex{}
+  TeamChanMap = make(map[string]TeamChanPair)
+  teamChanMapMutex = sync.Mutex{}
 )
 
 func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
@@ -45,13 +51,13 @@ func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     if cont != ActiveContest { return c.String(400, "not running") }
 
-    TeamChanMapMutex.Lock()
+    teamChanMapMutex.Lock()
     players, ok := TeamChanMap[teamid]
-    TeamChanMapMutex.Unlock()
+    teamChanMapMutex.Unlock()
 
     if !ok { return c.String(200, "free") }
 
-    if len(players) >= 5 { return c.String(400, "full") }
+    if players.ln >= 5 { return c.String(400, "full") }
 
     return c.String(200, "free")
   }
@@ -73,27 +79,30 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
 
-    TeamChanMapMutex.Lock()
+    teamChanMapMutex.Lock()
+
     teamchan, ok := TeamChanMap[teamid]
-    defer TeamChanMapMutex.Unlock()
     if !ok {
-      teamchan = TeamChans(make([]chan string, 0, 5))
+      teamchan = TeamChanPair{0, TeamChans(make([]chan string, 5, 5))}
       TeamChanMap[teamid] = teamchan
     }
-    if len(teamchan) >= 5 { return errors.New("too many players") }
+    if teamchan.ln >= 5 { return errors.New("too many players") }
     perchan := make(chan string, 10)
-    teamchan = append(teamchan, perchan)
+    teamchan.ch[teamchan.ln] = perchan
+    teamchan.ln += 1
 
-    go PlayerWsLoop(conn, teamid, perchan, teamchan)
+    teamChanMapMutex.Unlock()
+
+    go PlayerWsLoop(conn, teamid, perchan, teamchan.ch)
 
     return nil
   }
 }
 
 func WriteTeamChan(teamid string, msg string) {
-  TeamChanMapMutex.Lock()
-  res := TeamChanMap[teamid]
-  TeamChanMapMutex.Unlock()
+  teamChanMapMutex.Lock()
+  res := TeamChanMap[teamid].ch
+  teamChanMapMutex.Unlock()
   res.Send(msg)
 }
 

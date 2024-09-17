@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/anteat3r/strelavlna2/src"
@@ -161,10 +162,49 @@ func main() {
       apis.RequireAdminAuth(),
     )
 
-    // e.Router.POST(
-    //   "/api/register",
-    //   
-    // )
+    e.Router.GET(
+      "/api/admin/loadcosts",
+      func(c echo.Context) error {
+        res := ""
+        src.CostsMu.RLock()
+        for k, v := range src.Costs {
+          res += k + " -> " + strconv.Itoa(v)
+        }
+        src.CostsMu.RUnlock()
+        return c.String(200, res)
+      },
+      apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/setcosts",
+      func(c echo.Context) error {
+        k := c.QueryParam("k")
+        if k == "" { return c.String(400, "invalid param") }
+        v := c.QueryParam("v")
+        if v == "" { return c.String(400, "invalid param") }
+        vint, err := strconv.Atoi(v)
+        if err != nil { return c.String(400, err.Error()) }
+        src.CostsMu.Lock()
+        src.Costs[k] = vint
+        src.CostsMu.Unlock()  
+        app.Logger().Info(`Costs "` + k + `" set to "` + v + `" by ` + apis.RequestInfo(c).Admin.Email)
+        return c.String(200, "ok")
+      },
+    )
+
+    e.Router.GET(
+      "/api/admin/remcosts",
+      func(c echo.Context) error {
+        k := c.QueryParam("k")
+        if k == "" { return c.String(400, "invalid param") }
+        src.CostsMu.Lock()
+        delete(src.Costs, k)
+        src.CostsMu.Unlock()
+        app.Logger().Info(`Costs "` + k + `" removed by ` + apis.RequestInfo(c).Admin.Email)
+        return c.String(200, "ok")
+      },
+    )
 
     return nil
   })

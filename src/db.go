@@ -2,8 +2,10 @@ package src
 
 import (
 	"errors"
+	"sync"
 
 	"github.com/pocketbase/pocketbase/daos"
+  log "github.com/anteat3r/golog"
 )
 
 var (
@@ -12,8 +14,15 @@ var (
   Costs = map[string]int{
     "A": 10,
   }
-
+  CostsMu = sync.RWMutex{}
 )
+
+func GetCost(diff string) (int, bool) {
+  CostsMu.RLock()
+  res, ok := Costs[diff]
+  CostsMu.RUnlock()
+  return res, ok
+}
 
 func SliceExclude[T comparable](s []T, v T) (res []T, found bool) {
   i := 0
@@ -49,7 +58,9 @@ func DBSell(team string, prob string) (money int, oerr error) {
     rec.Set("bought", newbought)
     rec.Set("sold", append(rec.GetStringSlice("sold"), prob))
     money = rec.GetInt("money")
-    rec.Set("money", money + Costs[probrec.GetString("diff")])
+    cost, ok := GetCost(probrec.GetString("diff"))
+    if !ok { log.Error("invalid diff", prob, probrec.PublicExport()) }
+    rec.Set("money", money + cost)
     err = txDao.SaveRecord(rec)
 
     return nil
@@ -59,14 +70,15 @@ func DBSell(team string, prob string) (money int, oerr error) {
 
 func DBBuy(team string, diff string) (id string, money int, name string, oerr error) {
   oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
-    if _, ok := Costs[diff]; !ok {
+    diffcost, ok := GetCost(diff)
+    if !ok {
       return errors.New("buy" + DELIM + "invalid diff")
     }
 
     teamrec, err := txDao.FindRecordById("teams", team)
     if err != nil { return err }
 
-    if Costs[diff] > teamrec.GetInt("money") {
+    if diffcost > teamrec.GetInt("money") {
       return errors.New("buy" + DELIM + "not enough money")
     }
 
@@ -93,7 +105,7 @@ func DBBuy(team string, diff string) (id string, money int, name string, oerr er
 
     teamrec.Set("free", newfree)
     teamrec.Set("bought", append(teamrec.GetStringSlice("bought"), found))
-    teamrec.Set("money", teamrec.GetInt("money") - Costs[diff])
+    teamrec.Set("money", teamrec.GetInt("money") - diffcost)
     err = txDao.SaveRecord(teamrec)
     if err != nil { return err }
 
