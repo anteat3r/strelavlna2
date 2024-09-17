@@ -16,14 +16,6 @@
 
     <br>
 
-    <h1>Aktivní soutěž</h1>
-    <button id="activec-load">Načíst</button>
-    <input type="text" id="activec-inp">
-    <button id="activec-set">Nastavit</button>
-    <button id="activec-set-empty">Nastavit na ""</button>
-
-    <br>
-
     <h1>Proměnné v templatech</h1>
     <h2>reg_confirm (potvrzení registrace do soutěže)</h2>
     <ul>
@@ -63,6 +55,25 @@
       <li>RegistrationEnd (formát 1.2.2006 15:04:05)</li>
     </ul>
 
+    <br>
+
+    <h1>Aktivní soutěž</h1>
+    <button id="activec-load">Načíst</button>
+    <input type="text" id="activec-inp">
+    <button id="activec-set">Nastavit</button>
+    <button id="activec-set-empty">Nastavit na ""</button>
+
+    <br>
+
+    <h1>Editor ceníku</h1>
+    <p id="costs-p">&approx;&approx;&approx;</p>
+    <button id="costs-load">Načíst</button>
+    <br>
+    <input type="text" id="costs-key-inp">
+    <br>
+    <input type="text" id="costs-val-inp">
+    <button id="costs-set">Nastavit</button>
+
     <script src="pocketbase.umd.js"></script>
     <script type="text/javascript" defer>
       function $(a) { return document.querySelector(a); }
@@ -91,8 +102,13 @@
       });
 
       $("#activec-set").addEventListener("click", async (e) => {
+        let payload = $("#activec-inp").value;
+        if (payload == "<nil> <nil>") {
+          alert("invalid contest");
+          return;
+        }
         const res = await fetch(
-          `/api/admin/setactivec?i=${ $("#activec-inp").value }`,
+          `/api/admin/setactivec?i=${ payload }`,
           {headers: {"Authorization": pb.authStore.token},
         })
         console.log(res);
@@ -104,6 +120,26 @@
           {headers: {"Authorization": pb.authStore.token},
         })
         console.log(res);
+      });
+
+      $("#costs-load").addEventListener("click", async (e) => {
+        const res = await fetch(
+          "/api/admin/loadcosts",
+          {headers: {"Authorization": pb.authStore.token},
+        })
+        let sres = await res.text();
+        if (sres == "") { sres = "<nil> <nil>" }
+        $("#costs-p").innerHTML = sres;
+      });
+
+      $("#costs-set").addEventListener("click", async (e) => {
+        const res = await fetch(
+          `/api/admin/setcosts?k=${ $("#costs-key-inp").value }&v={ $("#costs-val-inp").value }`,
+          {headers: {"Authorization": pb.authStore.token},
+        })
+        let sres = await res.text();
+        if (sres == "") { sres = "<nil> <nil>" }
+        $("#costs-p").innerHTML = sres;
       });
     </script>
   </body>
