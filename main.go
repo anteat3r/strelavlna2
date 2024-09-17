@@ -168,7 +168,7 @@ func main() {
         res := ""
         src.CostsMu.RLock()
         for k, v := range src.Costs {
-          res += k + " -> " + strconv.Itoa(v)
+          res += k + " -> " + strconv.Itoa(v) + "\n"
         }
         src.CostsMu.RUnlock()
         return c.String(200, res)
