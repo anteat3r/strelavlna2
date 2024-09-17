@@ -17,17 +17,29 @@ var upgrader = websocket.Upgrader{
 }
 
 type TeamChans []chan string
-func (c TeamChans) Send(msg... string) {
+
+type TeamChanMu struct {
+  mu sync.RWMutex
+  ch TeamChans
+}
+func (c *TeamChanMu) Send(msg... string) {
   resmsg := strings.Join(msg, DELIM)
-  for _, ch := range c {
+  c.mu.RLock()
+  for _, ch := range c.ch {
     if ch == nil { continue }
     ch<- resmsg
   }
+  c.mu.RUnlock()
 }
-
-type TeamChanPair struct {
-  ln int
-  ch TeamChans
+func (c *TeamChanMu) Count() int {
+  i := 0
+  c.mu.RLock()
+  for _, ch := range c.ch {
+    if ch == nil { continue }
+    i++
+  }
+  c.mu.RUnlock()
+  return i
 }
 
 var (
@@ -35,9 +47,22 @@ var (
 
   nErr = errors.New
 
-  TeamChanMap = make(map[string]TeamChanPair)
+  TeamChanMap = make(map[string]*TeamChanMu)
   teamChanMapMutex = sync.Mutex{}
+
+  AdminsChans = make(TeamChans, 10)
+  adminsMutex = sync.RWMutex{}
 )
+
+func AdminSend(msg... string) {
+  resmsg := strings.Join(msg, DELIM)
+  adminsMutex.RLock()
+  for _, ch := range AdminsChans {
+    if ch == nil { continue }
+    ch<- resmsg
+  }
+  adminsMutex.RUnlock()
+}
 
 func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
   return func(c echo.Context) error {
@@ -57,7 +82,7 @@ func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     if !ok { return c.String(200, "free") }
 
-    if players.ln >= 5 { return c.String(400, "full") }
+    if players.Count() >= 5 { return c.String(400, "full") }
 
     return c.String(200, "free")
   }
@@ -83,17 +108,29 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     teamchan, ok := TeamChanMap[teamid]
     if !ok {
-      teamchan = TeamChanPair{0, TeamChans(make([]chan string, 5, 5))}
+      teamchan = &TeamChanMu{sync.RWMutex{}, make([]chan string, 5, 5)}
       TeamChanMap[teamid] = teamchan
     }
-    if teamchan.ln >= 5 { return errors.New("too many players") }
-    perchan := make(chan string, 10)
-    teamchan.ch[teamchan.ln] = perchan
-    teamchan.ln += 1
-
     teamChanMapMutex.Unlock()
 
-    go PlayerWsLoop(conn, teamid, perchan, teamchan.ch)
+    i := -1
+
+    teamchan.mu.RLock()
+    for j, c := range teamchan.ch {
+      if c == nil { continue }
+      i = j
+      break
+    }
+    teamchan.mu.RUnlock()
+
+    if i == -1 { return errors.New("too many players") }
+    perchan := make(chan string, 10)
+
+    teamchan.mu.Lock()
+    teamchan.ch[i] = perchan
+    teamchan.mu.Unlock()
+
+    go PlayerWsLoop(conn, teamid, perchan, teamchan, i)
 
     return nil
   }
@@ -101,7 +138,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
 func WriteTeamChan(teamid string, msg string) {
   teamChanMapMutex.Lock()
-  res := TeamChanMap[teamid].ch
+  res := TeamChanMap[teamid]
   teamChanMapMutex.Unlock()
   res.Send(msg)
 }
@@ -110,15 +147,15 @@ func PlayerWsLoop(
   conn *websocket.Conn,
   team string,
   perchan chan string,
-  tchan TeamChans,
+  tchan *TeamChanMu,
+  idx int,
 ) {
   wsrchan := make(chan string)
   go func(){
     for {
       p, rm, err := conn.ReadMessage()
       if err != nil {
-        log.Error(err)
-        conn.Close()
+        close(wsrchan)
         break
       }
       if p != websocket.TextMessage {
@@ -134,20 +171,31 @@ func PlayerWsLoop(
     case m, ok := <-perchan:
       if !ok {
         log.Info("chan closed")
+        conn.Close()
+        tchan.mu.Lock()
+        tchan.ch[idx] = nil
+        tchan.mu.Unlock()
         break loop
       }
       err := conn.WriteMessage(websocket.TextMessage, []byte(m))
       if err != nil {
         log.Error(err)
         conn.Close()
+        tchan.mu.Lock()
+        tchan.ch[idx] = nil
+        tchan.mu.Unlock()
         break loop
       }
     case m, ok := <-wsrchan:
       if !ok {
         log.Info("r chan closed")
+        conn.Close()
+        tchan.mu.Lock()
+        tchan.ch[idx] = nil
+        tchan.mu.Unlock()
         break loop
       }
-      err := PlayerWsHandleMsg(team, m, perchan, tchan)
+      err := PlayerWsHandleMsg(team, m, perchan, tchan, idx)
       if err != nil {
         perchan<- "err" + DELIM + err.Error()
       }
@@ -155,3 +203,95 @@ func PlayerWsLoop(
   }
 }
 
+func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
+  return func(c echo.Context) error {
+
+    adminid := c.PathParam("admin")
+    if adminid == "" { return nErr("invalid team path param") }
+
+    _, err := dao.FindAdminById(adminid)
+    if err != nil { return err }
+
+    conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+    if err != nil { return err }
+
+    adminsMutex.RLock()
+    i := -1
+    for j, c := range AdminsChans {
+      if c == nil { continue }
+      i = j
+      break
+    }
+    adminsMutex.RUnlock()
+    perchan := make(chan string, 10)
+    adminsMutex.Lock()
+    if i == -1 { 
+      AdminsChans = append(AdminsChans, perchan)
+    } else {
+      AdminsChans[i] = perchan
+    }
+    adminsMutex.Lock()
+
+    go AdminWsLoop(conn, perchan, i)
+
+    return nil
+  }
+}
+
+func AdminWsLoop(
+  conn *websocket.Conn,
+  perchan chan string,
+  idx int,
+) {
+  wsrchan := make(chan string)
+  go func(){
+    for {
+      p, rm, err := conn.ReadMessage()
+      if err != nil {
+        close(wsrchan)
+        break
+      }
+      if p != websocket.TextMessage {
+        log.Error("not text msg: ", p, rm)
+        continue
+      }
+      m := string(rm)
+      wsrchan<- m
+    }
+  }()
+  loop: for {
+    select {
+    case m, ok := <-perchan:
+      if !ok {
+        log.Info("chan closed")
+        conn.Close()
+        adminsMutex.Lock()
+        AdminsChans[idx] = nil
+        adminsMutex.Unlock()
+        break loop
+      }
+      err := conn.WriteMessage(websocket.TextMessage, []byte(m))
+      if err != nil {
+        log.Error(err)
+        conn.Close()
+        adminsMutex.Lock()
+        AdminsChans[idx] = nil
+        adminsMutex.Unlock()
+        break loop
+      }
+    case m, ok := <-wsrchan:
+      if !ok {
+        log.Info("r chan closed")
+        conn.Close()
+        adminsMutex.Lock()
+        AdminsChans[idx] = nil
+        adminsMutex.Unlock()
+        break loop
+      }
+      err := AdminWsHandleMsg(perchan, m, idx)
+      if err != nil {
+        perchan<- "err" + DELIM + err.Error()
+      }
+    }
+  }
+}

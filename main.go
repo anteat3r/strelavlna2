@@ -132,6 +132,11 @@ func main() {
     )
 
     e.Router.GET(
+      "/api/admin/play/:admin",
+      src.PlayWsEndpoint(app.Dao()),
+    )
+
+    e.Router.GET(
       "/api/admin/loadactivec",
       func(c echo.Context) error {
         return c.String(200, src.ActiveContest)
