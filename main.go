@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/anteat3r/strelavlna2/src"
@@ -46,7 +47,12 @@ func main() {
           "-created",
           0, 0,
         )
-        if err != nil { log.Error(err); return }
+        if err != nil {
+          if err.Error() != "sql: no rows in result set" {
+            log.Error(err)
+          }
+          return
+        }
         for _, rec := range recs {
           dt := rec.GetDateTime("updated").Time()
           if !time.Now().After(dt.Add(time.Hour * 6)) { continue }
@@ -117,7 +123,7 @@ func main() {
 
     e.Router.GET(
       "/api/validate_play",
-      src.PlayChackEndpoint(app.Dao()),
+      src.PlayCheckEndpoint(app.Dao()),
     )
 
     e.Router.GET(
@@ -125,10 +131,85 @@ func main() {
       src.PlayWsEndpoint(app.Dao()),
     )
 
-    // e.Router.POST(
-    //   "/api/register",
-    //   
-    // )
+    e.Router.GET(
+      "/api/admin/play/:admin",
+      src.PlayWsEndpoint(app.Dao()),
+    )
+
+    e.Router.GET(
+      "/api/admin/loadactivec",
+      func(c echo.Context) error {
+        return c.String(200, src.ActiveContest)
+      },
+      apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/setactivec",
+      func(c echo.Context) error {
+        if c.QueryParam("i") == "" {
+          return c.String(400, "invalid param")
+        }
+        src.ActiveContest = c.QueryParam("i")
+        app.Logger().Info(`ActiveContest set to "` + src.ActiveContest + `" by ` + apis.RequestInfo(c).Admin.Email)
+        return c.String(200, "")
+      },
+      apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/setactivecem",
+      func(c echo.Context) error {
+        src.ActiveContest = ""
+        app.Logger().Info(`ActiveContest set to "" by ` + apis.RequestInfo(c).Admin.Email)
+        return c.String(200, "")
+      },
+      apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/loadcosts",
+      func(c echo.Context) error {
+        res := ""
+        src.CostsMu.RLock()
+        for k, v := range src.Costs {
+          res += k + " -> " + strconv.Itoa(v) + "<br>"
+        }
+        src.CostsMu.RUnlock()
+        return c.String(200, res)
+      },
+      apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/setcosts",
+      func(c echo.Context) error {
+        k := c.QueryParam("k")
+        if k == "" { return c.String(400, "invalid param") }
+        v := c.QueryParam("v")
+        if v == "" { return c.String(400, "invalid param") }
+        vint, err := strconv.Atoi(v)
+        if err != nil { return c.String(400, err.Error()) }
+        src.CostsMu.Lock()
+        src.Costs[k] = vint
+        src.CostsMu.Unlock()  
+        app.Logger().Info(`Costs "` + k + `" set to "` + v + `" by ` + apis.RequestInfo(c).Admin.Email)
+        return c.String(200, "ok")
+      },
+    )
+
+    e.Router.GET(
+      "/api/admin/remcosts",
+      func(c echo.Context) error {
+        k := c.QueryParam("k")
+        if k == "" { return c.String(400, "invalid param") }
+        src.CostsMu.Lock()
+        delete(src.Costs, k)
+        src.CostsMu.Unlock()
+        app.Logger().Info(`Costs "` + k + `" removed by ` + apis.RequestInfo(c).Admin.Email)
+        return c.String(200, "ok")
+      },
+    )
 
     return nil
   })

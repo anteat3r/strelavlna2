@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin</title>
+  </head>
+  <body>
+
+    <h1 id="title"></h1>
+    <input type="email" id="auth-email">
+    <input type="password" id="auth-pass">
+    <button id="auth-login">Login</button>
+
+    <h1 style="font-size: 50; color: maroon;">Tlačítka na této stránce dělají velmi důležité a závažné věci. Pokud nebudete opatrní a něco spustíte, okamžitě to nahlašte (pokud ne, přijde se na to z logu a dopadnete ještě hůř) a budou z toho vyvozeny následky</h1>
+
+    <br>
+
+    <h1>Proměnné v templatech</h1>
+    <h2>reg_confirm (potvrzení registrace do soutěže)</h2>
+    <ul>
+      <li>Code (kód týmu)</li>
+      <li>CompSubject</li>
+      <li>CompName</li>
+      <li>School</li>
+      <li>TeamName</li>
+      <li>Email</li>
+      <li>Player1</li>
+      <li>Player2</li>
+      <li>Player3</li>
+      <li>Player4</li>
+      <li>Player5</li>
+      <li>OnlineRound (formát 1.2.2006 15:04:05)</li>
+      <li>FinalRound (formát 1.2.2006 15:04:05)</li>
+      <li>RegistrationStart (formát 1.2.2006 15:04:05)</li>
+      <li>RegistrationEnd (formát 1.2.2006 15:04:05)</li>
+    </ul>
+
+    <h2>reg_mail (odkaz na potvrzení emailu)</h2>
+    <ul>
+      <li>Code (kód potvrzení registrace týmu)</li>
+      <li>CompSubject</li>
+      <li>CompName</li>
+      <li>School</li>
+      <li>TeamName</li>
+      <li>Email</li>
+      <li>Player1</li>
+      <li>Player2</li>
+      <li>Player3</li>
+      <li>Player4</li>
+      <li>Player5</li>
+      <li>OnlineRound (formát 1.2.2006 15:04:05)</li>
+      <li>FinalRound (formát 1.2.2006 15:04:05)</li>
+      <li>RegistrationStart (formát 1.2.2006 15:04:05)</li>
+      <li>RegistrationEnd (formát 1.2.2006 15:04:05)</li>
+    </ul>
+
+    <br>
+
+    <h1>Aktivní soutěž</h1>
+    <button id="activec-load">Načíst</button>
+    <input type="text" id="activec-inp">
+    <button id="activec-set">Nastavit</button>
+    <button id="activec-set-empty">Nastavit na ""</button>
+
+    <br>
+
+    <h1>Editor ceníku</h1>
+    <pre id="costs-p">&approx;&approx;&approx;</pre>
+    <button id="costs-load">Načíst</button>
+    <!-- <br> -->
+    <input type="text" id="costs-key-inp">
+    <!-- <br> -->
+    <input type="text" id="costs-val-inp">
+    <button id="costs-set">Nastavit</button>
+    <button id="costs-rem">Smazat</button>
+
+    <script src="pocketbase.umd.js"></script>
+    <script type="text/javascript" defer>
+      function $(a) { return document.querySelector(a); }
+
+      const pb = new PocketBase("https://strela-vlna.gchd.cz");
+      if (pb.authStore.isValid) {
+        $("#title").innerHTML = pb.authStore.model.email;
+      }
+
+      $("#auth-login").addEventListener("click", async (e) => {
+        let res = await pb.admins.authWithPassword(
+          $("#auth-email").value,
+          $("#auth-pass").value,
+        );
+        console.log(res);
+      });
+
+      $("#activec-load").addEventListener("click", async (e) => {
+        const res = await fetch(
+          "/api/admin/loadactivec",
+          {headers: {"Authorization": pb.authStore.token},
+        })
+        let sres = await res.text();
+        if (sres == "") { sres = "<nil> <nil>" }
+        $("#activec-inp").value = sres;
+      });
+
+      $("#activec-set").addEventListener("click", async (e) => {
+        let payload = $("#activec-inp").value;
+        if (payload == "<nil> <nil>") {
+          alert("invalid contest");
+          return;
+        }
+        const res = await fetch(
+          `/api/admin/setactivec?i=${ payload }`,
+          {headers: {"Authorization": pb.authStore.token},
+        })
+        console.log(res);
+      });
+
+      $("#activec-set-empty").addEventListener("click", async (e) => {
+        const res = await fetch(
+          "/api/admin/setactivecem",
+          {headers: {"Authorization": pb.authStore.token},
+        })
+        console.log(res);
+      });
+
+      $("#costs-load").addEventListener("click", async (e) => {
+        const res = await fetch(
+          "/api/admin/loadcosts",
+          {headers: {"Authorization": pb.authStore.token},
+        })
+        let sres = await res.text();
+        if (sres == "") { sres = "<nil> <nil>" }
+        $("#costs-p").innerHTML = sres;
+      });
+
+      $("#costs-set").addEventListener("click", async (e) => {
+        const res = await fetch(
+          `/api/admin/setcosts?k=${ $("#costs-key-inp").value }&v=${ $("#costs-val-inp").value }`,
+          {headers: {"Authorization": pb.authStore.token},
+        })
+        let sres = await res.text();
+        console.log(sres);
+      });
+
+      $("#costs-rem").addEventListener("click", async (e) => {
+        const res = await fetch(
+          `/api/admin/remcosts?k=${ $("#costs-key-inp").value }`,
+          {headers: {"Authorization": pb.authStore.token},
+        })
+        let sres = await res.text();
+        console.log(sres);
+      });
+    </script>
+  </body>
+</html>

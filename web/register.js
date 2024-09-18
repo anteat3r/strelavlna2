@@ -394,7 +394,7 @@ register_button.addEventListener("click", function(){
         return;
     }
 
-    const register_card = document.getElementById("register-card");
+    const register_card = document.getElementById("register-form");
     var formData = new FormData(register_card);
     formData.append('id', new URLSearchParams(window.location.search).get('id'));
     for(let i = 1; i <= 5; i++){
