@@ -56,6 +56,10 @@
     </ul>
 
     <br>
+    <video style="display: none;" id="cat">
+      <source src="cat.mp4" type="video/mp4">
+    </video>
+
 
     <h1>Aktivní soutěž</h1>
     <button id="activec-load">Načíst</button>
@@ -78,6 +82,17 @@
     <script src="pocketbase.umd.js"></script>
     <script type="text/javascript" defer>
       function $(a) { return document.querySelector(a); }
+      function clown() {  {
+        let vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) - 50;
+        let x = $("#cat");
+        x.width = vw;
+        x.height = 1080/1920*vw;
+        x.style.display = "block";
+        x.play();
+        setInterval(function(e){
+          x.style.display = "none";
+        }, 3270);
+      } }
 
       const pb = new PocketBase("https://strela-vlna.gchd.cz");
       if (pb.authStore.isValid) {
@@ -92,7 +107,7 @@
         console.log(res);
       });
 
-      $("#activec-load").addEventListener("click", async (e) => {
+      $("#activec-load").addEventListener("click", async (e) => {clown();
         const res = await fetch(
           "/api/admin/loadactivec",
           {headers: {"Authorization": pb.authStore.token},
@@ -102,7 +117,7 @@
         $("#activec-inp").value = sres;
       });
 
-      $("#activec-set").addEventListener("click", async (e) => {
+      $("#activec-set").addEventListener("click", async (e) => {clown();
         let payload = $("#activec-inp").value;
         if (payload == "<nil> <nil>") {
           alert("invalid contest");
@@ -115,7 +130,7 @@
         console.log(res);
       });
 
-      $("#activec-set-empty").addEventListener("click", async (e) => {
+      $("#activec-set-empty").addEventListener("click", async (e) => {clown();
         const res = await fetch(
           "/api/admin/setactivecem",
           {headers: {"Authorization": pb.authStore.token},
@@ -123,7 +138,7 @@
         console.log(res);
       });
 
-      $("#costs-load").addEventListener("click", async (e) => {
+      $("#costs-load").addEventListener("click", async (e) => {clown();
         const res = await fetch(
           "/api/admin/loadcosts",
           {headers: {"Authorization": pb.authStore.token},
@@ -133,7 +148,7 @@
         $("#costs-p").innerHTML = sres;
       });
 
-      $("#costs-set").addEventListener("click", async (e) => {
+      $("#costs-set").addEventListener("click", async (e) => {clown();
         const res = await fetch(
           `/api/admin/setcosts?k=${ $("#costs-key-inp").value }&v=${ $("#costs-val-inp").value }`,
           {headers: {"Authorization": pb.authStore.token},
@@ -142,7 +157,7 @@
         console.log(sres);
       });
 
-      $("#costs-rem").addEventListener("click", async (e) => {
+      $("#costs-rem").addEventListener("click", async (e) => {clown();
         const res = await fetch(
           `/api/admin/remcosts?k=${ $("#costs-key-inp").value }`,
           {headers: {"Authorization": pb.authStore.token},
