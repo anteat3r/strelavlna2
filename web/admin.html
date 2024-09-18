@@ -83,6 +83,7 @@
     <script type="text/javascript" defer>
       function $(a) { return document.querySelector(a); }
       function clown() {  {
+        if (pb.authStore.isValid) { return; }
         let vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) - 50;
         let x = $("#cat");
         x.width = vw;
