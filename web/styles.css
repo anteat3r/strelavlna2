@@ -1441,3 +1441,561 @@ a:hover{
 .font-25{
     font-size: 25px;
 }
+
+.play-header{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    /* border-bottom: var(--color-secondary-light) dashed 2px; */
+
+}
+.play-header::after{
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    border-bottom: 2px dashed var(--color-secondary-light);
+    mask-image: linear-gradient(to right, transparent 0%, transparent 20%, black 50%, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 20%, black 50%, black 80%, transparent 100%);
+    
+}
+
+.play-header #title{
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 35px;
+    font-family: 'Lexend';
+    color: var(--color-secondary-dark);
+    font-weight: 400;
+}
+#clock{
+    position: absolute;
+    right: 15px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: -5px;
+    font-size: 30px;
+    font-family: 'Lexend';
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    letter-spacing: -1px;
+}
+
+
+.separator{
+    margin: 0px;
+    margin-top: 3px;
+}
+
+.digit-slider{
+    height: 35px;
+    overflow: hidden;
+}
+.digit-wrapper{
+    font-size: 30px;
+    font-family: 'Lexend';
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+}
+
+.digit-0-begining{
+    transform: translateY(0px);
+    transition: transform 0.0s;
+}
+.digit-9{
+    transform: translateY(-38px);
+    transition: transform 0.3s;
+}
+.digit-8{
+    transform: translateY(-76px);
+    transition: transform 0.3s;
+}
+.digit-7{
+    transform: translateY(-114px);
+    transition: transform 0.3s;
+}
+.digit-6{
+    transform: translateY(-152px);
+    transition: transform 0.3s;
+}
+.digit-5{
+    transform: translateY(-190px);
+    transition: transform 0.3s;
+}
+.digit-4{
+    transform: translateY(-228px);
+    transition: transform 0.3s;
+}
+.digit-3{
+    transform: translateY(-266px);
+    transition: transform 0.3s;
+}
+.digit-2{
+    transform: translateY(-304px);
+    transition: transform 0.3s;
+}
+.digit-1{
+    transform: translateY(-342px);
+    transition: transform 0.3s;
+}
+.digit-0-end{
+    transform: translateY(-380px);
+    transition: transform 0.3s;
+}
+.digit-wrapper p{
+    margin: 0px;
+}
+
+#teams-board{
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    width: 300px;
+    min-width: 300px;
+}
+#team-stats{
+    display: flex;
+    flex-direction: column;
+    border-top: 2px var(--color-secondary-light) dashed;
+    border-right: 2px var(--color-secondary-light) dashed;
+    border-top-right-radius: 10px;
+    align-items: center;
+}
+#team-name-wrapper{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px var(--color-secondary-light) dashed;
+}
+#team-name{
+    color: var(--color-secondary-dark);
+    font-family: 'Lexend';
+    font-weight: 500;
+    font-size: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    margin-left: 15px;
+}
+#rank{
+    font-family: 'Lexend';
+    font-size: 18px;
+    font-weight: 500;
+    border: 2px var(--color-secondary-light) solid;
+    border-radius: 5px;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    min-width: 25px;
+}
+
+#team-balance{
+    font-family: 'Lexend';
+    font-size: 25px;
+    font-weight: 800;
+    color: var(--color-secondary-dark);
+    margin: 10px;
+}
+
+#teams-problems{
+    border-top: 2px var(--color-secondary-light) solid;
+    border-right: 2px var(--color-secondary-light) solid;
+    background-color: var(--color-secondary-white);
+    overflow-y: auto;
+}
+
+.problem{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin: 15px;
+    padding: 5px;
+    border: 2px var(--color-secondary-light) solid;
+    border-radius: 5px;
+    background-color: white;
+    transition: background-color 0.3s ease-out;
+
+}
+.problem:hover{
+    background-color: var(--color-secondary-light);
+    border-color: var(--color-secondary);
+    transition: background-color border-color 0s;
+}
+.problem-focused{
+    background-color: var(--color-secondary);
+}
+.problem-focused:hover{
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary-light);
+}
+.problem-title{
+    margin: 0px;
+    font-family: 'Lexend';
+    font-size: 25px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    margin-right: 10px;
+    transition: color 0.3s ease-out;
+
+}
+.problem:hover .problem-title{
+    color: white;
+    transition: color 0s;
+}
+.problem-focused .problem-title{
+    color: white;
+}
+.problem-rank{
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+    transition: color 0.3s ease-out;
+}
+.problem:hover .problem-rank{
+    color: white;
+    transition: color 0s;
+}
+.problem-focused .problem-rank{
+    color: white;
+}
+
+.occupied-icon{
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    background-color: var(--color-secondary-light);
+    margin-right: 5px;
+    display: none;
+    transition: background-color 0.3s ease-out;
+}
+.problem:hover .occupied-icon{
+    background-color: white;
+    transition: background-color 0s;
+}
+.problem-focused .occupied-icon{
+    background-color: white;
+}
+.problem-worked-on .occupied-icon{
+    display: block;
+}
+
+#shop-actions-wrapper{
+    border-top: 2px var(--color-secondary-light) dashed;
+    border-right: 2px var(--color-secondary-light) solid;
+    background-color: var(--color-secondary-white);
+    height: 200px;
+}
+
+#buy-button-wrapper{
+    padding: 15px;
+}
+
+#buy-button{
+    background-color: var(--color-secondary);
+    border: 2px var(--color-secondary-light) solid;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 500;
+    color: white;
+    gap: 10px;
+    transition: background-color 0.3s ease-out;
+}
+
+#buy-button:hover{
+    background-color: var(--color-secondary-light);
+    transition: background-color 0s;
+}
+
+
+.buy-button-open i{
+    transform: rotate(0deg);
+    transition: transform 0.3s ease-in-out;
+}
+.buy-button-close i{
+    transform: rotate(180deg);
+    transition: transform 0.3s ease-in-out;
+}
+
+#buy-dropdown-wrapper{
+    overflow: hidden;
+    border: 2px var(--color-secondary-light) solid;
+    border-top: none;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding-top: 5px;
+}
+
+.buy-button-close #buy-dropdown-wrapper{
+    transform: translateY(-7px);
+    max-height: 0px;
+    transition: max-height 0.3s ease-out, transform 0.3s ease-out;
+}
+.buy-button-open #buy-dropdown-wrapper{
+    max-height: 120px;
+    transform: translateY(-5px);
+    transition: max-height 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.subbuy-button{
+    background-color: white;
+    border-radius: 0px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    transition: background-color 0.3s ease-out;
+}
+.subbuy-button:hover{
+    background-color: var(--color-secondary-glow);
+    transition: background-color 0s;
+}
+
+.buy-dropdown-difficulty{
+    margin: 0px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+}
+.buy-description{
+    margin: 0px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-secondary);
+}
+
+.align-center{
+    align-items: center;
+}
+.space-between{
+    justify-content: space-between;
+}
+
+#sell-action-wrapper{
+    padding: 15px;
+}
+
+#sell-button{
+    background-color: var(--color-secondary);
+    border: 2px var(--color-secondary-light) solid;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 500;
+    color: white;
+    transition: background-color 0.3s ease-out;
+}
+#sell-button:hover{
+    background-color: var(--color-secondary-light);
+    transition: background-color 0s;
+}
+
+#sell-information{
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    width: 94px;
+}
+
+#problem-wrapper{
+    padding: 30px;
+    padding-inline: 70px;
+    position: relative;
+}
+
+#problem-title{
+    font-family: 'Lexend';
+    font-size: 35px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+}
+
+#problem-content{
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+}
+
+#answer-input-wrapper{
+    position: absolute;
+    bottom: 50px;
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#answer-input{
+    width: 80%;
+    height: 40px;
+    outline: none;
+    border: 2px var(--color-secondary-light) solid;
+    border-radius: 30px;
+    background-color: var(--color-secondary-white);
+    padding-left: 15px;
+    font-size: 15px;
+    font-family: 'Lexend';
+    color: var(--color-secondary-dark);
+    font-weight: 800;
+    padding-right: 42px;
+}
+#answer-input::placeholder{
+    font-family: 'Lexend';
+    font-size: 15px;
+    color: #bad5dd;
+}
+
+#submit-answer-button{
+    height: 34px;
+    width: 34px;
+    border-radius: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-40px);
+    background-color: var(--color-secondary);
+    font-size: 17px;
+    color: white;
+    transition: background-color 0.3s ease-out;
+}
+
+#submit-answer-button:hover{
+    background-color: var(--color-secondary-light);
+    transition: background-color 0s;
+}
+
+#help-center-wrapper{
+    width: 300px;
+    min-width: 300px;
+    padding-top: 50px;
+}
+
+#help-center-title-wrapper{
+    border-top: 2px var(--color-secondary-light) dashed;
+    border-left: 2px var(--color-secondary-light) dashed;
+    border-top-left-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#help-center-title{
+    font-family: 'Lexend';
+    font-size: 25px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    margin: 10px;
+}
+
+#chat-wrapper{
+    border-top: 2px var(--color-secondary-light) solid;
+    border-left: 2px var(--color-secondary-light) solid;
+    background-color: var(--color-secondary-white);
+}
+
+#conversation-wrapper{
+    width: 100%;
+    height: calc(100%-100px);
+    max-height: calc(100%-100px);
+    overflow-y: auto;
+}
+
+.conversation-row{
+    margin: 15px;
+    min-height: 30px;
+    display: flex;
+}
+
+.conversation-message{
+    display: inline-block;
+    margin: 0px;
+    padding: 8px;
+    background-color: white;
+    border: 2px var(--color-secondary-glow) solid;
+    border-radius: 5px;
+    font-family: 'Lexend';
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+}
+.message-my p{
+    float: right;
+    margin-left: 30px;
+}
+.message-their p{
+    float: left;
+    margin-right: 30px;
+}
+
+#chat-controlls-wrapper{
+    position: absolute;
+    height: 100px;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    bottom: 30px;
+}
+
+#chat-input{
+    width: 200px;
+    outline: none;
+    background-color: white;
+    border: 2px var(--color-secondary-light) solid;
+    border-radius: 5px;
+    resize: none;
+    max-height: 92px;
+    max-width: 200px;
+    font-family: 'Lexend';
+    font-size: 16px;
+    padding-inline: 8px;
+    color: var(--color-secondary-dark);
+    font-weight: 700;
+    text-wrap: wrap;
+    overflow: hidden;
+}
+
+#chat-input::placeholder{
+    color: #d6d6d6;
+    font-weight: 500;
+}
+
+#send-message-button{
+    background-color: var(--color-secondary);
+    color: white;
+    font-size: 20px;
+    height: 30px;
+    width: 30px;
+    margin: 10px;
+    margin-bottom: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5
+}

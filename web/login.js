@@ -6,15 +6,17 @@ const login_message = document.getElementById("login-message");
 const button = document.getElementById("validate_play");
 
 function checkId(id){
-    animation_color = "#8FD9F7";
+    animation_color = "#3eb1df";
     is_loading_running = true;
     fetch(`https://strela-vlna.gchd.cz/api/validate_play?id=${id}`)
         .then(response => response.text())
         .then(data => {
-            if(data == "running"){
+            if(data == "free"){
                 window.location.href = `play.html?id=${id}`;
             }else if(data == "not running"){
                 login_message.innerHTML = "*Hra momentě neběží";
+            }else if(data = "full"){
+                login_message.innerHTML = "*Maximální počet hráču na tým dosažen";
             }else{
                 id_field.value = "";
                 const url = new URL(window.location.href);
