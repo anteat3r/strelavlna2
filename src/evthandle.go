@@ -62,10 +62,10 @@ func PlayerWsHandleMsg(
   case "view":
     if len(m) != 2 { return eIm(msg) }
     prob := m[1]
-    text, err := DBView(team, prob)
+    text, diff, name, err := DBView(team, prob)
     if err != nil { return err }
-    perchan<- "view" + DELIM + text
-    tchan.Send("focus", strconv.Itoa(idx))
+    perchan<- "viewed" + DELIM + diff + DELIM + name + DELIM + text
+    tchan.Send("focused", prob, strconv.Itoa(idx))
 
   case "chat":
     if len(m) != 3 { return eIm(msg) }
@@ -89,6 +89,5 @@ func AdminWsHandleMsg(
   m := strings.Split(msg, DELIM)
   if len(m) == 0 { return eIm(msg) }
   switch m[0] {}
-
   return nil
 }
