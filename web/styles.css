@@ -1504,7 +1504,7 @@ a:hover{
     color: var(--color-secondary-dark);
 }
 
-.digit-0-begining{
+.digit-0-start{
     transform: translateY(0px);
     transition: transform 0.0s;
 }
@@ -1548,6 +1548,38 @@ a:hover{
     transform: translateY(-380px);
     transition: transform 0.3s;
 }
+
+.digit-ten-0-start{
+    transform: translateY(0px);
+    transition: transform 0.0s;
+}
+.digit-ten-5{
+    transform: translateY(-38px);
+    transition: transform 0.3s;
+}
+.digit-ten-4{
+    transform: translateY(-76px);
+    transition: transform 0.3s;
+}
+.digit-ten-3{
+    transform: translateY(-114px);
+    transition: transform 0.3s;
+}
+.digit-ten-2{
+    transform: translateY(-152px);
+    transition: transform 0.3s;
+}
+.digit-ten-1{
+    transform: translateY(-190px);
+    transition: transform 0.3s;
+}
+.digit-ten-0-end{
+    transform: translateY(-228px);
+    transition: transform 0.3s;
+}
+
+
+
 .digit-wrapper p{
     margin: 0px;
 }
@@ -1575,7 +1607,8 @@ a:hover{
     justify-content: space-between;
     border-bottom: 1px var(--color-secondary-light) dashed;
 }
-#team-name{
+
+#team-name-wrapper #team-name{
     color: var(--color-secondary-dark);
     font-family: 'Lexend';
     font-weight: 500;
@@ -1664,6 +1697,7 @@ a:hover{
     color: var(--color-secondary-dark);
     margin: 0px;
     transition: color 0.3s ease-out;
+    transform: translateY(-2px);
 }
 .problem:hover .problem-rank{
     color: white;
@@ -1676,11 +1710,19 @@ a:hover{
 .occupied-icon{
     width: 14px;
     height: 14px;
+    min-height: 14px;
+    min-width: 14px;
+    margin-left: 15px;
     border-radius: 7px;
     background-color: var(--color-secondary-light);
     margin-right: 5px;
     display: none;
     transition: background-color 0.3s ease-out;
+}
+
+.unseen-chat .occupied-icon{
+    background-color: #1bd35b;
+    display: block;
 }
 .problem:hover .occupied-icon{
     background-color: white;
@@ -1998,4 +2040,8 @@ a:hover{
     align-items: center;
     justify-content: center;
     border-radius: 5
+}
+
+.bold{
+    font-weight: 700;
 }
