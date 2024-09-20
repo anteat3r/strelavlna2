@@ -4,6 +4,25 @@ var team_name = "Team 1";
 var team_rank = "14";
 var end_time = new Date().getTime() + 100000;
 var prices = [[10, 20, 30], [15, 35, 70], [5, 10, 15]];
+var global_chat = [
+    {
+        author: "support",
+        content: "ahoj, toto je technicka podpora aoiw jlasjd lkj"
+    },
+    {
+        author: "support",
+        content: "akjsd kjaajsdl jaoiw jlasjd lkj"
+    },
+    {
+        author: "team",
+        content: "docela noobatik"
+    },
+    {
+        author: "support",
+        content: "spis docela opatik"
+    },
+]
+
 
 var problems = [{
     id: "askjdhiwuahskjd",
@@ -105,7 +124,15 @@ buy_button.addEventListener("click", function(){
         buy_button_wrapper.classList.add("buy-button-close");
         buy_button_wrapper.classList.remove("buy-button-open");
     }
-})
+});
+
+document.getElementById("team-stats").addEventListener("click", function(){
+    focused_problem = "";
+    updateFocusedProblem();
+    updateChat();
+    updateProblemList();
+    document.getElementById("team-stats").classList.add("team-stats-selected");
+});
 
 
 function updateShop(){
@@ -116,6 +143,13 @@ function updateShop(){
             button.classList.add("subbuy-disabled");
         }
     });
+    const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
+    const sell_information = document.getElementById("sell-information");
+    if(focused_problem_obj != null){
+        sell_information.innerHTML = `*Prodat aktuální úlohu: <span class="bold">${focused_problem_obj.title}</span>`;
+    }else{
+        sell_information.innerHTML = `*Klikněte na úlohu kterou chcete prodat`;
+    }
 }
 
 
@@ -146,6 +180,8 @@ function updateProblemList(){
             updateProblemList();
             updateChat();
             updateFocusedProblem();
+            document.getElementById("team-stats").classList.remove("team-stats-selected");
+
         });
     }
 }
@@ -159,16 +195,24 @@ function updateFocusedProblem(){
     }
     const problem_title = document.getElementById("problem-title");
     const problem_content = document.getElementById("problem-content");
-    const sell_information = document.getElementById("sell-information");
     const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
     problem_title.innerHTML = focused_problem_obj.title + " [" + focused_problem_obj.rank + "]";
     problem_content.innerHTML = focused_problem_obj.problem_content;
-    sell_information.innerHTML = `*Prodat aktuální úlohu: <span class="bold">${focused_problem_obj.title}</span>`;
 }
 
 function updateChat(){
     const conversation_wrapper = document.getElementById("conversation-wrapper");
     conversation_wrapper.innerHTML = "";
+    if(focused_problem == "" || !problems.some(prob => prob.id == focused_problem)){
+        focused_problem = "";
+        for(const message of global_chat){
+            conversation_wrapper.innerHTML += 
+            `<div class="conversation-row ${message.author == "team" ? "message-my" : "message-their"}">
+                <p class="conversation-message">${message.content}</p>
+            </div>`
+        }
+        return;
+    }
     for(const message of problems.find(prob => prob.id == focused_problem).chat){
         conversation_wrapper.innerHTML += 
         `<div class="conversation-row ${message.author == "team" ? "message-my" : "message-their"}">
@@ -296,10 +340,11 @@ function sellProblem(){
     document.getElementById("confirm-dialog-content").innerHTML = `Opravdu chcete prodat úlohu:<br><span class="bold">${focused_problem_obj.title}</span> za <span class="bold">${focused_problem_obj.rank == "A" ? 5 : focused_problem_obj.rank == "B" ? 10 : 15}</span> DC?`;
     document.getElementById("confirm-dialog-ok").addEventListener("click", function(){
         team_balance += focused_problem_obj.rank == "A" ? 5 : focused_problem_obj.rank == "B" ? 10 : 15;
-        updateTeamStats();
         problems = problems.filter(prob => prob.id != focused_problem);
+        updateTeamStats();
         updateProblemList();
         updateShop();
+        updateChat();
         confirm_dialog.style.display = "none";
         document.getElementById("confirm-dialog-ok").removeEventListener("click", arguments.callee);
     });
@@ -332,125 +377,125 @@ function update(){
 
 update();
 
-/** @type {WebSocket} */
-let socket;
+// /** @type {WebSocket} */
+// let socket;
 
-function connectWS() {
-  const searchParams = new URLSearchParams(window.location.search);
-  const id = searchParams.get("id");
+// function connectWS() {
+//   const searchParams = new URLSearchParams(window.location.search);
+//   const id = searchParams.get("id");
 
-  socket = new WebSocket(`wss://strela-vlna.gchd.cz/api/play/${id}`);
+//   socket = new WebSocket(`wss://strela-vlna.gchd.cz/api/play/${id}`);
 
-  socket.addEventListener("message", (event) => {
-    function cLe() { console.log("invalid msg", rawmsg) }
-    /** @type {string} */
-    const rawmsg = event.data;
-    const msg = rawmsg.split(":");
-    if (msg.length == 0) { cLe() }
-    switch (msg[0]) {
-      case "msgrecd":
-        if (msg.length != 3) { cLe() }
-        msgRecieved(msg[1], msg[2])
-      break;
-      case "sold":
-        if (msg.length != 3) { cLe() }
-        probSold(msg[1], msg[2])
-      break;
-      case "bought":
-        if (msg.length != 5) { cLe() }
-        probBought(msg[1], msg[2], msg[3], msg[4])
-      break;
-      case "solved":
-        if (msg.length != 4) { cLe() }
-        probSolved(msg[1], msg[2], msg[3])
-      break;
-      case "viewed":
-        if (msg.length != 4) { cLe() }
-        probViewed(msg[1], msg[2], msg[3])
-      break;
-      case "focused":
-        if (msg.length != 3) { cLe() }
-        probFocused(msg[1], msg[2])
-      break;
-      case "msgsent":
-        if (msg.length != 3) { cLe() }
-        msgSent(msg[1], msg[2], msg[3])
-      break;
-      case "err":
+//   socket.addEventListener("message", (event) => {
+//     function cLe() { console.log("invalid msg", rawmsg) }
+//     /** @type {string} */
+//     const rawmsg = event.data;
+//     const msg = rawmsg.split(":");
+//     if (msg.length == 0) { cLe() }
+//     switch (msg[0]) {
+//       case "msgrecd":
+//         if (msg.length != 3) { cLe() }
+//         msgRecieved(msg[1], msg[2])
+//       break;
+//       case "sold":
+//         if (msg.length != 3) { cLe() }
+//         probSold(msg[1], msg[2])
+//       break;
+//       case "bought":
+//         if (msg.length != 5) { cLe() }
+//         probBought(msg[1], msg[2], msg[3], msg[4])
+//       break;
+//       case "solved":
+//         if (msg.length != 4) { cLe() }
+//         probSolved(msg[1], msg[2], msg[3])
+//       break;
+//       case "viewed":
+//         if (msg.length != 4) { cLe() }
+//         probViewed(msg[1], msg[2], msg[3])
+//       break;
+//       case "focused":
+//         if (msg.length != 3) { cLe() }
+//         probFocused(msg[1], msg[2])
+//       break;
+//       case "msgsent":
+//         if (msg.length != 3) { cLe() }
+//         msgSent(msg[1], msg[2], msg[3])
+//       break;
+//       case "err":
 
-    }
-  })
-}
+//     }
+//   })
+// }
 
-connectWS();
+// connectWS();
 
-/** @param {string} prob */
-function sellProb(prob) {
-  socket.send(`sell:${prob}`) }
+// /** @param {string} prob */
+// function sellProb(prob) {
+//   socket.send(`sell:${prob}`) }
 
-/** @param {string} diff */
-function buyProb(diff) {
-  socket.send(`buy:${diff}`) }
+// /** @param {string} diff */
+// function buyProb(diff) {
+//   socket.send(`buy:${diff}`) }
 
-/** @param {string} diff */
-function buyOldProb(diff) {
-  socket.send(`buyold:${diff}`) }
+// /** @param {string} diff */
+// function buyOldProb(diff) {
+//   socket.send(`buyold:${diff}`) }
 
-/** @param {string} prob
- * @param {string} sol */
-function solveProb(prob, sol) {
-  socket.send(`buy:${prob}:${sol}`) }
+// /** @param {string} prob
+//  * @param {string} sol */
+// function solveProb(prob, sol) {
+//   socket.send(`buy:${prob}:${sol}`) }
 
-/** @param {string} prob */
-function viewProb(prob) {
-  socket.send(`view:${prob}`) }
+// /** @param {string} prob */
+// function viewProb(prob) {
+//   socket.send(`view:${prob}`) }
 
-/** @param {string} prob
- * @param {string} text */
-function sendMsg(prob, text) {
-  socket.send(`chat:${prob}:${text}`) }
-
-
+// /** @param {string} prob
+//  * @param {string} text */
+// function sendMsg(prob, text) {
+//   socket.send(`chat:${prob}:${text}`) }
 
 
-/** @param {string} msg
- * @param {string} prob */
-function msgRecieved(prob, msg) {
-  console.log(prob, msg) }
 
-/** @param {string} msg
- * @param {string} prob */
-function msgSent(prob, msg) {
-  console.log(prob, msg) }
 
-/** @param {string} money
- * @param {string} prob */
-function probSold(prob, money) {
-  console.log(prob, money) }
+// /** @param {string} msg
+//  * @param {string} prob */
+// function msgRecieved(prob, msg) {
+//   console.log(prob, msg) }
 
-/** @param {string} msg
- * @param {string} prob 
- * @param {string} money 
- * @param {string} name */
-function probBought(prob, diff, money, name) {
-  console.log(prob, diff, money, name) }
+// /** @param {string} msg
+//  * @param {string} prob */
+// function msgSent(prob, msg) {
+//   console.log(prob, msg) }
 
-/** @param {string} msg
- * @param {string} prob 
- * @param {string} name */
-function probSolved(prob, diff, name) {
-  console.log(prob, diff, name) }
+// /** @param {string} money
+//  * @param {string} prob */
+// function probSold(prob, money) {
+//   console.log(prob, money) }
 
-/** @param {string} msg
- * @param {string} text 
- * @param {string} name */
-function probViewed(diff, name, text) {
-  console.log(text, diff, name) }
+// /** @param {string} msg
+//  * @param {string} prob 
+//  * @param {string} money 
+//  * @param {string} name */
+// function probBought(prob, diff, money, name) {
+//   console.log(prob, diff, money, name) }
 
-/** @param {string} idx
- * @param {string} prob */
-function probFocused(prob, idx) {
-  console.log(prob, idx) }
+// /** @param {string} msg
+//  * @param {string} prob 
+//  * @param {string} name */
+// function probSolved(prob, diff, name) {
+//   console.log(prob, diff, name) }
+
+// /** @param {string} msg
+//  * @param {string} text 
+//  * @param {string} name */
+// function probViewed(diff, name, text) {
+//   console.log(text, diff, name) }
+
+// /** @param {string} idx
+//  * @param {string} prob */
+// function probFocused(prob, idx) {
+//   console.log(prob, idx) }
 
 
 
