@@ -173,7 +173,7 @@ func DBSolve(team string, prob string, sol string) (name string, diff string, oe
   return
 }
 
-func DBView(team string, prob string) (text string, oerr error) {
+func DBView(team string, prob string) (text string, diff string, name string, oerr error) {
   oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
 
     teamrec, err := Dao.FindRecordById("teams", team)
@@ -188,6 +188,8 @@ func DBView(team string, prob string) (text string, oerr error) {
     }
 
     text = probrec.GetString("text")
+    diff = probrec.GetString("diff")
+    name = probrec.GetString("name")
 
     return nil
   })
