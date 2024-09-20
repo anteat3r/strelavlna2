@@ -54,10 +54,10 @@ func PlayerWsHandleMsg(
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
     sol := m[2]
-    name, diff, err := DBSolve(team, prob, sol)
+    check, diff, teamname, name, err := DBSolve(team, prob, sol)
     if err != nil { return err }
     tchan.Send("solved", prob, diff, name)
-    AdminSend("solved", prob, diff, name)
+    AdminSend("solved", check, diff, teamname, name)
 
   case "view":
     if len(m) != 2 { return eIm(msg) }
@@ -71,10 +71,18 @@ func PlayerWsHandleMsg(
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
     text := m[2]
-    name, diff, err := DBPlayerMsg(team, prob, text)
+    err := DBPlayerMsg(team, prob, text)
     if err != nil { return err }
     tchan.Send("msgsent", prob, text)
-    AdminSend("msgrecd", team, prob, text, name, diff)
+    AdminSend("msgrecd", team, prob, text)
+
+  case "raise":
+    if len(m) != 2 { return eIm(msg) }
+    prob := m[1]
+    check, diff, teamname, name, err := DBRaise(team, prob)
+    if err != nil { return err }
+    tchan.Send("raised", prob)
+    AdminSend("raised", check, diff, teamname, name)
 
   }
 
@@ -88,6 +96,37 @@ func AdminWsHandleMsg(
 ) error {
   m := strings.Split(msg, DELIM)
   if len(m) == 0 { return eIm(msg) }
-  switch m[0] {}
+  switch m[0] {
+
+  case "grade":
+    if len(m) != 4 { return eIm(msg) }
+    team := m[1]
+    prob := m[2]
+    rcorr := m[3]
+    corr := rcorr == "yes"
+    money, check, err := DBAdminGrade(team, prob, corr)
+    if err != nil { return err }
+    WriteTeamChan(team, "graded", prob, rcorr, strconv.Itoa(money))
+    AdminSend("graded", prob, check)
+
+  case "chat":
+    if len(m) != 4 { return eIm(msg) }
+    team := m[1]
+    prob := m[2]
+    text := m[3]
+    err := DBAdminMsg(team, prob, text)
+    if err != nil { return err }
+    WriteTeamChan(team, "msgrecd", prob, text)
+    AdminSend("msgsent", team, prob, text)
+
+  case "dismiss":
+    if len(m) != 2 { return eIm(msg) }
+    check := m[1]
+    team, prob, err := DBAdminDismiss(check)
+    if err != nil { return err }
+    WriteTeamChan(team, "dismissed", prob)
+    AdminSend("dismissed", check)
+
+  }
   return nil
 }
