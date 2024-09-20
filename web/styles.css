@@ -84,6 +84,7 @@ a:hover{
     font-weight: 600;
     margin: auto;
 }
+
 .footer-element1 {grid-area: f1}
 .footer-element2 {grid-area: f2}
 .footer-element3 {grid-area: f3}
