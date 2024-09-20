@@ -1659,7 +1659,8 @@ a:hover{
     border-radius: 5px;
     background-color: white;
     transition: background-color 0.3s ease-out;
-
+    cursor: pointer;
+    user-select: none;
 }
 .problem:hover{
     background-color: var(--color-secondary-light);
@@ -1813,6 +1814,18 @@ a:hover{
     transition: background-color 0s;
 }
 
+.subbuy-disabled:hover{
+    background-color: #ebebeb;
+    transition: background-color 0s;
+    cursor: not-allowed;
+}
+.subbuy-disabled h2{
+    color: gray;
+}
+.subbuy-disabled p{
+    color: gray;
+}
+
 .buy-dropdown-difficulty{
     margin: 0px;
     font-size: 20px;
@@ -1867,6 +1880,7 @@ a:hover{
     padding: 30px;
     padding-inline: 70px;
     position: relative;
+    width: 100%;
 }
 
 #problem-title{
@@ -1972,6 +1986,7 @@ a:hover{
     margin: 15px;
     min-height: 30px;
     display: flex;
+    justify-content: flex-start;
 }
 
 .conversation-message{
@@ -1986,10 +2001,17 @@ a:hover{
     font-weight: 500;
     color: var(--color-secondary-dark);
 }
-.message-my p{
-    float: right;
-    margin-left: 30px;
+.message-my{
+    padding-left: 30px;
+    
 }
+
+.message-my p{
+    margin-left: auto;
+    float: right;
+    background-color: var(--color-secondary-glow);
+}
+
 .message-their p{
     float: left;
     margin-right: 30px;
@@ -2044,4 +2066,53 @@ a:hover{
 
 .bold{
     font-weight: 700;
+}
+
+#confirm-dialog-wrapper{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    background-color: var(--color-secondary-white);
+    border: 2px var(--color-secondary-light) solid;
+    padding: 25px;
+    padding-top: 20px;
+    border-radius: 10px;
+    width: 300px;
+}
+#confirm-dialog h2{
+    font-family: 'Lexend';
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    margin-top: 0px;
+    text-align: center;
+}
+
+#confirmation-buttons-wrapper{
+    display: flex;
+    flex-direction: row;
+    border-top: 2px var(--color-secondary-light) dashed;
+    justify-content: center;
+    gap: 50px;
+    padding-top: 30px;
+}
+
+#confirm-dialog-ok{
+    width: 70px;
+}
+#confirm-dialog-cancel{
+    width: 70px;
+
+}
+
+#confiramtion-dialog-bg{
+    position: absolute;
+    width:100%;
+    height: 100%;
+    background-color: rgba(242, 252, 255, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 1;
+    display: none;
 }
