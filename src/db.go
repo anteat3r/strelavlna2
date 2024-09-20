@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	log "github.com/anteat3r/golog"
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
 )
@@ -137,13 +138,13 @@ func DBBuyOld(team string, diff string) (id string, money int, name string, oerr
   return dbBuySrc(team, diff, "solved")
 }
 
-func DBSolve(team string, prob string, sol string) (name string, diff string, oerr error) {
+func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, oerr error) {
   oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
 
-    teamrec, err := Dao.FindRecordById("teams", team)
+    teamrec, err := txDao.FindRecordById("teams", team)
     if err != nil { return err }
 
-    probrec, err := Dao.FindRecordById("probs", prob)
+    probrec, err := txDao.FindRecordById("probs", prob)
     if err != nil { return err }
 
     newbought, found := SliceExclude(teamrec.GetStringSlice("bought"), prob)
@@ -156,17 +157,19 @@ func DBSolve(team string, prob string, sol string) (name string, diff string, oe
     if err != nil { return err }
 
     coll, _ := txDao.FindCollectionByNameOrId("checks")
-    check := models.NewRecord(coll)
+    checkrec := models.NewRecord(coll)
 
-    check.Set("type", "sol")
-    check.Set("team", team)
-    check.Set("prob", prob)
-    check.Set("solution", sol)
-    err = txDao.SaveRecord(check)
+    checkrec.Set("type", "sol")
+    checkrec.Set("team", team)
+    checkrec.Set("prob", prob)
+    checkrec.Set("solution", sol)
+    err = txDao.SaveRecord(checkrec)
     if err != nil { return err }
 
+    check = checkrec.GetId()
     name = probrec.GetString("name")
     diff = probrec.GetString("diff")
+    teamname = probrec.GetString("name")
 
     return nil
   })
@@ -176,10 +179,10 @@ func DBSolve(team string, prob string, sol string) (name string, diff string, oe
 func DBView(team string, prob string) (text string, diff string, name string, oerr error) {
   oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
 
-    teamrec, err := Dao.FindRecordById("teams", team)
+    teamrec, err := txDao.FindRecordById("teams", team)
     if err != nil { return err }
 
-    probrec, err := Dao.FindRecordById("probs", prob)
+    probrec, err := txDao.FindRecordById("probs", prob)
     if err != nil { return err }
 
     if !slices.Contains(teamrec.GetStringSlice("bought"), prob) && 
@@ -196,14 +199,14 @@ func DBView(team string, prob string) (text string, diff string, name string, oe
   return
 }
 
-func DBPlayerMsg(team string, prob string, msg string) (name string, diff string, oerr error) {
+func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
   oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
 
-    teamrec, err := Dao.FindRecordById("teams", team)
+    teamrec, err := txDao.FindRecordById("teams", team)
     if err != nil { return err }
 
-    probrec, err := Dao.FindRecordById("probs", prob)
-    if err != nil { return err }
+    // probrec, err := txDao.FindRecordById("probs", prob)
+    // if err != nil { return err }
 
     if !slices.Contains(teamrec.GetStringSlice("bought"), prob) && 
          !slices.Contains(teamrec.GetStringSlice("pending"), prob) {
@@ -230,8 +233,181 @@ func DBPlayerMsg(team string, prob string, msg string) (name string, diff string
     err = txDao.SaveRecord(check)
     if err != nil { return err }
 
-    name = probrec.GetString("name")
+    return nil
+  })
+  return
+}
+
+func DBRaise(team string, prob string) (check string, diff string, teamname string, name string, oerr error) {
+  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+
+    teamrec, err := txDao.FindRecordById("teams", team)   
+    if err != nil { return err }
+
+    probrec, err := txDao.FindRecordById("probs", prob)   
+    if err != nil { return err }
+
+    if teamrec.GetInt("checks") >= 5 {
+      return dbErr("raise", "too many requests")
+    }
+
+    coll, _ := txDao.FindCollectionByNameOrId("checks")
+    checkrec := models.NewRecord(coll)
+
+    checkrec.Set("type", "msg")
+    checkrec.Set("team", team)
+    checkrec.Set("prob", prob)
+    err = txDao.SaveRecord(checkrec)
+    if err != nil { return err }
+
+    teamrec.Set("checks", teamrec.GetInt("checks")+1)
+    err = txDao.SaveRecord(teamrec)
+    if err != nil { return err }
+
+    check = checkrec.GetId()
     diff = probrec.GetString("diff")
+    name = probrec.GetString("name")
+    teamname = teamrec.GetString("name")
+
+    return nil
+  })
+  return
+}
+
+func DBPlayerInitLoad(team string) (money int, boughtprobs string, pendingprobs string, checks string, oerr error) {
+  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+
+    teamrec, err := txDao.FindRecordById("teams", team)
+    if err != nil { return err }
+
+    money = teamrec.GetInt("money")
+
+    for _, p := range teamrec.GetStringSlice("bought") {
+      probrec, err := txDao.FindRecordById("probs", p)
+      if err != nil { return err }
+      boughtprobs += probrec.GetId() + DELIM + 
+        probrec.GetString("diff") + DELIM +
+        probrec.GetString("name") + DELIM
+    }
+    boughtprobs += DELIM
+
+    for _, p := range teamrec.GetStringSlice("pending") {
+      probrec, err := txDao.FindRecordById("probs", p)
+      if err != nil { return err }
+      pendingprobs += probrec.GetId() + DELIM + 
+        probrec.GetString("diff") + DELIM +
+        probrec.GetString("name") + DELIM
+    }
+
+    res := []struct{ Id string `db:"id"` }{}
+    err = txDao.DB().NewQuery("SELECT ids FROM check WHERE team = {:team} AND type = 'msg'").
+      Bind(dbx.Params{
+        "team": team,
+      }).
+      All(&res)
+    if err != nil { return err }
+
+    for _, c := range res { checks += c.Id + DELIM }
+    
+    return nil
+  })
+  return
+}
+
+func DBAdminGrade(team string, prob string, corr bool) (money int, check string, oerr error) {
+  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+
+    teamrec, err := txDao.FindRecordById("teams", team)
+    if err != nil { return err }
+
+    probrec, err := txDao.FindRecordById("probs", prob)
+    if err != nil { return err }
+
+    newpending, found := SliceExclude(teamrec.GetStringSlice("pending"), prob)
+
+    if !found { return dbErr("grade", "prob not pending") }
+
+    teamrec.Set("pending", newpending)
+    if corr {
+      diffcost, ok := GetCost(probrec.GetString("diff"))
+      if !ok { return dbErr("grade", "invalid diff") }
+
+      teamrec.Set("money", teamrec.GetInt("money") + diffcost)
+      teamrec.Set("solved", append(teamrec.GetStringSlice("solved"), prob))
+    } else {
+      teamrec.Set("bought", append(teamrec.GetStringSlice("bought"), prob))
+    }
+
+    res := struct{ Id string `db:"id"` }{}
+    err = txDao.DB().NewQuery("SELECT ids FROM check WHERE team = {:team} AND prob = {:prob} AND type = 'sol' LIMIT 1").
+      Bind(dbx.Params{
+        "team": team,
+        "prob": prob,
+      }).
+      One(&res)
+    if err != nil { return err }
+    check = res.Id
+
+    err = txDao.SaveRecord(teamrec)
+    if err != nil { return err }
+
+    money = teamrec.GetInt("money")
+
+    checkrec, err := txDao.FindRecordById("checks", res.Id)
+    if err != nil { return err }
+
+    err = txDao.DeleteRecord(checkrec)
+    if err != nil { return err }
+
+    return nil
+  })
+  return 
+}
+
+func DBAdminMsg(team string, prob string, text string) (oerr error) {
+  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+
+    teamrec, err := txDao.FindRecordById("teams", team)
+    if err != nil { return err }
+
+    if !slices.Contains(teamrec.GetStringSlice("bought"), prob) && 
+         !slices.Contains(teamrec.GetStringSlice("pending"), prob) {
+      return dbClownErr("view", "prob not owned")
+    }
+
+    coll, _ := txDao.FindCollectionByNameOrId("chat")
+    msgrec := models.NewRecord(coll)
+
+    msgrec.Set("team", team)
+    msgrec.Set("prob", prob)
+    msgrec.Set("type", "admin")
+    msgrec.Set("text", text)
+    err = txDao.SaveRecord(msgrec)
+    if err != nil { return err }
+
+    return nil
+  })
+  return
+}
+
+func DBAdminDismiss(check string) (team string, prob string, oerr error) {
+  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+
+    checkrec, err := txDao.FindRecordById("checks", check)
+    if err != nil { return err }
+
+    teamrec, err := txDao.FindRecordById("teams", checkrec.GetString("team"))
+    if err != nil { return err }
+
+    teamrec.Set("checks", teamrec.GetInt("checks")-1)
+    err = txDao.SaveRecord(teamrec)
+    if err != nil { return err }
+
+    team = teamrec.GetId()
+    prob= checkrec.GetString("prob")
+
+    err = txDao.DeleteRecord(checkrec)
+    if err != nil { return err }
 
     return nil
   })

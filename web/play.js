@@ -76,7 +76,7 @@ var problems = [{
 }];
 
 //local states
-var focused_problem = "askjdhiwuahskjd";
+var focused_problem = "";
 
 const buy_button_wrapper = document.getElementById("buy-button-wrapper");
 const buy_button = document.getElementById("buy-button");
