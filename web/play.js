@@ -2,8 +2,12 @@
 var team_balance = 25;
 var team_name = "Team 1";
 var team_rank = "14";
-var end_time = new Date().getTime() + 100000;
-var prices = [[10, 20, 30], [15, 35, 70], [5, 10, 15]];
+var start_time = new Date().getTime() - 1000000;
+var end_time = new Date().getTime() + 3000000;
+var prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]];
+var team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
+var problems_solved = 12;
+var problems_sold = 3;
 var global_chat = [
     {
         author: "support",
@@ -95,6 +99,7 @@ updateProblemList();
 updateFocusedProblem();
 updateChat();
 updateShop();
+updatePriceList();
 
 
 //buy events
@@ -161,6 +166,33 @@ function updateTeamStats(){
     document.getElementById("team-name").innerHTML = team_name;
     document.getElementById("rank").innerHTML = team_rank;
     document.getElementById("team-balance").innerHTML = team_balance + " DC"
+    document.getElementById("team-stats-main-title").innerHTML = team_name;
+    document.getElementById("team-stats-main-balance").innerHTML = team_balance + " DC";
+    document.getElementById("team-stats-main-rank").innerHTML = team_rank;
+    document.getElementById("statistics-balance").innerHTML = team_balance + " DC";
+    document.getElementById("statistics-rank").innerHTML = team_rank;
+    document.getElementById("statistics-solved").innerHTML = problems_solved;
+    document.getElementById("statistics-sold").innerHTML = problems_sold;
+    const team_stats_players_wrapper = document.getElementById("team-stats-players-wrapper");
+    team_stats_players_wrapper.innerHTML = "";
+    for(const member of team_members){
+        team_stats_players_wrapper.innerHTML +=
+        `<h2 class="team-stats-player">${member}</h2>`
+    }
+}
+
+function updatePriceList(){
+    document.getElementById("price-list-a-buy").innerHTML = prices[0][0] + " DC";
+    document.getElementById("price-list-a-solve").innerHTML = prices[1][0] + " DC";
+    document.getElementById("price-list-a-sell").innerHTML = prices[2][0] + " DC";
+
+    document.getElementById("price-list-b-buy").innerHTML = prices[0][1] + " DC";
+    document.getElementById("price-list-b-solve").innerHTML = prices[1][1] + " DC";
+    document.getElementById("price-list-b-sell").innerHTML = prices[2][1] + " DC";
+
+    document.getElementById("price-list-c-buy").innerHTML = prices[0][2] + " DC";
+    document.getElementById("price-list-c-solve").innerHTML = prices[1][2] + " DC";
+    document.getElementById("price-list-c-sell").innerHTML = prices[2][2] + " DC";
 }
 
 function updateProblemList(){
@@ -196,8 +228,8 @@ function updateProblemList(){
 function updateFocusedProblem(){
     if(focused_problem == "" || !problems.some(prob => prob.id == focused_problem)){
         focused_problem = "";
-
-
+        problem_wrapper.classList.add("hidden");
+        team_stats_main_wrapper.classList.remove("hidden");
         return;
     }
     const problem_title = document.getElementById("problem-title");
@@ -228,7 +260,7 @@ function updateChat(){
     }
 }
 
-function updateClock(remaining){
+function updateClock(remaining, passed){
     lastSecond = Math.floor(remaining / 1000);
 
     const hours = Math.floor(remaining / 1000 / 60 / 60) % 24;
@@ -242,6 +274,17 @@ function updateClock(remaining){
     const minute_wrapper = document.getElementById("minutes").getElementsByClassName("digit-wrapper")[0];
     const ten_second_wrapper = document.getElementById("ten-seconds").getElementsByClassName("digit-wrapper")[0];
     const second_wrapper = document.getElementById("seconds").getElementsByClassName("digit-wrapper")[0];
+
+    const progressbar_time_string = document.getElementById("progressbar-time-passed");
+    const progressbar_cursor = document.getElementById("progressbar-cursor-wrapper");
+    const progressbar_percentage = document.getElementById("progressbar-percentage");
+    const progressbar_foreground = document.getElementById("progressbar-foreground");
+
+    const passed_percentage = (passed / (end_time - start_time)) * 100;
+    progressbar_time_string.innerHTML = new Date(passed).toISOString().substr(11, 8);
+    progressbar_cursor.style.left = `${passed_percentage}%`;
+    progressbar_percentage.innerHTML = `${Math.round(passed_percentage)}%`;
+    progressbar_foreground.style.width = `${passed_percentage}%`;
 
     for(let i = 1; i < 10; i++){
         hour_wrapper.classList.remove(`digit-${i}`);
@@ -317,19 +360,20 @@ function buyProblem(rank){
     document.getElementById("confirm-dialog-ok").addEventListener("click", function(){
         console.log(prices[0]["ABC".indexOf(rank)]);
         if(team_balance >= prices[0]["ABC".indexOf(rank)]){
-            team_balance -= prices[0]["ABC".indexOf(rank)];
-            updateTeamStats();
-            const new_problem = {
-                id: Math.random().toString(36).substring(7),
-                title: "Koupil sis novou úlohu",
-                rank: rank,
-                worked_on: false,
-                last_answer_time: Date.now(),
-                seen_chat: true,
-                problem_content: "Uspějte v této úloze a získejte další body!",
-                chat: []
-            }
-            problems.push(new_problem);
+            buyProb(rank);
+            // team_balance -= prices[0]["ABC".indexOf(rank)];
+            // updateTeamStats();
+            // const new_problem = {
+            //     id: Math.random().toString(36).substring(7),
+            //     title: "Koupil sis novou úlohu",
+            //     rank: rank,
+            //     worked_on: false,
+            //     last_answer_time: Date.now(),
+            //     seen_chat: true,
+            //     problem_content: "Uspějte v této úloze a získejte další body!",
+            //     chat: []
+            // }
+            // problems.push(new_problem);
             updateProblemList();
             updateShop();
 
@@ -348,10 +392,13 @@ function sellProblem(){
     document.getElementById("confirm-dialog-ok").addEventListener("click", function(){
         team_balance += focused_problem_obj.rank == "A" ? 5 : focused_problem_obj.rank == "B" ? 10 : 15;
         problems = problems.filter(prob => prob.id != focused_problem);
+        focused_problem = "";
         updateTeamStats();
         updateProblemList();
         updateShop();
         updateChat();
+        updateFocusedProblem();
+
         confirm_dialog.style.display = "none";
         document.getElementById("confirm-dialog-ok").removeEventListener("click", arguments.callee);
     });
@@ -369,9 +416,10 @@ function update(){
     //clock
     const now = new Date().getTime();
     const remaining = end_time - now;
+    const passed = now - start_time;
     if ((Math.floor(remaining / 1000) != lastSecond && remaining>=0) || (!clock_zeroed && remaining < 0)){
         if (remaining < 0){clock_zeroed = true;}
-        updateClock(remaining);
+        updateClock(remaining, passed);
     }
 
 
@@ -390,8 +438,12 @@ let socket;
 function connectWS() {
   const searchParams = new URLSearchParams(window.location.search);
   const id = searchParams.get("id");
-
   socket = new WebSocket(`wss://strela-vlna.gchd.cz/api/play/${id}`);
+  socket.addEventListener("error", (e) => {
+      console.log(e);
+      // window.location.href = `login.html?id=${id}`;
+  });
+    // window.location.href = "login.html";
 
   socket.addEventListener("message", (event) => {
     function cLe() { console.log("invalid msg", rawmsg) }
@@ -436,8 +488,13 @@ function connectWS() {
     }
   })
 }
-
-connectWS();
+try {
+  connectWS();
+} catch (e) {
+    console.log(e);
+//   window.location.href = "login.html";
+}
+// connectWS();
 
 /** @param {string} prob */
 function sellProb(prob) {

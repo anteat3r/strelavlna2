@@ -2253,7 +2253,7 @@ a:hover{
     border-radius: 5px;
     background-color: var(--color-secondary-glow);
     font-family: 'Lexend';
-    font-size: 16px;
+    font-size: 12px;
     font-weight: 500;
     padding: 5px;
     padding-inline: 8px;
@@ -2311,17 +2311,19 @@ a:hover{
     background-color: var(--color-secondary-light);
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
-    width: 32%;
+    /* width: 32%; */
     height: 40px;
+    transition: width 0.1s ease-out;
 }
 
 #progressbar-cursor-wrapper{
     position: absolute;
     top: 0;
-    left: 32%;
+    /* left: 32%; */
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: left 0.1s ease-out;
 }
 #progressbar-percentage{
     position: absolute;
