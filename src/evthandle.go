@@ -23,7 +23,9 @@ func PlayerWsHandleMsg(
   tchan *TeamChanMu,
   idx int,
 ) error {
+  ActiveContestMu.RLock()
   if ActiveContest == "" { return dbErr("contest ended") }
+  ActiveContestMu.RUnlock()
 
   m := strings.Split(msg, DELIM)
   if len(m) == 0 { return eIm(msg) }
@@ -54,17 +56,17 @@ func PlayerWsHandleMsg(
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
     sol := m[2]
-    check, diff, teamname, name, err := DBSolve(team, prob, sol)
+    check, diff, teamname, name, text, err := DBSolve(team, prob, sol)
     if err != nil { return err }
-    tchan.Send("solved", prob, diff, name)
-    AdminSend("solved", check, diff, teamname, name)
+    tchan.Send("solved", prob)
+    AdminSend("solved", check, diff, teamname, name, text)
 
-  case "view":
+  case "focus":
     if len(m) != 2 { return eIm(msg) }
     prob := m[1]
-    text, diff, name, err := DBView(team, prob)
-    if err != nil { return err }
-    perchan<- "viewed" + DELIM + diff + DELIM + name + DELIM + text
+    // text, diff, name, err := DBView(team, prob)
+    // if err != nil { return err }
+    // perchan<- "viewed" + DELIM + diff + DELIM + name + DELIM + text
     tchan.Send("focused", prob, strconv.Itoa(idx))
 
   case "chat":
@@ -75,14 +77,6 @@ func PlayerWsHandleMsg(
     if err != nil { return err }
     tchan.Send("msgsent", prob, text)
     AdminSend("msgrecd", team, prob, text)
-
-  case "raise":
-    if len(m) != 2 { return eIm(msg) }
-    prob := m[1]
-    check, diff, teamname, name, err := DBRaise(team, prob)
-    if err != nil { return err }
-    tchan.Send("raised", prob)
-    AdminSend("raised", check, diff, teamname, name)
 
   }
 
@@ -99,12 +93,11 @@ func AdminWsHandleMsg(
   switch m[0] {
 
   case "grade":
-    if len(m) != 4 { return eIm(msg) }
-    team := m[1]
-    prob := m[2]
-    rcorr := m[3]
+    if len(m) != 3 { return eIm(msg) }
+    check := m[1]
+    rcorr := m[2]
     corr := rcorr == "yes"
-    money, check, err := DBAdminGrade(team, prob, corr)
+    team, prob, money, err := DBAdminGrade(check, corr)
     if err != nil { return err }
     WriteTeamChan(team, "graded", prob, rcorr, strconv.Itoa(money))
     AdminSend("graded", prob, check)
@@ -126,7 +119,17 @@ func AdminWsHandleMsg(
     if err != nil { return err }
     WriteTeamChan(team, "dismissed", prob)
     AdminSend("dismissed", check)
+    
+  case "focus":
+    if len(m) != 2 { return eIm(msg) }
+    check := m[1]
+    team, prob, err := DBAdminView(check)    
+    if err != nil { return err }
+    WriteTeamChan(team, "adminfocused", check, prob)
+    AdminSend("focused", check, strconv.Itoa(idx))
+    
 
+    
   }
   return nil
 }

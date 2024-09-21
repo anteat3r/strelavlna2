@@ -142,7 +142,10 @@ func main() {
     e.Router.GET(
       "/api/admin/loadactivec",
       func(c echo.Context) error {
-        return c.String(200, src.ActiveContest)
+        src.ActiveContestMu.RLock()
+        res := src.ActiveContest
+        src.ActiveContestMu.RUnlock()
+        return c.String(200, res)
       },
       apis.RequireAdminAuth(),
     )
@@ -153,8 +156,10 @@ func main() {
         if c.QueryParam("i") == "" {
           return c.String(400, "invalid param")
         }
+        src.ActiveContestMu.Lock()
         src.ActiveContest = c.QueryParam("i")
-        app.Logger().Info(`ActiveContest set to "` + src.ActiveContest + `" by ` + apis.RequestInfo(c).Admin.Email)
+        src.ActiveContestMu.Unlock()
+        app.Logger().Info(`ActiveContest set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
         return c.String(200, "")
       },
       apis.RequireAdminAuth(),
@@ -163,7 +168,9 @@ func main() {
     e.Router.GET(
       "/api/admin/setactivecem",
       func(c echo.Context) error {
+        src.ActiveContestMu.Lock()
         src.ActiveContest = ""
+        src.ActiveContestMu.Unlock()
         app.Logger().Info(`ActiveContest set to "" by ` + apis.RequestInfo(c).Admin.Email)
         return c.String(200, "")
       },

@@ -44,6 +44,7 @@ func (c *TeamChanMu) Count() int {
 
 var (
   ActiveContest = ""
+  ActiveContestMu = sync.RWMutex{}
 
   nErr = errors.New
 
@@ -74,7 +75,9 @@ func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
     if err != nil { return c.String(400, "invalid") }
     cont := team.GetString("contest")
 
+    ActiveContestMu.RLock()
     if cont != ActiveContest { return c.String(400, "not running") }
+    ActiveContestMu.RUnlock()
 
     teamChanMapMutex.Lock()
     players, ok := TeamChanMap[teamid]
@@ -99,7 +102,9 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     if err != nil { return err }
     cont := team.GetString("contest")
 
+    ActiveContestMu.RLock()
     if cont != ActiveContest { return nErr("contest not active") }
+    ActiveContestMu.RUnlock()
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
