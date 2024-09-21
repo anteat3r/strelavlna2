@@ -136,7 +136,7 @@ func main() {
 
     e.Router.GET(
       "/api/admin/play/:admin",
-      src.PlayWsEndpoint(app.Dao()),
+      src.AdminWsEndpoint(app.Dao()),
     )
 
     e.Router.GET(

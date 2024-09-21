@@ -400,6 +400,7 @@ function connectWS() {
     const msg = rawmsg.split(":");
     if (msg.length == 0) { cLe() }
     switch (msg[0]) {
+
       case "msgrecd":
         if (msg.length != 3) { cLe() }
         msgRecieved(msg[1], msg[2])
@@ -429,6 +430,8 @@ function connectWS() {
         msgSent(msg[1], msg[2], msg[3])
       break;
       case "err":
+        console.log(msg)
+      break;
 
     }
   })
