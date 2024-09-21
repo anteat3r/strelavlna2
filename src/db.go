@@ -70,7 +70,7 @@ func DBSell(team string, prob string) (money int, oerr error) {
     rec.Set("bought", newbought)
     rec.Set("sold", append(rec.GetStringSlice("sold"), prob))
     money = rec.GetInt("money")
-    cost, ok := GetCost(probrec.GetString("diff"))
+    cost, ok := GetCost("-" + probrec.GetString("diff"))
     if !ok { log.Error("invalid diff", prob, probrec.PublicExport()) }
     rec.Set("money", money + cost)
     err = txDao.SaveRecord(rec)
@@ -298,10 +298,10 @@ func DBAdminGrade(check string, corr bool) (team string, prob string, money int,
 
     teamrec.Set("pending", newpending)
     if corr {
-      diffcost, ok := GetCost(probrec.GetString("diff"))
+      diffrew, ok := GetCost("+" + probrec.GetString("diff"))
       if !ok { return dbErr("grade", "invalid diff") }
 
-      teamrec.Set("money", teamrec.GetInt("money") + diffcost)
+      teamrec.Set("money", teamrec.GetInt("money") + diffrew)
       teamrec.Set("solved", append(teamrec.GetStringSlice("solved"), prob))
     } else {
       teamrec.Set("bought", append(teamrec.GetStringSlice("bought"), prob))
