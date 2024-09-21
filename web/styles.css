@@ -84,6 +84,7 @@ a:hover{
     font-weight: 600;
     margin: auto;
 }
+
 .footer-element1 {grid-area: f1}
 .footer-element2 {grid-area: f2}
 .footer-element3 {grid-area: f3}
@@ -1393,6 +1394,10 @@ a:hover{
     display: flex;
     flex-direction: row;
 }
+.flex-column{
+    display: flex;
+    flex-direction: column;
+}
 
 .flex-culumn{
     display: flex;
@@ -2181,3 +2186,436 @@ a:hover{
     transition: opacity 0.3s ease-out;
 }
 
+#team-stats-main-wrapper{
+    width: 100%;
+    margin: 40px;
+    margin-inline: 80px;
+    /* margin-bottom: 0px; */
+    /* border: 2px var(--color-secondary-light) solid; */
+    border-radius: 10px;
+    background-color: var(--color-secondary-white);
+}
+
+#team-stats-first-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+#team-stats-main-balance{
+    border-radius: 5px;
+    background-color: var(--color-secondary-glow);
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 700;
+    padding: 5px;
+    padding-inline: 8px;
+    color: var(--color-secondary-dark);
+    height: 27px;
+    margin-left: 17px;
+}
+#team-stats-main-rank{
+    border-radius: 5px;
+    background-color: var(--color-secondary-glow);
+    font-family: 'Lexend';
+    font-size: 17px;
+    font-weight: 700;
+    padding: 5px;
+    padding-inline: 8px;
+    color: var(--color-secondary-dark);
+    height: 23px;
+    margin-right: 15px;
+}
+#team-stats-main-title-wrapper{
+    padding-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#team-stats-main-title{
+    font-family: 'Lexend';
+    font-size: 35px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+    margin-bottom: 15px;
+}
+#team-stats-players-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 2px var(--color-secondary-dark) dashed;
+    padding-inline: 15px;
+}
+.team-stats-player{
+    margin: 0px;
+    border-radius: 5px;
+    background-color: var(--color-secondary-glow);
+    font-family: 'Lexend';
+    font-size: 16px;
+    font-weight: 500;
+    padding: 5px;
+    padding-inline: 8px;
+}
+
+.team-stats-paragraph{
+    font-family: 'Lexend';
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    margin-left: 30px;
+    margin-top: 50px;
+}
+
+#progressbar-wrapper{
+    position: relative;
+    margin-inline: 30px;
+    margin-top: 15px;
+}
+
+#progressbar-background-wrapper{
+    display: flex;
+    flex-direction: row;
+    height: 40px;
+    width: 100%;
+
+}
+
+.progressbar-background-first{
+    background-color: var(--color-secondary-glow);
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    height: 100%;
+    width: 25%;
+}
+.progressbar-background{
+    background-color: var(--color-secondary-glow);
+    height: 100%;
+    border-left: 1px var(--color-secondary-light) dashed;
+    width: 25%;
+}
+.progressbar-background-last{
+    background-color: var(--color-secondary-glow);
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-left: 1px var(--color-secondary-light) dashed;
+    height: 100%;
+    width: 25%;
+}
+
+#progressbar-foreground{
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: var(--color-secondary-light);
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    width: 32%;
+    height: 40px;
+}
+
+#progressbar-cursor-wrapper{
+    position: absolute;
+    top: 0;
+    left: 32%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#progressbar-percentage{
+    position: absolute;
+    left: -25px;
+    top: -25px;
+    margin: 0px;
+    font-family: 'Lexend';
+    font-size: 16px;
+    color: var(--color-secondary-dark);
+    font-weight: 500;
+    width: 50px;
+    text-align: center;
+}
+
+#progressbar-time-passed{
+    position: absolute;
+    left: -50px;
+    bottom: -25px;
+    margin: 0px;
+    font-family: 'Lexend';
+    font-size: 16px;
+    color: var(--color-secondary-dark);
+    font-weight: 500;
+    width: 100px;
+    text-align: center;
+}
+
+#triangle-down{
+    position: absolute;
+    top: -7px;
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 10px solid var(--color-secondary-dark);
+}
+
+#triangle-up{
+    position: absolute;
+    bottom: -7px;
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 10px solid var(--color-secondary-dark);
+}
+
+#progressbar-cursor-spacer{
+    height: 40px;
+    width: 2px;
+    background-color: var(--color-secondary-dark);
+}
+
+#team-stats-second-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin-top: 50px;
+}
+
+#price-list-wrapper{
+    padding: 30px;
+    padding-left: 50px;
+    padding-top: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#price-list-title{
+    font-family: 'Lexend';
+    font-size: 35px;
+    font-weight: 500;
+    letter-spacing: 8px;
+    color: var(--color-secondary-dark);
+    border-bottom: 2px var(--color-secondary-dark) dashed;
+    padding-bottom: 15px;
+    width: 350px;
+    text-align: center;
+    margin-bottom: 5px;
+    margin-top: 0px;
+    transform: translateX(25px);
+}
+#price-list-items-wrapper{
+    border-spacing: 0 15px;
+}
+#price-list-items-wrapper th{
+    width: 100px;
+    text-align: center;
+    font-family: 'Lexend';
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+}
+
+#price-list-items-wrapper td{
+    padding: 0px;
+}
+
+#price-list-row-a{
+    margin: 20px;
+    margin-inline: 0px;
+    padding: 0px;
+}
+#price-list-item-a-wrapper{
+    background-color: #c6ffe2;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+#price-list-item-a{
+    margin: 0px;
+    margin-right: 40px;
+    padding: 10px;
+    background-color: #30cf7e;
+    border-radius: 5px;
+    font-family: 'Lexend';
+    font-size: 25px;
+    font-weight: 500;
+    color: #c6ffe2;
+    text-align: center;
+}
+
+#price-list-a-buy{
+    background-color: #c6ffe2;
+    font-family: 'Lexend';
+    font-size: 20px;
+    text-align: center;
+    color: #30cf7e;
+}
+#price-list-a-solve{
+    background-color: #c6ffe2;
+    font-family: 'Lexend';
+    font-size: 20px;
+    text-align: center;
+    color: #30cf7e;
+}
+#price-list-a-sell{
+    background-color: #c6ffe2;
+    font-family: 'Lexend';
+    font-size: 20px;
+    text-align: center;
+    color: #30cf7e;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+
+
+#price-list-row-b{
+    margin: 20px;
+    margin-inline: 0px;
+    padding: 0px;
+}
+#price-list-item-b-wrapper{
+    background-color: #b2e9ff;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+#price-list-item-b{
+    margin: 0px;
+    margin-right: 40px;
+    padding: 10px;
+    background-color: #3eb1df;
+    border-radius: 5px;
+    font-family: 'Lexend';
+    font-size: 25px;
+    font-weight: 500;
+    color: #b2e9ff;
+    text-align: center;
+}
+
+#price-list-b-buy{
+    background-color: #b2e9ff;
+    font-family: 'Lexend';
+    font-size: 20px;
+    text-align: center;
+    color: #3eb1df;
+}
+#price-list-b-solve{
+    background-color: #b2e9ff;
+    font-family: 'Lexend';
+    font-size: 20px;
+    text-align: center;
+    color: #3eb1df;
+}
+#price-list-b-sell{
+    background-color: #b2e9ff;
+    font-family: 'Lexend';
+    font-size: 20px;
+    text-align: center;
+    color: #3eb1df;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+
+
+#price-list-row-c{
+    margin: 20px;
+    margin-inline: 0px;
+    padding: 0px;
+}
+#price-list-item-c-wrapper{
+    background-color: #ffd1c3;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+#price-list-item-c{
+    margin: 0px;
+    margin-right: 40px;
+    padding: 10px;
+    background-color: #e45528;
+    border-radius: 5px;
+    font-family: 'Lexend';
+    font-size: 25px;
+    font-weight: 500;
+    color: #ffd1c3;
+    text-align: center;
+}
+
+#price-list-c-buy{
+    background-color: #ffd1c3;
+    font-family: 'Lexend';
+    font-size: 20px;
+    text-align: center;
+    color: #e45528;
+}
+#price-list-c-solve{
+    background-color: #ffd1c3;
+    font-family: 'Lexend';
+    font-size: 20px;
+    text-align: center;
+    color: #e45528;
+}
+#price-list-c-sell{
+    background-color: #ffd1c3;
+    font-family: 'Lexend';
+    font-size: 20px;
+    text-align: center;
+    color: #e45528;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+#statistics-wrapper{
+    padding: 30px;
+    padding-right: 50px;
+    padding-top: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#statistics-title{
+    font-family: 'Lexend';
+    font-size: 35px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    letter-spacing: 8px;
+    width: 300px;
+    text-align: center;
+    padding-bottom: 15px;
+    border-bottom: 2px var(--color-secondary-dark) dashed;
+    margin-top: 0px;
+}
+
+#statistics-content-wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.statistics-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background-color: var(--color-secondary-glow);
+    padding-inline: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.statistics-row p{
+    font-family: 'Lexend';
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+}
+
+.statistics-spacer{
+    height: 20px;
+}

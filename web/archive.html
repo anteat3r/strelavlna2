@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href='https://fonts.googleapis.com/css?family=Lexend' rel='stylesheet'>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="archive.css">
     <title>Dopplerova vlna</title>
   </head>
   <body class="">
@@ -25,7 +26,39 @@
       <canvas id="this_year_canvas" width="3000" height="120"></canvas>
       <div id="main">
         <div class="white-section">
-            <h2 class="mv-100">Zatím tu nic není</h2>
+          <h1 class="archive-title">Archiv Střela & Vlna</h1> 
+        </div> 
+        <div id="selected-year" class="archive-year archive-2023">
+          <h2>2023</h2>
+        </div>
+        <div id="selected-year" class="archive-year archive-2022">
+          <h2>2022</h2>
+        </div>
+        <div id="selected-year" class="archive-year archive-2019">
+          <h2>2019</h2>
+        </div>
+        <div id="selected-year" class="archive-year archive-2018">
+          <h2>2018</h2>
+        </div>
+        <div class="year-selector">
+          <div class="year-button">
+            2023 <i class="fas fa-chevron-left"></i>
+          </div>
+          <div class="year-button">
+            2022 <i class="fas fa-chevron-left"></i>
+          </div>
+          <div class="year-button-covid">
+            2021 
+          </div>
+          <div class="year-button-covid">
+            2020 
+          </div>
+          <div class="year-button">
+            2019 <i class="fas fa-chevron-left"></i>
+          </div>
+          <div class="year-button">
+            2018 <i class="fas fa-chevron-left"></i>
+          </div>
         </div>
         <footer class="black-section grid-footer">
           <div class="footer-element1 footer-element">
@@ -63,4 +96,5 @@
   <script src="return_home.js"></script>
   <script src="this_year_canvas.js"></script>
   <script src="main_canvas.js"></script>
+  <script src="archive.js"></script>
 </html>

@@ -1,0 +1,102 @@
+.archive-title{
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+    border-bottom: var(--color-main) solid;
+}
+
+.year-selector{
+    border: var(--color-main-light) solid 5px;
+    margin-left: 50px;
+    margin-bottom: 50px;
+    height: 644px;
+    width: 300px;
+    background-color: var(--color-main-white);
+}
+
+.year-button{
+    font-family: 'Lexend';
+    font-size: 30px;
+    font-weight: 600;
+    padding-inline: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: center;
+    margin: 20px;
+    border: var(--color-main-light) solid 3px;
+    background-color: var(--color-secondary);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.year-button-covid{
+    font-family: 'Lexend';
+    color: gray;
+    font-size: 30px;
+    font-weight: 600;
+    padding-inline: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: center;
+    margin: 20px;
+    border: gray solid 3px;
+    background-color: lightgray;
+    border-radius: 10px;
+    cursor: not-allowed;
+}
+
+.year-button:hover{
+    font-family: 'Lexend';
+    font-size: 30px;
+    font-weight: 600;
+    padding-inline: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: center;
+    margin: 20px;
+    border: var(--color-main-light) solid 3px;
+    background-color: var(--color-secondary-light);
+    border-radius: 10px;
+}
+.year-button i{
+    transform: rotate(0deg);
+    transition: transform 0.3s ease-in-out;
+}
+
+.current-year-button{
+    font-family: 'Lexend';
+    font-size: 30px;
+    font-weight: 600;
+    padding-inline: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: center;
+    background-color: var(--color-secondary-glow);
+    margin: 20px;
+    border: var(--color-main-light) solid 3px;
+    border-radius: 10px;
+}
+
+.current-year-button:hover{
+    font-family: 'Lexend';
+    font-size: 30px;
+    font-weight: 600;
+    padding-inline: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: center;
+    background-color: white;
+    margin: 20px;
+    border: var(--color-main-light) solid 3px;
+    border-radius: 10px;
+}
+
+.current-year-button i{
+    transform: rotate(180deg);
+    transition: transform 0.3s ease-in-out;
+}
+
+.archive-year {
+    display: none;
+  }
+  
