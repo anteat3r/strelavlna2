@@ -107,6 +107,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     // ActiveContestMu.RUnlock()
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+    log.Info(err)
     if err != nil { return err }
 
     teamChanMapMutex.Lock()
