@@ -161,7 +161,7 @@
                 
             </div>
         </div>
-        <div id="problem-wrapper">
+        <div id="problem-wrapper" class="hidden">
             <h2 id="problem-title">Lyžař [A]</h2>
             <p id="problem-content">Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?</p>
             <div id="answer-input-wrapper">
@@ -169,6 +169,96 @@
                 <button id="submit-answer-button">
                     <i class="fas fa-angle-right"></i>
                 </button>
+            </div>
+        </div>
+        <div id="team-stats-main-wrapper" class="">
+            <div class="flex-column">
+                <div id="team-stats-first-row">
+                    <h2 id="team-stats-main-balance">1055 DC</h2>
+                    <div id="team-stats-main-title-wrapper">
+                        <h2 id="team-stats-main-title">Chcípáci</h2>
+                        <div id="team-stats-players-wrapper">
+                            <h2 class="team-stats-player">Pepa</h2>
+                            <h2 class="team-stats-player">Honza</h2>
+                            <h2 class="team-stats-player">Kateřina</h2>
+                        </div>
+                    </div>
+                    <h2 id="team-stats-main-rank">14</h2>
+                </div>
+                <p class="team-stats-paragraph">Průběh soutěže . . . .</p>
+                <div id="progressbar-wrapper">
+                    <div id="progressbar-background-wrapper">
+                        <div class="progressbar-background-first"></div>
+                        <div class="progressbar-background"></div>
+                        <div class="progressbar-background"></div>
+                        <div class="progressbar-background-last"></div>
+                    </div>
+                    <div id="progressbar-foreground"></div>
+                    <div id="progressbar-cursor-wrapper">
+                        <p id="progressbar-percentage">32 %</p>
+                        <div id="triangle-down"></div>
+                        <div id="progressbar-cursor-spacer"></div>
+                        <div id="triangle-up"></div>
+                        <p id="progressbar-time-passed">0:38:03</p>
+                    </div>
+                </div>
+                <div id="team-stats-second-row">
+                    <div id="price-list-wrapper">
+                        <h2 id="price-list-title">Ceník</h2>
+                        <table id="price-list-items-wrapper">
+                            <thead>
+                                <tr id="price-list-row-names">
+                                    <th class="price-list-empty"></th>
+                                    <th id="price-list-name-buy" class="price-list-name">Nákup</th>
+                                    <th id="price-list-name-solve" class="price-list-name">Vyřešení</th>
+                                    <th id="price-list-name-sell" class="price-list-name">Prodej</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="price-list-row-a">
+                                    <td id="price-list-item-a-wrapper"><h2 id="price-list-item-a">[A]</h2></td>
+                                    <td id="price-list-a-buy">10 DC</td>
+                                    <td id="price-list-a-solve">15 DC</td>
+                                    <td id="price-list-a-sell">5 DC</td>
+                                </tr>
+                                <tr id="price-list-row-b">
+                                    <td id="price-list-item-b-wrapper"><h2 id="price-list-item-b">[B]</h2></td>
+                                    <td id="price-list-b-buy">20 DC</td>
+                                    <td id="price-list-b-solve">35 DC</td>
+                                    <td id="price-list-b-sell">10 DC</td>
+                                </tr>
+                                <tr id="price-list-row-c">
+                                    <td id="price-list-item-c-wrapper"><h2 id="price-list-item-c">[C]</h2></td>
+                                    <td id="price-list-c-buy">30 DC</td>
+                                    <td id="price-list-c-solve">60 DC</td>
+                                    <td id="price-list-c-sell">15 DC</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="statistics-wrapper">
+                        <h2 id="statistics-title">Statistiky</h2>
+                        <div id="statistics-content-wrapper">
+                            <div class="statistics-row">
+                                <p>Aktuální zůstatek:</p>
+                                <p id="statistics-balance">1055 DC</p>
+                            </div>
+                            <div class="statistics-row">
+                                <p>Předběžné pořadí:</p>
+                                <p id="statistics-rank">14</p>
+                            </div>
+                            <div class="statistics-spacer"></div>
+                            <div class="statistics-row">
+                                <p>Vyřešené úlohy:</p>
+                                <p id="statistics-solved">3</p>
+                            </div>
+                            <div class="statistics-row">
+                                <p>Prodané úlohy:</p>
+                                <p id="statistics-sold">2</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="help-center-wrapper">
