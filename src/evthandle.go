@@ -69,6 +69,11 @@ func PlayerWsHandleMsg(
     // perchan<- "viewed" + DELIM + diff + DELIM + name + DELIM + text
     tchan.Send("focused", prob, strconv.Itoa(idx))
 
+  case "unfocus":
+    if len(m) != 1 { return eIm(msg) }
+    tchan.Send("unfocused", strconv.Itoa(idx))
+
+
   case "chat":
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
@@ -128,7 +133,9 @@ func AdminWsHandleMsg(
     WriteTeamChan(team, "adminfocused", check, prob)
     AdminSend("focused", check, strconv.Itoa(idx))
     
-
+  case "unfocus":
+    if len(m) != 1 { return eIm(msg) }
+    AdminSend("unfocused", strconv.Itoa(idx))
     
   }
   return nil

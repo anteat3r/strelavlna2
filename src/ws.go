@@ -98,15 +98,16 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     teamid := c.PathParam("team")
     if teamid == "" { return nErr("invalid team path param") }
 
-    team, err := dao.FindRecordById("teams", teamid)
+    _, err := dao.FindRecordById("teams", teamid)
     if err != nil { return err }
-    cont := team.GetString("contest")
+    // cont := team.GetString("contest")
 
-    ActiveContestMu.RLock()
-    if cont != ActiveContest { return nErr("contest not active") }
-    ActiveContestMu.RUnlock()
+    // ActiveContestMu.RLock()
+    // if cont != ActiveContest { return nErr("contest not active") }
+    // ActiveContestMu.RUnlock()
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+    log.Info(err)
     if err != nil { return err }
 
     teamChanMapMutex.Lock()
