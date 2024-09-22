@@ -26,7 +26,8 @@ audio {
     font-weight: 500;
     letter-spacing: 8px;
     color: var(--color-secondary-dark);
-
+    margin-top: 30px;
+    margin-bottom: 0px;
     text-align: center;
 }
 #waitroom-timer{

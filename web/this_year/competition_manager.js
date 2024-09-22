@@ -46,7 +46,7 @@ fetch("https://strela-vlna.gchd.cz/api/contests")
         for (const button of buttons) {
             if (!button.classList.contains("summary-card-button-gray")) {
                 button.addEventListener("click", function(){
-                    window.location.href = `register.html?id=${this.id}`;
+                    window.location.href = `../register/?id=${this.id}`;
                 })
             }
         }

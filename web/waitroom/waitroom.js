@@ -50,9 +50,7 @@ function drawSpectrum(dataArray, offsetY, scale, opacity) {
     canvasCtx.strokeStyle = `rgba(62, 177, 223, ${opacity})`;
     canvasCtx.lineWidth = 2;
     canvasCtx.stroke();
-    const now = Date.now();
-    const remaining = target_time - now;
-    document.getElementById('waitroom-timer').innerText = new Date(remaining).toISOString().substr(11, 8);
+    
 }
 
 function updateSpectrogramMountains() {
@@ -89,6 +87,9 @@ function frame(){
     if(is_playing){
         updateSpectrogramMountains();
     }
+    const now = Date.now();
+    const remaining = target_time - now;
+    document.getElementById('waitroom-timer').innerText = new Date(remaining).toISOString().substr(11, 8);
     requestAnimationFrame(frame);
 }
 

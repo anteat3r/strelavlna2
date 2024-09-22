@@ -13,7 +13,7 @@ function checkId(id){
         .then(data => {
             console.log(data);
             if(data == "free"){
-                window.location.href = `play.html?id=${id}`;
+                window.location.href = `../play/?id=${id}`;
             }else if(data == "not running"){
                 login_message.innerHTML = "*Hra momentě neběží";
             }else if(data == "full"){
