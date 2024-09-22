@@ -1,0 +1,70 @@
+body {
+    font-family: 'Lexend';
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    width: 100%;
+    /* border: 1px solid black; */
+    margin-top: 20px;
+}
+
+audio {
+    margin-top: 20px;
+}
+.waitroom-title{
+    display: inline-block;
+    position: relative;
+    font-family: 'Lexend';
+    font-size: 35px;
+    font-weight: 500;
+    letter-spacing: 8px;
+    color: var(--color-secondary-dark);
+
+    text-align: center;
+}
+#waitroom-timer{
+    font-family: 'Lexend';
+    font-size: 35px;
+    font-weight: 500;
+    letter-spacing: 8px;
+    color: var(--color-secondary-dark);
+    padding-bottom: 15px;
+    text-align: center;
+    margin-bottom: 0px;
+}
+
+#note-button{
+    position: absolute;
+    top: 10px;
+    right: -50px;
+    height: 30px;
+    width: 30px;
+    text-align: center;
+    padding: 0px;
+    background-color: var(--color-secondary-glow);
+    color: var(--color-secondary-dark);
+    transition: background-color 0.3s ease-out, color 0.3s ease-out;
+
+}
+
+#note-button:hover{
+    background-color: var(--color-secondary);
+    color: white;
+    transition: background-color 0.0s, color 0.0s;
+}
+
+#waitroom-title-wrapper{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border-bottom: 2px var(--color-secondary-glow) dashed;
+    padding-bottom: 15px;
+}

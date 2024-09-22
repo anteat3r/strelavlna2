@@ -521,6 +521,7 @@ a:hover{
     margin: 0 auto; /* Centers the container */
     /* padding: 0 20px; Adds some padding on the sides */
     min-height: 100vh;
+    width: 100%;
 }
 
 .form-default{
@@ -566,4 +567,19 @@ a:hover{
 .form-admin h2{
     color: var(--color-black-dark);
     border-bottom: var(--color-black-light) dashed 3px;
+}
+
+.navbar-main{
+    background-color: var(--color-main);
+    border-bottom: var(--color-main-light) 2px solid;
+}
+
+.navbar-play{
+    background-color: var(--color-secondary);
+    border-bottom: var(--color-secondary-light) 2px solid;
+}
+
+.navbar-admin{
+    background-color: var(--color-black);
+    border-bottom: var(--color-gray) 2px solid;
 }

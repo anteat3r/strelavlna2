@@ -622,20 +622,7 @@
     cursor: not-allowed !important;
 }
 
-.navbar-main{
-    background-color: var(--color-main);
-    border-bottom: var(--color-main-light) 2px solid;
-}
 
-.navbar-play{
-    background-color: var(--color-secondary);
-    border-bottom: var(--color-secondary-light) 2px solid;
-}
-
-.navbar-admin{
-    background-color: var(--color-black);
-    border-bottom: var(--color-gray) 2px solid;
-}
 
 .submit-button-main{
     
