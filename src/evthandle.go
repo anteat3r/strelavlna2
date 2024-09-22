@@ -93,6 +93,9 @@ func PlayerWsHandleMsg(
     tchan.Send("msgsent", prob, text)
     AdminSend("msgrecd", team, prob, text)
 
+  default:
+    return eIm(msg)
+
   }
 
   log.Info("playerevt", team, msg)

@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"html/template"
 	"net/http"
 	"net/mail"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/anteat3r/strelavlna2/src"
@@ -27,7 +29,8 @@ func customHTTPErrorHandler(c echo.Context, err error) {
 		code = he.Code
 	}
 
-  c.String(code, err.Error()) }
+  c.String(code, err.Error())
+}
 
 
 func main() {
@@ -285,6 +288,22 @@ func main() {
       },
       // apis.RequireAdminAuth(),
     )
+
+    initcont, err := app.Dao().FindFirstRecordByData("text", "name", "def_activecont")
+    if err != nil { return err }
+
+    src.ActiveContest = initcont.GetString("text")
+
+    initcosts, err := app.Dao().FindFirstRecordByData("text", "name", "def_costs")
+    if err != nil { return err }
+
+    for _, l := range strings.Split(initcosts.GetString("text"), "\n") {
+      vals := strings.Split(l, " -> ")
+      if len(vals) != 2 { return errors.New("invalid costs") }
+      val, err := strconv.Atoi(vals[1])
+      if err != nil { return err }
+      src.Costs[vals[0]] = val
+    }
 
     return nil
   })
