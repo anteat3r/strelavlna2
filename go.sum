@@ -9,6 +9,12 @@ github.com/anteat3r/golog v0.0.0-20240817140351-3a4a52bbf063 h1:ipJrWzUwsJwBfIR4
 github.com/anteat3r/golog v0.0.0-20240817140351-3a4a52bbf063/go.mod h1:qcwc/3TaEymLI62/xCxaW9iCph+saQi6XhK/q/8QvoM=
 github.com/anteat3r/golog v0.1.0 h1:6R/mVJHFv1wqqJlWW7MjZRCUO3vzMGVOL5AwgXn5T9c=
 github.com/anteat3r/golog v0.1.0/go.mod h1:qcwc/3TaEymLI62/xCxaW9iCph+saQi6XhK/q/8QvoM=
+github.com/anteat3r/golog v0.1.1 h1:tJAUhepXi2beTjPpMVNOVh+8dEisfZ6ILW0OBFF/YPQ=
+github.com/anteat3r/golog v0.1.1/go.mod h1:qcwc/3TaEymLI62/xCxaW9iCph+saQi6XhK/q/8QvoM=
+github.com/anteat3r/golog v0.1.2 h1:g+ft8grZfaRRBOYTm5hLyGsG2ehz4tLAfjmBfkfILjg=
+github.com/anteat3r/golog v0.1.2/go.mod h1:qcwc/3TaEymLI62/xCxaW9iCph+saQi6XhK/q/8QvoM=
+github.com/anteat3r/golog v0.1.3 h1:DlMAiELkjOMoT2DSq7LXUAB5AscslXD5yFWAbTZi+u0=
+github.com/anteat3r/golog v0.1.3/go.mod h1:qcwc/3TaEymLI62/xCxaW9iCph+saQi6XhK/q/8QvoM=
 github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496/go.mod h1:oGkLhpf+kjZl6xBf758TQhh5XrAeiJv/7FRz/2spLIg=
 github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 h1:DklsrG3dyBCFEj5IhUbnKptjxatkF07cF2ak3yi77so=
 github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2/go.mod h1:WaHUgvxTVq04UNunO+XhnAqY/wQc+bxr74GqbsZ/Jqw=

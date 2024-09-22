@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"html/template"
 	"net/http"
 	"net/mail"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/anteat3r/strelavlna2/src"
@@ -27,12 +29,12 @@ func customHTTPErrorHandler(c echo.Context, err error) {
 		code = he.Code
 	}
 
-  c.String(code, err.Error()) }
+  c.String(code, err.Error())
+}
 
 
 func main() {
   app := pocketbase.New()
-  src.Dao = app.Dao()
 
   app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
     e.Router.HTTPErrorHandler = customHTTPErrorHandler
@@ -153,13 +155,20 @@ func main() {
     e.Router.GET(
       "/api/admin/setactivec",
       func(c echo.Context) error {
+        log.Info(c.QueryParams())
         if c.QueryParam("i") == "" {
+          log.Info("soadij")
           return c.String(400, "invalid param")
         }
+        log.Info("soadij")
         src.ActiveContestMu.Lock()
+        log.Info("soadij")
         src.ActiveContest = c.QueryParam("i")
+        log.Info("soadij")
         src.ActiveContestMu.Unlock()
+        log.Info("soadij")
         app.Logger().Info(`ActiveContest set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
+        log.Info("soadij")
         return c.String(200, "")
       },
       apis.RequireAdminAuth(),
@@ -280,8 +289,30 @@ func main() {
       // apis.RequireAdminAuth(),
     )
 
+    initcont, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecont")
+    if err != nil { return err }
+
+    src.ActiveContest = initcont.GetString("text")
+
+    initcosts, err := app.Dao().FindFirstRecordByData("texts", "name", "def_costs")
+    if err != nil { return err }
+
+    text := initcosts.GetString("text")
+    text = strings.TrimPrefix(text, "<p>")
+    text = strings.TrimSuffix(text, "</p>")
+
+    for _, l := range strings.Split(text, "; ") {
+      vals := strings.Split(l, " = ")
+      if len(vals) != 2 { return errors.New("invalid costs") }
+      val, err := strconv.Atoi(vals[1])
+      if err != nil { return err }
+      src.Costs[vals[0]] = val
+    }
+
     return nil
   })
+
+  src.Dao = app.Dao()
 
   if err := app.Start(); err != nil {
     panic(err)

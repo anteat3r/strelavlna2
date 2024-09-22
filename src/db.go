@@ -355,12 +355,12 @@ func DBAdminDismiss(check string) (team string, prob string, oerr error) {
     teamrec, err := txDao.FindRecordById("teams", checkrec.GetString("team"))
     if err != nil { return err }
 
-    teamrec.Set("checks", teamrec.GetInt("checks")-1)
-    err = txDao.SaveRecord(teamrec)
-    if err != nil { return err }
+    // teamrec.Set("checks", teamrec.GetInt("checks")-1)
+    // err = txDao.SaveRecord(teamrec)
+    // if err != nil { return err }
 
     team = teamrec.GetId()
-    prob= checkrec.GetString("prob")
+    prob = checkrec.GetString("prob")
 
     err = txDao.DeleteRecord(checkrec)
     if err != nil { return err }

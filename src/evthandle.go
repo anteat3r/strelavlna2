@@ -3,6 +3,8 @@ package src
 import (
 	"strconv"
 	"strings"
+
+  log "github.com/anteat3r/golog"
 )
 
 type InvalidMsgError struct { msg string }
@@ -14,7 +16,11 @@ func eIm(msg string) InvalidMsgError {
   return InvalidMsgError{msg}
 }
 
-const DELIM = ":"
+func sLog(v... any) {
+  log.InfoT("%v ", 1, v...)
+}
+
+const DELIM = "\x00"
 
 func PlayerWsHandleMsg(
   team string,
@@ -22,10 +28,15 @@ func PlayerWsHandleMsg(
   perchan chan string,
   tchan *TeamChanMu,
   idx int,
-) error {
+) (oerr error) {
   ActiveContestMu.RLock()
   if ActiveContest == "" { return dbErr("contest ended") }
   ActiveContestMu.RUnlock()
+  defer func(){
+    if oerr != nil {
+      sLog("playerevterr", team, msg, oerr.Error())
+    }
+  }()
 
   m := strings.Split(msg, DELIM)
   if len(m) == 0 { return eIm(msg) }
@@ -73,7 +84,6 @@ func PlayerWsHandleMsg(
     if len(m) != 1 { return eIm(msg) }
     tchan.Send("unfocused", strconv.Itoa(idx))
 
-
   case "chat":
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
@@ -83,16 +93,28 @@ func PlayerWsHandleMsg(
     tchan.Send("msgsent", prob, text)
     AdminSend("msgrecd", team, prob, text)
 
+  default:
+    return eIm(msg)
+
   }
+
+  log.Info("playerevt", team, msg)
 
   return nil
 }
 
 func AdminWsHandleMsg(
+  email string,
   perchan chan string,
   msg string,
   idx int,
-) error {
+) (oerr error) {
+  defer func(){
+    if oerr != nil {
+      sLog("adminevterr", email, msg, oerr.Error())
+    }
+  }()
+
   m := strings.Split(msg, DELIM)
   if len(m) == 0 { return eIm(msg) }
   switch m[0] {
@@ -138,5 +160,8 @@ func AdminWsHandleMsg(
     AdminSend("unfocused", strconv.Itoa(idx))
     
   }
+
+  sLog("adminevt", email, msg)
+
   return nil
 }
