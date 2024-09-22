@@ -11,11 +11,13 @@ function checkId(id){
     fetch(`https://strela-vlna.gchd.cz/api/validate_play?id=${id}`)
         .then(response => response.text())
         .then(data => {
+            console.log(data);
             if(data == "free"){
                 window.location.href = `play.html?id=${id}`;
             }else if(data == "not running"){
                 login_message.innerHTML = "*Hra momentě neběží";
-            }else if(data = "full"){
+            }else if(data == "full"){
+                console.log("hehheha");
                 login_message.innerHTML = "*Maximální počet hráču na tým dosažen";
             }else{
                 id_field.value = "";
