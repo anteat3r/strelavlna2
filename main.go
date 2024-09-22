@@ -312,7 +312,7 @@ func main() {
     return nil
   })
 
-  src.Dao = app.Dao()
+  src.App = app
 
   if err := app.Start(); err != nil {
     panic(err)
