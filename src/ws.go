@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/daos"
+  log "github.com/anteat3r/golog"
 )
 
 var upgrader = websocket.Upgrader{
@@ -31,8 +32,10 @@ type TeamChanMu struct {
   ch TeamChans
 }
 func (c *TeamChanMu) Send(msg... string) {
+  log.Info(c, msg)
   resmsg := strings.Join(msg, DELIM)
   c.mu.RLock()
+  log.Info(c.ch)
   for _, ch := range c.ch {
     if ch == nil { continue }
     ch<- resmsg
