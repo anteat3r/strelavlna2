@@ -156,6 +156,7 @@ func main() {
     e.Router.GET(
       "/api/admin/setactivec",
       func(c echo.Context) error {
+        log.Info(c.QueryParams())
         if c.QueryParam("i") == "" {
           log.Info("soadij")
           return c.String(400, "invalid param")
