@@ -116,10 +116,6 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     log.Info(c.Request().Header)
     log.Info(c.Request().URL)
-    
-    conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
-    log.Info(err)
-    if err != nil { return err }
 
     teamChanMapMutex.Lock()
 
@@ -133,8 +129,8 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     i := -1
 
     teamchan.mu.RLock()
-    for j, c := range teamchan.ch {
-      if c == nil { continue }
+    for j, ch := range teamchan.ch {
+      if ch == nil { continue }
       i = j
       break
     }
@@ -146,6 +142,10 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     teamchan.mu.Lock()
     teamchan.ch[i] = perchan
     teamchan.mu.Unlock()
+
+    conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+    log.Info(err)
+    if err != nil { return err }
 
     go PlayerWsLoop(conn, teamid, perchan, teamchan, i)
 
