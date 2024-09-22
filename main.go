@@ -35,7 +35,6 @@ func customHTTPErrorHandler(c echo.Context, err error) {
 
 func main() {
   app := pocketbase.New()
-  src.Dao = app.Dao()
 
   app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
     e.Router.HTTPErrorHandler = customHTTPErrorHandler
@@ -312,6 +311,8 @@ func main() {
 
     return nil
   })
+
+  src.Dao = app.Dao()
 
   if err := app.Start(); err != nil {
     panic(err)
