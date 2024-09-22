@@ -541,6 +541,12 @@ a:hover{
     font-weight: 700;
     font-family: 'Lexend';
 }
+.form-wrapper{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 40px;
+}
 
 .form-main{
     background-color: var(--color-main-white);
@@ -796,4 +802,19 @@ a:hover{
 }
 .font-25{
     font-size: 25px;
+}
+
+.hidden{
+    display: none;
+}
+
+.align-center{
+    align-items: center;
+}
+.space-between{
+    justify-content: space-between;
+}
+
+.bold{
+    font-weight: 700;
 }
