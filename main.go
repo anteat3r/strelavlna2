@@ -290,12 +290,12 @@ func main() {
       // apis.RequireAdminAuth(),
     )
 
-    initcont, err := app.Dao().FindFirstRecordByData("text", "name", "def_activecont")
+    initcont, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecont")
     if err != nil { return err }
 
     src.ActiveContest = initcont.GetString("text")
 
-    initcosts, err := app.Dao().FindFirstRecordByData("text", "name", "def_costs")
+    initcosts, err := app.Dao().FindFirstRecordByData("texts", "name", "def_costs")
     if err != nil { return err }
 
     text := initcosts.GetString("text")
