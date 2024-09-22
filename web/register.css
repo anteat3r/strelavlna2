@@ -1,0 +1,216 @@
+
+.form-wrapper{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 40px;
+}
+
+#register-inner-wrapper{
+    display: flex;
+    justify-content: left;
+    align-items: left;
+    flex-direction: column;
+    padding: 20px;
+    font-family: 'Lexend';
+}
+
+.register-label{
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+.register-label-small{
+    font-size: 17px;
+}
+
+
+
+#player-name-selector-top-wrapper{
+    /* margin-top: 50px; */
+    max-width: 400px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    border-bottom: #000000 2px solid;
+}
+
+#school-selector-top-wrapper{
+    /* max-width: 800px; */
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    border-bottom: #bdb4f1 2px solid;
+}
+
+#school-dropdown-icon{
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.school-dropdown-icon-normal{
+    transform: rotate(0deg) translateY(5px);
+    transition: transform 0.2s ease-out;
+}
+.school-dropdown-icon-toggle{
+    transform: rotate(180deg) translateY(5px);
+    transition: transform 0.2s ease-out;
+}
+
+
+#register-players-dropdown-icon{
+    cursor: pointer;
+    font-size: 20px;
+    color: #6853e0;
+}
+.register-players-dropdown-icon-normal{
+    transform:rotate(0deg) translateY(5px);
+    transition: transform 0.2s ease-out;
+}
+
+.register-players-dropdown-icon-toggle{
+    transform:rotate(180deg) translateY(5px);
+    transition: transform 0.2s ease-out;
+
+}
+
+#player-name-selector-wrapper{
+    margin-top: 0px;
+    overflow: hidden;
+    padding-top: 20px;
+    margin-bottom: 50px;
+}
+
+.player-name-selector-wrapper-normal{
+    max-height: 0px;
+    transition: max-height 0.5s ease-out;
+}
+.player-name-selector-wrapper-toggle{
+    max-height: 250px;
+    transition: max-height 0.5s ease-out;
+}
+
+#school-selector-wrapper{
+    max-width: 600px;
+    margin-top: 0px;
+    overflow: hidden;
+    padding-top: 20px;
+    margin-bottom: 50px;
+    position: relative;
+    display: inline-block;
+}
+
+.school-selector-wrapper-normal{
+    max-height: 0px;
+    transition: max-height 0.5s ease-out;
+}
+.school-selector-wrapper-toggle{
+    max-height: 350px;
+    transition: max-height 0.5s ease-out;
+}
+
+
+.player-name-input-wrapper{
+    display: flex;
+    flex-direction:row;
+    justify-content: left;
+    gap: 10px;
+    color: #404040;
+}
+
+.autocomplete {
+    position: relative;
+    display: inline-block;
+    width: 75%;
+    max-width: 600px;
+}
+
+.autocomplete-items {
+    position: absolute;
+    border: 1px solid #d4d4d4;
+    border-bottom: none;
+    border-top: none;
+    z-index: 99;
+    /*position the autocomplete items to be the same width as the container:*/
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 400px;
+    overflow-y: scroll;
+}
+
+.autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #fff; 
+    border-bottom: 1px solid #8b7be7; 
+    transition: background-color 0.3s ease-out;
+
+}
+
+.autocomplete-items div:hover {
+    background-color: #e1dcfa; 
+    transition: background-color 0s;
+}
+
+.autocomplete-active {
+    background-color: #4b31db !important; 
+    color: #ffffff; 
+}
+
+#register-button{
+    max-width: 200px;
+    font-family: 'Lexend';
+    font-size: 20px;
+    color: white;
+}
+
+
+.email-input-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    row-gap: 5px;
+    column-gap: 20px;
+    
+    flex-wrap: wrap;
+}
+
+.email-check-code-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    gap: 5px;
+}
+
+.mail-check-input{
+    height: 21px;
+    width: 21px;
+}
+
+#mail-check-button{
+    height: 26px;
+    border: none;
+    padding: 2px;
+    padding-right: 5px;
+    padding-left: 10px;
+    background-color: #543ed4;
+    color: white;
+}
+
+.fa-arrow-right-from-bracket{
+    margin-left: 5px;
+    margin-right: 2px;
+}
+
+#email-sent-message{
+    margin-top: 5px;
+    margin-left: 10px;
+    font-size: 12px;
+    font-family: 'Lexend';
+    color:#414141
+}
+.register-button-disabled{
+    background-color: #636363 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+}
