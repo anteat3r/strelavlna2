@@ -297,8 +297,12 @@ func main() {
     initcosts, err := app.Dao().FindFirstRecordByData("text", "name", "def_costs")
     if err != nil { return err }
 
-    for _, l := range strings.Split(initcosts.GetString("text"), "\n") {
-      vals := strings.Split(l, " -> ")
+    text := initcosts.GetString("text")
+    text = strings.TrimPrefix(text, "<p>")
+    text = strings.TrimSuffix(text, "</p>")
+
+    for _, l := range strings.Split(text, "; ") {
+      vals := strings.Split(l, " = ")
       if len(vals) != 2 { return errors.New("invalid costs") }
       val, err := strconv.Atoi(vals[1])
       if err != nil { return err }
