@@ -17,7 +17,7 @@ func eIm(msg string) InvalidMsgError {
 }
 
 func sLog(v... any) {
-  log.InfoT("%v ", v...)
+  log.InfoT("%v ", 1, v...)
 }
 
 const DELIM = "\x00"
