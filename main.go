@@ -84,7 +84,7 @@ func main() {
     e.Router.GET(
       "/",
       func(c echo.Context) error {
-        return c.Redirect(301, "/about_us")
+        return c.Redirect(301, "/about_us/")
       },
     )
 
