@@ -118,10 +118,10 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     log.Info(c.Request().URL)
 
     teamChanMapMutex.Lock()
-
     teamchan, ok := TeamChanMap[teamid]
     if !ok {
       teamchan = &TeamChanMu{sync.RWMutex{}, make([]chan string, 5, 5)}
+      log.Info(teamchan)
       TeamChanMap[teamid] = teamchan
     }
     teamChanMapMutex.Unlock()
