@@ -2,6 +2,7 @@ package src
 
 import (
 	"errors"
+	"net/http"
 	"strings"
 	"sync"
 
@@ -14,6 +15,13 @@ import (
 var upgrader = websocket.Upgrader{
   ReadBufferSize: 1024,
   WriteBufferSize: 1024,
+  CheckOrigin: func(r *http.Request) bool {
+    origin, ok := r.Header["Origin"]
+    if !ok { return false }
+    if len(origin) != 1 { return false }
+    if origin[0] != "https://strela-vlna.gchd.cz" { return false }
+    return true
+  },
 }
 
 type TeamChans []chan string
