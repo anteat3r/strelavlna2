@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="images/Icon.png" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dopplerova vlna</title>
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="waitroom.css">
+</head>
+<body class=""></body>
+    <div class="container">
+      <header>
+        <div class="row-segment grid-nav navbar-play">
+          <div class="nav1">
+            <a href="index.html"><img id="logo" src="images\Logo_withname3.png" width="446px" height="50px"></a>
+          </div>
+        </div>
+      </header>
+      <div id="main">
+        <div id="waitroom-title-wrapper">
+          <h1 class="waitroom-title">
+            Čekárna
+            <button id="note-button">
+              <i class="fa-brands fa-itunes-note"></i>
+            </button>
+          </h1>
+        </div>
+        <h1 id="waitroom-timer">1:54:28</h1>
+
+
+    <!-- Audio player -->
+        <audio loop id="audio">
+            <!-- <source src="music/elevatorMusic2.mp3" type="audio/mp3"> -->
+            <source src="music/elevatorMusic2.mp3" type="audio/mp3" loop>
+            Your browser does not support the audio element.
+        </audio>
+
+        <!-- Canvas for spectrogram -->
+        <canvas width="2000" height="650"></canvas>
+      </div>
+    </div>
+    <script src="waitroom.js"></script>
+  </body>
+
+</html>
