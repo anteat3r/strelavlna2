@@ -68,7 +68,7 @@ function updateSpectrogramMountains() {
 
     const depthStep = 1.5;
     var offsetY = 500;
-    var scale = 4;
+    var scale = 8;
     for (let i = 0; i < spectrumHistory.length; i++) {
         scale += i/70; 
         offsetY -= depthStep * (1+i/1.5) + (Math.random()*2-1)*0.2;
@@ -98,15 +98,6 @@ audioElement.onplay = () => {
 };
 
 frame();
-
-
-// window.addEventListener('load', function() {
-//     var audio = document.getElementById('audio');
-    
-//     audio.play().catch(function(error) {
-//       console.log("Autoplay prevented: " + error);
-//     });
-//   });
 
 
 function playStop(){
