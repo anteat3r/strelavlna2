@@ -13,7 +13,8 @@ body {
 canvas {
     width: 100%;
     /* border: 1px solid black; */
-    margin-top: 20px;
+    /* margin-top: 20px; */
+    transform: translateY(-20px);
 }
 
 audio {
@@ -31,15 +32,41 @@ audio {
     margin-bottom: 0px;
     text-align: center;
 }
-#waitroom-timer{
+.waitroom-timer{
+    position: absolute;
+
     font-family: 'Lexend';
     font-size: 35px;
     font-weight: 500;
     letter-spacing: 8px;
     color: var(--color-secondary-dark);
-    padding-bottom: 15px;
     text-align: center;
+    margin: 0px;
+}
+
+#waitroom-timer-wrapper{
+    position: relative;
     margin-bottom: 0px;
+    margin-top: 70px;
+}
+
+.timer-1{
+    transform: translateX(-50%);
+}
+.timer-2{
+    transform: translateX(calc(-50%/0.95)) translateY(5px);
+    scale: 0.95;
+    opacity: 0.3;
+}
+.timer-3{
+    transform: translateX(calc(-50%/0.90)) translateY(10px);
+    scale: 0.90;
+    opacity: 0.2;
+}
+.timer-4{
+    transform: translateX(calc(-50%/0.85)) translateY(15px);
+    scale: 0.85;
+    opacity: 0.1;
 }
 
 #note-button{
