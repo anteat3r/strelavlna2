@@ -130,7 +130,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     teamchan.mu.RLock()
     for j, ch := range teamchan.ch {
-      if ch == nil { continue }
+      if ch != nil { continue }
       i = j
       break
     }
