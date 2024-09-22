@@ -107,6 +107,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     // ActiveContestMu.RUnlock()
 
     log.Info(c.Request().Header)
+    log.Info(c.Request().URL)
     
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     log.Info(err)
