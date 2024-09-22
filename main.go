@@ -81,10 +81,12 @@ func main() {
       ),
     )
 
-    e.Router.File("/archive", "../web/archive.html")
-    e.Router.File("/register", "../web/register.html")
-    e.Router.File("/rules", "../web/rules.html")
-    e.Router.File("/this_year", "../web/this_year.html")
+    e.Router.GET(
+      "/",
+      func(c echo.Context) error {
+        return c.Redirect(301, "/about_us")
+      },
+    )
 
     // PathParams o (okres)
     e.Router.GET(
@@ -160,15 +162,10 @@ func main() {
           log.Info("soadij")
           return c.String(400, "invalid param")
         }
-        log.Info("soadij")
         src.ActiveContestMu.Lock()
-        log.Info("soadij")
         src.ActiveContest = c.QueryParam("i")
-        log.Info("soadij")
         src.ActiveContestMu.Unlock()
-        log.Info("soadij")
         app.Logger().Info(`ActiveContest set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
-        log.Info("soadij")
         return c.String(200, "")
       },
       apis.RequireAdminAuth(),
