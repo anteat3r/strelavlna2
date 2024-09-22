@@ -175,6 +175,7 @@ func PlayerWsLoop(
         close(wsrchan)
         break wsrloop
       }
+      log.Info(time.Now())
       if p != websocket.TextMessage {
         perchan<- "err" + DELIM + "not text msg: " + DELIM + strconv.Itoa(p)
         continue
@@ -190,6 +191,7 @@ func PlayerWsLoop(
         oerr = nErr("perchan closed")
         break loop
       }
+      log.Info(time.Now())
       err := conn.WriteMessage(websocket.TextMessage, []byte(m))
       if err != nil {
         oerr = err
@@ -264,7 +266,6 @@ func AdminWsLoop(
         close(wsrchan)
         break wsrloop
       }
-      log.Info(time.Now())
       if p != websocket.TextMessage {
         perchan<- "err" + DELIM + "not text msg: " + DELIM + strconv.Itoa(p)
         continue
@@ -280,7 +281,6 @@ func AdminWsLoop(
         oerr = nErr("perchan closed")
         break loop
       }
-      log.Info(time.Now())
       err := conn.WriteMessage(websocket.TextMessage, []byte(m))
       if err != nil {
         oerr = err
