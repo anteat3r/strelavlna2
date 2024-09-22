@@ -154,12 +154,18 @@ func main() {
       "/api/admin/setactivec",
       func(c echo.Context) error {
         if c.QueryParam("i") == "" {
+          log.Info("soadij")
           return c.String(400, "invalid param")
         }
+        log.Info("soadij")
         src.ActiveContestMu.Lock()
+        log.Info("soadij")
         src.ActiveContest = c.QueryParam("i")
+        log.Info("soadij")
         src.ActiveContestMu.Unlock()
+        log.Info("soadij")
         app.Logger().Info(`ActiveContest set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
+        log.Info("soadij")
         return c.String(200, "")
       },
       apis.RequireAdminAuth(),
