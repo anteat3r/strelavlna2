@@ -30,13 +30,18 @@ func PlayerWsHandleMsg(
   idx int,
 ) (oerr error) {
   ActiveContestMu.RLock()
-  if ActiveContest == "" { return dbErr("contest ended") }
+  if ActiveContest == "" {
+    ActiveContestMu.RUnlock()
+    return dbErr("contest ended")
+  }
   ActiveContestMu.RUnlock()
-  defer func(){
-    if oerr != nil {
-      sLog("playerevterr", team, msg, oerr.Error())
-    }
-  }()
+  // defer func(){
+  //   if oerr != nil {
+  //     sLog("playerevterr", team, msg, oerr.Error())
+  //   }
+  // }()
+
+  log.Info("")
 
   m := strings.Split(msg, DELIM)
   if len(m) == 0 { return eIm(msg) }

@@ -6,9 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
-	log "github.com/anteat3r/golog"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/daos"
@@ -33,10 +31,8 @@ type TeamChanMu struct {
   ch TeamChans
 }
 func (c *TeamChanMu) Send(msg... string) {
-  log.Info(c, msg)
   resmsg := strings.Join(msg, DELIM)
   c.mu.RLock()
-  log.Info(c.ch)
   for _, ch := range c.ch {
     if ch == nil { continue }
     ch<- resmsg
@@ -175,7 +171,6 @@ func PlayerWsLoop(
         close(wsrchan)
         break wsrloop
       }
-      log.Info(time.Now())
       if p != websocket.TextMessage {
         perchan<- "err" + DELIM + "not text msg: " + DELIM + strconv.Itoa(p)
         continue
@@ -191,7 +186,6 @@ func PlayerWsLoop(
         oerr = nErr("perchan closed")
         break loop
       }
-      log.Info(time.Now())
       err := conn.WriteMessage(websocket.TextMessage, []byte(m))
       if err != nil {
         oerr = err
