@@ -8,12 +8,13 @@ import (
 
 	log "github.com/anteat3r/golog"
 	"github.com/pocketbase/dbx"
+	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
 )
 
 var (
-  Dao *daos.Dao
+  App *pocketbase.PocketBase
 
   Costs = map[string]int{
     "A": 10,
@@ -55,7 +56,7 @@ func SliceExclude[T comparable](s []T, v T) (res []T, found bool) {
 }
 
 func DBSell(team string, prob string) (money int, oerr error) {
-  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
     rec, err := txDao.FindRecordById("teams", team)
     if err != nil { return err }
 
@@ -81,7 +82,7 @@ func DBSell(team string, prob string) (money int, oerr error) {
 }
 
 func dbBuySrc(team string, diff string, srcField string) (id string, money int, name string, oerr error) {
-  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
     diffcost, ok := GetCost(diff)
     if !ok {
       return dbClownErr("buy", "invalid diff")
@@ -139,7 +140,7 @@ func DBBuyOld(team string, diff string) (id string, money int, name string, oerr
 }
 
 func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, text string, oerr error) {
-  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamrec, err := txDao.FindRecordById("teams", team)
     if err != nil { return err }
@@ -178,7 +179,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
 }
 
 func DBView(team string, prob string) (text string, diff string, name string, oerr error) {
-  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamrec, err := txDao.FindRecordById("teams", team)
     if err != nil { return err }
@@ -201,7 +202,7 @@ func DBView(team string, prob string) (text string, diff string, name string, oe
 }
 
 func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
-  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamrec, err := txDao.FindRecordById("teams", team)
     if err != nil { return err }
@@ -238,7 +239,7 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
 }
 
 func DBPlayerInitLoad(team string) (money int, boughtprobs string, pendingprobs string, checks string, oerr error) {
-  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamrec, err := txDao.FindRecordById("teams", team)
     if err != nil { return err }
@@ -278,7 +279,7 @@ func DBPlayerInitLoad(team string) (money int, boughtprobs string, pendingprobs 
 }
 
 func DBAdminGrade(check string, corr bool) (team string, prob string, money int, oerr error) {
-  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     checkrec, err := txDao.FindRecordById("checks", check)
     if err != nil { return err }
@@ -321,7 +322,7 @@ func DBAdminGrade(check string, corr bool) (team string, prob string, money int,
 }
 
 func DBAdminMsg(team string, prob string, text string) (oerr error) {
-  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamrec, err := txDao.FindRecordById("teams", team)
     if err != nil { return err }
@@ -347,7 +348,7 @@ func DBAdminMsg(team string, prob string, text string) (oerr error) {
 }
 
 func DBAdminDismiss(check string) (team string, prob string, oerr error) {
-  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     checkrec, err := txDao.FindRecordById("checks", check)
     if err != nil { return err }
@@ -371,7 +372,7 @@ func DBAdminDismiss(check string) (team string, prob string, oerr error) {
 }
 
 func DBAdminView(check string) (team string, prob string, oerr error) {
-  oerr = Dao.RunInTransaction(func(txDao *daos.Dao) error {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     checkrec, err := txDao.FindRecordById("checks", check)
     if err != nil { return err }
