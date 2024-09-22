@@ -106,6 +106,8 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     // if cont != ActiveContest { return nErr("contest not active") }
     // ActiveContestMu.RUnlock()
 
+    log.Info(c.Request().Header)
+    
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     log.Info(err)
     if err != nil { return err }
