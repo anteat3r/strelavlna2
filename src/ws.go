@@ -33,10 +33,8 @@ type TeamChanMu struct {
   ch TeamChans
 }
 func (c *TeamChanMu) Send(msg... string) {
-  log.Info(c, msg)
   resmsg := strings.Join(msg, DELIM)
   c.mu.RLock()
-  log.Info(c.ch)
   for _, ch := range c.ch {
     if ch == nil { continue }
     ch<- resmsg
