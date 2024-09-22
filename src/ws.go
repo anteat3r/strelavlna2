@@ -6,9 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
-	log "github.com/anteat3r/golog"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/daos"
