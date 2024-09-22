@@ -1,0 +1,36 @@
+.reg-flex{
+    margin-inline: 10%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+#summary-title{
+    /* font-weight: 500; */
+    font-family: 'Lexend';
+    padding-bottom: 20px;
+    width: 300px;
+    margin-bottom: 70px;
+    margin-left: 10%;
+}
+@media (max-width: 700px){
+    #summary-title{
+        margin-left: 10%;
+    }
+}
+
+@media (max-width:400px){
+    #summary-title{
+        margin-left: 5%;
+    }
+}
+#this_year_canvas{
+    background-color: white;
+    display: block;
+    object-fit: cover;
+    width: 100%;
+    height: 120px;
+}
