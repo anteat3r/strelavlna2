@@ -1,36 +1,36 @@
-
 document.addEventListener("DOMContentLoaded", function() {
     const yearButtons = document.querySelectorAll(".year-button");
-    const selectedYearDisplay = document.getElementById("selected-year");
+    const yearSelector = document.querySelector(".year-selector");
+  
+    // Initially, activate the first button and show its content
+    let activeButton = yearButtons[0];
+    activeButton.classList.add("current-year-button");
+    const initialYearDiv = document.querySelector(`.archive-${activeButton.textContent.trim()}`);
+    setMaxHeight(initialYearDiv);
   
     yearButtons.forEach(function(button) {
       button.addEventListener("click", function() {
-        // Get the year from the clicked button's text
         const year = button.textContent.trim();
   
-        // If the clicked button is already active, remove the class and clear the display
-        if (button.classList.contains("current-year-button")) {
-          button.classList.remove("current-year-button");
-          selectedYearDisplay.textContent = ""; // Clear the selected year
-          hideAllYears(); // Hide all year content
-        } else {
-          // Remove the 'current-year-button' class from all buttons
-          yearButtons.forEach(function(btn) {
-            btn.classList.remove("current-year-button");
-          });
+        // Check if the clicked button is already active
+        if (button === activeButton) {
+          return; // Do nothing if it's the only active button
+        }
   
-          // Add the 'current-year-button' class to the clicked button
-          button.classList.add("current-year-button");
+        // Remove 'current-year-button' from the previously active button
+        activeButton.classList.remove("current-year-button");
   
-          // Display the selected year (trim to remove extra spaces)
-          //selectedYearDisplay.textContent = "Selected Year: " + year;
+        // Hide all year content
+        hideAllYears();
   
-          // Hide all year divs, then show the selected year div
-          hideAllYears();
-          const yearDiv = document.querySelector(`.archive-${year}`);
-          if (yearDiv) {
-            yearDiv.style.display = "block";
-          }
+        // Set the clicked button as the new active one
+        button.classList.add("current-year-button");
+        activeButton = button;
+  
+        // Show the corresponding year div with dynamic height
+        const yearDiv = document.querySelector(`.archive-${year}`);
+        if (yearDiv) {
+          setMaxHeight(yearDiv); // Apply the dynamic max-height
         }
       });
     });
@@ -39,12 +39,17 @@ document.addEventListener("DOMContentLoaded", function() {
     function hideAllYears() {
       const yearDivs = document.querySelectorAll(".archive-year");
       yearDivs.forEach(function(div) {
-        div.style.display = "none";
+        div.style.maxHeight = "0"; // Reset max-height to 0 for smooth closing
       });
+    }
+  
+    // Function to set dynamic max-height
+    function setMaxHeight(element) {
+      element.classList.add("active");
+  
+      // Calculate content height using scrollHeight
+      const contentHeight = element.scrollHeight;
+      element.style.maxHeight = contentHeight + "px"; // Set max-height dynamically
     }
   });
   
-
-
-
-
