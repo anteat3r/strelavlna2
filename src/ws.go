@@ -3,6 +3,7 @@ package src
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -106,16 +107,13 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     teamid := c.PathParam("team")
     if teamid == "" { return nErr("invalid team path param") }
 
-    _, err := dao.FindRecordById("teams", teamid)
+    teamrec, err := dao.FindRecordById("teams", teamid)
     if err != nil { return err }
     // cont := team.GetString("contest")
 
     // ActiveContestMu.RLock()
     // if cont != ActiveContest { return nErr("contest not active") }
     // ActiveContestMu.RUnlock()
-
-    log.Info(c.Request().Header)
-    log.Info(c.Request().URL)
 
     teamChanMapMutex.Lock()
     teamchan, ok := TeamChanMap[teamid]
@@ -124,7 +122,6 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
       TeamChanMap[teamid] = teamchan
     }
     teamChanMapMutex.Unlock()
-    log.Info(teamchan)
 
     i := -1
 
@@ -144,9 +141,9 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     teamchan.mu.Unlock()
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
-    log.Info(err)
     if err != nil { return err }
 
+    sLog("player connected", teamrec.GetId(), teamrec.GetString("name"))
     go PlayerWsLoop(conn, teamid, perchan, teamchan, i)
 
     return nil
@@ -169,47 +166,35 @@ func PlayerWsLoop(
 ) {
   wsrchan := make(chan string)
   go func(){
-    for {
+    wsrloop: for {
       p, rm, err := conn.ReadMessage()
       if err != nil {
         close(wsrchan)
-        break
+        break wsrloop
       }
       if p != websocket.TextMessage {
-        log.Error("not text msg: ", p, rm)
+        perchan<- "err" + DELIM + "not text msg: " + DELIM + strconv.Itoa(p)
         continue
       }
-      m := string(rm)
-      wsrchan<- m
+      wsrchan<- string(rm)
     }
   }()
+  var oerr error
   loop: for {
     select {
     case m, ok := <-perchan:
       if !ok {
-        log.Info("chan closed")
-        conn.Close()
-        tchan.mu.Lock()
-        tchan.ch[idx] = nil
-        tchan.mu.Unlock()
+        oerr = nErr("perchan closed")
         break loop
       }
       err := conn.WriteMessage(websocket.TextMessage, []byte(m))
       if err != nil {
-        log.Error(err)
-        conn.Close()
-        tchan.mu.Lock()
-        tchan.ch[idx] = nil
-        tchan.mu.Unlock()
+        oerr = err
         break loop
       }
     case m, ok := <-wsrchan:
       if !ok {
-        log.Info("r chan closed")
-        conn.Close()
-        tchan.mu.Lock()
-        tchan.ch[idx] = nil
-        tchan.mu.Unlock()
+        oerr = nErr("r chan closed")
         break loop
       }
       err := PlayerWsHandleMsg(team, m, perchan, tchan, idx)
@@ -218,18 +203,20 @@ func PlayerWsLoop(
       }
     }
   }
+  sLog("player quit", team, oerr)
+  conn.Close()
+  adminsMutex.Lock()
+  AdminsChans[idx] = nil
+  adminsMutex.Unlock()
 }
 
 func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
   return func(c echo.Context) error {
 
     adminid := c.PathParam("admin")
-    if adminid == "" { return nErr("invalid team path param") }
+    if adminid == "" { return nErr("invalid admin path param") }
 
-    _, err := dao.FindAdminById(adminid)
-    if err != nil { return err }
-
-    conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+    adminrec, err := dao.FindAdminById(adminid)
     if err != nil { return err }
 
     adminsMutex.RLock()
@@ -244,12 +231,17 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     adminsMutex.Lock()
     if i == -1 { 
       AdminsChans = append(AdminsChans, perchan)
+      i = len(AdminsChans) - 1
     } else {
       AdminsChans[i] = perchan
     }
     adminsMutex.Lock()
 
-    go AdminWsLoop(conn, perchan, i)
+    conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+    if err != nil { return err }
+
+    sLog("admin connected", adminrec.GetId(), adminrec.Email)
+    go AdminWsLoop(conn, adminrec.Email, perchan, i)
 
     return nil
   }
@@ -257,58 +249,52 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
 func AdminWsLoop(
   conn *websocket.Conn,
+  email string,
   perchan chan string,
   idx int,
 ) {
   wsrchan := make(chan string)
   go func(){
-    for {
+    wsrloop: for {
       p, rm, err := conn.ReadMessage()
       if err != nil {
         close(wsrchan)
-        break
+        break wsrloop
       }
       if p != websocket.TextMessage {
-        log.Error("not text msg: ", p, rm)
+        perchan<- "err" + DELIM + "not text msg: " + DELIM + strconv.Itoa(p)
         continue
       }
-      m := string(rm)
-      wsrchan<- m
+      wsrchan<- string(rm)
     }
   }()
+  var oerr error
   loop: for {
     select {
     case m, ok := <-perchan:
       if !ok {
-        log.Info("chan closed")
-        conn.Close()
-        adminsMutex.Lock()
-        AdminsChans[idx] = nil
-        adminsMutex.Unlock()
+        oerr = nErr("perchan closed")
         break loop
       }
       err := conn.WriteMessage(websocket.TextMessage, []byte(m))
       if err != nil {
-        log.Error(err)
-        conn.Close()
-        adminsMutex.Lock()
-        AdminsChans[idx] = nil
-        adminsMutex.Unlock()
+        oerr = err
         break loop
       }
     case m, ok := <-wsrchan:
       if !ok {
-        log.Info("r chan closed")
-        conn.Close()
-        adminsMutex.Lock()
-        AdminsChans[idx] = nil
-        adminsMutex.Unlock()
+        oerr = nErr("r chan closed")
         break loop
       }
-      err := AdminWsHandleMsg(perchan, m, idx)
+      err := AdminWsHandleMsg(email, perchan, m, idx)
       if err != nil {
         perchan<- "err" + DELIM + err.Error()
       }
     }
   }
+  sLog("admin quit", oerr)
+  conn.Close()
+  adminsMutex.Lock()
+  AdminsChans[idx] = nil
+  adminsMutex.Unlock()
 }
