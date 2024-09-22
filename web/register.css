@@ -1,10 +1,4 @@
 
-.form-wrapper{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 40px;
-}
 
 #register-inner-wrapper{
     display: flex;
@@ -213,4 +207,74 @@
     background-color: #636363 !important;
     box-shadow: none !important;
     cursor: not-allowed !important;
+}
+
+.region{
+    fill: none;
+    stroke: #8b7be7;
+    stroke-width: 2px;
+}
+
+.region-selector-ready{
+    fill: #8b7be700;
+    stroke: #8b7be7;
+    stroke-width: 2px;
+    transition: fill 0.5s ease-out;
+}
+.region-selector-hover{
+    fill: #8b7be738;
+    stroke: #8b7be7;
+    stroke-width: 2px;
+    transition: fill 0s;
+
+}
+
+.region-selector-hidden{
+    fill: none;
+    stroke: none;
+}
+
+.region-selector-notready{
+    fill: #8b7be700;
+    stroke: #8b7be736;
+    stroke-width: 2px;
+    transition: stroke 0.5s ease-out;
+}
+
+.district-selector-selected{
+    fill: #73c7e979;
+    stroke: #7bc5e7;
+    stroke-width: 2px;
+}
+
+
+
+.subregion{
+    stroke-width: 0.5px;
+}
+
+#return-button{
+    position: absolute;
+    top: 20px;
+    left: 10px;
+    height: 30px;
+    width: 30px;
+    padding: 0px;
+    background-color: #543ed4;
+
+}
+
+#return-button i{
+    font-size: 20px;
+    margin: 0px;
+    color: #f3f1ff;
+}
+
+.return-button-shown{
+    display: block;
+}
+
+.return-button-hidden{
+    display: none;
+
 }
