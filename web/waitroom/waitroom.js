@@ -30,7 +30,7 @@ if (is_mobile) {
     canvas.width = 400;
 }
 
-function drawSpectrum(dataArray, offsetY, scale, opacity) {
+function drawSpectrum(dataArray, offsetY, scale, opacity, fill) {
     const pointSpacing = (canvas.width / dataArray.length*1.5); 
 
     canvasCtx.beginPath();
@@ -46,9 +46,13 @@ function drawSpectrum(dataArray, offsetY, scale, opacity) {
     }
     canvasCtx.lineTo((canvas.width / 2) + (dataArray.length - dataArray.length/2) * scale, canvas.height - offsetY);
     canvasCtx.lineTo(canvas.width, canvas.height - offsetY);
-
+    
+    if(fill){
+        canvasCtx.fillStyle = 'white';
+        canvasCtx.fill();
+    }
     canvasCtx.strokeStyle = `rgba(62, 177, 223, ${opacity})`;
-    canvasCtx.lineWidth = 2;
+    canvasCtx.lineWidth = 3;
     canvasCtx.stroke();
     
 }
@@ -74,22 +78,34 @@ function updateSpectrogramMountains() {
         offsetY -= depthStep * (1+i/1.5) + (Math.random()*2-1)*0.2;
 
         if(i==0){
-            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), offsetY, scale, 1);
+            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), offsetY, scale, 1, true);
 
         }else{
-            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), offsetY, scale, 0.4 - (0.4*i/spectrumHistory.length));
+            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), offsetY, scale, 0.4 - (0.4*i/spectrumHistory.length), false);
         }
     }
 
 }
 
+var last_second = Math.floor(Date.now()/1000);
 function frame(){
     if(is_playing){
         updateSpectrogramMountains();
     }
     const now = Date.now();
     const remaining = target_time - now;
-    document.getElementById('waitroom-timer').innerText = new Date(remaining).toISOString().substr(11, 8);
+
+    const this_second = Math.floor(now/1000);
+    if (this_second != last_second) {
+        last_second = this_second;
+        for (const timer of document.getElementsByClassName('waitroom-timer')) {
+            timer.innerText = new Date(remaining).toISOString().substr(11, 8);
+        }
+    }
+    
+    // document.getElementById('waitroom-timer').innerText = new Date(remaining).toISOString().substr(11, 8);
+    
+    
     requestAnimationFrame(frame);
 }
 
