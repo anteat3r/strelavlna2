@@ -293,7 +293,11 @@ func main() {
     initcont, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecont")
     if err != nil { return err }
 
-    src.ActiveContest = initcont.GetString("text")
+    text_ := initcont.GetString("text")
+    text_ = strings.TrimPrefix(text_, "<p>")
+    text_ = strings.TrimSuffix(text_, "</p>")
+
+    src.ActiveContest = text_
 
     initcosts, err := app.Dao().FindFirstRecordByData("texts", "name", "def_costs")
     if err != nil { return err }
