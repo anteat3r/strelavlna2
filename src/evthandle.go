@@ -139,8 +139,8 @@ func AdminWsHandleMsg(
     team := m[1]
     prob := m[2]
     text := m[3]
-    err := DBAdminMsg(team, prob, text)
-    if err != nil { return err }
+    // err := DBAdminMsg(team, prob, text)
+    // if err != nil { return err }
     WriteTeamChan(team, "msgrecd", prob, text)
     AdminSend("msgsent", team, prob, text)
 
