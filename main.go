@@ -162,6 +162,7 @@ func main() {
           log.Info("soadij")
           return c.String(400, "invalid param")
         }
+        log.Info(src.ActiveContestMu.TryLock())
         src.ActiveContestMu.Lock()
         src.ActiveContest = c.QueryParam("i")
         src.ActiveContestMu.Unlock()
