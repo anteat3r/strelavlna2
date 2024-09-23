@@ -4,7 +4,9 @@ console.log(is_mobile);
 setTimeout(e=> {is_playing = false;}, 1500);
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-
+var speed = 0;
+var pos = 0;
+var running = false;
 
 const target_time = Date.now() + 20000000;
 
@@ -39,7 +41,7 @@ function drawSpectrum(dataArray, offsetY, scale, opacity, fill) {
 
     for (let i = 0; i < dataArray.length; i++) {
         const value = dataArray[i]; 
-        const y = canvas.height - offsetY - (value / 2); 
+        const y = canvas.height - offsetY - (value / 2)*scale*0.15; 
         const x = (canvas.width / 2) + (i - dataArray.length/2) * scale
         canvasCtx.lineTo(x, y);
 
@@ -58,40 +60,83 @@ function drawSpectrum(dataArray, offsetY, scale, opacity, fill) {
 }
 
 function updateSpectrogramMountains() {
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    analyser.getByteFrequencyData(dataArray);
-
-    if (spectrumHistory.length >= maxHistory) {
-        spectrumHistory.shift();
+    if(running){
+        speed += Math.min((2 - speed)*0.05, 0.01);
+    }else{
+        speed += (0 - speed)*0.05;
     }
-    spectrumHistory.push([...dataArray]);
+    pos -= speed;
+    while(pos <= -2){
+        pos += 2;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        analyser.getByteFrequencyData(dataArray);
+
+        if (spectrumHistory.length >= maxHistory) {
+            spectrumHistory.shift();
+        }
+        spectrumHistory.push([...dataArray]);
+    }
+    if(speed < 0.001){return;}
 
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const depthStep = 1.5;
-    var offsetY = 500;
+    const depthStep = 3;
+    var offsetY = 495;
     var scale = 8;
+    const fov = 100;
+    const cam_height = -100;
+    var offsetZ = 260 + pos;
+
+    for(let i = 0; i < 100; i++){
+        const k = fov/offsetZ;
+        canvasCtx.beginPath();
+        canvasCtx.moveTo(0, canvas.height - (cam_height*k+555));
+        canvasCtx.lineTo(canvas.width, canvas.height - (cam_height*k+555));
+        canvasCtx.strokeStyle = `rgba(128, 128, 128, ${i*i/50000})`;
+        canvasCtx.lineWidth = 1;
+        canvasCtx.stroke();
+        offsetZ-=2;
+
+    }
+    // offsetY = 500;
+    var offsetZ = 60 + pos;
     for (let i = 0; i < spectrumHistory.length; i++) {
-        scale += i/70; 
-        offsetY -= depthStep * (1+i/1.5) + (Math.random()*2-1)*0.2;
+        if(offsetZ <= 0){
+            break;
+        }
+        const k = fov/offsetZ;
+        // console.log(spectrumHistory.length);
+        scale = k*3;
+        // offsetY -= depthStep * (1+i/3);
 
         if(i==0){
-            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), offsetY, scale, 1, true);
-
+            
+            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), cam_height*k+555, scale, 1, true);
         }else{
-            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), offsetY, scale, 0.4 - (0.4*i/spectrumHistory.length), false);
+            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), cam_height*k+555, scale, 0.4 - (0.4*i/spectrumHistory.length), false);
         }
+        offsetZ-=2;
     }
 
 }
 
+function drawSilentLines() {
+    for(let i = 0; i < maxHistory-1; i++){
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
+        spectrumHistory.push([...dataArray]);
+    }
+    speed = 2;
+    updateSpectrogramMountains();
+    speed = 0;
+}
+
 var last_second = Math.floor(Date.now()/1000);
 function frame(){
-    if(is_playing){
-        updateSpectrogramMountains();
-    }
+    updateSpectrogramMountains();
     const now = Date.now();
     const remaining = target_time - now;
 
@@ -112,7 +157,7 @@ function frame(){
 audioElement.onplay = () => {
     audioCtx.resume();
 };
-
+drawSilentLines();
 frame();
 
 
@@ -122,11 +167,13 @@ function playStop(){
         audioElement.play();
         is_playing = true;
         document.getElementById('note-button').addEventListener('click', playStop);
+        running = true;
     }else{
         audioElement.pause();
+        running = false;
+        is_playing = false;
+        document.getElementById('note-button').addEventListener('click', playStop);
         setTimeout(e=>{
-            is_playing = false;
-            document.getElementById('note-button').addEventListener('click', playStop);
         }, 1000);
     }
 }
