@@ -20,6 +20,8 @@ var (
     "A": 10,
   }
   CostsMu = sync.RWMutex{}
+
+  ChecksColl *models.Collection
 )
 
 func GetCost(diff string) (int, bool) {
@@ -70,18 +72,19 @@ func DBSell(team string, prob string) (money int, oerr error) {
 
     rec.Set("bought", newbought)
     rec.Set("sold", append(rec.GetStringSlice("sold"), prob))
-    money = rec.GetInt("money")
     cost, ok := GetCost("-" + probrec.GetString("diff"))
     if !ok { log.Error("invalid diff", prob, probrec.PublicExport()) }
-    rec.Set("money", money + cost)
+    rec.Set("money", rec.GetInt("money") + cost)
     err = txDao.SaveRecord(rec)
+
+    money = rec.GetInt("money")
 
     return nil
   })
   return
 }
 
-func dbBuySrc(team string, diff string, srcField string) (id string, money int, name string, oerr error) {
+func dbBuySrc(team string, diff string, srcField string) (id string, money int, name string, text string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
     diffcost, ok := GetCost(diff)
     if !ok {
@@ -125,17 +128,18 @@ func dbBuySrc(team string, diff string, srcField string) (id string, money int, 
     id = found
     money = teamrec.GetInt("money")
     name = prob.GetString("name")
+    text = prob.GetString("text")
 
     return nil
   })
   return
 }
 
-func DBBuy(team string, diff string) (id string, money int, name string, oerr error) {
+func DBBuy(team string, diff string) (id string, money int, name string, text string, oerr error) {
   return dbBuySrc(team, diff, "free")
 }
 
-func DBBuyOld(team string, diff string) (id string, money int, name string, oerr error) {
+func DBBuyOld(team string, diff string) (id string, money int, name string, text string, oerr error) {
   return dbBuySrc(team, diff, "solved")
 }
 
@@ -204,27 +208,27 @@ func DBView(team string, prob string) (text string, diff string, name string, oe
 func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    teamrec, err := txDao.FindRecordById("teams", team)
+    _, err := txDao.DB().
+      NewQuery("UPDATE teams SET chat = CONCAT(chat, {:prob}, ';', {:text}, '&') WHERE id = {:team}").
+      Bind(dbx.Params{
+        "prob": prob,
+        "text": msg,
+        "team": team,
+      }).
+      Execute()
+
     if err != nil { return err }
 
-    if prob != "" &&
-       !slices.Contains(teamrec.GetStringSlice("bought"), prob) && 
-       !slices.Contains(teamrec.GetStringSlice("pending"), prob) {
-      return dbClownErr("view", "prob not owned")
-    }
+    // _, err = txDao.DB().
+    //   NewQuery("INSERT INTO checks (team, prob, type, text) VALUES ({:team}, {:prob}, 'player', {:text})").
+    //   Bind(dbx.Params{
+    //     "prob": prob,
+    //     "text": msg,
+    //     "team": team,
+    //   }).
+    //   Execute()
 
-    coll, _ := txDao.FindCollectionByNameOrId("chat")
-    msgrec := models.NewRecord(coll)
-
-    msgrec.Set("team", team)
-    msgrec.Set("prob", prob)
-    msgrec.Set("type", "player")
-    msgrec.Set("text", msg)
-    err = txDao.SaveRecord(msgrec)
-    if err != nil { return err }
-
-    coll2, _ := txDao.FindCollectionByNameOrId("checks")
-    check := models.NewRecord(coll2)
+    check := models.NewRecord(ChecksColl)
 
     check.Set("type", "msg")
     check.Set("team", team)
@@ -234,6 +238,36 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
     if err != nil { return err }
 
     return nil
+
+    // if err != nil { return err }
+    //
+    // if prob != "" &&
+    //    !slices.Contains(teamrec.GetStringSlice("bought"), prob) && 
+    //    !slices.Contains(teamrec.GetStringSlice("pending"), prob) {
+    //   return dbClownErr("view", "prob not owned")
+    // }
+    //
+    // coll, _ := txDao.FindCollectionByNameOrId("chat")
+    // msgrec := models.NewRecord(coll)
+    //
+    // msgrec.Set("team", team)
+    // msgrec.Set("prob", prob)
+    // msgrec.Set("type", "player")
+    // msgrec.Set("text", msg)
+    // err = txDao.SaveRecord(msgrec)
+    // if err != nil { return err }
+    //
+    // coll2, _ := txDao.FindCollectionByNameOrId("checks")
+    // check := models.NewRecord(coll2)
+    //
+    // check.Set("type", "msg")
+    // check.Set("team", team)
+    // check.Set("prob", prob)
+    // check.Set("solution", "")
+    // err = txDao.SaveRecord(check)
+    // if err != nil { return err }
+
+    // return nil
   })
   return
 }

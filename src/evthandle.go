@@ -57,16 +57,16 @@ func PlayerWsHandleMsg(
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
-    prob, money, name, err := DBBuy(team, diff)
+    prob, money, name, text, err := DBBuy(team, diff)
     if err != nil { return err }
-    tchan.Send("bought", prob, diff, strconv.Itoa(money), name)
+    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text)
 
   case "buyold":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
-    prob, money, name, err := DBBuyOld(team, diff)
+    prob, money, name, text, err := DBBuyOld(team, diff)
     if err != nil { return err }
-    tchan.Send("bought", prob, diff, strconv.Itoa(money), name)
+    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text)
 
   case "solve":
     if len(m) != 3 { return eIm(msg) }
@@ -139,8 +139,8 @@ func AdminWsHandleMsg(
     team := m[1]
     prob := m[2]
     text := m[3]
-    err := DBAdminMsg(team, prob, text)
-    if err != nil { return err }
+    // err := DBAdminMsg(team, prob, text)
+    // if err != nil { return err }
     WriteTeamChan(team, "msgrecd", prob, text)
     AdminSend("msgsent", team, prob, text)
 

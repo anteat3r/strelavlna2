@@ -1,5 +1,5 @@
 //global states
-var team_balance = 25;
+var team_balance = 400;
 var team_name = "Team 1";
 var team_rank = "14";
 var start_time = new Date().getTime() - 1000000;
@@ -104,6 +104,11 @@ updatePriceList();
 
 //buy events
 
+document.getElementById("send-message-button").addEventListener("click", function(){
+    const chat_input = document.getElementById("chat-input");
+    sendMsg(focused_problem, chat_input.value);
+    chat_input.value = "";
+});
 
 buy_buttons.forEach(function(button, n){
     button.addEventListener("mouseover", function(){
@@ -390,14 +395,7 @@ function sellProblem(){
     const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
     document.getElementById("confirm-dialog-content").innerHTML = `Opravdu chcete prodat úlohu:<br><span class="bold">${focused_problem_obj.title}</span> za <span class="bold">${focused_problem_obj.rank == "A" ? 5 : focused_problem_obj.rank == "B" ? 10 : 15}</span> DC?`;
     document.getElementById("confirm-dialog-ok").addEventListener("click", function(){
-        team_balance += focused_problem_obj.rank == "A" ? 5 : focused_problem_obj.rank == "B" ? 10 : 15;
-        problems = problems.filter(prob => prob.id != focused_problem);
-        focused_problem = "";
-        updateTeamStats();
-        updateProblemList();
-        updateShop();
-        updateChat();
-        updateFocusedProblem();
+        sellProb(focused_problem);
 
         confirm_dialog.style.display = "none";
         document.getElementById("confirm-dialog-ok").removeEventListener("click", arguments.callee);
@@ -449,7 +447,7 @@ function connectWS() {
     function cLe() { console.log("invalid msg", rawmsg) }
     /** @type {string} */
     const rawmsg = event.data;
-    const msg = rawmsg.split(":");
+    const msg = rawmsg.split("\x00");
     if (msg.length == 0) { cLe() }
     switch (msg[0]) {
 
@@ -462,8 +460,8 @@ function connectWS() {
         probSold(msg[1], msg[2])
       break;
       case "bought":
-        if (msg.length != 5) { cLe() }
-        probBought(msg[1], msg[2], msg[3], msg[4])
+        if (msg.length != 6) { cLe() }
+        probBought(msg[1], msg[2], msg[3], msg[4], msg[5])
       break;
       case "solved":
         if (msg.length != 4) { cLe() }
@@ -484,7 +482,6 @@ function connectWS() {
       case "err":
         console.log(msg)
       break;
-
     }
   })
 }
@@ -496,62 +493,100 @@ try {
 }
 // connectWS();
 
-/** @param {string} prob */
-function sellProb(prob) {
-  socket.send(`sell:${prob}`) }
+/** @param {string} id */
+function sellProb(id) {
+  socket.send(`sell\x00${id}`) }
 
 /** @param {string} diff */
 function buyProb(diff) {
-  socket.send(`buy:${diff}`) }
+  socket.send(`buy\x00${diff}`) }
 
 /** @param {string} diff */
 function buyOldProb(diff) {
-  socket.send(`buyold:${diff}`) }
+  socket.send(`buyold\x00${diff}`) }
 
-/** @param {string} prob
+/** @param {string} id
  * @param {string} sol */
-function solveProb(prob, sol) {
-  socket.send(`buy:${prob}:${sol}`) }
+function solveProb(id, sol) {
+  socket.send(`buy\x00${id}:${sol}`) }
 
-/** @param {string} prob */
-function viewProb(prob) {
-  socket.send(`view:${prob}`) }
+/** @param {string} id */
+function viewProb(id) {
+  socket.send(`view\x00${id}`) }
 
-/** @param {string} prob
+/** @param {string} id
  * @param {string} text */
-function sendMsg(prob, text) {
-  socket.send(`chat:${prob}:${text}`) }
-
-
-
+function sendMsg(id, text) {
+  socket.send(`chat\x00${id}\x00${text}`) }
 
 /** @param {string} msg
- * @param {string} prob */
-function msgRecieved(prob, msg) {
-  console.log(prob, msg) }
+ * @param {string} id */
+function msgRecieved(id, msg) {
+  if(id == "") {
+    global_chat.push({author: "support", content: msg});
+    updateChat();
+  } else {
+    const problem = problems.find(prob => prob.id == id);
+    if(problem != null) {
+      problem.chat.push({author: "support", content: msg});
+      updateChat();
+    }
+  }
+  console.log(id, msg) }
 
 /** @param {string} msg
- * @param {string} prob */
-function msgSent(prob, msg) {
-  console.log(prob, msg) }
+ * @param {string} id */
+function msgSent(id, msg) {
+  if(id == "") {
+    global_chat.push({author: "team", content: msg});
+    // updateChat();
+  } else {
+    const problem = problems.find(prob => prob.id == id);
+    if(problem != null) {
+      problem.chat.push({author: "team", content: msg});
+      updateChat();
+    }
+  }
+  console.log(id, msg) }
 
 /** @param {string} money
- * @param {string} prob */
-function probSold(prob, money) {
-  console.log(prob, money) }
+ * @param {string} id */
+function probSold(id, money) {
+  problems = problems.filter(prob => prob.id != id);
+  team_balance = parseInt(money);
+  updateTeamStats();
+  updateProblemList();
+  updateFocusedProblem();
+  console.log(id, money);
+}
 
+/** @param {string} id
+ * @param {string} diff
+ * @param {string} money
+ * @param {string} name
+ * @param {string} text */
+function probBought(id, diff, money, name, text) {
+    const new_problem = {
+        id: id,
+        title: name,
+        rank: diff,
+        worked_on: false,
+        last_answer_time: Date.now()-10000,
+        seen_chat: true,
+        problem_content: text,
+        chat: []
+    }
+    problems.push(new_problem);
+    team_balance = parseInt(money);
+    console.log(id, diff, money, name, text) 
+    updateProblemList();
+    updateTeamStats();
+}
 /** @param {string} msg
- * @param {string} prob 
- * @param {string} money 
+ * @param {string} id 
  * @param {string} name */
-function probBought(prob, diff, money, name) {
-  console.log(prob, diff, money, name) }
-
-/** @param {string} msg
- * @param {string} prob 
- * @param {string} name */
-function probSolved(prob, diff, name) {
-  console.log(prob, diff, name) }
+function probSolved(id, diff, name) {
+  console.log(id, diff, name) }
 
 /** @param {string} msg
  * @param {string} text 
@@ -560,9 +595,9 @@ function probViewed(diff, name, text) {
   console.log(text, diff, name) }
 
 /** @param {string} idx
- * @param {string} prob */
-function probFocused(prob, idx) {
-  console.log(prob, idx) }
+ * @param {string} id */
+function probFocused(id, idx) {
+  console.log(id, idx) }
 
 
 
