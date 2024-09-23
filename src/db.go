@@ -206,36 +206,60 @@ func DBView(team string, prob string) (text string, diff string, name string, oe
 func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    teamrec, err := txDao.FindRecordById("teams", team)
+    _, err := txDao.DB().
+      NewQuery("UPDATE teams SET chat = CONCAT(chat, {:prob}, ';', {:text}, '&') WHERE id = {:team}").
+      Bind(dbx.Params{
+        "prob": prob,
+        "text": msg,
+        "team": team,
+      }).
+      Execute()
+
     if err != nil { return err }
 
-    if prob != "" &&
-       !slices.Contains(teamrec.GetStringSlice("bought"), prob) && 
-       !slices.Contains(teamrec.GetStringSlice("pending"), prob) {
-      return dbClownErr("view", "prob not owned")
-    }
+    _, err = txDao.DB().
+      NewQuery("INSERT INTO checks (team, prob, type, text) VALUES ({:team}, {:prob}, 'player', {:text})").
+      Bind(dbx.Params{
+        "prob": prob,
+        "text": msg,
+        "team": team,
+      }).
+      Execute()
 
-    coll, _ := txDao.FindCollectionByNameOrId("chat")
-    msgrec := models.NewRecord(coll)
-
-    msgrec.Set("team", team)
-    msgrec.Set("prob", prob)
-    msgrec.Set("type", "player")
-    msgrec.Set("text", msg)
-    err = txDao.SaveRecord(msgrec)
     if err != nil { return err }
 
-    coll2, _ := txDao.FindCollectionByNameOrId("checks")
-    check := models.NewRecord(coll2)
+    return err
 
-    check.Set("type", "msg")
-    check.Set("team", team)
-    check.Set("prob", prob)
-    check.Set("solution", "")
-    err = txDao.SaveRecord(check)
-    if err != nil { return err }
+    // teamrec, err := txDao.FindRecordById("teams", team)
+    // if err != nil { return err }
+    //
+    // if prob != "" &&
+    //    !slices.Contains(teamrec.GetStringSlice("bought"), prob) && 
+    //    !slices.Contains(teamrec.GetStringSlice("pending"), prob) {
+    //   return dbClownErr("view", "prob not owned")
+    // }
+    //
+    // coll, _ := txDao.FindCollectionByNameOrId("chat")
+    // msgrec := models.NewRecord(coll)
+    //
+    // msgrec.Set("team", team)
+    // msgrec.Set("prob", prob)
+    // msgrec.Set("type", "player")
+    // msgrec.Set("text", msg)
+    // err = txDao.SaveRecord(msgrec)
+    // if err != nil { return err }
+    //
+    // coll2, _ := txDao.FindCollectionByNameOrId("checks")
+    // check := models.NewRecord(coll2)
+    //
+    // check.Set("type", "msg")
+    // check.Set("team", team)
+    // check.Set("prob", prob)
+    // check.Set("solution", "")
+    // err = txDao.SaveRecord(check)
+    // if err != nil { return err }
 
-    return nil
+    // return nil
   })
   return
 }
