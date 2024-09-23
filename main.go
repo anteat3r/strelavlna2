@@ -318,6 +318,9 @@ func main() {
   })
 
   src.App = app
+  cll, err := app.Dao().FindCollectionByNameOrId("checks")
+  if err != nil { panic(err) }
+  src.ChecksColl = cll
 
   if err := app.Start(); err != nil {
     panic(err)
