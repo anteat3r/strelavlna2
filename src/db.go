@@ -207,7 +207,7 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     _, err := txDao.DB().
-      NewQuery("UPDATE teams SET chat = chat + {:prob} + ';' + {:text} WHERE id = {:team}").
+      NewQuery("UPDATE teams SET chat = CONCAT(chat, {:prob}, ';', {:text}, '&') WHERE id = {:team}").
       Bind(dbx.Params{
         "prob": prob,
         "text": msg,
