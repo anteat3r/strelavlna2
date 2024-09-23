@@ -162,10 +162,13 @@ func main() {
           log.Info("soadij")
           return c.String(400, "invalid param")
         }
-        log.Info(src.ActiveContestMu.TryLock())
+        log.Info("asod")
         src.ActiveContestMu.Lock()
+        log.Info("asod")
         src.ActiveContest = c.QueryParam("i")
+        log.Info("asod")
         src.ActiveContestMu.Unlock()
+        log.Info("asod")
         app.Logger().Info(`ActiveContest set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
         return c.String(200, "")
       },
