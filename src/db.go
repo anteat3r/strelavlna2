@@ -20,6 +20,8 @@ var (
     "A": 10,
   }
   CostsMu = sync.RWMutex{}
+
+  ChecksColl *models.Collection
 )
 
 func GetCost(diff string) (int, bool) {
@@ -217,20 +219,26 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
 
     if err != nil { return err }
 
-    _, err = txDao.DB().
-      NewQuery("INSERT INTO checks (team, prob, type, text) VALUES ({:team}, {:prob}, 'player', {:text})").
-      Bind(dbx.Params{
-        "prob": prob,
-        "text": msg,
-        "team": team,
-      }).
-      Execute()
+    // _, err = txDao.DB().
+    //   NewQuery("INSERT INTO checks (team, prob, type, text) VALUES ({:team}, {:prob}, 'player', {:text})").
+    //   Bind(dbx.Params{
+    //     "prob": prob,
+    //     "text": msg,
+    //     "team": team,
+    //   }).
+    //   Execute()
 
+    check := models.NewRecord(ChecksColl)
+
+    check.Set("type", "msg")
+    check.Set("team", team)
+    check.Set("prob", prob)
+    check.Set("solution", "")
+    err = txDao.SaveRecord(check)
     if err != nil { return err }
 
-    return err
+    return nil
 
-    // teamrec, err := txDao.FindRecordById("teams", team)
     // if err != nil { return err }
     //
     // if prob != "" &&
