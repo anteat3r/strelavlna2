@@ -16,10 +16,10 @@ var upgrader = websocket.Upgrader{
   ReadBufferSize: 1024,
   WriteBufferSize: 1024,
   CheckOrigin: func(r *http.Request) bool {
-    origin, ok := r.Header["Origin"]
-    if !ok { return false }
-    if len(origin) != 1 { return false }
-    if origin[0] != "https://strela-vlna.gchd.cz" { return false }
+    // origin, ok := r.Header["Origin"]
+    // if !ok { return false }
+    // if len(origin) != 1 { return false }
+    // if origin[0] != "https://strela-vlna.gchd.cz" { return false }
     return true
   },
 }
@@ -84,7 +84,10 @@ func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
     cont := team.GetString("contest")
 
     ActiveContestMu.RLock()
-    if cont != ActiveContest { return c.String(400, "not running") }
+    if cont != ActiveContest { 
+      ActiveContestMu.RUnlock()
+      return c.String(400, "not running")
+    }
     ActiveContestMu.RUnlock()
 
     teamChanMapMutex.Lock()
