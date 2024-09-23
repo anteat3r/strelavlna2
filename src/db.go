@@ -81,7 +81,7 @@ func DBSell(team string, prob string) (money int, oerr error) {
   return
 }
 
-func dbBuySrc(team string, diff string, srcField string) (id string, money int, name string, oerr error) {
+func dbBuySrc(team string, diff string, srcField string) (id string, money int, name string, text string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
     diffcost, ok := GetCost(diff)
     if !ok {
@@ -125,17 +125,18 @@ func dbBuySrc(team string, diff string, srcField string) (id string, money int, 
     id = found
     money = teamrec.GetInt("money")
     name = prob.GetString("name")
+    text = prob.GetString("text")
 
     return nil
   })
   return
 }
 
-func DBBuy(team string, diff string) (id string, money int, name string, oerr error) {
+func DBBuy(team string, diff string) (id string, money int, name string, text string, oerr error) {
   return dbBuySrc(team, diff, "free")
 }
 
-func DBBuyOld(team string, diff string) (id string, money int, name string, oerr error) {
+func DBBuyOld(team string, diff string) (id string, money int, name string, text string, oerr error) {
   return dbBuySrc(team, diff, "solved")
 }
 
