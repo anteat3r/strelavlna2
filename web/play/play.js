@@ -539,7 +539,7 @@ function msgRecieved(id, msg) {
 function msgSent(id, msg) {
   if(id == "") {
     global_chat.push({author: "team", content: msg});
-    updateChat();
+    // updateChat();
   } else {
     const problem = problems.find(prob => prob.id == id);
     if(problem != null) {
