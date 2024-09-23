@@ -72,7 +72,7 @@ func DBSell(team string, prob string) (money int, oerr error) {
     rec.Set("sold", append(rec.GetStringSlice("sold"), prob))
     cost, ok := GetCost("-" + probrec.GetString("diff"))
     if !ok { log.Error("invalid diff", prob, probrec.PublicExport()) }
-    rec.Set("money", money + cost)
+    rec.Set("money", rec.GetInt("money") + cost)
     err = txDao.SaveRecord(rec)
 
     money = rec.GetInt("money")
