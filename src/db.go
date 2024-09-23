@@ -215,6 +215,19 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
       }).
       Execute()
 
+    if err != nil { return err }
+
+    _, err = txDao.DB().
+      NewQuery("INSERT INTO checks (team, prob, type, text) VALUES ({:team}, {:prob}, 'player', {:text})").
+      Bind(dbx.Params{
+        "prob": prob,
+        "text": msg,
+        "team": team,
+      }).
+      Execute()
+
+    if err != nil { return err }
+
     return err
 
     // teamrec, err := txDao.FindRecordById("teams", team)
