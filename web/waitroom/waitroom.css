@@ -80,7 +80,7 @@ audio {
     background-color: var(--color-secondary-glow);
     color: var(--color-secondary-dark);
     transition: background-color 0.3s ease-out, color 0.3s ease-out;
-
+    font-size: 14px;
 }
 
 #note-button:hover{

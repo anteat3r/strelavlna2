@@ -7,6 +7,14 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 var speed = 0;
 var pos = 0;
 var running = false;
+var cam_height = -200;
+
+stoneSetup = {
+    min: -1000,
+    max: 1000,
+    innerMin: -200,
+    InnerMax: 200
+}
 
 const target_time = Date.now() + 20000000;
 
@@ -24,7 +32,7 @@ analyser.connect(audioCtx.destination);
 const canvas = document.querySelector('canvas');
 const canvasCtx = canvas.getContext('2d');
 
-
+var stones = []
 const spectrumHistory = [];
 const maxHistory = is_mobile ? 1 : 25;
 
@@ -32,11 +40,35 @@ if (is_mobile) {
     canvas.width = 400;
 }
 
-function drawSpectrum(dataArray, offsetY, scale, opacity, fill) {
-    const pointSpacing = (canvas.width / dataArray.length*1.5); 
+function pregenerateStones(n, sep){
+    for (let i = 0; i < n; i++) {
+        if (i % sep == 0) {
+            stones.push(Math.floor(Math.random() * (stoneSetup.max - stoneSetup.min + 1) + stoneSetup.min));
+        } else {
+            stones.push(0);
+        }
+    }
+    for (let i = 0; i < n; i++) {
+        if (stones[i] >= stoneSetup.innerMin && stones[i] <= stoneSetup.InnerMax) {
+            stones[i] = 0;
+        }
+    }
+}
 
+function drawSpectrum(dataArray, offsetY, scale, opacity, fill, stone, fov, offsetZ) {
+    const pointSpacing = (canvas.width / dataArray.length*1.5); 
     canvasCtx.beginPath();
     canvasCtx.moveTo(0, canvas.height - offsetY);
+
+    if (stone != 0) {
+        if(stone < stoneSetup.innerMin){
+            const k = fov/offsetZ;
+            canvasCtx.lineTo((stone-40)*k + canvas.width/2, canvas.height - ((cam_height)*k+555));
+            canvasCtx.lineTo((stone)*k + canvas.width/2, canvas.height - ((cam_height+30)*k+555));
+            canvasCtx.lineTo((stone+40)*k + canvas.width/2, canvas.height - ((cam_height)*k+555));
+        }
+        
+    }
     canvasCtx.lineTo((canvas.width / 2) + (-1 - dataArray.length/2) * scale, canvas.height - offsetY);
 
     for (let i = 0; i < dataArray.length; i++) {
@@ -46,9 +78,20 @@ function drawSpectrum(dataArray, offsetY, scale, opacity, fill) {
         canvasCtx.lineTo(x, y);
 
     }
+    
     canvasCtx.lineTo((canvas.width / 2) + (dataArray.length - dataArray.length/2) * scale, canvas.height - offsetY);
+    if (stone != 0) {
+        if(stone > 0){
+            const k = fov/offsetZ;
+            canvasCtx.lineTo((stone-40)*k + canvas.width/2, canvas.height - ((cam_height)*k+555));
+            canvasCtx.lineTo((stone)*k + canvas.width/2, canvas.height - ((cam_height+30)*k+555));
+            canvasCtx.lineTo((stone+40)*k + canvas.width/2, canvas.height - ((cam_height)*k+555));
+        }
+    }
     canvasCtx.lineTo(canvas.width, canvas.height - offsetY);
     
+    
+
     if(fill){
         canvasCtx.fillStyle = 'white';
         canvasCtx.fill();
@@ -56,14 +99,17 @@ function drawSpectrum(dataArray, offsetY, scale, opacity, fill) {
     canvasCtx.strokeStyle = `rgba(62, 177, 223, ${opacity})`;
     canvasCtx.lineWidth = 3;
     canvasCtx.stroke();
-    
+
 }
 
 function updateSpectrogramMountains() {
     if(running){
         speed += Math.min((2 - speed)*0.05, 0.01);
+        cam_height += (-100 - cam_height) * 0.01;
     }else{
         speed += (0 - speed)*0.05;
+        cam_height += (-200 - cam_height) * 0.01;
+
     }
     pos -= speed;
     while(pos <= -2){
@@ -77,8 +123,18 @@ function updateSpectrogramMountains() {
             spectrumHistory.shift();
         }
         spectrumHistory.push([...dataArray]);
+        stones.shift();
+        if(stones[stones.length-5] != 0){
+            var new_stone = Math.floor(Math.random() * (stoneSetup.max - stoneSetup.min + 1) + stoneSetup.min);
+            while(new_stone >= stoneSetup.innerMin && new_stone <= stoneSetup.InnerMax){
+                new_stone = Math.floor(Math.random() * (stoneSetup.max - stoneSetup.min + 1) + stoneSetup.min);
+            }
+            stones.push(new_stone);
+        }else{
+            stones.push(0);
+        }
     }
-    if(speed < 0.001){return;}
+    if(speed < 0.001 && cam_height < -199){return;}
 
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -86,13 +142,18 @@ function updateSpectrogramMountains() {
     var offsetY = 495;
     var scale = 8;
     const fov = 100;
-    const cam_height = -100;
     var offsetZ = 260 + pos;
 
     for(let i = 0; i < 100; i++){
         const k = fov/offsetZ;
         canvasCtx.beginPath();
         canvasCtx.moveTo(0, canvas.height - (cam_height*k+555));
+        if(99-i < stones.length && stones[99-i] != 0){
+            canvasCtx.lineTo((stones[129-i]-40)*k + canvas.width/2, canvas.height - ((cam_height)*k+555));
+            canvasCtx.lineTo((stones[129-i])*k + canvas.width/2, canvas.height - ((cam_height+30)*k+555));
+            canvasCtx.lineTo((stones[129-i]+40)*k + canvas.width/2, canvas.height - ((cam_height)*k+555));
+        }
+            
         canvasCtx.lineTo(canvas.width, canvas.height - (cam_height*k+555));
         canvasCtx.strokeStyle = `rgba(128, 128, 128, ${i*i/50000})`;
         canvasCtx.lineWidth = 1;
@@ -113,9 +174,9 @@ function updateSpectrogramMountains() {
 
         if(i==0){
             
-            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), cam_height*k+555, scale, 1, true);
+            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), cam_height*k+555, scale, 1, true, stones[29-i], fov, offsetZ);
         }else{
-            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), cam_height*k+555, scale, 0.4 - (0.4*i/spectrumHistory.length), false);
+            drawSpectrum(spectrumHistory[spectrumHistory.length - 1 - i].slice(0,100), cam_height*k+555, scale, 0.4 - (0.4*i/spectrumHistory.length), false, stones[29-i], fov, offsetZ);
         }
         offsetZ-=2;
     }
@@ -157,6 +218,8 @@ function frame(){
 audioElement.onplay = () => {
     audioCtx.resume();
 };
+pregenerateStones(130, 1);
+console.log(stones);
 drawSilentLines();
 frame();
 
@@ -168,13 +231,14 @@ function playStop(){
         is_playing = true;
         document.getElementById('note-button').addEventListener('click', playStop);
         running = true;
+        document.getElementById('note-button').innerHTML = `<i class="fa-solid fa-pause"></i>`;
+        
     }else{
         audioElement.pause();
         running = false;
         is_playing = false;
         document.getElementById('note-button').addEventListener('click', playStop);
-        setTimeout(e=>{
-        }, 1000);
+        document.getElementById('note-button').innerHTML = `<i class="fa-brands fa-itunes-note"></i>`;
     }
 }
 document.getElementById('note-button').addEventListener('click', playStop);
