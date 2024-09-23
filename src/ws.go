@@ -84,7 +84,10 @@ func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
     cont := team.GetString("contest")
 
     ActiveContestMu.RLock()
-    if cont != ActiveContest { return c.String(400, "not running") }
+    if cont != ActiveContest { 
+      ActiveContestMu.RUnlock()
+      return c.String(400, "not running")
+    }
     ActiveContestMu.RUnlock()
 
     teamChanMapMutex.Lock()
