@@ -449,7 +449,7 @@ function connectWS() {
     function cLe() { console.log("invalid msg", rawmsg) }
     /** @type {string} */
     const rawmsg = event.data;
-    const msg = rawmsg.split(":");
+    const msg = rawmsg.split("\x00");
     if (msg.length == 0) { cLe() }
     switch (msg[0]) {
 
@@ -498,29 +498,29 @@ try {
 
 /** @param {string} prob */
 function sellProb(prob) {
-  socket.send(`sell:${prob}`) }
+  socket.send(`sell\x00${prob}`) }
 
 /** @param {string} diff */
 function buyProb(diff) {
-  socket.send(`buy:${diff}`) }
+  socket.send(`buy\x00${diff}`) }
 
 /** @param {string} diff */
 function buyOldProb(diff) {
-  socket.send(`buyold:${diff}`) }
+  socket.send(`buyold\x00${diff}`) }
 
 /** @param {string} prob
  * @param {string} sol */
 function solveProb(prob, sol) {
-  socket.send(`buy:${prob}:${sol}`) }
+  socket.send(`buy\x00${prob}:${sol}`) }
 
 /** @param {string} prob */
 function viewProb(prob) {
-  socket.send(`view:${prob}`) }
+  socket.send(`view\x00${prob}`) }
 
 /** @param {string} prob
  * @param {string} text */
 function sendMsg(prob, text) {
-  socket.send(`chat:${prob}:${text}`) }
+  socket.send(`chat\x00${prob}:${text}`) }
 
 
 
