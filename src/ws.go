@@ -207,9 +207,9 @@ func PlayerWsLoop(
   }
   sLog("player quit", team, oerr)
   conn.Close()
-  adminsMutex.Lock()
-  AdminsChans[idx] = nil
-  adminsMutex.Unlock()
+  tchan.mu.Lock()
+  tchan.ch[idx] = nil
+  tchan.mu.Unlock()
 }
 
 func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
