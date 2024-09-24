@@ -28,6 +28,7 @@ var (
 )
  
 func ParseRefList(s string) []string {
+  if s == "[]" { return []string{} }
   s = strings.TrimPrefix(s, "[")
   s = strings.TrimSuffix(s, "]")
   res := strings.Split(s, ",")
