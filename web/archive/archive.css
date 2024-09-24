@@ -3,6 +3,7 @@
     font-weight: 600;
     margin: auto;
     padding: 20px;
+    padding-bottom: 40px;
     text-align: center;
     border-bottom: var(--color-main) solid;
 }
@@ -11,12 +12,12 @@
     display: flex;
 }
 .year-selector{
+    display: flex;
+    flex-direction: column;
     border: var(--color-main-light) solid 5px;
     margin: 50px;
-    height: 644px;
-    width: 300px;
-    min-width: 300px;
     background-color: var(--color-main-white);
+    flex-grow: 2;
 }
 
 .year-button{
@@ -110,7 +111,8 @@
 .archive{
     border-left: var(--color-secondary) dashed 5px;
     font-family: 'Lexend';
-    flex-grow: 1;
+    flex-grow: 8;
+    max-width: calc(100vw-410px);
 }
 
 .year-title{
@@ -122,32 +124,45 @@
 }
 
 .online-round{
-    padding-left: 100px;
     margin: 0;
     padding-top: 25px;
     padding-bottom: 50px;
 }
 
+.online-round h1{
+    margin-left: 7vw;
+}
+
 .online-round-covid{
-    padding-left: 100px;
     margin: 0;
     padding-top: 25px;
     padding-bottom: 400px;
 }
 
 .normal-round{
-    padding-left: 100px;
     margin: 0;
     padding-top: 25px;
     background-color: var(--color-main-white);
 }
 
+.normal-round h1{
+    margin-left: 7vw;
+}
+
+.normal-round h2{
+    margin-left: 7vw;
+}
+
 .placement-wrapper{
     display: flex;
-    gap: 12vw;
+    flex-wrap: wrap;
+    margin: auto;
+    gap: 10vw;
+    max-width: 60vw;
     font-size: 20px;
-    margin-left: 50px;
     text-align: center;
+    justify-content: space-evenly;
+    padding-bottom: 35px;
 }
 
 .first-place{
@@ -192,15 +207,19 @@
 }
 
 .image-gallery{
-    margin-inline: 5vw;
-    margin-top: 50px;
+    padding-inline: 5vw;
+    padding-top: 20px;
+    background-color: white;
 }
 
 .images{
     display: flex;
-    gap: 30px;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    gap: 3vw;
+    max-width: 70vw;
     padding-bottom: 50px;
-    margin-left: 50px;
+    margin: auto;
     width: 60vw;
 }
 
@@ -231,3 +250,19 @@
     text-align: center;
     padding-top: 5px;
 }
+
+@media (max-width: 1100px) {
+    .year-selector {
+      display: none;
+    }
+  
+    
+    .archive-year {
+      max-height: none;
+      overflow: visible; 
+    }
+    .archive{
+        border: none;
+    }
+  }
+  
