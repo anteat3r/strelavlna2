@@ -105,7 +105,7 @@ func DBSell(team string, prob string) (money int, oerr error) {
       Money int `db:"money"`
     }{}
     err := txDao.DB().
-      NewQuery("SELECT t.bought, t.sold, t.money, p.diff FROM teams AS t WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT bought, sold, money FROM teams WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
       One(&teamres)
     if err != nil { return err }
