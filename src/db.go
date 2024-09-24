@@ -68,45 +68,67 @@ func dbClownErr(args... string) error {
   return errors.New("clown" + DELIM + strings.Join(args, DELIM))
 }
 
-func SliceExclude[T comparable](s []T, v T) (res []T, found bool) {
-  i := 0
-  found = false
-  res = make([]T, len(s))
-  for _, p := range s {
-    if p == v {
+func SliceExclude[T comparable](s []T, v T) bool {
+  found := false
+  for i := range len(s) {
+    if s[i] == v {
       found = true
       continue
     }
-    res[i] = p
-    i++
+    if !found { continue }
+    s[i-1] = s[i]
   }
-  if found {
-    res = res[:len(s)-1]
-  }
-  return
+  if found { s = s[:len(s)-1] }
+  return found
 }
 
 func DBSell(team string, prob string) (money int, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
-    rec, err := txDao.FindRecordById("teams", team)
+
+    teamres := struct{
+      Bought string `db:"bought"`
+      Sold string `db:"sold"`
+      Money int `db:"money"`
+    }{}
+    err := txDao.DB().
+      NewQuery("SELECT (t.bought, t.sold, t.money, p.diff) FROM teams AS t WHERE id = {:team} LIMIT 1").
+      Bind(dbx.Params{ "team": team }).
+      One(&teamres)
     if err != nil { return err }
 
-    probrec, err := txDao.FindRecordById("probs", prob)
+    probres := struct{
+      Diff string `db:"diff"`
+    }{}
+    err = txDao.DB().
+      NewQuery("SELECT diff FROM probs WHERE id = {:prob} LIMIT 1").
+      Bind(dbx.Params{ "prob": prob }).
+      One(&probres)
     if err != nil { return err }
-    
-    bought := rec.GetStringSlice("bought")
 
-    newbought, found := SliceExclude(bought, prob)
+    bought := ParseRefList(teamres.Bought)
+    sold := ParseRefList(teamres.Sold)
+
+    found := SliceExclude(bought, prob)
     if !found { return dbClownErr("sell", "prob not owned") }
 
-    rec.Set("bought", newbought)
-    rec.Set("sold", append(rec.GetStringSlice("sold"), prob))
-    cost, ok := GetCost("-" + probrec.GetString("diff"))
-    if !ok { log.Error("invalid diff", prob, probrec.PublicExport()) }
-    rec.Set("money", rec.GetInt("money") + cost)
-    err = txDao.SaveRecord(rec)
+    sold = append(sold, prob)
 
-    money = rec.GetInt("money")
+    cost, ok := GetCost(probres.Diff)
+    if !ok { log.Error("invalid diff", prob, probres.Diff) }
+
+    money = teamres.Money + cost
+
+    _, err = txDao.DB().
+      NewQuery("UPDATE teams SET money = {:money}, bought = {:bought}, sold = {:sold} WHERE id = {:team} LIMIT 1").
+      Bind(dbx.Params{
+        "money": teamres.Money + cost,
+        "bought": StringifyRefList(bought),
+        "sold": StringifyRefList(sold),
+        "team": team,
+      }).
+      Execute()
+
+    if err != nil { return err }
 
     return nil
   })
