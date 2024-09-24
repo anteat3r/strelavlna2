@@ -58,9 +58,7 @@ func PlayerWsHandleMsg(
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
-    sLog(time.Now())
     prob, money, name, text, err := DBBuy(team, diff)
-    sLog(time.Now())
     if err != nil { return err }
     tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text)
 

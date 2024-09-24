@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v5"
@@ -178,6 +179,7 @@ func PlayerWsLoop(
         perchan<- "err" + DELIM + "not text msg: " + DELIM + strconv.Itoa(p)
         continue
       }
+      sLog(time.Now())
       wsrchan<- string(rm)
     }
   }()
@@ -189,6 +191,7 @@ func PlayerWsLoop(
         oerr = nErr("perchan closed")
         break loop
       }
+      sLog(time.Now())
       err := conn.WriteMessage(websocket.TextMessage, []byte(m))
       if err != nil {
         oerr = err
