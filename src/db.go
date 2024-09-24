@@ -133,7 +133,7 @@ func DBSell(team string, prob string) (money int, oerr error) {
     money = teamres.Money + cost
 
     _, err = txDao.DB().
-      NewQuery("UPDATE teams SET money = {:money}, bought = {:bought}, sold = {:sold} WHERE id = {:team} LIMIT 1").
+      NewQuery("UPDATE teams SET money = {:money}, bought = {:bought}, sold = {:sold} WHERE id = {:team}").
       Bind(dbx.Params{
         "money": money,
         "bought": StringifyRefList(bought),
@@ -200,7 +200,7 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
     text = probres.Text
 
     _, err = txDao.DB().
-      NewQuery("UPDATE teams SET money = {:money}, free = {:free}, bought = {:bought} WHERE id = {:team} LIMIT 1").
+      NewQuery("UPDATE teams SET money = {:money}, free = {:free}, bought = {:bought} WHERE id = {:team}").
       Bind(dbx.Params{
         "money": money,
         "free": StringifyRefList(free),
@@ -325,7 +325,7 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
       Cnt int `db:"count(id)"`
     }{}
     err = txDao.DB().
-      NewQuery("UPDATE checks SET text = {:text} WHERE team = {:team} AND prob = {:prob} AND type = 'msg' LIMIT 1 RETURNING count(id)").
+      NewQuery("UPDATE checks SET text = {:text} WHERE team = {:team} AND prob = {:prob} AND type = 'msg' RETURNING count(id)").
       Bind(dbx.Params{
         "prob": prob,
         "text": msg,
@@ -434,7 +434,7 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
     }
 
     _, err = txDao.DB().
-      NewQuery("UPDATE teams SET money = {:money}, " + tstring + " = {:target}, pending = {:pending} WHERE id = {:team} LIMIT 1").
+      NewQuery("UPDATE teams SET money = {:money}, " + tstring + " = {:target}, pending = {:pending} WHERE id = {:team}").
       Bind(dbx.Params{
         "money": money,
         "target": target,
