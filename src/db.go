@@ -209,6 +209,8 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
       }).
       Execute()
 
+    if err != nil { return err }
+
     return nil
   })
   return
