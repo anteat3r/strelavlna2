@@ -104,7 +104,7 @@ func DBSell(team string, prob string) (money int, oerr error) {
       Money int `db:"money"`
     }{}
     err := txDao.DB().
-      NewQuery("SELECT (t.bought, t.sold, t.money, p.diff) FROM teams AS t WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT t.bought, t.sold, t.money, p.diff FROM teams AS t WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
       One(&teamres)
     if err != nil { return err }
@@ -159,7 +159,7 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
       Bought string `db:"bought"`
     }{}
     err := txDao.DB().
-      NewQuery("SELECT (money, free, bought) FROM teams WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT money, free, bought FROM teams WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
       One(&teamres)
 
@@ -175,7 +175,7 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
       Text string `db:"text"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT (id, name, text) FROM probs WHERE id IN " +
+      NewQuery("SELECT id, name, text FROM probs WHERE id IN " +
                 RefListToInExpr(ParseRefList(teamres.Free)) +
                 " AND diff = {:diff} LIMIT 1").
         Bind(dbx.Params{ "diff": diff }).
@@ -230,7 +230,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
       Pending string `db:"pending"`
     }{}
     err := txDao.DB().
-      NewQuery("SELECT (name, bought, pending) FROM teams WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT name, bought, pending FROM teams WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
       One(&teamres)
 
@@ -250,7 +250,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
       Text string `db:"text"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT (diff, name, text) FROM probs WHERE id = {:prob} LIMIT 1").
+      NewQuery("SELECT diff, name, text FROM probs WHERE id = {:prob} LIMIT 1").
       Bind(dbx.Params{ "prob": prob }).
       One(&probres)
 
@@ -370,7 +370,7 @@ func DBPlayerInitLoad(team string) (res teamInitInfo, oerr error) {
 
     res = teamInitInfo{}
     err := txDao.DB().
-      NewQuery("SELECT (bought, pending, chat, money, player_1, player_2, player_3, player_4, player_5, name) FROM teams WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT bought, pending, chat, money, player_1, player_2, player_3, player_4, player_5, name FROM teams WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
       One(&res)
     
@@ -391,7 +391,7 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
       Solved string `db:"solved"`
     }{}
     err := txDao.DB().
-      NewQuery("SELECT (money, bought, pending, solved) FROM teams WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT money, bought, pending, solved FROM teams WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
       One(&teamres)
 
@@ -416,7 +416,7 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
       Text string `db:"text"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT (diff, name, text) FROM probs WHERE id = {:prob} LIMIT 1").
+      NewQuery("SELECT diff, name, text FROM probs WHERE id = {:prob} LIMIT 1").
       Bind(dbx.Params{ "prob": prob }).
       One(&probres)
 
