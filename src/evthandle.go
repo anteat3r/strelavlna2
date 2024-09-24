@@ -93,10 +93,30 @@ func PlayerWsHandleMsg(
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
     text := m[2]
+    for _, c := range text {
+      if c == '\x09' { return dbErr("chat", "invalid msg") }
+      if c == '\x0b' { return dbErr("chat", "invalid msg") }
+    }
     err := DBPlayerMsg(team, prob, text)
     if err != nil { return err }
     tchan.Send("msgsent", prob, text)
     AdminSend("msgrecd", team, prob, text)
+    
+  case "load":
+    if len(m) != 3 { return eIm(msg) }
+    res, err := DBPlayerInitLoad(team)
+    if err != nil { return err }
+    perchan<- "loaded" + 
+      strconv.Itoa(res.Money) + DELIM +
+      res.Bought + DELIM +
+      res.Pending + DELIM +
+      res.Name + DELIM +
+      res.Player1 + DELIM +
+      res.Player2 + DELIM +
+      res.Player3 + DELIM +
+      res.Player4 + DELIM +
+      res.Player5 + DELIM +
+      res.Chat
 
   default:
     return eIm(msg)

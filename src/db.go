@@ -11,6 +11,8 @@ import (
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
+	"github.com/pocketbase/pocketbase/tools/security"
+	"github.com/pocketbase/pocketbase/tools/types"
 )
 
 var (
@@ -23,6 +25,33 @@ var (
 
   ChecksColl *models.Collection
 )
+ 
+func ParseRefList(s string) []string {
+  s = strings.TrimPrefix(s, "[")
+  s = strings.TrimSuffix(s, "]")
+  res := strings.Split(s, ",")
+  for i, s := range res {
+    res[i] = strings.Trim(s, `"`)
+  }
+  return res
+}
+ 
+func StringifyRefList(l []string) string {
+  res := "["
+  for i, s := range l {
+    res += `"` + s + `"`
+    if i == len(l)-1 { break }
+    res += ","
+  }
+  return res
+}
+
+func GetRandomId() string {
+  return security.RandomStringWithAlphabet(
+    models.DefaultIdLength,
+    models.DefaultIdAlphabet,
+  )
+}
 
 func GetCost(diff string) (int, bool) {
   CostsMu.RLock()
@@ -209,7 +238,7 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     _, err := txDao.DB().
-      NewQuery("UPDATE teams SET chat = CONCAT(chat, {:prob}, ';', {:text}, '&') WHERE id = {:team}").
+      NewQuery("UPDATE teams SET chat = CONCAT(chat, {:prob}, CHAR(9), {:text}, CHAR(11)) WHERE id = {:team}").
       Bind(dbx.Params{
         "prob": prob,
         "text": msg,
@@ -218,23 +247,41 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
       Execute()
 
     if err != nil { return err }
+    
+    res := struct{
+      Cnt int `db:"count(id)"`
+    }{}
+    err = txDao.DB().
+      NewQuery("UPDATE checks SET text = {:text} WHERE team = {:team} AND prob = {:prob} AND type = 'msg' LIMIT 1 RETURNING count(id)").
+      Bind(dbx.Params{
+        "prob": prob,
+        "text": msg,
+        "team": team,
+      }).
+      One(&res)
+    if err != nil { return err }
+    
+    if res.Cnt == 1 { return nil }
 
-    // _, err = txDao.DB().
-    //   NewQuery("INSERT INTO checks (team, prob, type, text) VALUES ({:team}, {:prob}, 'player', {:text})").
-    //   Bind(dbx.Params{
-    //     "prob": prob,
-    //     "text": msg,
-    //     "team": team,
-    //   }).
-    //   Execute()
+    _, err = txDao.DB().
+    NewQuery("INSERT INTO checks (id, team, prob, type, text, created, updated) VALUES ({:id}, {:team}, {:prob}, 'player', {:text}, {:created}, {:updated})").
+      Bind(dbx.Params{
+        "id": GetRandomId(),
+        "prob": prob,
+        "text": msg,
+        "team": team,
+        "created": types.NowDateTime(),
+        "updated": types.NowDateTime(),
+      }).
+      Execute()
 
-    check := models.NewRecord(ChecksColl)
-
-    check.Set("type", "msg")
-    check.Set("team", team)
-    check.Set("prob", prob)
-    check.Set("solution", "")
-    err = txDao.SaveRecord(check)
+    // check := models.NewRecord(ChecksColl)
+    //
+    // check.Set("type", "msg")
+    // check.Set("team", team)
+    // check.Set("prob", prob)
+    // check.Set("solution", "")
+    // err = txDao.SaveRecord(check)
     if err != nil { return err }
 
     return nil
@@ -272,42 +319,65 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
   return
 }
 
-func DBPlayerInitLoad(team string) (money int, boughtprobs string, pendingprobs string, checks string, oerr error) {
+type teamInitInfo struct {
+  Bought string `db:"bought"`
+  Pending string `db:"pending"`
+  Chat string `db:"chat"`
+  Money int `db:"money"`
+  Name string `db:"name"`
+  Player1 string `db:"player_1"`
+  Player2 string `db:"player_2"`
+  Player3 string `db:"player_3"`
+  Player4 string `db:"player_4"`
+  Player5 string `db:"player_5"`
+}
+
+func DBPlayerInitLoad(team string) (res teamInitInfo, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    teamrec, err := txDao.FindRecordById("teams", team)
-    if err != nil { return err }
-
-    money = teamrec.GetInt("money")
-
-    for _, p := range teamrec.GetStringSlice("bought") {
-      probrec, err := txDao.FindRecordById("probs", p)
-      if err != nil { return err }
-      boughtprobs += probrec.GetId() + DELIM + 
-        probrec.GetString("diff") + DELIM +
-        probrec.GetString("name") + DELIM
-    }
-    boughtprobs += DELIM
-
-    for _, p := range teamrec.GetStringSlice("pending") {
-      probrec, err := txDao.FindRecordById("probs", p)
-      if err != nil { return err }
-      pendingprobs += probrec.GetId() + DELIM + 
-        probrec.GetString("diff") + DELIM +
-        probrec.GetString("name") + DELIM
-    }
-
-    res := []struct{ Id string `db:"id"` }{}
-    err = txDao.DB().NewQuery("SELECT ids FROM check WHERE team = {:team} AND type = 'msg'").
-      Bind(dbx.Params{
-        "team": team,
-      }).
-      All(&res)
-    if err != nil { return err }
-
-    for _, c := range res { checks += c.Id + DELIM }
+    res = teamInitInfo{}
+    err := txDao.DB().
+      NewQuery("SELECT (bought, pending, chat, money, player_1, player_2, player_3, player_4, player_5, name) FROM teams WHERE id = {:team} LIMIT 1").
+      Bind(dbx.Params{ "team": team }).
+      One(&res)
+    
+    if err != nil { return err } 
     
     return nil
+
+    // teamrec, err := txDao.FindRecordById("teams", team)
+    // if err != nil { return err }
+    //
+    // money = teamrec.GetInt("money")
+    //
+    // for _, p := range teamrec.GetStringSlice("bought") {
+    //   probrec, err := txDao.FindRecordById("probs", p)
+    //   if err != nil { return err }
+    //   boughtprobs += probrec.GetId() + DELIM + 
+    //     probrec.GetString("diff") + DELIM +
+    //     probrec.GetString("name") + DELIM
+    // }
+    // boughtprobs += DELIM
+    //
+    // for _, p := range teamrec.GetStringSlice("pending") {
+    //   probrec, err := txDao.FindRecordById("probs", p)
+    //   if err != nil { return err }
+    //   pendingprobs += probrec.GetId() + DELIM + 
+    //     probrec.GetString("diff") + DELIM +
+    //     probrec.GetString("name") + DELIM
+    // }
+    //
+    // res := []struct{ Id string `db:"id"` }{}
+    // err = txDao.DB().NewQuery("SELECT ids FROM check WHERE team = {:team} AND type = 'msg'").
+    //   Bind(dbx.Params{
+    //     "team": team,
+    //   }).
+    //   All(&res)
+    // if err != nil { return err }
+    //
+    // for _, c := range res { checks += c.Id + DELIM }
+    // 
+    // return nil
   })
   return
 }
