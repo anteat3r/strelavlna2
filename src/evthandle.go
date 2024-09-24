@@ -75,7 +75,7 @@ func PlayerWsHandleMsg(
     check, diff, teamname, name, text, err := DBSolve(team, prob, sol)
     if err != nil { return err }
     tchan.Send("solved", prob)
-    AdminSend("solved", check, diff, teamname, name, text)
+    AdminSend("solved", check, team, prob, diff, teamname, name, text)
 
   case "focus":
     if len(m) != 2 { return eIm(msg) }
@@ -145,11 +145,13 @@ func AdminWsHandleMsg(
   switch m[0] {
 
   case "grade":
-    if len(m) != 3 { return eIm(msg) }
+    if len(m) != 5 { return eIm(msg) }
     check := m[1]
-    rcorr := m[2]
+    team := m[2]
+    prob := m[3]
+    rcorr := m[4]
     corr := rcorr == "yes"
-    team, prob, money, err := DBAdminGrade(check, corr)
+    money, err := DBAdminGrade(check, team, prob, corr)
     if err != nil { return err }
     WriteTeamChan(team, "graded", prob, rcorr, strconv.Itoa(money))
     AdminSend("graded", prob, check)
