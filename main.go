@@ -314,6 +314,10 @@ func main() {
       src.Costs[vals[0]] = val
     }
 
+    cll, err := app.Dao().FindCollectionByNameOrId("checks")
+    if err != nil { panic(err) }
+    src.ChecksColl = cll
+
     return nil
   })
 
