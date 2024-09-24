@@ -4,7 +4,7 @@ var team_name = "Team 1";
 var team_rank = "14";
 var start_time = new Date().getTime() - 1000000;
 var end_time = new Date().getTime() + 3000000;
-var prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]];
+var prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]]; //[buy], [solve], [sell]
 var team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
 var problems_solved = 12;
 var problems_sold = 3;
@@ -32,8 +32,8 @@ var problems = [{
     id: "askjdhiwuahskjd",
     title: "Lyzar ve vesnici co si koupil moc drahy listky",
     rank: "A",
-    worked_on: true,
-    last_answer_time: new Date().getTime(),
+    focused_by: [],
+    pending: false,
     seen_chat: true,
     problem_content: "Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?",
     chat: [
@@ -59,8 +59,8 @@ var problems = [{
     id: "bnvcxiuwalknsdlkj",
     title: "Pecka u malého noobatika",
     rank: "C",
-    worked_on: false,
-    last_answer_time: Date.now(),
+    focused_by: [],
+    pending: false,
     seen_chat: true,
     problem_content: "asi Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?",
     chat: [
@@ -139,13 +139,28 @@ buy_button.addEventListener("click", function(){
 });
 
 document.getElementById("team-stats").addEventListener("click", function(){
+    unfocusProb(focused_problem);
     focused_problem = "";
     updateFocusedProblem();
     updateChat();
     updateProblemList();
+    updateShop();
     document.getElementById("team-stats").classList.add("team-stats-selected");
     problem_wrapper.classList.add("hidden");
     team_stats_main_wrapper.classList.remove("hidden");
+});
+
+document.getElementById("submit-answer-button").addEventListener("click", function(){
+    const answer_obj = problems.find(prob => prob.id == focused_problem);
+    if(answer_obj != null && !answer_obj.pending){
+        const answer_input = document.getElementById("answer-input");
+        if(answer_input.value != ""){
+            answer_obj.pending = true;
+            solveProb(focused_problem, answer_input.value);
+            answer_input.value = "";
+            updateFocusedProblem();
+        }
+    }
 });
 
 
@@ -160,9 +175,16 @@ function updateShop(){
     const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
     const sell_information = document.getElementById("sell-information");
     if(focused_problem_obj != null){
-        sell_information.innerHTML = `*Prodat aktuální úlohu: <span class="bold">${focused_problem_obj.title}</span>`;
+        if(focused_problem_obj.pending){
+            sell_information.innerHTML = `*Nelze prodat úlohu, kterou jste poslali na kontrolu řešení`;
+            document.getElementById("sell-action-wrapper").classList.add("cannot-sell");
+        }else{
+            sell_information.innerHTML = `*Prodat aktuální úlohu: <span class="bold">${focused_problem_obj.title}</span>`;
+            document.getElementById("sell-action-wrapper").classList.remove("cannot-sell");
+        }
     }else{
         sell_information.innerHTML = `*Klikněte na úlohu kterou chcete prodat`;
+        document.getElementById("sell-action-wrapper").classList.add("cannot-sell");
     }
 }
 
@@ -202,10 +224,15 @@ function updatePriceList(){
 
 function updateProblemList(){
     const problems_wrapper = document.getElementById("teams-problems");
+    for(const prob of problems){
+        if(prob.focused_by.length > 0){
+            prob.seen_chat = true;
+        }
+    }
     problems_wrapper.innerHTML = "";
     for(prob of problems){
         problems_wrapper.innerHTML +=
-        `<div class="problem ${focused_problem == prob.id ? "problem-focused" : ""} ${prob.worked_on ? "problem-worked-on" : ""} ${!prob.seen_chat ? "unseen-chat" : ""}" id="${prob.id}">
+        `<div class="problem ${focused_problem == prob.id ? "problem-focused" : ""} ${prob.focused_by.length > (focused_problem == prob.id ? 1 : 0) ? "problem-worked-on" : ""} ${!prob.seen_chat ? "unseen-chat" : ""} ${prob.pending ? "problem-pending" : ""}" id="${prob.id}">
             <div class="flex flex-row align-center">
                 <h2 class="problem-title"${prob.title.length > 12 ? `style="font-size: 15px"` : ""}>${prob.title}</h2>
                 <h2 class="problem-rank">[${prob.rank}]</h2>
@@ -217,17 +244,26 @@ function updateProblemList(){
     const problems_buttons = document.getElementById("teams-problems").getElementsByClassName("problem");
     for(const button of problems_buttons){
         button.addEventListener("click", function(){
+            if(focused_problem == this.id){
+                return;
+            }
+            if(focused_problem != ""){
+                unfocusProb(focused_problem);
+            }
             focused_problem = this.id;
             updateProblemList();
             updateChat();
             updateFocusedProblem();
             updateShop();
+            focusProb(focused_problem);
             document.getElementById("team-stats").classList.remove("team-stats-selected");
             problem_wrapper.classList.remove("hidden");
             team_stats_main_wrapper.classList.add("hidden");
             
         });
     }
+    
+    
 }
 
 function updateFocusedProblem(){
@@ -242,6 +278,13 @@ function updateFocusedProblem(){
     const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
     problem_title.innerHTML = focused_problem_obj.title + " [" + focused_problem_obj.rank + "]";
     problem_content.innerHTML = focused_problem_obj.problem_content;
+    const answer_input_wrapper = document.getElementById("answer-input-wrapper");
+
+    if(focused_problem_obj.pending){
+        answer_input_wrapper.classList.add("cannot-answer");
+    }else{
+        answer_input_wrapper.classList.remove("cannot-answer");
+    }
 }
 
 function updateChat(){
@@ -263,6 +306,7 @@ function updateChat(){
             <p class="conversation-message">${message.content}</p>
         </div>`
     }
+    conversation_wrapper.scrollTop = conversation_wrapper.scrollHeight;
 }
 
 function updateClock(remaining, passed){
@@ -389,7 +433,7 @@ function buyProblem(rank){
 }
 
 function sellProblem(){
-    if(!focused_problem || !problems.some(prob => prob.id == focused_problem)) return;
+    if(!focused_problem || !problems.some(prob => prob.id == focused_problem) || problems.find(prob => prob.id == focused_problem).pending) return;
     const confirm_dialog = document.getElementById("confiramtion-dialog-bg");
     confirm_dialog.style.display = "block";
     const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
@@ -467,13 +511,13 @@ function connectWS() {
         if (msg.length != 4) { cLe() }
         probSolved(msg[1], msg[2], msg[3])
       break;
-      case "viewed":
-        if (msg.length != 4) { cLe() }
-        probViewed(msg[1], msg[2], msg[3])
-      break;
       case "focused":
         if (msg.length != 3) { cLe() }
         probFocused(msg[1], msg[2])
+      break;
+      case "unfocused":
+        if (msg.length != 2) { cLe() }
+        probUnfocused(msg[1])
       break;
       case "msgsent":
         if (msg.length != 3) { cLe() }
@@ -494,11 +538,11 @@ try {
 // connectWS();
 
 /** @param {string} id */
-function sellProb(id) {
+function sellProb(id) { //done
   socket.send(`sell\x00${id}`) }
 
 /** @param {string} diff */
-function buyProb(diff) {
+function buyProb(diff) { //done
   socket.send(`buy\x00${diff}`) }
 
 /** @param {string} diff */
@@ -507,16 +551,20 @@ function buyOldProb(diff) {
 
 /** @param {string} id
  * @param {string} sol */
-function solveProb(id, sol) {
-  socket.send(`buy\x00${id}:${sol}`) }
+function solveProb(id, sol) { //done
+  socket.send(`solve\x00${id}\x00${sol}`) }
 
 /** @param {string} id */
-function viewProb(id) {
-  socket.send(`view\x00${id}`) }
+function focusProb(id) { //done
+  socket.send(`focus\x00${id}`) }
+
+/** @param {string} id */
+function unfocusProb() { //done
+    socket.send(`unfocus`) }
 
 /** @param {string} id
  * @param {string} text */
-function sendMsg(id, text) {
+function sendMsg(id, text) { //done
   socket.send(`chat\x00${id}\x00${text}`) }
 
 /** @param {string} msg
@@ -529,6 +577,8 @@ function msgRecieved(id, msg) {
     const problem = problems.find(prob => prob.id == id);
     if(problem != null) {
       problem.chat.push({author: "support", content: msg});
+      problem.seen_chat = false;
+      updateProblemList();
       updateChat();
     }
   }
@@ -539,7 +589,7 @@ function msgRecieved(id, msg) {
 function msgSent(id, msg) {
   if(id == "") {
     global_chat.push({author: "team", content: msg});
-    // updateChat();
+    updateChat();
   } else {
     const problem = problems.find(prob => prob.id == id);
     if(problem != null) {
@@ -557,6 +607,7 @@ function probSold(id, money) {
   updateTeamStats();
   updateProblemList();
   updateFocusedProblem();
+  updateShop();
   console.log(id, money);
 }
 
@@ -570,8 +621,8 @@ function probBought(id, diff, money, name, text) {
         id: id,
         title: name,
         rank: diff,
-        worked_on: false,
-        last_answer_time: Date.now()-10000,
+        focused_by: [],
+        can_answer: true,
         seen_chat: true,
         problem_content: text,
         chat: []
@@ -586,18 +637,29 @@ function probBought(id, diff, money, name, text) {
  * @param {string} id 
  * @param {string} name */
 function probSolved(id, diff, name) {
+    problems.find(prob => prob.id == id).pending = true;
+    updateFocusedProblem();
+    updateProblemList();
+    updateShop();
   console.log(id, diff, name) }
 
-/** @param {string} msg
- * @param {string} text 
- * @param {string} name */
-function probViewed(diff, name, text) {
-  console.log(text, diff, name) }
+
 
 /** @param {string} idx
  * @param {string} id */
 function probFocused(id, idx) {
-  console.log(id, idx) }
+    const problem = problems.find(prob => prob.id == id);
+    if(!problem.focused_by.includes(idx)){
+        problem.focused_by.push(idx);
+    }
+    updateProblemList();    
+    console.log(id, idx) }
 
-
+/** @param {string} idx
+ * @param {string} id */
+function probUnfocused(idx) {
+    problems.forEach(prob => prob.focused_by = prob.focused_by.filter(focused => focused != idx));
+    updateProblemList();    
+    console.log(id, idx) }
+  
 
