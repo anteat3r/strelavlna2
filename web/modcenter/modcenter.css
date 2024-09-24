@@ -1053,6 +1053,8 @@
     color: var(--color-black-glow);
     font-size: 13px;
     font-weight: 500;
+    cursor: pointer;
+    user-select: none;
 }
 
 #problem-content-wrapper{
@@ -1073,6 +1075,8 @@
     font-size: 13px;
     font-weight: 500;
     color: var(--color-black-glow);
+    cursor: pointer;
+    user-select: none;
 }
 
 #grading-wrapper{
