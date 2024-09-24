@@ -336,6 +336,8 @@
     color: white;
     gap: 10px;
     transition: background-color 0.3s ease-out;
+    padding: 5px;
+    padding-inline: 10px;
 }
 
 #buy-button:hover{
@@ -383,6 +385,7 @@
     align-items: center;
     padding-top: 3px;
     padding-bottom: 3px;
+    padding-inline: 10px;
     transition: background-color 0.3s ease-out;
 }
 .subbuy-button:hover{
@@ -432,6 +435,8 @@
     font-weight: 500;
     color: white;
     transition: background-color 0.3s ease-out;
+    padding: 5px;
+    padding-inline: 10px;
 }
 #sell-button:hover{
     background-color: var(--color-secondary-light);
