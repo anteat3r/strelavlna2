@@ -394,7 +394,7 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Contest string `db:"contest"`
     }{}
     err := txDao.DB().
-      NewQuery("SELECT bought, pending, chat, money, player_1, player_2, player_3, player_4, player_5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT bought, pending, chat, money, player1, player2, player3, player4, player5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
       One(&teamres)
 
