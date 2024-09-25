@@ -95,7 +95,7 @@ func SliceExclude[T comparable](s []T, v T) bool {
     if !found { continue }
     s[i-1] = s[i]
   }
-  if found { s = s[:len(s)-1] }
+  if found { fmt.Println("here"); s = s[:len(s)-1] }
   return found
 }
 
