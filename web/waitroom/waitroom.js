@@ -16,7 +16,16 @@ stoneSetup = {
     InnerMax: 200
 }
 
-const target_time = Date.now() + 20000000;
+var target_time = Date.now() + 20000000;
+
+const urlParams = new URLSearchParams(window.location.search);
+const id = urlParams.get('id');
+fetch(`https://strela-vlna.gchd.cz/api/get_start_time?id=${id}`)
+    .then(response => response.text())
+    .then(data => {
+        // target_time = Date.parse(data);
+        target_time = Date.now() + 10000;
+    });
 
 
 const analyser = audioCtx.createAnalyser();
@@ -200,6 +209,10 @@ function frame(){
     updateSpectrogramMountains();
     const now = Date.now();
     const remaining = target_time - now;
+
+    if (remaining <= 0) {
+        window.location.href = `../play?id=${id}`;
+    }
 
     const this_second = Math.floor(now/1000);
     if (this_second != last_second) {
