@@ -326,7 +326,7 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
       Cnt int `db:"count(id)"`
     }{}
     err = txDao.DB().
-      NewQuery("UPDATE checks SET text = {:text} WHERE team = {:team} AND prob = {:prob} AND type = 'msg' RETURNING count(id)").
+      NewQuery("UPDATE checks SET solution = {:text} WHERE team = {:team} AND prob = {:prob} AND type = 'msg' RETURNING count(id)").
       Bind(dbx.Params{
         "prob": prob,
         "text": msg,
@@ -338,7 +338,7 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
     if res.Cnt == 1 { return nil }
 
     _, err = txDao.DB().
-    NewQuery("INSERT INTO checks (id, team, prob, type, text, created, updated) VALUES ({:id}, {:team}, {:prob}, 'msg', {:text}, {:created}, {:updated})").
+    NewQuery("INSERT INTO checks (id, team, prob, type, solution, created, updated) VALUES ({:id}, {:team}, {:prob}, 'msg', {:text}, {:created}, {:updated})").
       Bind(dbx.Params{
         "id": GetRandomId(),
         "prob": prob,
