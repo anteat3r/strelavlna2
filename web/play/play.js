@@ -1,3 +1,4 @@
+const redirects = false;
 //global states
 var team_balance = 400;
 var team_name = "Team 1";
@@ -397,14 +398,12 @@ function updateClock(remaining, passed){
 document.getElementById("confirm-dialog-cancel").addEventListener("click", function(){
     const confirm_dialog = document.getElementById("confiramtion-dialog-bg");
     confirm_dialog.style.display = "none";
-    // document.getElementById("confirm-dialog-ok").removeEventListener("click", arguments.callee);
     document.getElementById("confirm-dialog-ok").replaceWith(document.getElementById("confirm-dialog-ok").cloneNode(true));
 });
 function buyProblem(rank){
     if (team_balance < prices[0]["ABC".indexOf(rank)]){return;}
     const confirm_dialog = document.getElementById("confiramtion-dialog-bg");
     confirm_dialog.style.display = "block";
-    // document.getElementById("confirm-dialog-content").innerHTML = `Opravdu chcete koupit úlohu ranku <span class="bold">${rank}</span> za <span class="bold">${prices[team_rank.indexOf(rank)][0]}</span> DC?`;
     document.getElementById("confirm-dialog-content").innerHTML = `Opravdu chcete koupit úlohu:<br><span class="bold">${rank}</span> za <span class="bold">${prices[0]["ABC".indexOf(rank)]}</span> DC?`;
     document.getElementById("confirm-dialog-ok").addEventListener("click", function(){
         console.log(prices[0]["ABC".indexOf(rank)]);
@@ -423,8 +422,8 @@ function buyProblem(rank){
             //     chat: []
             // }
             // problems.push(new_problem);
-            updateProblemList();
-            updateShop();
+            // updateProblemList();
+            // updateShop();
 
         }
         confirm_dialog.style.display = "none";
@@ -483,9 +482,10 @@ function connectWS() {
   socket = new WebSocket(`wss://strela-vlna.gchd.cz/api/play/${id}`);
   socket.addEventListener("error", (e) => {
       console.log(e);
-      // window.location.href = `login.html?id=${id}`;
+      if(redirects){
+        window.location.href = `login.html?id=${id}`;
+      }
   });
-    // window.location.href = "login.html";
 
   socket.addEventListener("message", (event) => {
     function cLe() { console.log("invalid msg", rawmsg) }
@@ -520,8 +520,11 @@ function connectWS() {
         probUnfocused(msg[1])
       break;
       case "msgsent":
-        if (msg.length != 3) { cLe() }
+        if (msg.length != 4) { cLe() }
         msgSent(msg[1], msg[2], msg[3])
+      break;
+      case "focuscheck":
+        focusCheck();
       break;
       case "err":
         console.log(msg)
@@ -533,7 +536,11 @@ try {
   connectWS();
 } catch (e) {
     console.log(e);
-//   window.location.href = "login.html";
+    if(redirects){
+        const searchParams = new URLSearchParams(window.location.search);
+        const id = searchParams.get("id");
+        window.location.href = `login.html?id=${id}`;
+    }
 }
 // connectWS();
 
@@ -660,6 +667,16 @@ function probFocused(id, idx) {
 function probUnfocused(idx) {
     problems.forEach(prob => prob.focused_by = prob.focused_by.filter(focused => focused != idx));
     updateProblemList();    
-    console.log(id, idx) }
+    console.log(id, idx) 
+}
   
-
+function focusCheck(){
+    if(!problems.some(prob => prob.id == focused_problem)){
+        focused_problem = "";
+    }
+    if(focused_problem == ""){
+        unfocusProb();
+    }else{
+        focusProb(focused_problem);
+    }
+}
