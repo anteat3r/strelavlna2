@@ -323,7 +323,7 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
     if err != nil { return err }
     
     res := []struct{
-      Id int `db:"id"`
+      Id string `db:"id"`
     }{}
     err = txDao.DB().
       NewQuery("UPDATE checks SET solution = {:text} WHERE team = {:team} AND prob = {:prob} AND type = 'msg' RETURNING id").
