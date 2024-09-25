@@ -713,7 +713,36 @@ function focusCheck(){
 
 
 
+
+
 function loaded(data) {
-    
     console.log(data);
+    problems = data.bought.map(bought => {
+        return {
+            id: bought.id,
+            title: bought.name,
+            rank: bought.diff,
+            focused_by: [],
+            can_answer: true,
+            seen_chat: true,
+            problem_content: bought.text,
+            chat: data.chat.split("\x0b").filter(line => line.split("\x09")[2] == bought.id).map(line => {
+                const [author, probid, text] = line.split("\x09");
+                return {author: author == "a" ? "support" : "team" , content: text};
+            })
+        }
+    });
+    team_balance = parseInt(data.money);
+    team_name = data.name;
+    online_round = new Date(Date.now() + parseInt(data.online_round));
+    online_round_end = new Date(Date.now() + parseInt(data.online_round_end));
+    player1 = data.player1;
+    player2 = data.player2;
+    player3 = data.player3;
+    player4 = data.player4;
+    player5 = data.player5;
+    global_chat = data.chat.split("\x0b").filter(line => line.split("\x09")[2] == "").map(line => {
+        const [author, probid, text] = line.split("\x09");
+        return {author: author == "a" ? "support" : "team" , content: text};
+    });
 }

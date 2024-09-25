@@ -20,11 +20,12 @@ var target_time = Date.now() + 20000000;
 
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
-fetch(`https://strela-vlna.gchd.cz/api/get_start_time?id=${id}`)
+fetch(`https://strela-vlna.gchd.cz/api/start_time/${id}`)
     .then(response => response.text())
     .then(data => {
-        // target_time = Date.parse(data);
-        target_time = Date.now() + 10000;
+        console.log(data);
+        target_time = Date.parse(data);
+        // target_time = Date.now() + 10000;
     });
 
 
