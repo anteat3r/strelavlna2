@@ -360,6 +360,7 @@ type probRes struct {
   Name string `db:"name" json:"name"`
   Diff string `db:"diff" json:"diff"`
   Text string `db:"text" json:"text"`
+  Id string `db:"id" json:"id"`
 }
 
 type teamRes struct {
@@ -402,14 +403,14 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
 
     boughtprobsres := []probRes{}
     err = txDao.DB().
-      NewQuery("SELECT name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Bought))).
+      NewQuery("SELECT id, name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Bought))).
       All(&boughtprobsres)
 
     if err != nil { return err }
 
     pendingprobsres := []probRes{}
     err = txDao.DB().
-      NewQuery("SELECT name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Pending))).
+      NewQuery("SELECT id, name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Pending))).
       All(&pendingprobsres)
 
     if err != nil { return err }

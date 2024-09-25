@@ -101,9 +101,10 @@ func SingleContestEndp(dao *daos.Dao) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		res := struct {
 			Name string `db:"name" json:"name"`
+			OnlineRound string `db:"online_round" json:"online_round"`
 		}{}
 		err := dao.DB().
-			NewQuery("SELECT name FROM contests WHERE id = {:id} LIMIT 1").
+			NewQuery("SELECT name, online_round FROM contests WHERE id = {:id} LIMIT 1").
 			Bind(dbx.Params{"id": c.PathParam("id")}).
 			One(&res)
 		if err != nil {
