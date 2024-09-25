@@ -686,6 +686,7 @@ function probSolved(id, diff, name) {
  * @param {string} id */
 function probFocused(id, idx) {
     const problem = problems.find(prob => prob.id == id);
+    console.log(id);
     if(!problem.focused_by.includes(idx)){
         problem.focused_by.push(idx);
     }
@@ -697,7 +698,6 @@ function probFocused(id, idx) {
 function probUnfocused(idx) {
     problems.forEach(prob => prob.focused_by = prob.focused_by.filter(focused => focused != idx));
     updateProblemList();    
-    console.log(id, idx) 
 }
   
 function focusCheck(){
@@ -717,7 +717,9 @@ function focusCheck(){
 
 function loaded(data) {
     console.log(data);
-    problems = JSON.parse(data).bought.map(bought => {
+    data = JSON.parse(data);
+    
+    problems = data.bought.map(bought => {
         return {
             id: bought.id,
             title: bought.name,
@@ -745,4 +747,9 @@ function loaded(data) {
         const [author, probid, text] = line.split("\x09");
         return {author: author == "a" ? "support" : "team" , content: text};
     });
+    updateProblemList();
+    updateShop();
+    updateTeamStats();
+    updateChat();
+    updateFocusedProblem();
 }
