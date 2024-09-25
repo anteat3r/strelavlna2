@@ -645,6 +645,7 @@ function probSold(id, money) {
   updateProblemList();
   updateFocusedProblem();
   updateShop();
+  updateChat();
   console.log(id, money);
 }
 
@@ -736,8 +737,8 @@ function loaded(data) {
     });
     team_balance = parseInt(data.money);
     team_name = data.name;
-    online_round = new Date(Date.now() + parseInt(data.online_round));
-    online_round_end = new Date(Date.now() + parseInt(data.online_round_end));
+    start_time = new Date(Date.now() + parseInt(data.online_round));
+    end_time = new Date(Date.now() + parseInt(data.online_round_end));
     player1 = data.player1;
     player2 = data.player2;
     player3 = data.player3;
