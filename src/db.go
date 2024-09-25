@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"slices"
 	"strings"
 	"sync"
@@ -192,9 +193,9 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
     free := ParseRefList(teamres.Free)
     bought := ParseRefList(teamres.Bought)
 
-    log.Info(free)
+    fmt.Println(free)
     found := SliceExclude(free, prob)
-    log.Info(free)
+    fmt.Println(free)
     if !found { log.Error("prob not free", team, prob) }
 
     bought = append(bought, prob)
