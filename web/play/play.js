@@ -717,7 +717,6 @@ function focusCheck(){
 
 
 function loaded(data) {
-    console.log(data);
     data = JSON.parse(data);
     
     problems = data.bought.map(bought => {
@@ -748,6 +747,7 @@ function loaded(data) {
         const [author, probid, text] = line.split("\x09");
         return {author: author == "a" ? "support" : "team" , content: text};
     });
+    console.log(problems[0].chat);
     updateProblemList();
     updateShop();
     updateTeamStats();
