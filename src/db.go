@@ -2,10 +2,12 @@ package src
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	log "github.com/anteat3r/golog"
 	"github.com/pocketbase/dbx"
@@ -224,7 +226,7 @@ func DBBuyOld(team string, diff string) (id string, money int, name string, text
   return dbBuySrc(team, diff, "solved")
 }
 
-func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, text string, oerr error) {
+func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -262,7 +264,6 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
     teamname = teamres.Name
     diff = probres.Diff
     name = probres.Name
-    text = probres.Text
 
     check = GetRandomId()
     _, err = txDao.DB().
@@ -355,29 +356,92 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
   return
 }
 
-type teamInitInfo struct {
-  Bought string `db:"bought"`
-  Pending string `db:"pending"`
-  Chat string `db:"chat"`
-  Money int `db:"money"`
-  Name string `db:"name"`
-  Player1 string `db:"player_1"`
-  Player2 string `db:"player_2"`
-  Player3 string `db:"player_3"`
-  Player4 string `db:"player_4"`
-  Player5 string `db:"player_5"`
+type probRes struct {
+  Name string `db:"name" json:"name"`
+  Diff string `db:"diff" json:"diff"`
+  Text string `db:"text" json:"text"`
 }
 
-func DBPlayerInitLoad(team string) (res teamInitInfo, oerr error) {
+type teamRes struct {
+  Bought []probRes `json:"bought"`
+  Pending []probRes `json:"pending"`
+  Chat string `json:"chat"`
+  Money int `json:"money"`
+  Name string `json:"name"`
+  OnlineRound time.Time `json:"online_round"`
+  OnlineRoundEnd time.Time `json:"online_round_end"`
+  Player1 string `json:"player1"`
+  Player2 string `json:"player2"`
+  Player3 string `json:"player3"`
+  Player4 string `json:"player4"`
+  Player5 string `json:"player5"`
+}
+
+func DBPlayerInitLoad(team string) (sres string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    res = teamInitInfo{}
+    teamres := struct {
+      Bought string `db:"bought"`
+      Pending string `db:"pending"`
+      Chat string `db:"chat"`
+      Money int `db:"money"`
+      Name string `db:"name"`
+      Player1 string `db:"player_1"`
+      Player2 string `db:"player_2"`
+      Player3 string `db:"player_3"`
+      Player4 string `db:"player_4"`
+      Player5 string `db:"player_5"`
+      Contest string `db:"contest"`
+    }{}
     err := txDao.DB().
-      NewQuery("SELECT bought, pending, chat, money, player_1, player_2, player_3, player_4, player_5, name FROM teams WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT bought, pending, chat, money, player_1, player_2, player_3, player_4, player_5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
-      One(&res)
-    
-    if err != nil { return err } 
+      One(&teamres)
+
+    if err != nil { return err }
+
+    boughtprobsres := []probRes{}
+    err = txDao.DB().
+      NewQuery("SELECT name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Bought))).
+      All(&boughtprobsres)
+
+    if err != nil { return err }
+
+    pendingprobsres := []probRes{}
+    err = txDao.DB().
+      NewQuery("SELECT name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Pending))).
+      All(&pendingprobsres)
+
+    if err != nil { return err }
+
+    contres := struct{
+      OnlineRound types.DateTime `db:"online_round"`
+      OnlineRoundEnd types.DateTime `db:"online_round_end"`
+    }{}
+    err = txDao.DB().
+      NewQuery("SELECT online_round, online_round_end FROM contest WHERE id = {:contest} LIMIT 1").
+      Bind(dbx.Params{ "contest": teamres.Contest }).
+      One(&contres)
+
+    if err != nil { return err }
+
+    res := teamRes{
+      Bought: boughtprobsres,
+      Pending: pendingprobsres,
+      Chat: teamres.Chat,
+      Money: teamres.Money,
+      Name: teamres.Name,
+      OnlineRound: contres.OnlineRound.Time(),
+      OnlineRoundEnd: contres.OnlineRoundEnd.Time(),
+      Player1: teamres.Player1,
+      Player2: teamres.Player2,
+      Player3: teamres.Player3,
+      Player4: teamres.Player4,
+      Player5: teamres.Player5,
+    }
+
+    sresb, _ := json.Marshal(res)
+    sres = string(sresb)
     
     return nil
   })
@@ -498,27 +562,25 @@ func DBAdminDismiss(check string) (team string, prob string, oerr error) {
   return
 }
 
-func DBAdminView(check string) (team string, prob string, oerr error) {
+func DBAdminView(prob string) (text string, sol string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    checkrec, err := txDao.FindRecordById("checks", check)
+    probres := struct{
+      Text string `db:"text"`
+      Sol string `db:"solution"`
+    }{}
+    err := txDao.DB().
+      NewQuery("SELECT text, solution FROM probs WHERE id = {:prob} LIMIT 1").
+      Bind(dbx.Params{ "prob": prob }).
+      One(&probres)
+
     if err != nil { return err }
 
-    probrec, err := txDao.FindRecordById("probs", checkrec.GetString("prob"))
-    if err != nil { return err }
-
-    teamrec, err := txDao.FindRecordById("teams", checkrec.GetString("team"))
-    if err != nil { return err }
-    
-    prob = probrec.GetId()
-    team = teamrec.GetId()
-
-    // diff = probrec.GetString("diff")
-    // teamname = teamrec.GetString("name")
-    // name = probrec.GetString("name")
-    // text = probrec.GetString("text")
+    text = probres.Text
+    sol = probres.Sol
     
     return nil
   })
   return
 }
+

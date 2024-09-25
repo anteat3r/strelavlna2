@@ -72,10 +72,10 @@ func PlayerWsHandleMsg(
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
     sol := m[2]
-    check, diff, teamname, name, text, err := DBSolve(team, prob, sol)
+    check, diff, teamname, name, err := DBSolve(team, prob, sol)
     if err != nil { return err }
     tchan.Send("solved", prob)
-    AdminSend("solved", check, team, prob, diff, teamname, name, text)
+    AdminSend("solved", check, team, prob, diff, teamname, name)
 
   case "focus":
     if len(m) != 2 { return eIm(msg) }
@@ -106,17 +106,11 @@ func PlayerWsHandleMsg(
     if len(m) != 3 { return eIm(msg) }
     res, err := DBPlayerInitLoad(team)
     if err != nil { return err }
-    perchan<- "loaded" + 
-      strconv.Itoa(res.Money) + DELIM +
-      res.Bought + DELIM +
-      res.Pending + DELIM +
-      res.Name + DELIM +
-      res.Player1 + DELIM +
-      res.Player2 + DELIM +
-      res.Player3 + DELIM +
-      res.Player4 + DELIM +
-      res.Player5 + DELIM +
-      res.Chat
+    perchan<- "loaded" + DELIM + res
+
+  case "reqfocus":
+    if len(m) != 1 { return eIm(msg) }
+    tchan.Send("reqfocus")
 
   default:
     return eIm(msg)
@@ -161,8 +155,8 @@ func AdminWsHandleMsg(
     team := m[1]
     prob := m[2]
     text := m[3]
-    // err := DBAdminMsg(team, prob, text)
-    // if err != nil { return err }
+    err := DBAdminMsg(team, prob, text)
+    if err != nil { return err }
     WriteTeamChan(team, "msgrecd", prob, text)
     AdminSend("msgsent", team, prob, text)
 
@@ -175,16 +169,28 @@ func AdminWsHandleMsg(
     AdminSend("dismissed", check)
     
   case "focus":
-    if len(m) != 2 { return eIm(msg) }
+    if len(m) != 3 { return eIm(msg) }
     check := m[1]
-    team, prob, err := DBAdminView(check)    
-    if err != nil { return err }
+    team := m[2]
+    prob := m[3]
+    rtxt := m[4]
+    txt := rtxt == "yes"
+    if txt {
+      text, sol, err := DBAdminView(prob)    
+      if err != nil { return err }
+      perchan<- "viewed" + DELIM + prob + DELIM + text + DELIM + sol
+    }
     WriteTeamChan(team, "adminfocused", check, prob)
     AdminSend("focused", check, strconv.Itoa(idx))
     
   case "unfocus":
     if len(m) != 1 { return eIm(msg) }
     AdminSend("unfocused", strconv.Itoa(idx))
+
+  case "reqfocus":
+    if len(m) != 1 { return eIm(msg) }
+    AdminSend("reqfocus")
+
     
   }
 
