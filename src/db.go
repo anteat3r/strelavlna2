@@ -322,23 +322,23 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
 
     if err != nil { return err }
     
-    res := struct{
-      Cnt int `db:"count(id)"`
+    res := []struct{
+      Id string `db:"id"`
     }{}
     err = txDao.DB().
-      NewQuery("UPDATE checks SET text = {:text} WHERE team = {:team} AND prob = {:prob} AND type = 'msg' RETURNING count(id)").
+      NewQuery("UPDATE checks SET solution = {:text} WHERE team = {:team} AND prob = {:prob} AND type = 'msg' RETURNING id").
       Bind(dbx.Params{
         "prob": prob,
         "text": msg,
         "team": team,
       }).
-      One(&res)
+      All(&res)
     if err != nil { return err }
     
-    if res.Cnt == 1 { return nil }
+    if len(res) == 1 { return nil }
 
     _, err = txDao.DB().
-    NewQuery("INSERT INTO checks (id, team, prob, type, text, created, updated) VALUES ({:id}, {:team}, {:prob}, 'msg', {:text}, {:created}, {:updated})").
+    NewQuery("INSERT INTO checks (id, team, prob, type, solution, created, updated) VALUES ({:id}, {:team}, {:prob}, 'msg', {:text}, {:created}, {:updated})").
       Bind(dbx.Params{
         "id": GetRandomId(),
         "prob": prob,
@@ -360,6 +360,7 @@ type probRes struct {
   Name string `db:"name" json:"name"`
   Diff string `db:"diff" json:"diff"`
   Text string `db:"text" json:"text"`
+  Id string `db:"id" json:"id"`
 }
 
 type teamRes struct {
@@ -368,8 +369,8 @@ type teamRes struct {
   Chat string `json:"chat"`
   Money int `json:"money"`
   Name string `json:"name"`
-  OnlineRound time.Time `json:"online_round"`
-  OnlineRoundEnd time.Time `json:"online_round_end"`
+  OnlineRound int64 `json:"online_round"`
+  OnlineRoundEnd int64 `json:"online_round_end"`
   Player1 string `json:"player1"`
   Player2 string `json:"player2"`
   Player3 string `json:"player3"`
@@ -402,14 +403,14 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
 
     boughtprobsres := []probRes{}
     err = txDao.DB().
-      NewQuery("SELECT name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Bought))).
+      NewQuery("SELECT id, name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Bought))).
       All(&boughtprobsres)
 
     if err != nil { return err }
 
     pendingprobsres := []probRes{}
     err = txDao.DB().
-      NewQuery("SELECT name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Pending))).
+      NewQuery("SELECT id, name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Pending))).
       All(&pendingprobsres)
 
     if err != nil { return err }
@@ -425,14 +426,17 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
 
     if err != nil { return err }
 
+    ordelta := contres.OnlineRound.Time().Sub(time.Now()).Milliseconds()
+    oredelta := contres.OnlineRoundEnd.Time().Sub(time.Now()).Milliseconds()
+
     res := teamRes{
       Bought: boughtprobsres,
       Pending: pendingprobsres,
       Chat: teamres.Chat,
       Money: teamres.Money,
       Name: teamres.Name,
-      OnlineRound: contres.OnlineRound.Time(),
-      OnlineRoundEnd: contres.OnlineRoundEnd.Time(),
+      OnlineRound: ordelta,
+      OnlineRoundEnd: oredelta,
       Player1: teamres.Player1,
       Player2: teamres.Player2,
       Player3: teamres.Player3,

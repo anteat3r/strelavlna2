@@ -97,13 +97,34 @@ func SingleSchoolEndp(dao *daos.Dao) echo.HandlerFunc {
 	}
 }
 
+func TeamContestStartEndp(dao *daos.Dao) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		res := struct {
+			OnlineRound string `db:"online_round"`
+		}{}
+		err := dao.DB().
+      NewQuery("SELECT online_round FROM contests WHERE id = (SELECT contest FROM teams WHERE id = {:id} LIMIT 1) LIMIT 1").
+			Bind(dbx.Params{"id": c.PathParam("id")}).
+			One(&res)
+		if err != nil {
+			return err
+		}
+		out, err := json.Marshal(res.OnlineRound)
+		if err != nil {
+			return err
+		}
+		return c.String(200, string(out))
+	}
+}
+
 func SingleContestEndp(dao *daos.Dao) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		res := struct {
 			Name string `db:"name" json:"name"`
+			OnlineRound string `db:"online_round" json:"online_round"`
 		}{}
 		err := dao.DB().
-			NewQuery("SELECT name FROM contests WHERE id = {:id} LIMIT 1").
+			NewQuery("SELECT name, online_round FROM contests WHERE id = {:id} LIMIT 1").
 			Bind(dbx.Params{"id": c.PathParam("id")}).
 			One(&res)
 		if err != nil {
