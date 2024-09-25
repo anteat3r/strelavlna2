@@ -739,11 +739,7 @@ function loaded(data) {
     team_name = data.name;
     start_time = new Date(Date.now() + parseInt(data.online_round));
     end_time = new Date(Date.now() + parseInt(data.online_round_end));
-    player1 = data.player1;
-    player2 = data.player2;
-    player3 = data.player3;
-    player4 = data.player4;
-    player5 = data.player5;
+    team_members = [player1, player2, player3, player4, player5].filter(member => member != "");
     global_chat = [];
     for (const line of data.chat.split("\x0b")) {
       if (line == "") continue;
