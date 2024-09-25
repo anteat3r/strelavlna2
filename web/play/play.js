@@ -107,6 +107,7 @@ updatePriceList();
 
 document.getElementById("send-message-button").addEventListener("click", function(){
     const chat_input = document.getElementById("chat-input");
+    if(chat_input.value.length > 200 || chat_input.value.length == 0) return;
     sendMsg(focused_problem, chat_input.value);
     chat_input.value = "";
 });
@@ -738,11 +739,7 @@ function loaded(data) {
     team_name = data.name;
     start_time = new Date(Date.now() + parseInt(data.online_round));
     end_time = new Date(Date.now() + parseInt(data.online_round_end));
-    player1 = data.player1;
-    player2 = data.player2;
-    player3 = data.player3;
-    player4 = data.player4;
-    player5 = data.player5;
+    team_members = [data.player1, data.player2, data.player3, data.player4, data.player5].filter(member => member != "");
     global_chat = [];
     for (const line of data.chat.split("\x0b")) {
       if (line == "") continue;
