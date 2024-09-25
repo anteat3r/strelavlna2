@@ -369,8 +369,8 @@ type teamRes struct {
   Chat string `json:"chat"`
   Money int `json:"money"`
   Name string `json:"name"`
-  OnlineRound time.Time `json:"online_round"`
-  OnlineRoundEnd time.Time `json:"online_round_end"`
+  OnlineRound int64 `json:"online_round"`
+  OnlineRoundEnd int64 `json:"online_round_end"`
   Player1 string `json:"player1"`
   Player2 string `json:"player2"`
   Player3 string `json:"player3"`
@@ -426,14 +426,17 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
 
     if err != nil { return err }
 
+    ordelta := contres.OnlineRound.Time().Sub(time.Now()).Milliseconds()
+    oredelta := contres.OnlineRoundEnd.Time().Sub(time.Now()).Milliseconds()
+
     res := teamRes{
       Bought: boughtprobsres,
       Pending: pendingprobsres,
       Chat: teamres.Chat,
       Money: teamres.Money,
       Name: teamres.Name,
-      OnlineRound: contres.OnlineRound.Time(),
-      OnlineRoundEnd: contres.OnlineRoundEnd.Time(),
+      OnlineRound: ordelta,
+      OnlineRoundEnd: oredelta,
       Player1: teamres.Player1,
       Player2: teamres.Player2,
       Player3: teamres.Player3,
