@@ -3,7 +3,7 @@ const redirects = false;
 var team_balance = 400;
 var team_name = "Team 1";
 var team_rank = "14";
-var start_time = new Date().getTime() - 1000000;
+var start_time = new Date().getTime() - 5000;
 var end_time = new Date().getTime() + 5000;
 var prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]]; //[buy], [solve], [sell]
 var team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
@@ -446,7 +446,7 @@ function buyProblem(rank){
 }
 
 function sellProblem(){
-    if(!focused_problem || !problems.some(prob => prob.id == focused_problem) || problems.find(prob => prob.id == focused_problem).pending) return;
+    if(!focused_problem || !problems.some(prob => prob.id == focused_problem) || problems.find(prob => prob.id == focused_problem).pending || clock_zeroed) return;
     const confirm_dialog = document.getElementById("confiramtion-dialog-bg");
     confirm_dialog.style.display = "block";
     const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
@@ -470,13 +470,15 @@ function update(){
 
     //clock
     const now = new Date().getTime();
-    const remaining = end_time - now;
-    const passed = now - start_time;
+    var remaining = end_time - now;
+    var passed = now - start_time;
     if ((Math.floor(remaining / 1000) != lastSecond && remaining>=0) || (!clock_zeroed && remaining < 0)){
         if (remaining < 0){
             clock_zeroed = true;
             updateShop();
             updateFocusedProblem();
+            remaining = 0;
+            passed = end_time-start_time;
         }
         updateClock(remaining, passed);
     }
@@ -544,6 +546,9 @@ function connectWS() {
       case "focuscheck":
         focusCheck();
       break;
+      case "loaded":
+        if (msg.length != 11) { cLe() }
+        loaded(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7], msg[8], msg[9], msg[10]);
       case "err":
         console.log(msg)
       break;
@@ -697,4 +702,25 @@ function focusCheck(){
     }else{
         focusProb(focused_problem);
     }
+}
+
+function loaded(money, bought, pending, name, player1, player2, player3, player4, player5, chat) {
+    team_balance = parseInt(money);
+    problems = JSON.parse(bought).map(id => problems.find(prob => prob.id == id));
+    problems.forEach(prob => prob.pending = JSON.parse(pending).includes(prob.id));
+    team_name = name;
+    team_players = [player1, player2, player3, player4, player5].filter(player => player != "");
+    global_chat = chat.split("\x0b").map(msg => {
+        const parts = msg.split("\x09");
+        return {
+            author: parts[0],
+            content: parts[2],
+            id: parts[1]
+        }
+    });
+    updateTeamStats();
+    updateProblemList();
+    updateChat();
+    updateShop();
+    console.log(money, bought, pending, name, player1, player2, player3, player4, player5, chat);
 }
