@@ -103,7 +103,7 @@ func PlayerWsHandleMsg(
     AdminSend("msgrecd", team, prob, text)
     
   case "load":
-    if len(m) != 3 { return eIm(msg) }
+    if len(m) != 1 { return eIm(msg) }
     res, err := DBPlayerInitLoad(team)
     if err != nil { return err }
     perchan<- "loaded" + DELIM + res
