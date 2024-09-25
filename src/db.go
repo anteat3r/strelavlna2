@@ -85,7 +85,7 @@ func dbClownErr(args... string) error {
   return errors.New("clown" + DELIM + strings.Join(args, DELIM))
 }
 
-func SliceExclude[T comparable](s []T, v T) bool {
+func SliceExclude[T comparable](s []T, v T) ([]T, bool) {
   found := false
   for i := range len(s) {
     if s[i] == v {
@@ -95,8 +95,11 @@ func SliceExclude[T comparable](s []T, v T) bool {
     if !found { continue }
     s[i-1] = s[i]
   }
-  if found { fmt.Println("here"); s = s[:len(s)-1] }
-  return found
+  if found {
+    return s[:len(s)-1], true
+  } else {
+    return s, false
+  }
 }
 
 func DBSell(team string, prob string) (money int, oerr error) {
@@ -128,7 +131,7 @@ func DBSell(team string, prob string) (money int, oerr error) {
     bought := ParseRefList(teamres.Bought)
     sold := ParseRefList(teamres.Sold)
 
-    found := SliceExclude(bought, prob)
+    bought, found := SliceExclude(bought, prob)
     if !found { return dbClownErr("sell", "prob not owned") }
 
     sold = append(sold, prob)
@@ -195,7 +198,7 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
 
     fmt.Println(free)
     fmt.Println(prob)
-    found := SliceExclude(free, prob)
+    free, found := SliceExclude(free, prob)
     fmt.Println(found)
     fmt.Println(free)
     if !found { log.Error("prob not free", team, prob) }
@@ -248,7 +251,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
 
     bought := ParseRefList(teamres.Bought)
     pending := ParseRefList(teamres.Pending)
-    found := SliceExclude(bought, prob)
+    pending, found := SliceExclude(bought, prob)
 
     if !found { return dbErr("solve", "prob not owned") }
 
@@ -480,7 +483,7 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
       tstring = "solved"
     }
     pending := ParseRefList(teamres.Pending)
-    found := SliceExclude(pending, prob)
+    pending, found := SliceExclude(pending, prob)
 
     if !found { return dbErr("solve", "prob not owned") }
 
