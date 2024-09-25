@@ -386,11 +386,11 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Chat string `db:"chat"`
       Money int `db:"money"`
       Name string `db:"name"`
-      Player1 string `db:"player_1"`
-      Player2 string `db:"player_2"`
-      Player3 string `db:"player_3"`
-      Player4 string `db:"player_4"`
-      Player5 string `db:"player_5"`
+      Player1 string `db:"player1"`
+      Player2 string `db:"player2"`
+      Player3 string `db:"player3"`
+      Player4 string `db:"player4"`
+      Player5 string `db:"player5"`
       Contest string `db:"contest"`
     }{}
     err := txDao.DB().
