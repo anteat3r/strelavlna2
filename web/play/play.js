@@ -165,6 +165,8 @@ document.getElementById("submit-answer-button").addEventListener("click", functi
     }
 });
 
+window.addEventListener("load", load);
+
 
 function updateShop(){
     buy_buttons.forEach(function(button, n){
@@ -547,8 +549,8 @@ function connectWS() {
         focusCheck();
       break;
       case "loaded":
-        if (msg.length != 11) { cLe() }
-        loaded(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7], msg[8], msg[9], msg[10]);
+        if (msg.length != 2) { cLe() }
+        loaded(msg[1]);
       case "err":
         console.log(msg)
       break;
@@ -596,6 +598,11 @@ function unfocusProb() { //done
  * @param {string} text */
 function sendMsg(id, text) { //done
   socket.send(`chat\x00${id}\x00${text}`) }
+
+/** load game state */
+function load() {
+  socket.send("load");
+}
 
 /** @param {string} msg
  * @param {string} id */
@@ -704,23 +711,9 @@ function focusCheck(){
     }
 }
 
-function loaded(money, bought, pending, name, player1, player2, player3, player4, player5, chat) {
-    team_balance = parseInt(money);
-    problems = JSON.parse(bought).map(id => problems.find(prob => prob.id == id));
-    problems.forEach(prob => prob.pending = JSON.parse(pending).includes(prob.id));
-    team_name = name;
-    team_players = [player1, player2, player3, player4, player5].filter(player => player != "");
-    global_chat = chat.split("\x0b").map(msg => {
-        const parts = msg.split("\x09");
-        return {
-            author: parts[0],
-            content: parts[2],
-            id: parts[1]
-        }
-    });
-    updateTeamStats();
-    updateProblemList();
-    updateChat();
-    updateShop();
-    console.log(money, bought, pending, name, player1, player2, player3, player4, player5, chat);
+
+
+function loaded(data) {
+    
+    console.log(data);
 }
