@@ -332,7 +332,7 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
         "text": msg,
         "team": team,
       }).
-      One(&res)
+      All(&res)
     if err != nil { return err }
     
     if len(res) == 1 { return nil }
