@@ -717,7 +717,7 @@ function focusCheck(){
 
 function loaded(data) {
     console.log(data);
-    problems = data.bought.map(bought => {
+    problems = JSON.parse(data.bought).map(bought => {
         return {
             id: bought.id,
             title: bought.name,
