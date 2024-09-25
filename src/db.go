@@ -192,7 +192,9 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
     free := ParseRefList(teamres.Free)
     bought := ParseRefList(teamres.Bought)
 
+    log.Info(free)
     found := SliceExclude(free, prob)
+    log.Info(free)
     if !found { log.Error("prob not free", team, prob) }
 
     bought = append(bought, prob)
