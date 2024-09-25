@@ -728,10 +728,7 @@ function loaded(data) {
             can_answer: true,
             seen_chat: true,
             problem_content: bought.text,
-            chat: data.chat.split("\x0b").filter(line => line.split("\x09")[2] == bought.id).map(line => {
-                const [author, probid, text] = line.split("\x09");
-                return {author: author == "a" ? "support" : "team" , content: text};
-            })
+            chat: [],
         }
     });
     team_balance = parseInt(data.money);
@@ -743,10 +740,17 @@ function loaded(data) {
     player3 = data.player3;
     player4 = data.player4;
     player5 = data.player5;
-    global_chat = data.chat.split("\x0b").filter(line => line.split("\x09")[2] == "").map(line => {
-        const [author, probid, text] = line.split("\x09");
-        return {author: author == "a" ? "support" : "team" , content: text};
-    });
+    global_chat = [];
+    for (const line of data.chat.split("\x0b")) {
+      if (line == "") continue;
+      const [author, id, text] = line.split("\x09");
+      if (id == "") {
+        global_chat.push({author: author == "a" ? "support" : "team", content: text});
+      } else {
+        const prob = problems.find(i => i.id == id);
+        prob.chat.push({author: author == "a" ? "support" : "team", content: text});
+      }
+    }
     console.log(problems[0].chat);
     updateProblemList();
     updateShop();
