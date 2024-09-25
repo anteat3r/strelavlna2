@@ -165,7 +165,6 @@ document.getElementById("submit-answer-button").addEventListener("click", functi
     }
 });
 
-window.addEventListener("load", load);
 
 
 function updateShop(){
@@ -507,6 +506,10 @@ function connectWS() {
       if(redirects){
         window.location.href = `login.html?id=${id}`;
       }
+  });
+
+  socket.addEventListener("open", (event) => {
+    load();
   });
 
   socket.addEventListener("message", (event) => {
