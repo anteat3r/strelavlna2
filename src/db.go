@@ -419,7 +419,7 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       OnlineRoundEnd types.DateTime `db:"online_round_end"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT online_round, online_round_end FROM contest WHERE id = {:contest} LIMIT 1").
+      NewQuery("SELECT online_round, online_round_end FROM contests WHERE id = {:contest} LIMIT 1").
       Bind(dbx.Params{ "contest": teamres.Contest }).
       One(&contres)
 
