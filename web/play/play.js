@@ -748,6 +748,7 @@ function loaded(data) {
         global_chat.push({author: author == "a" ? "support" : "team", content: text});
       } else {
         const prob = problems.find(i => i.id == id);
+        if (prob == undefined) { continue; }
         prob.chat.push({author: author == "a" ? "support" : "team", content: text});
       }
     }
