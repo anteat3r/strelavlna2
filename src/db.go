@@ -322,11 +322,11 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
 
     if err != nil { return err }
     
-    res := struct{
-      Cnt int `db:"count(id)"`
+    res := []struct{
+      Id int `db:"id"`
     }{}
     err = txDao.DB().
-      NewQuery("UPDATE checks SET solution = {:text} WHERE team = {:team} AND prob = {:prob} AND type = 'msg' RETURNING count(id)").
+      NewQuery("UPDATE checks SET solution = {:text} WHERE team = {:team} AND prob = {:prob} AND type = 'msg' RETURNING id").
       Bind(dbx.Params{
         "prob": prob,
         "text": msg,
@@ -335,7 +335,7 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
       One(&res)
     if err != nil { return err }
     
-    if res.Cnt == 1 { return nil }
+    if len(res) == 1 { return nil }
 
     _, err = txDao.DB().
     NewQuery("INSERT INTO checks (id, team, prob, type, solution, created, updated) VALUES ({:id}, {:team}, {:prob}, 'msg', {:text}, {:created}, {:updated})").
