@@ -93,6 +93,8 @@ func PlayerWsHandleMsg(
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
     text := m[2]
+    if len(text) == 0 { return dbErr("chat", "msg empty") }
+    if len(text) > 200 { return dbErr("chat", "msg too long") }
     for _, c := range text {
       if c == '\x09' { return dbErr("chat", "invalid msg") }
       if c == '\x0b' { return dbErr("chat", "invalid msg") }

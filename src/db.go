@@ -267,7 +267,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
 
     check = GetRandomId()
     _, err = txDao.DB().
-      NewQuery("INSERT INTO checks (id, team, prob, type, text, created, updated) VALUES ({:id}, {:team}, {:prob}, 'sol', {:text}, {:created}, {:updated})").
+      NewQuery("INSERT INTO checks (id, team, prob, type, solution, created, updated) VALUES ({:id}, {:team}, {:prob}, 'sol', {:text}, {:created}, {:updated})").
       Bind(dbx.Params{
         "id": GetRandomId(),
         "prob": prob,
