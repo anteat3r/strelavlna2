@@ -107,6 +107,7 @@ updatePriceList();
 
 document.getElementById("send-message-button").addEventListener("click", function(){
     const chat_input = document.getElementById("chat-input");
+    if(chat_input.value.length > 200 || chat_input.value.length == 0) return;
     sendMsg(focused_problem, chat_input.value);
     chat_input.value = "";
 });
