@@ -95,7 +95,7 @@ func SliceExclude[T comparable](s []T, v T) bool {
     if !found { continue }
     s[i-1] = s[i]
   }
-  if found { s = s[:len(s)-2] }
+  if found { s = s[:len(s)-1] }
   return found
 }
 
@@ -194,7 +194,9 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
     bought := ParseRefList(teamres.Bought)
 
     fmt.Println(free)
+    fmt.Println(prob)
     found := SliceExclude(free, prob)
+    fmt.Println(found)
     fmt.Println(free)
     if !found { log.Error("prob not free", team, prob) }
 
