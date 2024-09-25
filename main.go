@@ -108,6 +108,12 @@ func main() {
       "/api/contests",
       src.ContestsEndp(app.Dao(), false),
     )
+
+    e.Router.GET(
+      "/api/teamcontstart/:id",
+      src.TeamContestStartEndp(app.Dao()),
+    )
+
     e.Router.GET(
       "/api/contests/after",
       src.ContestsEndp(app.Dao(), true),
