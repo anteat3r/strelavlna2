@@ -364,6 +364,10 @@
     padding-top: 5px;
 }
 
+.cannot-sell #buy-dropdown-wrapper{
+    display: none;
+}
+
 .buy-button-close #buy-dropdown-wrapper{
     transform: translateY(-7px);
     max-height: 0px;

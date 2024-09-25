@@ -4,7 +4,7 @@ var team_balance = 400;
 var team_name = "Team 1";
 var team_rank = "14";
 var start_time = new Date().getTime() - 1000000;
-var end_time = new Date().getTime() + 3000000;
+var end_time = new Date().getTime() + 5000;
 var prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]]; //[buy], [solve], [sell]
 var team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
 var problems_solved = 12;
@@ -130,6 +130,7 @@ document.getElementById("sell-button").addEventListener("click", sellProblem);
 
 
 buy_button.addEventListener("click", function(){
+    if(clock_zeroed){return;}
     if(buy_button_wrapper.classList.contains("buy-button-close")){
         buy_button_wrapper.classList.add("buy-button-open");
         buy_button_wrapper.classList.remove("buy-button-close");
@@ -186,6 +187,19 @@ function updateShop(){
     }else{
         sell_information.innerHTML = `*Klikněte na úlohu kterou chcete prodat`;
         document.getElementById("sell-action-wrapper").classList.add("cannot-sell");
+    }
+    if(clock_zeroed){
+        sell_information.innerHTML = `*Čas vypršel. Již nelze provádět žádné akce`;
+        document.getElementById("sell-action-wrapper").classList.add("cannot-sell");
+        buy_buttons.forEach(function(button){
+            button.classList.add("subbuy-disabled");
+        });
+        document.getElementById("buy-button-wrapper").classList.add("cannot-sell");
+        buy_button.classList.add("cannot-sell");
+        if(!buy_button_wrapper.classList.contains("buy-button-close")){
+            buy_button_wrapper.classList.add("buy-button-close");
+            buy_button_wrapper.classList.remove("buy-button-open");
+        }
     }
 }
 
@@ -281,7 +295,7 @@ function updateFocusedProblem(){
     problem_content.innerHTML = focused_problem_obj.problem_content;
     const answer_input_wrapper = document.getElementById("answer-input-wrapper");
 
-    if(focused_problem_obj.pending){
+    if(focused_problem_obj.pending || clock_zeroed){
         answer_input_wrapper.classList.add("cannot-answer");
     }else{
         answer_input_wrapper.classList.remove("cannot-answer");
@@ -459,7 +473,11 @@ function update(){
     const remaining = end_time - now;
     const passed = now - start_time;
     if ((Math.floor(remaining / 1000) != lastSecond && remaining>=0) || (!clock_zeroed && remaining < 0)){
-        if (remaining < 0){clock_zeroed = true;}
+        if (remaining < 0){
+            clock_zeroed = true;
+            updateShop();
+            updateFocusedProblem();
+        }
         updateClock(remaining, passed);
     }
 
