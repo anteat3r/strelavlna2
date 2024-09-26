@@ -1,3 +1,5 @@
+const redirects = true;
+
 var is_playing = true;
 const is_mobile = !window.matchMedia("(pointer: fine)").matches;
 console.log(is_mobile);
@@ -16,18 +18,24 @@ stoneSetup = {
     InnerMax: 200
 }
 
-var target_time = Date.now() + 20000000;
+var target_time = Date.now() + 3600000;
 
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
-fetch(`https://strela-vlna.gchd.cz/api/start_time/${id}`)
-    .then(response => response.text())
+fetch(`https://strela-vlna.gchd.cz/api/teamcontstart/${id}`)
+    .then(response => {
+        if(response.status == 500) {
+            window.location.href = `../login?id=${id}`;
+            return;
+        }
+        return response.text();
+    })
     .then(data => {
         console.log(data);
-        target_time = Date.parse(data);
+        target_time = Date.now() + parseInt(data);
+        // console.log(data);
         // target_time = Date.now() + 10000;
     });
-
 
 const analyser = audioCtx.createAnalyser();
 analyser.fftSize = is_mobile ? 256 : 2048; 
@@ -211,7 +219,7 @@ function frame(){
     const now = Date.now();
     const remaining = target_time - now;
 
-    if (remaining <= 0) {
+    if (remaining <= 0 && redirects) {
         window.location.href = `../play?id=${id}`;
     }
 
