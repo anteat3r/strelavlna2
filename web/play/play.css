@@ -638,6 +638,7 @@
 }
 .chat-banned .conversation-message{
     border-color: var(--color-black-glow);
+    color: var(--color-black);
 }
 .message-my{
     padding-left: 30px;
@@ -1252,10 +1253,14 @@
 
 #chat-banned-info{
     margin: 0px;
-    margin-top: 60px;
+    margin-top: 65px;
     font-family: 'Lexend';
     font-size: 11px;
     font-weight: 500;
     color: var(--color-black);
     margin-left: 10px;
+}
+
+#seen-global-chat-icon{
+    margin: 0px;
 }
