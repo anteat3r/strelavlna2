@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"maps"
 	"slices"
 	"strings"
 	"sync"
@@ -385,6 +386,7 @@ type teamRes struct {
   Name string `json:"name"`
   OnlineRound int64 `json:"online_round"`
   OnlineRoundEnd int64 `json:"online_round_end"`
+  Costs map[string]int `json:"costs"`
   Player1 string `json:"player1"`
   Player2 string `json:"player2"`
   Player3 string `json:"player3"`
@@ -443,6 +445,10 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
     ordelta := contres.OnlineRound.Time().Sub(time.Now()).Milliseconds()
     oredelta := contres.OnlineRoundEnd.Time().Sub(time.Now()).Milliseconds()
 
+    CostsMu.RLock()
+    costsc := maps.Clone(Costs)
+    CostsMu.RUnlock()
+
     res := teamRes{
       Bought: boughtprobsres,
       Pending: pendingprobsres,
@@ -456,6 +462,7 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Player3: teamres.Player3,
       Player4: teamres.Player4,
       Player5: teamres.Player5,
+      Costs: costsc,
     }
 
     sresb, _ := json.Marshal(res)

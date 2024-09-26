@@ -74,7 +74,7 @@ func PlayerWsHandleMsg(
     sol := m[2]
     check, diff, teamname, name, err := DBSolve(team, prob, sol)
     if err != nil { return err }
-    tchan.Send("solved", prob)
+    tchan.Send("solved", prob, sol)
     AdminSend("solved", check, team, prob, diff, teamname, name)
 
   case "focus":
