@@ -267,6 +267,17 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
     teamname = teamres.Name
     diff = probres.Diff
     name = probres.Name
+    
+    _, err = txDao.DB().
+      NewQuery("UPDATE teams SET pending = {:pending}, bought = {:bought} WHERE id = {:id} LIMIT 1").
+      Bind(dbx.Params{
+        "pending": StringifyRefList(pending),
+        "bought": StringifyRefList(bought),
+        "id": team,
+      }).
+      Execute()
+
+    if err != nil { return err }
 
     check = GetRandomId()
     _, err = txDao.DB().
