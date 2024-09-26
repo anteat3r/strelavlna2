@@ -387,11 +387,17 @@ type teamRes struct {
   OnlineRound int64 `json:"online_round"`
   OnlineRoundEnd int64 `json:"online_round_end"`
   Costs map[string]int `json:"costs"`
+  Checks []checkRes `json:"checks"`
   Player1 string `json:"player1"`
   Player2 string `json:"player2"`
   Player3 string `json:"player3"`
   Player4 string `json:"player4"`
   Player5 string `json:"player5"`
+}
+
+type checkRes struct{
+  Prob string `db:"prob" json:"probid"`
+  Sol string `db:"solution" json:"solution"`
 }
 
 func DBPlayerInitLoad(team string) (sres string, oerr error) {
@@ -439,6 +445,14 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       NewQuery("SELECT online_round, online_round_end FROM contests WHERE id = {:contest} LIMIT 1").
       Bind(dbx.Params{ "contest": teamres.Contest }).
       One(&contres)
+
+    if err != nil { return err }
+
+    checkres := []checkRes{}
+    err = txDao.DB().
+      NewQuery("SELECT prob, solution FROM checks WHERE team = {:team}").
+      Bind(dbx.Params{ "team": team }).
+      All(&checkres)
 
     if err != nil { return err }
 
