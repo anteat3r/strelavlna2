@@ -10,6 +10,8 @@ var team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "
 var problems_solved = 12;
 var problems_sold = 3;
 var global_chat = [];
+var seen_global_chat = true;
+var menu_focused_by = [];
 var problems = [];
 var myId = "";
 var chat_banned = false;
@@ -77,7 +79,8 @@ buy_button.addEventListener("click", function(){
 });
 
 document.getElementById("team-stats").addEventListener("click", function(){
-    unfocusProb(focused_problem);
+    unfocusProb();
+    focusProb("");
     focused_problem = "";
     updateFocusedProblem();
     updateChat();
@@ -143,7 +146,7 @@ function updateShop(){
 
 function updateTeamStats(){
     document.getElementById("team-name").innerHTML = team_name;
-    document.getElementById("rank").innerHTML = team_rank;
+    document.getElementById("rank-number").innerHTML = team_rank;
     document.getElementById("team-balance").innerHTML = team_balance + " DC"
     document.getElementById("team-stats-main-title").innerHTML = team_name;
     document.getElementById("team-stats-main-balance").innerHTML = team_balance + " DC";
@@ -199,9 +202,9 @@ function updateProblemList(){
             if(focused_problem == this.id){
                 return;
             }
-            if(focused_problem != ""){
-                unfocusProb(focused_problem);
-            }
+
+            unfocusProb();
+
             const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
             if(focused_problem_obj != null){
                 const index = focused_problem_obj.focused_by.indexOf(myId);
@@ -254,6 +257,7 @@ function updateFocusedProblem(){
 }
 
 function updateChat(){
+    console.log(menu_focused_by);
     if(chat_banned){
         document.getElementById("help-center-wrapper").classList.add("chat-banned");
         document.getElementById("chat-banned-info").classList.remove("hidden");
@@ -263,6 +267,18 @@ function updateChat(){
     }
     const conversation_wrapper = document.getElementById("conversation-wrapper");
     conversation_wrapper.innerHTML = "";
+
+    if(menu_focused_by.length > 0){
+        seen_global_chat = true;
+    }
+    if(seen_global_chat){
+        document.getElementById("seen-global-chat-icon").classList.add("hidden");
+        document.getElementById("rank-number").classList.remove("hidden");
+    }else{
+        document.getElementById("seen-global-chat-icon").classList.remove("hidden");
+        document.getElementById("rank-number").classList.add("hidden");
+    }
+
     if(focused_problem == "" || !problems.some(prob => prob.id == focused_problem)){
         focused_problem = "";
         for(const message of global_chat){
@@ -279,6 +295,7 @@ function updateChat(){
             <p class="conversation-message">${message.content}</p>
         </div>`
     }
+    
     conversation_wrapper.scrollTop = conversation_wrapper.scrollHeight;
 }
 
@@ -518,9 +535,11 @@ function connectWS() {
         break;
       case "banned" :
         chat_banned = true;
+        updateChat();
         break;
       case "unbanned" :
         chat_banned = false;
+        updateChat();
         break;
       case "err":
         console.log(msg)
@@ -587,6 +606,7 @@ function load() {
 function msgRecieved(id, msg) {
   if(id == "") {
     global_chat.push({author: "support", content: msg});
+    seen_global_chat = false;
     updateChat();
   } else {
     const problem = problems.find(prob => prob.id == id);
@@ -669,6 +689,15 @@ function probSolved(id, solution) {
 /** @param {string} idx
  * @param {string} id */
 function probFocused(id, idx) {
+    if(id == ""){
+        if(!menu_focused_by.includes(idx)){
+            menu_focused_by.push(idx);
+        }
+        seen_global_chat = true;
+        updateProblemList();
+        updateChat();
+        return;
+    }
     const problem = problems.find(prob => prob.id == id);
     console.log(id);
     if(!problem.focused_by.includes(idx)){
@@ -681,6 +710,7 @@ function probFocused(id, idx) {
  * @param {string} id */
 function probUnfocused(idx) {
     problems.forEach(prob => prob.focused_by = prob.focused_by.filter(focused => focused != idx));
+    menu_focused_by = menu_focused_by.filter(focused => focused != idx);
     updateProblemList();    
 }
   
@@ -688,11 +718,7 @@ function focusCheck(){
     if(!problems.some(prob => prob.id == focused_problem)){
         focused_problem = "";
     }
-    if(focused_problem == ""){
-        unfocusProb();
-    }else{
-        focusProb(focused_problem);
-    }
+    focusProb(focused_problem);
 }
 
 /** @param {string} probid
@@ -780,7 +806,7 @@ function loaded(data) {
     // console.log(problems[0].chat);
     updateProblemList();
     updateShop();
+    updateFocusedProblem();
     updateTeamStats();
     updateChat();
-    updateFocusedProblem();
 }

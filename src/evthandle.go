@@ -109,10 +109,11 @@ func PlayerWsHandleMsg(
     res, err := DBPlayerInitLoad(team, idx)
     if err != nil { return err }
     perchan<- "loaded" + DELIM + res
+    tchan.Send("focuscheck")
 
-  case "reqfocus":
+  case "focuscheck":
     if len(m) != 1 { return eIm(msg) }
-    tchan.Send("reqfocus")
+    tchan.Send("focuscheck")
 
   default:
     return eIm(msg)
@@ -189,11 +190,26 @@ func AdminWsHandleMsg(
     if len(m) != 1 { return eIm(msg) }
     AdminSend("unfocused", strconv.Itoa(idx))
 
-  case "reqfocus":
+  case "focuscheck":
     if len(m) != 1 { return eIm(msg) }
-    AdminSend("reqfocus")
+    AdminSend("focuscheck")
 
-    
+  case "ban":
+    if len(m) != 2 { return eIm(msg) }
+    team := m[1]
+    err := DBAdminBan(team)
+    if err != nil { return err }
+    AdminSend("banned", team)
+    WriteTeamChan(team, "banned")
+
+  case "unban":
+    if len(m) != 2 { return eIm(msg) }
+    team := m[1]
+    err := DBAdminUnBan(team)
+    if err != nil { return err }
+    AdminSend("unbanned", team)
+    WriteTeamChan(team, "unbanned")
+
   }
 
   sLog("adminevt", email, msg)

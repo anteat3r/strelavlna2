@@ -62,6 +62,9 @@ var (
 
   AdminsChans = make(TeamChans, 10)
   adminsMutex = sync.RWMutex{}
+
+  AdminCnt = 0
+  adminCntMu = sync.RWMutex{}
 )
 
 func AdminSend(msg... string) {
@@ -213,6 +216,7 @@ func PlayerWsLoop(
   tchan.mu.Lock()
   tchan.ch[idx] = nil
   tchan.mu.Unlock()
+  tchan.Send("unfocused", strconv.Itoa(idx))
 }
 
 func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
@@ -240,7 +244,7 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     } else {
       AdminsChans[i] = perchan
     }
-    adminsMutex.Lock()
+    adminsMutex.Unlock()
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
@@ -258,6 +262,9 @@ func AdminWsLoop(
   perchan chan string,
   idx int,
 ) {
+  adminCntMu.Lock()
+  AdminCnt += 1
+  adminCntMu.Unlock()
   wsrchan := make(chan string)
   go func(){
     wsrloop: for {
@@ -302,4 +309,8 @@ func AdminWsLoop(
   adminsMutex.Lock()
   AdminsChans[idx] = nil
   adminsMutex.Unlock()
+  adminCntMu.Lock()
+  AdminCnt -= 1
+  adminCntMu.Unlock()
+  AdminSend("unfocused", strconv.Itoa(idx))
 }
