@@ -388,6 +388,7 @@ type teamRes struct {
   OnlineRoundEnd int64 `json:"online_round_end"`
   Costs map[string]int `json:"costs"`
   Checks []checkRes `json:"checks"`
+  Rank int `json:"rank"`
   Player1 string `json:"player1"`
   Player2 string `json:"player2"`
   Player3 string `json:"player3"`
@@ -478,6 +479,7 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Player4: teamres.Player4,
       Player5: teamres.Player5,
       Costs: costsc,
+      Rank: -1,
     }
 
     sresb, _ := json.Marshal(res)
