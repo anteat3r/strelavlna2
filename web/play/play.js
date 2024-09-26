@@ -458,12 +458,6 @@ function update(){
         updateClock(remaining, passed);
     }
 
-
-
-
-
-
-
 }
 
 update();
