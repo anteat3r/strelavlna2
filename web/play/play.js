@@ -9,76 +9,8 @@ var prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]]; //[buy], [solve], [sell]
 var team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
 var problems_solved = 12;
 var problems_sold = 3;
-var global_chat = [
-    {
-        author: "support",
-        content: "ahoj, toto je technicka podpora aoiw jlasjd lkj"
-    },
-    {
-        author: "support",
-        content: "akjsd kjaajsdl jaoiw jlasjd lkj"
-    },
-    {
-        author: "team",
-        content: "docela noobatik"
-    },
-    {
-        author: "support",
-        content: "spis docela opatik"
-    },
-]
-
-
-var problems = [{
-    id: "askjdhiwuahskjd",
-    title: "Lyzar ve vesnici co si koupil moc drahy listky",
-    rank: "A",
-    focused_by: [],
-    pending: false,
-    seen_chat: true,
-    problem_content: "Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?",
-    chat: [
-        {
-            author: "support",
-            content: "akjsd kjashdkjhi udawhkjs duiwoah sldjl jaw diajsdl jaoiw jlasjd lkj"
-        },
-        {
-            author: "support",
-            content: "akjsd kjaajsdl jaoiw jlasjd lkj"
-        },
-        {
-            author: "team",
-            content: "docela noobatik"
-        },
-        {
-            author: "support",
-            content: "spis docela opatik"
-        },
-    ]
-},
-{
-    id: "bnvcxiuwalknsdlkj",
-    title: "Pecka u malého noobatika",
-    rank: "C",
-    focused_by: [],
-    pending: false,
-    seen_chat: true,
-    problem_content: "asi Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?",
-    chat: [
-        {
-            author: "support",
-            content: "akjsd kjaajsdl jaoiw jlasjd lkj"
-        },
-        {
-            author: "team",
-            content: "docela noobatik"
-        },
-        {
-            author: "support",
-            content: "akjsd kjashdkjhi udawhkjs duiwoah sldjl jaw diajsdl jaoiw jlasjd lkj"
-        },
-    ]
-}];
+var global_chat = [];
+var problems = [];
 
 //local states
 var focused_problem = "";
@@ -752,7 +684,7 @@ function loaded(data) {
         prob.chat.push({author: author == "a" ? "support" : "team", content: text});
       }
     }
-    console.log(problems[0].chat);
+    // console.log(problems[0].chat);
     updateProblemList();
     updateShop();
     updateTeamStats();
