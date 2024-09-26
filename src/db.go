@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"maps"
 	"slices"
 	"strings"
 	"sync"
@@ -246,7 +247,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
 
     bought := ParseRefList(teamres.Bought)
     pending := ParseRefList(teamres.Pending)
-    pending, found := SliceExclude(bought, prob)
+    bought, found := SliceExclude(bought, prob)
 
     if !found { return dbErr("solve", "prob not owned") }
 
@@ -269,7 +270,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
     name = probres.Name
     
     _, err = txDao.DB().
-      NewQuery("UPDATE teams SET pending = {:pending}, bought = {:bought} WHERE id = {:id} LIMIT 1").
+      NewQuery("UPDATE teams SET pending = {:pending}, bought = {:bought} WHERE id = {:id}").
       Bind(dbx.Params{
         "pending": StringifyRefList(pending),
         "bought": StringifyRefList(bought),
@@ -385,6 +386,12 @@ type teamRes struct {
   Name string `json:"name"`
   OnlineRound int64 `json:"online_round"`
   OnlineRoundEnd int64 `json:"online_round_end"`
+  Costs map[string]int `json:"costs"`
+  Checks []checkRes `json:"checks"`
+  Rank int `json:"rank"`
+  NumSold int `json:"numsold"`
+  NumSolved int `json:"numsolved"`
+  Idx int `json:"idx"`
   Player1 string `json:"player1"`
   Player2 string `json:"player2"`
   Player3 string `json:"player3"`
@@ -392,12 +399,19 @@ type teamRes struct {
   Player5 string `json:"player5"`
 }
 
-func DBPlayerInitLoad(team string) (sres string, oerr error) {
+type checkRes struct{
+  Prob string `db:"prob" json:"probid"`
+  Sol string `db:"solution" json:"solution"`
+}
+
+func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct {
       Bought string `db:"bought"`
       Pending string `db:"pending"`
+      Sold string `db:"sold"`
+      Solved string `db:"solved"`
       Chat string `db:"chat"`
       Money int `db:"money"`
       Name string `db:"name"`
@@ -409,7 +423,7 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Contest string `db:"contest"`
     }{}
     err := txDao.DB().
-      NewQuery("SELECT bought, pending, chat, money, player1, player2, player3, player4, player5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT bought, pending, sold, solved, chat, money, player1, player2, player3, player4, player5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
       One(&teamres)
 
@@ -429,6 +443,24 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
 
     if err != nil { return err }
 
+    soldres := struct{
+      Cnt int `db:"count(*)"`
+    }{}
+    err = txDao.DB().
+      NewQuery("SELECT count(*) FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Sold))).
+      One(&soldres)
+
+    if err != nil { return err }
+
+    solvedres := struct{
+      Cnt int `db:"count(*)"`
+    }{}
+    err = txDao.DB().
+      NewQuery("SELECT count(*) FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Solved))).
+      One(&solvedres)
+
+    if err != nil { return err }
+
     contres := struct{
       OnlineRound types.DateTime `db:"online_round"`
       OnlineRoundEnd types.DateTime `db:"online_round_end"`
@@ -440,8 +472,20 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
 
     if err != nil { return err }
 
+    checkres := []checkRes{}
+    err = txDao.DB().
+      NewQuery("SELECT prob, solution FROM checks WHERE team = {:team}").
+      Bind(dbx.Params{ "team": team }).
+      All(&checkres)
+
+    if err != nil { return err }
+
     ordelta := contres.OnlineRound.Time().Sub(time.Now()).Milliseconds()
     oredelta := contres.OnlineRoundEnd.Time().Sub(time.Now()).Milliseconds()
+
+    CostsMu.RLock()
+    costsc := maps.Clone(Costs)
+    CostsMu.RUnlock()
 
     res := teamRes{
       Bought: boughtprobsres,
@@ -451,11 +495,17 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Name: teamres.Name,
       OnlineRound: ordelta,
       OnlineRoundEnd: oredelta,
+      Checks: checkres,
       Player1: teamres.Player1,
       Player2: teamres.Player2,
       Player3: teamres.Player3,
       Player4: teamres.Player4,
       Player5: teamres.Player5,
+      Costs: costsc,
+      Rank: -1,
+      NumSold: soldres.Cnt,
+      NumSolved: solvedres.Cnt,
+      Idx: idx,
     }
 
     sresb, _ := json.Marshal(res)
@@ -528,7 +578,7 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
     if err != nil { return err }
 
     _, err = txDao.DB().
-      NewQuery("DELETE FROM checks WHERE id = {:check} LIMIT 1").
+      NewQuery("DELETE FROM checks WHERE id = {:check}").
       Bind(dbx.Params{ "check": check }).
       Execute()
 
