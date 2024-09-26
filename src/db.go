@@ -446,7 +446,7 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Cnt int `db:"count(*)"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT count(*) FROM prob WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Sold))).
+      NewQuery("SELECT count(*) FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Sold))).
       One(&soldres)
 
     if err != nil { return err }
@@ -455,7 +455,7 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Cnt int `db:"count(*)"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT count(*) FROM prob WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Solved))).
+      NewQuery("SELECT count(*) FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Solved))).
       One(&solvedres)
 
     if err != nil { return err }
