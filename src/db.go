@@ -29,6 +29,17 @@ var (
 
   ChecksColl *models.Collection
 )
+
+func HashId(id string) int {
+  res := 0
+  for _, r := range id {
+    res += int(r)
+  }
+  adminCntMu.RLock()
+  cnt := AdminCnt
+  adminCntMu.RUnlock()
+  return res % cnt
+}
  
 func ParseRefList(s string) []string {
   if s == "[]" { return []string{} }
@@ -326,16 +337,21 @@ func DBView(team string, prob string) (text string, diff string, name string, oe
 func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    _, err := txDao.DB().
-      NewQuery("UPDATE teams SET chat = CONCAT(chat, 'p', CHAR(9), {:prob}, CHAR(9), {:text}, CHAR(11)) WHERE id = {:team}").
+    banres := struct{
+      Banned bool `db:"banned"`
+    }{}
+    err := txDao.DB().
+      NewQuery("UPDATE teams SET chat = CONCAT(chat, 'p', CHAR(9), {:prob}, CHAR(9), {:text}, CHAR(11)) WHERE id = {:team} RETURNING banned").
       Bind(dbx.Params{
         "prob": prob,
         "text": msg,
         "team": team,
       }).
-      Execute()
+      One(&banres)
 
     if err != nil { return err }
+
+    if banres.Banned { return dbClownErr("chat", "banned") }
     
     res := []struct{
       Id string `db:"id"`
@@ -392,6 +408,7 @@ type teamRes struct {
   NumSold int `json:"numsold"`
   NumSolved int `json:"numsolved"`
   Idx int `json:"idx"`
+  Banned bool `json:"banned"`
   Player1 string `json:"player1"`
   Player2 string `json:"player2"`
   Player3 string `json:"player3"`
@@ -415,6 +432,7 @@ func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
       Chat string `db:"chat"`
       Money int `db:"money"`
       Name string `db:"name"`
+      Banned bool `db:"banned"`
       Player1 string `db:"player1"`
       Player2 string `db:"player2"`
       Player3 string `db:"player3"`
@@ -423,7 +441,7 @@ func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
       Contest string `db:"contest"`
     }{}
     err := txDao.DB().
-      NewQuery("SELECT bought, pending, sold, solved, chat, money, player1, player2, player3, player4, player5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT bought, pending, sold, solved, chat, money, banned, player1, player2, player3, player4, player5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
       One(&teamres)
 
@@ -496,6 +514,7 @@ func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
       OnlineRound: ordelta,
       OnlineRoundEnd: oredelta,
       Checks: checkres,
+      Banned: teamres.Banned,
       Player1: teamres.Player1,
       Player2: teamres.Player2,
       Player3: teamres.Player3,
@@ -652,3 +671,54 @@ func DBAdminView(prob string) (text string, sol string, oerr error) {
   return
 }
 
+func DBAdminBan(team string) (oerr error) {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+
+    _, err := txDao.DB().
+      NewQuery("UPDATE teams SET banned = TRUE, last_banned = {:last_banned} WHERE id = {:id}").
+      Bind(dbx.Params{
+        "id": team,
+        "last_banned": types.NowDateTime(),
+      }).
+      Execute()
+
+    if err != nil { return err }
+
+    return nil
+  })
+  return
+}
+
+func DBAdminUnBan(team string) (oerr error) {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+
+    _, err := txDao.DB().
+      NewQuery("UPDATE teams SET banned = FALSE, last_banned = '' WHERE id = {:id}").
+      Bind(dbx.Params{ "id": team }).
+      Execute()
+
+    if err != nil { return err }
+
+    return nil
+  })
+  return
+}
+
+func DBAdminInitLoad() (oerr error) {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+
+    banresr := []struct{ Id string `db:"id"` }{}
+    err := txDao.DB().
+      NewQuery("SELECT id FROM teams WHERE banned = TRUE").
+      All(&banresr)
+    if err != nil { return err }
+
+    banres := make([]string, len(banresr))
+    for i := range banresr { banres[i] = banresr[i].Id }
+
+
+
+    return nil
+  })
+  return
+}

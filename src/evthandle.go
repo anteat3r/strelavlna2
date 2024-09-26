@@ -193,7 +193,22 @@ func AdminWsHandleMsg(
     if len(m) != 1 { return eIm(msg) }
     AdminSend("reqfocus")
 
-    
+  case "ban":
+    if len(m) != 2 { return eIm(msg) }
+    team := m[1]
+    err := DBAdminBan(team)
+    if err != nil { return err }
+    AdminSend("banned", team)
+    WriteTeamChan(team, "banned")
+
+  case "unban":
+    if len(m) != 2 { return eIm(msg) }
+    team := m[1]
+    err := DBAdminUnBan(team)
+    if err != nil { return err }
+    AdminSend("unbanned", team)
+    WriteTeamChan(team, "unbanned")
+
   }
 
   sLog("adminevt", email, msg)
