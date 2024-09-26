@@ -11,6 +11,8 @@ var problems_solved = 12;
 var problems_sold = 3;
 var global_chat = [];
 var problems = [];
+var myId = "";
+var chat_banned = false;
 
 //local states
 var focused_problem = "";
@@ -38,6 +40,7 @@ updatePriceList();
 //buy events
 
 document.getElementById("send-message-button").addEventListener("click", function(){
+    if(chat_banned) return;
     const chat_input = document.getElementById("chat-input");
     if(chat_input.value.length > 200 || chat_input.value.length == 0) return;
     sendMsg(focused_problem, chat_input.value);
@@ -199,6 +202,14 @@ function updateProblemList(){
             if(focused_problem != ""){
                 unfocusProb(focused_problem);
             }
+            const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
+            if(focused_problem_obj != null){
+                const index = focused_problem_obj.focused_by.indexOf(myId);
+                if (index > -1) {
+                    focused_problem_obj.focused_by.splice(index, 1);
+                }
+            }
+            
             focused_problem = this.id;
             updateProblemList();
             updateChat();
@@ -228,6 +239,12 @@ function updateFocusedProblem(){
     problem_title.innerHTML = focused_problem_obj.title + " [" + focused_problem_obj.rank + "]";
     problem_content.innerHTML = focused_problem_obj.problem_content;
     const answer_input_wrapper = document.getElementById("answer-input-wrapper");
+    const answer_input = document.getElementById("answer-input");
+    if(focused_problem_obj.pending){
+        answer_input.placeholder = "Odpověděli jste: " + focused_problem_obj.solution;
+    }else{
+        answer_input.placeholder = "Odpověď";
+    }
 
     if(focused_problem_obj.pending || clock_zeroed){
         answer_input_wrapper.classList.add("cannot-answer");
@@ -237,6 +254,13 @@ function updateFocusedProblem(){
 }
 
 function updateChat(){
+    if(chat_banned){
+        document.getElementById("help-center-wrapper").classList.add("chat-banned");
+        document.getElementById("chat-banned-info").classList.remove("hidden");
+    }else{
+        document.getElementById("help-center-wrapper").classList.remove("chat-banned");
+        document.getElementById("chat-banned-info").classList.add("hidden");
+    }
     const conversation_wrapper = document.getElementById("conversation-wrapper");
     conversation_wrapper.innerHTML = "";
     if(focused_problem == "" || !problems.some(prob => prob.id == focused_problem)){
@@ -466,8 +490,8 @@ function connectWS() {
         probBought(msg[1], msg[2], msg[3], msg[4], msg[5])
       break;
       case "solved":
-        if (msg.length != 4) { cLe() }
-        probSolved(msg[1], msg[2], msg[3])
+        if (msg.length != 3) { cLe() }
+        probSolved(msg[1], msg[2])
       break;
       case "focused":
         if (msg.length != 3) { cLe() }
@@ -487,6 +511,17 @@ function connectWS() {
       case "loaded":
         if (msg.length != 2) { cLe() }
         loaded(msg[1]);
+      break;
+      case "graded" :
+        if (msg.length != 4) { cLe() }
+        graded(msg[1], msg[2], msg[3]);
+        break;
+      case "banned" :
+        chat_banned = true;
+        break;
+      case "unbanned" :
+        chat_banned = false;
+        break;
       case "err":
         console.log(msg)
       break;
@@ -528,6 +563,13 @@ function focusProb(id) { //done
 
 /** @param {string} id */
 function unfocusProb() { //done
+    const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
+    if(focused_problem_obj != null){
+        const index = focused_problem_obj.focused_by.indexOf(myId);
+        if (index > -1) {
+            focused_problem_obj.focused_by.splice(index, 1);
+        }
+    }
     socket.send(`unfocus`) }
 
 /** @param {string} id
@@ -577,6 +619,7 @@ function msgSent(id, msg) {
 function probSold(id, money) {
   problems = problems.filter(prob => prob.id != id);
   team_balance = parseInt(money);
+  problems_sold++;
   updateTeamStats();
   updateProblemList();
   updateFocusedProblem();
@@ -606,16 +649,20 @@ function probBought(id, diff, money, name, text) {
     console.log(id, diff, money, name, text) 
     updateProblemList();
     updateTeamStats();
+    updateShop();
 }
 /** @param {string} msg
  * @param {string} id 
- * @param {string} name */
-function probSolved(id, diff, name) {
-    problems.find(prob => prob.id == id).pending = true;
+ * @param {string} solution */
+function probSolved(id, solution) {
+    const problem = problems.find(prob => prob.id == id);
+    problem.pending = true;
+    problem.solution = solution;
     updateFocusedProblem();
     updateProblemList();
     updateShop();
-  console.log(id, diff, name) }
+    console.log(id, solution);
+}
 
 
 
@@ -648,6 +695,24 @@ function focusCheck(){
     }
 }
 
+/** @param {string} probid
+ * @param {string} correct
+ * @param {string} money */
+function graded(probid, correct, money) {
+    const problem = problems.find(prob => prob.id == probid);
+    if(correct == "yes"){
+        problems = problems.filter(prob => prob.id != probid);
+    }else{
+        problem.pending = false;
+        problem.solution = "";
+    }
+    team_balance = parseInt(money);
+    updateTeamStats();
+    updateProblemList();
+    updateShop();
+    console.log(probid, correct, money);
+}
+
 
 
 
@@ -663,10 +728,27 @@ function loaded(data) {
             focused_by: [],
             can_answer: true,
             seen_chat: true,
+            pending: false,
+            solution: "",
             problem_content: bought.text,
             chat: [],
         }
     });
+    console.log(data);
+    problems = problems.concat(data.pending.map(pending => {
+        return {
+            id: pending.id,
+            title: pending.name,
+            rank: pending.diff,
+            focused_by: [],
+            can_answer: true,
+            seen_chat: true,
+            pending: true,
+            solution: data.checks.find(check => check.probid == pending.id).solution,
+            problem_content: pending.text,
+            chat: [],
+        }
+    }));
     team_balance = parseInt(data.money);
     team_name = data.name;
     start_time = new Date(Date.now() + parseInt(data.online_round));
@@ -684,6 +766,17 @@ function loaded(data) {
         prob.chat.push({author: author == "a" ? "support" : "team", content: text});
       }
     }
+    prices = [
+        [data.costs["A"] || 0, data.costs["B"] || 0, data.costs["C"] || 0],
+        [data.costs["+A"] || 0, data.costs["+B"] || 0, data.costs["+C"] || 0],
+        [data.costs["-A"] || 0, data.costs["-B"] || 0, data.costs["-C"] || 0]
+    ];
+    team_rank = parseInt(data.rank);
+    problems_solved = parseInt(data.numsolved);
+    problems_sold = parseInt(data.numsold);
+    chat_banned = data.banned;
+    myId = data.idx.toString();
+    updatePriceList();
     // console.log(problems[0].chat);
     updateProblemList();
     updateShop();
