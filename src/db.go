@@ -389,6 +389,8 @@ type teamRes struct {
   Costs map[string]int `json:"costs"`
   Checks []checkRes `json:"checks"`
   Rank int `json:"rank"`
+  NumSold int `json:"numsold"`
+  NumSolved int `json:"numsolved"`
   Player1 string `json:"player1"`
   Player2 string `json:"player2"`
   Player3 string `json:"player3"`
@@ -407,6 +409,8 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
     teamres := struct {
       Bought string `db:"bought"`
       Pending string `db:"pending"`
+      Sold string `db:"sold"`
+      Solved string `db:"solved"`
       Chat string `db:"chat"`
       Money int `db:"money"`
       Name string `db:"name"`
@@ -418,7 +422,7 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Contest string `db:"contest"`
     }{}
     err := txDao.DB().
-      NewQuery("SELECT bought, pending, chat, money, player1, player2, player3, player4, player5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT bought, pending, sold, solved, chat, money, player1, player2, player3, player4, player5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
       One(&teamres)
 
@@ -435,6 +439,24 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
     err = txDao.DB().
       NewQuery("SELECT id, name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Pending))).
       All(&pendingprobsres)
+
+    if err != nil { return err }
+
+    soldres := struct{
+      Cnt int `db:"count(*)"`
+    }{}
+    err = txDao.DB().
+      NewQuery("SELECT count(*) FROM prob WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Sold))).
+      One(&soldres)
+
+    if err != nil { return err }
+
+    solvedres := struct{
+      Cnt int `db:"count(*)"`
+    }{}
+    err = txDao.DB().
+      NewQuery("SELECT count(*) FROM prob WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Solved))).
+      One(&solvedres)
 
     if err != nil { return err }
 
@@ -480,6 +502,8 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Player5: teamres.Player5,
       Costs: costsc,
       Rank: -1,
+      NumSold: soldres.Cnt,
+      NumSolved: solvedres.Cnt,
     }
 
     sresb, _ := json.Marshal(res)
