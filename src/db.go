@@ -247,7 +247,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
 
     bought := ParseRefList(teamres.Bought)
     pending := ParseRefList(teamres.Pending)
-    pending, found := SliceExclude(bought, prob)
+    bought, found := SliceExclude(bought, prob)
 
     if !found { return dbErr("solve", "prob not owned") }
 
