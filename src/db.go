@@ -549,7 +549,7 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
     if err != nil { return err }
 
     _, err = txDao.DB().
-      NewQuery("DELETE FROM checks WHERE id = {:check} LIMIT 1").
+      NewQuery("DELETE FROM checks WHERE id = {:check}").
       Bind(dbx.Params{ "check": check }).
       Execute()
 
