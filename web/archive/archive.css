@@ -160,7 +160,7 @@
 
 .placement-wrapper{
     display: flex;
-    flex-wrap: wrap;
+    flex-flow: row wrap;
     margin: auto;
     gap: 10vw;
     max-width: 60vw;
@@ -204,7 +204,6 @@
 
 .place-name{
     font-size: 20px;
-    color: var(--color-main);
     border-top: #d5f5ff 2px solid;
     margin: 10px;
     padding-top: 15px;
@@ -260,6 +259,63 @@
       display: none;
     }
 
+    .online-round h1{
+        font-size: 25px;
+    }
+
+    .online-round-covid h1{
+        font-size: 25px;
+    }
+
+    .online-round{
+        padding: 0;
+    }
+
+    .online-round-covid{
+        padding: 0;
+        border-bottom: var(--color-main) 2px solid;
+    }
+
+    .normal-round h1{
+        font-size: 25px;
+        margin-top: 0;
+        padding-top: 16.75px;
+    }
+
+    .normal-round h2{
+        font-size: 25px;
+        margin-top: 0;
+        padding-top: 16.75px;
+    }
+
+    .normal-round{
+        padding: 0;
+    }
+
+    .placement-wrapper{
+        gap: 15vw;
+        max-width: 80vw;
+    }
+
+    .first-place{
+        font-size: 25px;
+    }
+    .first{
+        break-after: always;
+    }
+    .second-place{
+        font-size: 20px;
+        margin-top: 30px;
+    }
+
+    .third-place{
+        font-size: 15px;
+        margin-top: 35px;
+    }
+
+    .place-name{
+        font-size: 15px;
+    }
     .archive-year{
         max-height: none;
     }
@@ -268,8 +324,16 @@
         border: none;
     }
 
+    .archive-title{
+        font-size: 30px;
+        padding: 10px;
+        border-bottom: var(--color-main) 2px solid;
+    }
     .year-title{
         display: block;
+        font-size: 20px;
+        padding: 15px;
+        border-bottom: var(--color-main) 2px solid;
     }
 
     .archive-mobile {
@@ -278,38 +342,33 @@
         transition: max-height 0.5s ease-out; 
     }
 
-    .year-title{
-        border-bottom: var(--color-main) 3px solid;
-    }
-
     .archive-2018 .year-title{
         border: none;
     }
 
     .image-gallery{
-        border-bottom: var(--color-main) 3px solid;
-    }
-
-    .online-round-covid{
-        border-bottom: var(--color-main) 3px solid;
+        border-bottom: var(--color-main) 2px solid;
     }
 
     .archive-2018 .online-round{
-        border-top: var(--color-main) 3px solid;
+        border-top: var(--color-main) 2px solid;
     }
-
-    .online-round-covid{
-        padding-bottom: 50px;
-    }
-
     .images{
-        gap: 8vw
+        gap: 8vw;
+        padding-top: 0;
+        padding-bottom: 30px;
     }
 
+    .image-gallery{
+        padding: 0;
+    }
     .more-button a{
         width: 60vw;
     }
-         
+
+    .more-button{
+        padding-bottom: 30px;  
+    }
 }
 
 @media (max-width: 500px) {
