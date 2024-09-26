@@ -391,6 +391,7 @@ type teamRes struct {
   Rank int `json:"rank"`
   NumSold int `json:"numsold"`
   NumSolved int `json:"numsolved"`
+  Idx int `json:"idx"`
   Player1 string `json:"player1"`
   Player2 string `json:"player2"`
   Player3 string `json:"player3"`
@@ -403,7 +404,7 @@ type checkRes struct{
   Sol string `db:"solution" json:"solution"`
 }
 
-func DBPlayerInitLoad(team string) (sres string, oerr error) {
+func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct {
@@ -504,6 +505,7 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Rank: -1,
       NumSold: soldres.Cnt,
       NumSolved: solvedres.Cnt,
+      Idx: idx,
     }
 
     sresb, _ := json.Marshal(res)

@@ -106,7 +106,7 @@ func PlayerWsHandleMsg(
     
   case "load":
     if len(m) != 1 { return eIm(msg) }
-    res, err := DBPlayerInitLoad(team)
+    res, err := DBPlayerInitLoad(team, idx)
     if err != nil { return err }
     perchan<- "loaded" + DELIM + res
 
