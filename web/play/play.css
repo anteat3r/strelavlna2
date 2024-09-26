@@ -284,6 +284,22 @@
     border-style: dashed !important;
 }
 
+.problem-focused.problem-pending{
+    border-color: var(--color-secondary-light) !important;
+    /* border-style: solid !important; */
+    background-color: var(--color-secondary-white) !important;
+    background-image: repeating-linear-gradient(-45deg, var(--color-secondary-glow), var(--color-secondary-glow) 10px, transparent 10px, transparent 20px) !important;
+}
+
+.problem-focused.problem-pending .problem-title{
+    color: var(--color-secondary-dark);
+}
+
+.problem-focused.problem-pending .problem-rank{
+    color: var(--color-secondary-dark);
+}
+
+
 .occupied-icon{
     width: 14px;
     height: 14px;
@@ -310,6 +326,13 @@
 }
 .problem-worked-on .occupied-icon{
     display: block;
+}
+
+.problem-focused.problem-pending .occupied-icon{
+    background-color: var(--color-secondary-light);
+    border: 5px var(--color-secondary-white) solid;
+    border-radius: 100px;
+    transform: translateX(5px);
 }
 
 #shop-actions-wrapper{
@@ -516,11 +539,11 @@
 .cannot-answer input{
     background-color: #f5f5f5 !important;
     border-color: #aaaaaa !important;
-    color: #7c7c7c !important;
+    color: #666666 !important;
 }
 
 .cannot-answer input::placeholder{
-    color: #d4d4d4 !important;
+    color: #adadad !important;
 }
 
 #submit-answer-button{
