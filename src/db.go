@@ -471,6 +471,7 @@ func DBPlayerInitLoad(team string) (sres string, oerr error) {
       Name: teamres.Name,
       OnlineRound: ordelta,
       OnlineRoundEnd: oredelta,
+      Checks: checkres,
       Player1: teamres.Player1,
       Player2: teamres.Player2,
       Player3: teamres.Player3,
