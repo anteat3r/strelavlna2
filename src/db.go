@@ -270,7 +270,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
     name = probres.Name
     
     _, err = txDao.DB().
-      NewQuery("UPDATE teams SET pending = {:pending}, bought = {:bought} WHERE id = {:id} LIMIT 1").
+      NewQuery("UPDATE teams SET pending = {:pending}, bought = {:bought} WHERE id = {:id}").
       Bind(dbx.Params{
         "pending": StringifyRefList(pending),
         "bought": StringifyRefList(bought),
