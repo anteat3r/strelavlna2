@@ -12,6 +12,7 @@ var problems_sold = 3;
 var global_chat = [];
 var problems = [];
 var myId = "";
+var chat_banned = false;
 
 //local states
 var focused_problem = "";
@@ -39,6 +40,7 @@ updatePriceList();
 //buy events
 
 document.getElementById("send-message-button").addEventListener("click", function(){
+    if(chat_banned) return;
     const chat_input = document.getElementById("chat-input");
     if(chat_input.value.length > 200 || chat_input.value.length == 0) return;
     sendMsg(focused_problem, chat_input.value);
@@ -252,6 +254,13 @@ function updateFocusedProblem(){
 }
 
 function updateChat(){
+    if(chat_banned){
+        document.getElementById("help-center-wrapper").classList.add("chat-banned");
+        document.getElementById("chat-banned-info").classList.remove("hidden");
+    }else{
+        document.getElementById("help-center-wrapper").classList.remove("chat-banned");
+        document.getElementById("chat-banned-info").classList.add("hidden");
+    }
     const conversation_wrapper = document.getElementById("conversation-wrapper");
     conversation_wrapper.innerHTML = "";
     if(focused_problem == "" || !problems.some(prob => prob.id == focused_problem)){
@@ -507,6 +516,12 @@ function connectWS() {
         if (msg.length != 4) { cLe() }
         graded(msg[1], msg[2], msg[3]);
         break;
+      case "banned" :
+        chat_banned = true;
+        break;
+      case "unbanned" :
+        chat_banned = false;
+        break;
       case "err":
         console.log(msg)
       break;
@@ -759,7 +774,7 @@ function loaded(data) {
     team_rank = parseInt(data.rank);
     problems_solved = parseInt(data.numsolved);
     problems_sold = parseInt(data.numsold);
-
+    chat_banned = data.banned;
     myId = data.idx.toString();
     updatePriceList();
     // console.log(problems[0].chat);

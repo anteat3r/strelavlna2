@@ -17,7 +17,6 @@
     border-bottom: 2px dashed var(--color-secondary-light);
     mask-image: linear-gradient(to right, transparent 0%, transparent 20%, black 50%, black 80%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 20%, black 50%, black 80%, transparent 100%);
-    
 }
 
 .play-header #title{
@@ -593,10 +592,22 @@
     margin: 10px;
 }
 
+.chat-banned #help-center-title-wrapper{
+    border-color: var(--color-black-glow);
+}
+.chat-banned #help-center-title{
+    color: var(--color-black-glow);
+}
+
 #chat-wrapper{
     border-top: 2px var(--color-secondary-light) solid;
     border-left: 2px var(--color-secondary-light) solid;
     background-color: var(--color-secondary-white);
+}
+.chat-banned #chat-wrapper{
+    border-color: var(--color-black-glow);
+    background-color: white;
+    
 }
 
 #conversation-wrapper{
@@ -625,6 +636,9 @@
     font-weight: 500;
     color: var(--color-secondary-dark);
 }
+.chat-banned .conversation-message{
+    border-color: var(--color-black-glow);
+}
 .message-my{
     padding-left: 30px;
     
@@ -634,6 +648,10 @@
     margin-left: auto;
     float: right;
     background-color: var(--color-secondary-glow);
+}
+
+.chat-banned .message-my p{
+    background-color: white;
 }
 
 .message-their p{
@@ -669,6 +687,11 @@
     overflow: hidden;
 }
 
+.chat-banned #chat-input{
+    border-color: var(--color-black-glow);
+    color: var(--color-black-glow);
+}
+
 #chat-input::placeholder{
     color: #d6d6d6;
     font-weight: 500;
@@ -685,7 +708,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 5
+    border-radius: 5;
+    transition: background-color 0.3s ease-out;
+}
+
+#send-message-button:hover{
+    background-color: var(--color-secondary-light);
+    transition: background-color 0.0s;
+}
+
+.chat-banned #send-message-button{
+    background-color: var(--color-black-glow);
+    cursor: not-allowed;
 }
 
 #confirm-dialog-wrapper{
@@ -1214,4 +1248,14 @@
 
 .statistics-spacer{
     height: 20px;
+}
+
+#chat-banned-info{
+    margin: 0px;
+    margin-top: 60px;
+    font-family: 'Lexend';
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-black);
+    margin-left: 10px;
 }
