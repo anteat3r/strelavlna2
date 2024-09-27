@@ -1,227 +1,121 @@
 const redirects = false;
 //global states
-var team_balance = 400;
-var team_name = "Team 1";
-var team_rank = "14";
 var start_time = new Date().getTime() - 5000;
 var end_time = new Date().getTime() + 5000;
 var prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]]; //[buy], [solve], [sell]
-var team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
-var problems_solved = 12;
-var problems_sold = 3;
-var global_chat = [];
-var seen_global_chat = true;
-var menu_focused_by = [];
-var problems = [];
+
 var myId = "";
-var chat_banned = false;
+
+var checks = [
+    {
+        id: 0,
+        probid: 0,
+        teamid: 0,
+        payload: "To je spatne",
+        type: "grade",
+        content: "Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?",
+        name: "Soudce",
+        rank: "C",
+        seen_chat: true,
+        chat_banned: false,
+        focused_by: [],
+        chat: [
+            {
+                author: "team",
+                content: "Je to 5?"
+            },
+            {
+                author: "support",
+                content: "ano, je to 5."
+            }
+        ]
+    }
+];
 
 //local states
 var focused_check = "";
 
-const buy_button_wrapper = document.getElementById("buy-button-wrapper");
-const buy_button = document.getElementById("buy-button");
-const easy_buy = document.getElementById("easy-buy");
-const medium_buy = document.getElementById("medium-buy");
-const hard_buy = document.getElementById("hard-buy");
+const confirm_button = document.getElementById("confirm-button");
+const reject_button = document.getElementById("reject-button");
 
-const buy_buttons = [easy_buy, medium_buy, hard_buy];
-
-const problem_wrapper = document.getElementById("problem-wrapper");
-const team_stats_main_wrapper = document.getElementById("team-stats-main-wrapper");
+const focused_check_wrapper = document.getElementById("check-wrapper");
+const mod_home_wrapper = document.getElementById("mod-home-wrapper");
 
 //initial setup
-updateTeamStats();
-updateProblemList();
-updateFocusedProblem();
+updateCheckList();
+updateFocusedCheck();
 updateChat();
-updateShop();
-updatePriceList();
 
 
 //buy events
 
 document.getElementById("send-message-button").addEventListener("click", function(){
-    if(chat_banned) return;
     const chat_input = document.getElementById("chat-input");
     if(chat_input.value.length > 200 || chat_input.value.length == 0) return;
-    sendMsg(focused_check, chat_input.value);
+    const focused_check_obj = checks.find(check => check.id == focused_check);
+    
+    sendMsg(focused_check_obj.teamid, focused_check_obj.probid, chat_input.value);
     chat_input.value = "";
 });
 
-buy_buttons.forEach(function(button, n){
-    button.addEventListener("mouseover", function(){
-        button.getElementsByClassName("buy-dropdown-difficulty")[0].innerHTML = `&nbsp` + prices[0][n];
-    });
-    button.addEventListener("mouseout", function(){
-        button.getElementsByClassName("buy-dropdown-difficulty")[0].innerHTML = ["[A]", "[B]", "[C]"][n];
-    });
-});
 
-buy_buttons.forEach(function(button, n){
-    button.addEventListener("click", function(){
-        buyProblem(["A", "B", "C"][n]);
-    });
-})
-
-document.getElementById("sell-button").addEventListener("click", sellProblem);
-
-
-buy_button.addEventListener("click", function(){
-    if(clock_zeroed){return;}
-    if(buy_button_wrapper.classList.contains("buy-button-close")){
-        buy_button_wrapper.classList.add("buy-button-open");
-        buy_button_wrapper.classList.remove("buy-button-close");
-    }else{
-        buy_button_wrapper.classList.add("buy-button-close");
-        buy_button_wrapper.classList.remove("buy-button-open");
-    }
-});
-
-document.getElementById("team-stats").addEventListener("click", function(){
-    unfocusProb();
-    focusProb("");
+document.getElementById("home-button").addEventListener("click", function(){
+    unfocusCheck();
+    focusCheck("", "", "");
     focused_check = "";
-    updateFocusedProblem();
+    updateFocusedCheck();
     updateChat();
-    updateProblemList();
+    updateCheckList();
     updateShop();
-    document.getElementById("team-stats").classList.add("team-stats-selected");
-    problem_wrapper.classList.add("hidden");
-    team_stats_main_wrapper.classList.remove("hidden");
+    document.getElementById("home-button").classList.add("home-selected");
+    focused_check_wrapper.classList.add("hidden");
+    mod_home_wrapper.classList.remove("hidden");
 });
 
-document.getElementById("submit-answer-button").addEventListener("click", function(){
-    const answer_obj = problems.find(prob => prob.id == focused_check);
-    if(answer_obj != null && !answer_obj.pending){
-        const answer_input = document.getElementById("answer-input");
-        if(answer_input.value != ""){
-            answer_obj.pending = true;
-            solveProb(focused_check, answer_input.value);
-            answer_input.value = "";
-            updateFocusedProblem();
+function updateCheckList(){
+    const checks_wrapper = document.getElementById("teams-checks");
+    for(const check of checks){
+        if(check.focused_by.length > 0){
+            check.seen_chat = true;
         }
     }
-});
-
-
-
-function updateShop(){
-    buy_buttons.forEach(function(button, n){
-        if(team_balance >= prices[0][n]){
-            button.classList.remove("subbuy-disabled");
-        }else{
-            button.classList.add("subbuy-disabled");
-        }
-    });
-    const focused_problem_obj = problems.find(prob => prob.id == focused_check);
-    const sell_information = document.getElementById("sell-information");
-    if(focused_problem_obj != null){
-        if(focused_problem_obj.pending){
-            sell_information.innerHTML = `*Nelze prodat úlohu, kterou jste poslali na kontrolu řešení`;
-            document.getElementById("sell-action-wrapper").classList.add("cannot-sell");
-        }else{
-            sell_information.innerHTML = `*Prodat aktuální úlohu: <span class="bold">${focused_problem_obj.title}</span>`;
-            document.getElementById("sell-action-wrapper").classList.remove("cannot-sell");
-        }
-    }else{
-        sell_information.innerHTML = `*Klikněte na úlohu kterou chcete prodat`;
-        document.getElementById("sell-action-wrapper").classList.add("cannot-sell");
-    }
-    if(clock_zeroed){
-        sell_information.innerHTML = `*Čas vypršel. Již nelze provádět žádné akce`;
-        document.getElementById("sell-action-wrapper").classList.add("cannot-sell");
-        buy_buttons.forEach(function(button){
-            button.classList.add("subbuy-disabled");
-        });
-        document.getElementById("buy-button-wrapper").classList.add("cannot-sell");
-        buy_button.classList.add("cannot-sell");
-        if(!buy_button_wrapper.classList.contains("buy-button-close")){
-            buy_button_wrapper.classList.add("buy-button-close");
-            buy_button_wrapper.classList.remove("buy-button-open");
-        }
-    }
-}
-
-
-function updateTeamStats(){
-    document.getElementById("team-name").innerHTML = team_name;
-    document.getElementById("rank-number").innerHTML = team_rank;
-    document.getElementById("team-balance").innerHTML = team_balance + " DC"
-    document.getElementById("team-stats-main-title").innerHTML = team_name;
-    document.getElementById("team-stats-main-balance").innerHTML = team_balance + " DC";
-    document.getElementById("team-stats-main-rank").innerHTML = team_rank;
-    document.getElementById("statistics-balance").innerHTML = team_balance + " DC";
-    document.getElementById("statistics-rank").innerHTML = team_rank;
-    document.getElementById("statistics-solved").innerHTML = problems_solved;
-    document.getElementById("statistics-sold").innerHTML = problems_sold;
-    const team_stats_players_wrapper = document.getElementById("team-stats-players-wrapper");
-    team_stats_players_wrapper.innerHTML = "";
-    for(const member of team_members){
-        team_stats_players_wrapper.innerHTML +=
-        `<h2 class="team-stats-player">${member}</h2>`
-    }
-}
-
-function updatePriceList(){
-    document.getElementById("price-list-a-buy").innerHTML = prices[0][0] + " DC";
-    document.getElementById("price-list-a-solve").innerHTML = prices[1][0] + " DC";
-    document.getElementById("price-list-a-sell").innerHTML = prices[2][0] + " DC";
-
-    document.getElementById("price-list-b-buy").innerHTML = prices[0][1] + " DC";
-    document.getElementById("price-list-b-solve").innerHTML = prices[1][1] + " DC";
-    document.getElementById("price-list-b-sell").innerHTML = prices[2][1] + " DC";
-
-    document.getElementById("price-list-c-buy").innerHTML = prices[0][2] + " DC";
-    document.getElementById("price-list-c-solve").innerHTML = prices[1][2] + " DC";
-    document.getElementById("price-list-c-sell").innerHTML = prices[2][2] + " DC";
-}
-
-function updateProblemList(){
-    const problems_wrapper = document.getElementById("teams-problems");
-    for(const prob of problems){
-        if(prob.focused_by.length > 0){
-            prob.seen_chat = true;
-        }
-    }
-    problems_wrapper.innerHTML = "";
-    for(prob of problems){
-        problems_wrapper.innerHTML +=
-        `<div class="problem ${focused_check == prob.id ? "problem-focused" : ""} ${prob.focused_by.length > (focused_check == prob.id ? 1 : 0) ? "problem-worked-on" : ""} ${!prob.seen_chat ? "unseen-chat" : ""} ${prob.pending ? "problem-pending" : ""}" id="${prob.id}">
+    checks_wrapper.innerHTML = "";
+    for(check of checks){
+        checks_wrapper.innerHTML +=
+        `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!check.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
             <div class="flex flex-row align-center">
-                <h2 class="problem-title"${prob.title.length > 12 ? `style="font-size: 15px"` : ""}>${prob.title}</h2>
-                <h2 class="problem-rank">[${prob.rank}]</h2>
+                <h2 class="check-title"${check.title.length > 12 ? `style="font-size: 15px"` : ""}>${check.title}</h2>
+                <h2 class="check-rank">[${check.rank}]</h2>
             </div>
             <div class="occupied-icon"></div>
         </div>`
     }
     
-    const problems_buttons = document.getElementById("teams-problems").getElementsByClassName("problem");
-    for(const button of problems_buttons){
+    const checks_buttons = document.getElementById("teams-checks").getElementsByClassName("check");
+    for(const button of checks_buttons){
         button.addEventListener("click", function(){
             if(focused_check == this.id){
                 return;
             }
 
-            unfocusProb();
+            unfocusCheck();
 
-            const focused_problem_obj = problems.find(prob => prob.id == focused_check);
-            if(focused_problem_obj != null){
-                const index = focused_problem_obj.focused_by.indexOf(myId);
+            const focused_check_obj = checks.find(check => check.id == focused_check);
+            if(focused_check_obj != null){
+                const index = focused_check_obj.focused_by.indexOf(myId);
                 if (index > -1) {
-                    focused_problem_obj.focused_by.splice(index, 1);
+                    focused_check_obj.focused_by.splice(index, 1);
                 }
             }
             
             focused_check = this.id;
-            updateProblemList();
+            updateCheckList();
             updateChat();
-            updateFocusedProblem();
-            updateShop();
-            focusProb(focused_check);
+            updateFocusedCheck();
+            focusCheck(focused_check);
             document.getElementById("team-stats").classList.remove("team-stats-selected");
-            problem_wrapper.classList.remove("hidden");
-            team_stats_main_wrapper.classList.add("hidden");
+            focused_check_wrapper.classList.remove("hidden");
+            mod_home_wrapper.classList.add("hidden");
             
         });
     }
@@ -229,27 +123,27 @@ function updateProblemList(){
     
 }
 
-function updateFocusedProblem(){
-    if(focused_check == "" || !problems.some(prob => prob.id == focused_check)){
+function updateFocusedCheck(){
+    if(focused_check == "" || !checks.some(check => check.id == focused_check)){
         focused_check = "";
-        problem_wrapper.classList.add("hidden");
-        team_stats_main_wrapper.classList.remove("hidden");
+        focused_check_wrapper.classList.add("hidden");
+        mod_home_wrapper.classList.remove("hidden");
         return;
     }
-    const problem_title = document.getElementById("problem-title");
-    const problem_content = document.getElementById("problem-content");
-    const focused_problem_obj = problems.find(prob => prob.id == focused_check);
-    problem_title.innerHTML = focused_problem_obj.title + " [" + focused_problem_obj.rank + "]";
-    problem_content.innerHTML = focused_problem_obj.problem_content;
+    const checklem_title = document.getElementById("checklem-title");
+    const checklem_content = document.getElementById("checklem-content");
+    const focused_check_obj = checklems.find(check => check.id == focused_check);
+    checklem_title.innerHTML = focused_check_obj.title + " [" + focused_check_obj.rank + "]";
+    checklem_content.innerHTML = focused_check_obj.checklem_content;
     const answer_input_wrapper = document.getElementById("answer-input-wrapper");
     const answer_input = document.getElementById("answer-input");
-    if(focused_problem_obj.pending){
-        answer_input.placeholder = "Odpověděli jste: " + focused_problem_obj.solution;
+    if(focused_check_obj.pending){
+        answer_input.placeholder = "Odpověděli jste: " + focused_check_obj.solution;
     }else{
         answer_input.placeholder = "Odpověď";
     }
 
-    if(focused_problem_obj.pending || clock_zeroed){
+    if(focused_check_obj.pending || clock_zeroed){
         answer_input_wrapper.classList.add("cannot-answer");
     }else{
         answer_input_wrapper.classList.remove("cannot-answer");
@@ -279,7 +173,7 @@ function updateChat(){
         document.getElementById("rank-number").classList.add("hidden");
     }
 
-    if(focused_check == "" || !problems.some(prob => prob.id == focused_check)){
+    if(focused_check == "" || !checklems.some(check => check.id == focused_check)){
         focused_check = "";
         for(const message of global_chat){
             conversation_wrapper.innerHTML += 
@@ -289,7 +183,7 @@ function updateChat(){
         }
         return;
     }
-    for(const message of problems.find(prob => prob.id == focused_check).chat){
+    for(const message of checklems.find(check => check.id == focused_check).chat){
         conversation_wrapper.innerHTML += 
         `<div class="conversation-row ${message.author == "team" ? "message-my" : "message-their"}">
             <p class="conversation-message">${message.content}</p>
@@ -389,7 +283,7 @@ document.getElementById("confirm-dialog-cancel").addEventListener("click", funct
     confirm_dialog.style.display = "none";
     document.getElementById("confirm-dialog-ok").replaceWith(document.getElementById("confirm-dialog-ok").cloneNode(true));
 });
-function buyProblem(rank){
+function buyChecklem(rank){
     if (team_balance < prices[0]["ABC".indexOf(rank)]){return;}
     const confirm_dialog = document.getElementById("confiramtion-dialog-bg");
     confirm_dialog.style.display = "block";
@@ -397,21 +291,21 @@ function buyProblem(rank){
     document.getElementById("confirm-dialog-ok").addEventListener("click", function(){
         console.log(prices[0]["ABC".indexOf(rank)]);
         if(team_balance >= prices[0]["ABC".indexOf(rank)]){
-            buyProb(rank);
+            buyCheck(rank);
             // team_balance -= prices[0]["ABC".indexOf(rank)];
             // updateTeamStats();
-            // const new_problem = {
+            // const new_checklem = {
             //     id: Math.random().toString(36).substring(7),
             //     title: "Koupil sis novou úlohu",
             //     rank: rank,
             //     worked_on: false,
             //     last_answer_time: Date.now(),
             //     seen_chat: true,
-            //     problem_content: "Uspějte v této úloze a získejte další body!",
+            //     checklem_content: "Uspějte v této úloze a získejte další body!",
             //     chat: []
             // }
-            // problems.push(new_problem);
-            // updateProblemList();
+            // checklems.push(new_checklem);
+            // updateCheckList();
             // updateShop();
 
         }
@@ -420,14 +314,14 @@ function buyProblem(rank){
     });
 }
 
-function sellProblem(){
-    if(!focused_check || !problems.some(prob => prob.id == focused_check) || problems.find(prob => prob.id == focused_check).pending || clock_zeroed) return;
+function sellChecklem(){
+    if(!focused_check || !checklems.some(check => check.id == focused_check) || checklems.find(check => check.id == focused_check).pending || clock_zeroed) return;
     const confirm_dialog = document.getElementById("confiramtion-dialog-bg");
     confirm_dialog.style.display = "block";
-    const focused_problem_obj = problems.find(prob => prob.id == focused_check);
-    document.getElementById("confirm-dialog-content").innerHTML = `Opravdu chcete prodat úlohu:<br><span class="bold">${focused_problem_obj.title}</span> za <span class="bold">${focused_problem_obj.rank == "A" ? 5 : focused_problem_obj.rank == "B" ? 10 : 15}</span> DC?`;
+    const focused_check_obj = checklems.find(check => check.id == focused_check);
+    document.getElementById("confirm-dialog-content").innerHTML = `Opravdu chcete prodat úlohu:<br><span class="bold">${focused_check_obj.title}</span> za <span class="bold">${focused_check_obj.rank == "A" ? 5 : focused_check_obj.rank == "B" ? 10 : 15}</span> DC?`;
     document.getElementById("confirm-dialog-ok").addEventListener("click", function(){
-        sellProb(focused_check);
+        sellCheck(focused_check);
 
         confirm_dialog.style.display = "none";
         document.getElementById("confirm-dialog-ok").removeEventListener("click", arguments.callee);
@@ -451,7 +345,7 @@ function update(){
         if (remaining < 0){
             clock_zeroed = true;
             updateShop();
-            updateFocusedProblem();
+            updateFocusedCheck();
             remaining = 0;
             passed = end_time-start_time;
         }
@@ -494,23 +388,23 @@ function connectWS() {
       break;
       case "sold":
         if (msg.length != 3) { cLe() }
-        probSold(msg[1], msg[2])
+        checkSold(msg[1], msg[2])
       break;
       case "bought":
         if (msg.length != 6) { cLe() }
-        probBought(msg[1], msg[2], msg[3], msg[4], msg[5])
+        checkBought(msg[1], msg[2], msg[3], msg[4], msg[5])
       break;
       case "solved":
         if (msg.length != 3) { cLe() }
-        probSolved(msg[1], msg[2])
+        checkSolved(msg[1], msg[2])
       break;
       case "focused":
         if (msg.length != 3) { cLe() }
-        probFocused(msg[1], msg[2])
+        checkFocused(msg[1], msg[2])
       break;
       case "unfocused":
         if (msg.length != 2) { cLe() }
-        probUnfocused(msg[1])
+        checkUnfocused(msg[1])
       break;
       case "msgsent":
         if (msg.length != 4) { cLe() }
@@ -554,41 +448,46 @@ try {
 // connectWS();
 
 /** @param {string} id */
-function sellProb(id) { //done
+function sellCheck(id) { //done
   socket.send(`sell\x00${id}`) }
 
 /** @param {string} diff */
-function buyProb(diff) { //done
+function buyCheck(diff) { //done
   socket.send(`buy\x00${diff}`) }
 
 /** @param {string} diff */
-function buyOldProb(diff) {
+function buyOldCheck(diff) {
   socket.send(`buyold\x00${diff}`) }
 
 /** @param {string} id
  * @param {string} sol */
-function solveProb(id, sol) { //done
+function solveCheck(id, sol) { //done
   socket.send(`solve\x00${id}\x00${sol}`) }
 
-/** @param {string} id */
-function focusProb(id) { //done
-  socket.send(`focus\x00${id}`) }
+/** @param {string} id
+ * @param {string} probid
+ * @param {string} teamid 
+ * @param {boolean} send_content
+ * */
+function focusCheck(id, probid, teamid, send_content) { //done
+  socket.send(`focus\x00${id}\x00${probid}\x00${teamid}\x00${send_content ? "yes" : "no"}`) }
 
 /** @param {string} id */
-function unfocusProb() { //done
-    const focused_problem_obj = problems.find(prob => prob.id == focused_check);
-    if(focused_problem_obj != null){
-        const index = focused_problem_obj.focused_by.indexOf(myId);
+function unfocusCheck() { //done
+    const focused_check_obj = checks.find(check => check.id == focused_check);
+    if(focused_check_obj != null){
+        const index = focused_check_obj.focused_by.indexOf(myId);
         if (index > -1) {
-            focused_problem_obj.focused_by.splice(index, 1);
+            focused_check_obj.focused_by.splice(index, 1);
         }
     }
     socket.send(`unfocus`) }
 
-/** @param {string} id
+/** @param {string} teamid
+ * @param {string} checkid
  * @param {string} text */
-function sendMsg(id, text) { //done
-  socket.send(`chat\x00${id}\x00${text}`) }
+function sendMsg(teamid, checkid, text) { //done
+  socket.send(`chat\x00${teamid}\x00${checkid}\x00${text}`) }
 
 /** load game state */
 function load() {
@@ -603,11 +502,11 @@ function msgRecieved(id, msg) {
     seen_global_chat = false;
     updateChat();
   } else {
-    const problem = problems.find(prob => prob.id == id);
-    if(problem != null) {
-      problem.chat.push({author: "support", content: msg});
-      problem.seen_chat = false;
-      updateProblemList();
+    const checklem = checklems.find(check => check.id == id);
+    if(checklem != null) {
+      checklem.chat.push({author: "support", content: msg});
+      checklem.seen_chat = false;
+      updateCheckList();
       updateChat();
     }
   }
@@ -620,9 +519,9 @@ function msgSent(id, msg) {
     global_chat.push({author: "team", content: msg});
     updateChat();
   } else {
-    const problem = problems.find(prob => prob.id == id);
-    if(problem != null) {
-      problem.chat.push({author: "team", content: msg});
+    const checklem = checklems.find(check => check.id == id);
+    if(checklem != null) {
+      checklem.chat.push({author: "team", content: msg});
       updateChat();
     }
   }
@@ -630,13 +529,13 @@ function msgSent(id, msg) {
 
 /** @param {string} money
  * @param {string} id */
-function probSold(id, money) {
-  problems = problems.filter(prob => prob.id != id);
+function checkSold(id, money) {
+  checklems = checklems.filter(check => check.id != id);
   team_balance = parseInt(money);
-  problems_sold++;
+  checklems_sold++;
   updateTeamStats();
-  updateProblemList();
-  updateFocusedProblem();
+  updateCheckList();
+  updateFocusedCheck();
   updateShop();
   updateChat();
   console.log(id, money);
@@ -647,33 +546,33 @@ function probSold(id, money) {
  * @param {string} money
  * @param {string} name
  * @param {string} text */
-function probBought(id, diff, money, name, text) {
-    const new_problem = {
+function checkBought(id, diff, money, name, text) {
+    const new_checklem = {
         id: id,
         title: name,
         rank: diff,
         focused_by: [],
         can_answer: true,
         seen_chat: true,
-        problem_content: text,
+        checklem_content: text,
         chat: []
     }
-    problems.push(new_problem);
+    checklems.push(new_checklem);
     team_balance = parseInt(money);
     console.log(id, diff, money, name, text) 
-    updateProblemList();
+    updateCheckList();
     updateTeamStats();
     updateShop();
 }
 /** @param {string} msg
  * @param {string} id 
  * @param {string} solution */
-function probSolved(id, solution) {
-    const problem = problems.find(prob => prob.id == id);
-    problem.pending = true;
-    problem.solution = solution;
-    updateFocusedProblem();
-    updateProblemList();
+function checkSolved(id, solution) {
+    const checklem = checklems.find(check => check.id == id);
+    checklem.pending = true;
+    checklem.solution = solution;
+    updateFocusedCheck();
+    updateCheckList();
     updateShop();
     console.log(id, solution);
 }
@@ -682,55 +581,55 @@ function probSolved(id, solution) {
 
 /** @param {string} idx
  * @param {string} id */
-function probFocused(id, idx) {
+function checkFocused(id, idx) {
     if(id == ""){
         if(!menu_focused_by.includes(idx)){
             menu_focused_by.push(idx);
         }
         seen_global_chat = true;
-        updateProblemList();
+        updateCheckList();
         updateChat();
         return;
     }
-    const problem = problems.find(prob => prob.id == id);
+    const checklem = checklems.find(check => check.id == id);
     console.log(id);
-    if(!problem.focused_by.includes(idx)){
-        problem.focused_by.push(idx);
+    if(!checklem.focused_by.includes(idx)){
+        checklem.focused_by.push(idx);
     }
-    updateProblemList();    
+    updateCheckList();    
     console.log(id, idx) }
 
 /** @param {string} idx
  * @param {string} id */
-function probUnfocused(idx) {
-    problems.forEach(prob => prob.focused_by = prob.focused_by.filter(focused => focused != idx));
+function checkUnfocused(idx) {
+    checklems.forEach(check => check.focused_by = check.focused_by.filter(focused => focused != idx));
     menu_focused_by = menu_focused_by.filter(focused => focused != idx);
-    updateProblemList();    
+    updateCheckList();    
 }
   
 function focusCheck(){
-    if(!problems.some(prob => prob.id == focused_check)){
+    if(!checklems.some(check => check.id == focused_check)){
         focused_check = "";
     }
-    focusProb(focused_check);
+    focusCheck(focused_check);
 }
 
-/** @param {string} probid
+/** @param {string} checkid
  * @param {string} correct
  * @param {string} money */
-function graded(probid, correct, money) {
-    const problem = problems.find(prob => prob.id == probid);
+function graded(checkid, correct, money) {
+    const checklem = checklems.find(check => check.id == checkid);
     if(correct == "yes"){
-        problems = problems.filter(prob => prob.id != probid);
+        checklems = checklems.filter(check => check.id != checkid);
     }else{
-        problem.pending = false;
-        problem.solution = "";
+        checklem.pending = false;
+        checklem.solution = "";
     }
     team_balance = parseInt(money);
     updateTeamStats();
-    updateProblemList();
+    updateCheckList();
     updateShop();
-    console.log(probid, correct, money);
+    console.log(checkid, correct, money);
 }
 
 
@@ -740,7 +639,7 @@ function graded(probid, correct, money) {
 function loaded(data) {
     data = JSON.parse(data);
     
-    problems = data.bought.map(bought => {
+    checklems = data.bought.map(bought => {
         return {
             id: bought.id,
             title: bought.name,
@@ -750,12 +649,12 @@ function loaded(data) {
             seen_chat: true,
             pending: false,
             solution: "",
-            problem_content: bought.text,
+            checklem_content: bought.text,
             chat: [],
         }
     });
     console.log(data);
-    problems = problems.concat(data.pending.map(pending => {
+    checklems = checklems.concat(data.pending.map(pending => {
         return {
             id: pending.id,
             title: pending.name,
@@ -764,8 +663,8 @@ function loaded(data) {
             can_answer: true,
             seen_chat: true,
             pending: true,
-            solution: data.checks.find(check => check.probid == pending.id).solution,
-            problem_content: pending.text,
+            solution: data.checks.find(check => check.checkid == pending.id).solution,
+            checklem_content: pending.text,
             chat: [],
         }
     }));
@@ -781,9 +680,9 @@ function loaded(data) {
       if (id == "") {
         global_chat.push({author: author == "a" ? "support" : "team", content: text});
       } else {
-        const prob = problems.find(i => i.id == id);
-        if (prob == undefined) { continue; }
-        prob.chat.push({author: author == "a" ? "support" : "team", content: text});
+        const check = checklems.find(i => i.id == id);
+        if (check == undefined) { continue; }
+        check.chat.push({author: author == "a" ? "support" : "team", content: text});
       }
     }
     prices = [
@@ -792,15 +691,15 @@ function loaded(data) {
         [data.costs["-A"] || 0, data.costs["-B"] || 0, data.costs["-C"] || 0]
     ];
     team_rank = parseInt(data.rank);
-    problems_solved = parseInt(data.numsolved);
-    problems_sold = parseInt(data.numsold);
+    checklems_solved = parseInt(data.numsolved);
+    checklems_sold = parseInt(data.numsold);
     chat_banned = data.banned;
     myId = data.idx.toString();
     updatePriceList();
-    // console.log(problems[0].chat);
-    updateProblemList();
+    // console.log(checklems[0].chat);
+    updateCheckList();
     updateShop();
-    updateFocusedProblem();
+    updateFocusedCheck();
     updateTeamStats();
     updateChat();
 }
