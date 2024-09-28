@@ -619,8 +619,8 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
       NewQuery("UPDATE teams SET money = {:money}, " + tstring + " = {:target}, pending = {:pending} WHERE id = {:team}").
       Bind(dbx.Params{
         "money": money,
-        "target": target,
-        "pending": pending,
+        "target": StringifyRefList(target),
+        "pending": StringifyRefList(pending),
         "team": team,
       }).
       Execute()
