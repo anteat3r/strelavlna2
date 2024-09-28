@@ -99,10 +99,14 @@ func PlayerWsHandleMsg(
       if c == '\x09' { return dbErr("chat", "invalid msg") }
       if c == '\x0b' { return dbErr("chat", "invalid msg") }
     }
-    err := DBPlayerMsg(team, prob, text)
+    teamname, name, diff, checku, err := DBPlayerMsg(team, prob, text)
     if err != nil { return err }
     tchan.Send("msgsent", prob, text)
-    AdminSend("msgrecd", team, prob, text)
+    if checku == "" {
+      AdminSend("msgrecd", team, teamname, prob, diff, name, text)
+    } else {
+      AdminSend("msgchngd", checku, text)
+    }
     
   case "load":
     if len(m) != 1 { return eIm(msg) }
@@ -172,14 +176,14 @@ func AdminWsHandleMsg(
     AdminSend("dismissed", check)
     
   case "focus":
-    if len(m) != 3 { return eIm(msg) }
+    if len(m) != 5 { return eIm(msg) }
     check := m[1]
     team := m[2]
     prob := m[3]
     rtxt := m[4]
     txt := rtxt == "yes"
     if txt {
-      text, sol, err := DBAdminView(prob)    
+      text, sol, err := DBAdminView(team, prob)    
       if err != nil { return err }
       perchan<- "viewed" + DELIM + prob + DELIM + text + DELIM + sol
     }
@@ -209,6 +213,12 @@ func AdminWsHandleMsg(
     if err != nil { return err }
     AdminSend("unbanned", team)
     WriteTeamChan(team, "unbanned")
+
+  case "load":
+    if len(m) != 1 { return eIm(msg) }
+    res, err := DBAdminInitLoad(idx)
+    if err != nil { return err }
+    perchan<- "loaded" + DELIM + res
 
   }
 
