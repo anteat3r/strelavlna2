@@ -241,7 +241,7 @@ func DBBuyOld(team string, diff string) (id string, money int, name string, text
   return dbBuySrc(team, diff, "solved")
 }
 
-func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, oerr error) {
+func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, csol string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -268,6 +268,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
       Diff string `db:"diff"`
       Name string `db:"name"`
       Text string `db:"text"`
+      Sol string `db:"solution"`
     }{}
     err = txDao.DB().
       NewQuery("SELECT diff, name, text FROM probs WHERE id = {:prob} LIMIT 1").
@@ -279,6 +280,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
     teamname = teamres.Name
     diff = probres.Diff
     name = probres.Name
+    csol = probres.Sol
     
     _, err = txDao.DB().
       NewQuery("UPDATE teams SET pending = {:pending}, bought = {:bought} WHERE id = {:id}").
@@ -334,7 +336,7 @@ func DBView(team string, prob string) (text string, diff string, name string, oe
   return
 }
 
-func DBPlayerMsg(team string, prob string, msg string) (teamname string, name string, diff string, checku string, oerr error) {
+func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname string, name string, diff string, check string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -357,7 +359,8 @@ func DBPlayerMsg(team string, prob string, msg string) (teamname string, name st
     if teamres.Banned { return dbClownErr("chat", "banned") }
 
     if !slices.Contains(ParseRefList(teamres.Bought), prob) &&
-       !slices.Contains(ParseRefList(teamres.Pending), prob) {
+       !slices.Contains(ParseRefList(teamres.Pending), prob) &&
+       prob != "" {
       return dbErr("prob not owned")
     }
     
@@ -375,14 +378,16 @@ func DBPlayerMsg(team string, prob string, msg string) (teamname string, name st
     if err != nil { return err }
     
     if len(res) == 1 {  
-      checku = res[0].Id
+      check = res[0].Id
+      upd = true
       return nil
     }
 
+    cid := GetRandomId()
     _, err = txDao.DB().
     NewQuery("INSERT INTO checks (id, team, prob, type, solution, created, updated) VALUES ({:id}, {:team}, {:prob}, 'msg', {:text}, {:created}, {:updated})").
       Bind(dbx.Params{
-        "id": GetRandomId(),
+        "id": cid,
         "prob": prob,
         "text": msg,
         "team": team,
@@ -675,35 +680,53 @@ func DBAdminDismiss(check string) (team string, prob string, oerr error) {
   return
 }
 
-func DBAdminView(team string, prob string) (text string, sol string, oerr error) {
+func DBAdminView(team string, prob string, sprob bool, schat bool) (text string, sol string, name string, diff string, chat string, banned string, lastbanned string, oerr error) {
+  if !sprob && !schat { return }
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    probres := struct{
-      Text string `db:"text"`
-      Sol string `db:"solution"`
-    }{}
-    err := txDao.DB().
-      NewQuery("SELECT text, solution FROM probs WHERE id = {:prob} LIMIT 1").
-      Bind(dbx.Params{ "prob": prob }).
-      One(&probres)
+    if sprob {
+      probres := struct{
+        Text string `db:"text"`
+        Sol string `db:"solution"`
+        Diff string `db:"diff"`
+        Name string `db:"name"`
+      }{}
+      err := txDao.DB().
+        NewQuery("SELECT text, solution, diff, name FROM probs WHERE id = {:prob} LIMIT 1").
+        Bind(dbx.Params{ "prob": prob }).
+        One(&probres)
 
-    if err != nil { return err }
+      if err != nil { return err }
 
-    teamres := struct{
-      Chat string `db:"chat"`
-      Banned bool `db:"banned"`
-      LastBanned types.DateTime `db:"last_banned"`
-    }{}
-    err = txDao.DB().
-      NewQuery("SELECT chat, banned, last_banned FROM teams WHERE id = {:team} LIMIT 1").
-      Bind(dbx.Params{ "team": team }).
-      One(&teamres)
+      text = probres.Text
+      sol = probres.Sol
+      diff = probres.Diff
+      name = probres.Name
+    }
 
-    if err != nil { return err }
+    if schat {
+      teamres := struct{
+        Chat string `db:"chat"`
+        Banned bool `db:"banned"`
+        LastBanned types.DateTime `db:"last_banned"`
+      }{}
+      err := txDao.DB().
+        NewQuery("SELECT chat, banned, last_banned FROM teams WHERE id = {:team} LIMIT 1").
+        Bind(dbx.Params{ "team": team }).
+        One(&teamres)
 
-    text = probres.Text
-    sol = probres.Sol
-    
+      if err != nil { return err }
+
+      bres := "no"
+      if teamres.Banned {
+        bres = "yes"
+      }
+
+      chat = teamres.Chat
+      banned = bres
+      lastbanned = teamres.LastBanned.String()
+    }
+
     return nil
   })
   return
@@ -764,7 +787,7 @@ type adminCheckRes struct {
   Assign int `json:"assign"`
   TeamName string `db:"teams.name" json:"teamname"`
   Type string `db:"checks.type" json:"type"`
-  Solution string `db:"probs.solution" json:"payload"`
+  Solution string `db:"probs.solution" json:"team_message"`
 }
 
 func DBAdminInitLoad(idx int) (res string, oerr error) {
