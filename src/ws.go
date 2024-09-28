@@ -184,7 +184,11 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 func WriteTeamChan(teamid string, msg... string) {
   teamChanMapMutex.Lock()
   res := TeamChanMap[teamid]
-  if res == nil { fmt.Printf("aid %v\n", TeamChanMap); return }
+  if res == nil {
+    fmt.Printf("aid %v\n", TeamChanMap)
+    teamChanMapMutex.Unlock()
+    return
+  }
   teamChanMapMutex.Unlock()
   res.Send(msg...)
 }
