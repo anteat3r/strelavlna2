@@ -17,7 +17,7 @@ var checks = [
         assignid: "iadksibd",
         teamname: "Team 1",
         type: "grade", //grade, chat, globalchat
-        payload: "To bude asi 5\x005",
+        team_message: "",
         focused_by: [],
     }
 ];
@@ -26,6 +26,7 @@ var cached_problems = [{
     id: "huiadkshuiwabksjd",
     title: "Lyžař",
     rank: "C",
+    correct_answer: "5",
     contet: "Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?",
 }];
 
@@ -404,8 +405,8 @@ function updateFocusedCheck(){
 
     if(focused_check_obj.type == "grade"){
         problem_id.innerHTML = "#" + focused_check_obj.probid;
-        team_answer.innerHTML = focused_check_obj.payload.split("\x00")[0];
-        correct_answer.innerHTML = focused_check_obj.payload.split("\x00")[1];
+        team_answer.innerHTML = focused_check_obj.team_message;
+        correct_answer.innerHTML = focused_problem_obj.correct_answer;
         grading_wrapper.classList.remove("hidden");
         check_content_wrapper.classList.remove("hidden");
     }else if(focused_check_obj.type == "chat"){
@@ -596,6 +597,10 @@ function connectWS() {
         if (msg.length != 8) { cLe() }
         solved(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
       break;
+      case "questioned":
+        if (msg.length != 8) { cLe() }
+        questioned(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
+      break;
       case "msgrecd":
         if (msg.length != 4) { cLe() }
         msgRecieved(msg[1], msg[2], msg[3]);
@@ -611,6 +616,14 @@ function connectWS() {
       case "focused":
         if (msg.length != 3) { cLe() }
         checkFocused(msg[1], msg[2]);
+      break;
+      case "viewedProb":
+        if (msg.length != 3) { cLe() }
+        viewedProb(msg[1], msg[2]);
+      break;
+      case "viewedChat":
+        if (msg.length != 3) { cLe() }
+        viewedChat(msg[1], msg[2], msg[3]);
       break;
       case "unfocused":
         if (msg.length != 2) { cLe() }
@@ -724,9 +737,84 @@ function load() {
   socket.send("load");
 }
 
+/**
+ * Store a problem in the cache of viewed problems
+ * @param {string} probid - ID of the problem
+ * @param {string} title - Title of the problem
+ * @param {string} rank - Rank of the problem
+ * @param {string} correct_answer - Answer to the problem
+ * @param {string} content - Content of the problem
+ */
+function viewedProb(probid, title, rank, correct_answer, content) {
+    if(!cached_problems.some(prob => prob.id == probid)){
+        cached_problems.push({
+            id: probid,
+            title: title,
+            rank: rank,
+            correct_answer: correct_answer,
+            content: content
+        });
+    }
+    updateFocusedCheck();
+}
 
 
-function solved(checkid, teamid, probid, assignid, rank, teamname, title){
+
+function viewedChat(probid, teamid, seen_chat, banned, chat) {
+    if(!cached_chats.some(chat => chat.probid == probid && chat.teamid == teamid)){
+        var newchat = [];
+        for (const line of chat.split("\x0b")) {
+            if (line == "") continue;
+            const [author, id, text] = line.split("\x09");
+            newchat.push({author: author == "a" ? "support" : "team", content: text});
+        }
+        cached_chats.push({
+            probid: probid,
+            teamid: teamid,
+            seen_chat: seen_chat == "yes",
+            banned: banned == "yes",
+            chat: newchat
+        });
+    }
+    updateChat();
+}
+
+
+function questioned(checkid, teamid, teamname, probid, probdiff, probname, message, assignid){
+    checks.push(
+        {   
+            id: checkid,
+            probid: probid,
+            teamid: teamid,
+            assignid: assignid,
+            teamname: teamname,
+            type: "chat",
+            focused_by: []
+        }
+    );
+
+    cached_chats.push(
+        {
+            probid: probid,
+            teamid: teamid,
+            seen_chat: false,
+            banned: false,
+            chat: [
+                {
+                    author: "team",
+                    content: message
+                }
+            ]
+        }
+    )
+    updateCheckList();
+    updateFocusedCheck();
+    updateChat();
+
+}
+
+
+function solved(checkid, teamid, probid, assignid, teamname, team_answer, correct_answer){
     checks.push(
         {   
             id: checkid,
@@ -735,7 +823,8 @@ function solved(checkid, teamid, probid, assignid, rank, teamname, title){
             assignid: assignid,
             teamname: teamname,
             type: "grade",
-            payload: `${title}\x00${rank}`,
+            team_answer: team_answer,
+            correct_answer: correct_answer,
             focused_by: []
         });
 }
@@ -852,7 +941,7 @@ function loaded(data) {
             assignid: check.assign,
             teamname: check.teamname,
             type: check.type, //grade, chat, globalchat
-            payload: check.payload,
+            team_message: check.team_message,
             focused_by: [],
         }
     });
