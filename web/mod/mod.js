@@ -77,12 +77,11 @@ document.getElementById("send-message-button").addEventListener("click", functio
 
 document.getElementById("home-button").addEventListener("click", function(){
     unfocusCheck();
-    focusCheck("", "", "");
+    focusCheck("", "", "", false, false);
     focused_check = "";
     updateFocusedCheck();
     updateChat();
     updateCheckList();
-    updateShop();
     document.getElementById("home-button").classList.add("home-selected");
     focused_check_wrapper.classList.add("hidden");
     mod_home_wrapper.classList.remove("hidden");
@@ -566,7 +565,7 @@ let socket;
 function connectWS() {
   const searchParams = new URLSearchParams(window.location.search);
   const id = searchParams.get("id");
-  socket = new WebSocket(`wss://strela-vlna.gchd.cz/api/play/${id}`);
+  socket = new WebSocket(`wss://strela-vlna.gchd.cz/ws/admin/play/${id}`);
   socket.addEventListener("error", (e) => {
       console.log(e);
       if(redirects){
