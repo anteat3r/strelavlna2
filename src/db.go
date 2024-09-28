@@ -814,8 +814,31 @@ func DBAdminInitLoad(idx int) (res string, oerr error) {
     err = txDao.DB().
       NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name AS teamname, probs.diff, probs.name FROM checks INNER JOIN teams ON teams.id = checks.team INNER JOIN probs ON probs.id = checks.prob").
       All(&checkres)
-      // All(&checkres)
     if err != nil { return err }
+
+    gcheckres := []struct{
+      Team string `db:"team"`
+      Id string `db:"id"`
+      Assign int `json:"assign"`
+      TeamName string `db:"teamname"`
+      Type string `db:"type"`
+      Solution string `db:"solution"`
+    }{}
+    err = txDao.DB().
+      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name AS teamname FROM checks INNER JOIN teams ON teams.id = checks.team").
+      All(&gcheckres)
+    if err != nil { return err }
+
+    for _, c := range gcheckres {
+      checkres = append(checkres, adminCheckRes{
+        Team: c.Team,
+        Id: c.Id,
+        Assign: c.Assign,
+        TeamName: c.TeamName,
+        Type: c.Type,
+        Solution: c.Solution,
+      })
+    }
 
     for i, c := range checkres { checkres[i].Assign = HashId(c.Prob) }
 
