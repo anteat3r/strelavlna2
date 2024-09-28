@@ -370,7 +370,7 @@ function updateFocusedCheck(){
         return;
     }
     const grading_wrapper = document.getElementById("grading-wrapper");
-    const problem_content_wrapper = document.getElementById("problem-content-wrapper");
+    const check_content_wrapper = document.getElementById("check-content-wrapper");
 
     const team_name = document.getElementById("team-name");
     const team_id = document.getElementById("team-id");
@@ -399,14 +399,14 @@ function updateFocusedCheck(){
         team_answer.innerHTML = focused_check_obj.payload.split("\x00")[0];
         correct_answer.innerHTML = focused_check_obj.payload.split("\x00")[1];
         grading_wrapper.classList.remove("hidden");
-        problem_content_wrapper.classList.remove("hidden");
+        check_content_wrapper.classList.remove("hidden");
     }else if(focused_check_obj.type == "chat"){
         problem_id.innerHTML = "#" + focused_check_obj.probid;
         grading_wrapper.classList.add("hidden");
-        problem_content_wrapper.classList.remove("hidden");
+        check_content_wrapper.classList.remove("hidden");
     }else if(focused_check_obj.type == "globalchat"){
         grading_wrapper.classList.add("hidden");
-        problem_content_wrapper.classList.add("hidden");
+        check_content_wrapper.classList.add("hidden");
     }else{
         console.error("Unknown check type: " + focused_check_obj.type);
     }

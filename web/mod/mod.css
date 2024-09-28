@@ -305,7 +305,7 @@
     position: relative;
 }
 
-#check-title{
+#problem-title{
     margin: 0px;
     font-family: 'Lexend';
     font-size: 35px;
@@ -313,7 +313,7 @@
     color: var(--color-secondary-dark);
 }
 
-#check-content{
+#problem-content{
     font-family: 'Lexend';
     font-size: 20px;
     font-weight: 500;
@@ -1084,7 +1084,7 @@
     margin-top: 30px;
 }
 
-#check-id{
+#problem-id{
     position: absolute;
     top: 10px;
     right: 10px;
