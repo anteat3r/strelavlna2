@@ -730,6 +730,7 @@ function graded(probid, correct, money) {
     updateTeamStats();
     updateProblemList();
     updateShop();
+    updateFocusedProblem();
     console.log(probid, correct, money);
 }
 

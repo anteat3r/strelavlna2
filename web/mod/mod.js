@@ -753,7 +753,7 @@ try {
 function grade(checkid, teamid, probid, correct){
     const chat_obj = cached_chats.find(chat => chat.teamid == teamid);
     if(!chat_obj){
-        socket.send(`msgsent\x00${teamid}\x00${chat_obj.chat[0].author}\x00${chat_obj.chat[0].content}`);
+        socket.send(`grade\x00${checkid}\x00${teamid}\x00${probid}\x00${correct ? "yes" : "no"}`);
     }else{
         if(!chat_obj.banned){
             socket.send(`grade\x00${checkid}\x00${teamid}\x00${probid}\x00${correct ? "yes" : "no"}`);
