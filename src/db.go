@@ -733,6 +733,13 @@ func DBAdminView(team string, prob string, sprob bool, schat bool) (text string,
         bres = "yes"
       }
 
+      chlines := strings.Split(teamres.Chat, "\x0a")
+      for _, l := range chlines {
+        line := strings.Split(l, "\x09")
+        if line[1] != prob { continue }
+        chat += l + "\x0a"
+      }
+
       chat = teamres.Chat
       banned = bres
       lastbanned = teamres.LastBanned.String()
