@@ -298,7 +298,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
     _, err = txDao.DB().
       NewQuery("INSERT INTO checks (id, team, prob, type, solution, created, updated) VALUES ({:id}, {:team}, {:prob}, 'sol', {:text}, {:created}, {:updated})").
       Bind(dbx.Params{
-        "id": GetRandomId(),
+        "id": check,
         "prob": prob,
         "text": sol,
         "team": team,
@@ -413,6 +413,7 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
     diff = probres.Diff
     name = probres.Name
     teamname = teamres.Name
+    check = cid
 
     return nil
   })
@@ -733,7 +734,14 @@ func DBAdminView(team string, prob string, sprob bool, schat bool) (text string,
         bres = "yes"
       }
 
-      chat = teamres.Chat
+      chlines := strings.Split(teamres.Chat, "\x0a")
+      for _, l := range chlines {
+        line := strings.Split(l, "\x09")
+        if len(line) <= 1 { continue }
+        if line[1] != prob { continue }
+        chat += l + "\x0a"
+      }
+
       banned = bres
       lastbanned = teamres.LastBanned.String()
     }

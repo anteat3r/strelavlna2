@@ -403,8 +403,7 @@ function updateCheckList(){
                 return;
             }
 
-            // unfocusCheck();
-
+            
             const focused_check_obj = checks.find(check => check.id == focused_check);
             if(focused_check_obj != null){
                 const index = focused_check_obj.focused_by.indexOf(myId);
@@ -412,6 +411,7 @@ function updateCheckList(){
                     focused_check_obj.focused_by.splice(index, 1);
                 }
             }
+            unfocusCheck();
             
             focused_check = this.id;
             updateCheckList();
@@ -676,8 +676,8 @@ function connectWS() {
         solved(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
       break;
       case "questioned":
-        if (msg.length != 8) { cLe() }
-        questioned(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
+        if (msg.length != 9) { cLe() }
+        questioned(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7], msg[8]);
       break;
       case "msgrecd":
         if (msg.length != 4) { cLe() }
@@ -879,12 +879,14 @@ function questioned(checkid, teamid, teamname, probid, probdiff, probname, messa
             id: checkid,
             probid: probid,
             teamid: teamid,
-            assignid: assignid,
+            assignid: assignid.toString(),
             teamname: teamname,
             type: "chat",
             focused_by: []
         }
     );
+
+    console.log(checks);
 
     cached_chats.push(
         {
@@ -914,7 +916,7 @@ function solved(checkid, teamid, probid, assignid, teamname, team_answer, correc
             id: checkid,
             probid: probid,
             teamid: teamid,
-            assignid: assignid,
+            assignid: assignid.toString(),
             teamname: teamname,
             type: "grade",
             team_message: team_answer,
@@ -1040,7 +1042,7 @@ function loaded(data) {
             id: check.id,
             probid: check.probid,
             teamid: check.teamid,
-            assignid: check.assign,
+            assignid: check.assign.toString(),
             teamname: check.teamname,
             type: check.type == "sol" ? "grade" : check.probid == "" ? "globalchat" : "chat", //grade, chat, globalchat
             team_message: check.team_message,
@@ -1048,7 +1050,6 @@ function loaded(data) {
         }
     });
 
-    // console.log(data.checks[2].type =="sol" ? "grade" : data.checks[2].probid == "" ? "globalchat" : "chat");
 
     checks.forEach(check => focusCheck(check.id, check.probid, check.teamid, check.probid != "", true));
     
