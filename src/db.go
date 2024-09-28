@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"maps"
 	"slices"
 	"strings"
@@ -779,15 +780,15 @@ type adminBannedRes struct{
 }
 
 type adminCheckRes struct {
-  Team string `db:"checks.team" json:"teamid"`
-  Prob string `db:"checks.prob" json:"probid"`
-  Diff string `db:"probs.diff" json:"probdiff"`
-  ProbName string `db:"probs.name" json:"probname"`
-  Id string `db:"checks.id" json:"id"`
+  Team string `db:"team" json:"teamid"`
+  Prob string `db:"prob" json:"probid"`
+  Diff string `db:"diff" json:"probdiff"`
+  ProbName string `db:"name" json:"probname"`
+  Id string `db:"id" json:"id"`
   Assign int `json:"assign"`
-  TeamName string `db:"teams.name" json:"teamname"`
-  Type string `db:"checks.type" json:"type"`
-  Solution string `db:"probs.solution" json:"team_message"`
+  TeamName string `db:"teamname" json:"teamname"`
+  Type string `db:"type" json:"type"`
+  Solution string `db:"solution" json:"team_message"`
 }
 
 func DBAdminInitLoad(idx int) (res string, oerr error) {
@@ -801,8 +802,9 @@ func DBAdminInitLoad(idx int) (res string, oerr error) {
 
     checkres := []adminCheckRes{}
     err = txDao.DB().
-      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name, probs.diff, probs.name FROM checks INNER JOIN teams ON teams.id = checks.team INNER JOIN probs ON probs.id = checks.prob").
+      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name AS teamname, probs.diff, probs.name FROM checks INNER JOIN teams ON teams.id = checks.team INNER JOIN probs ON probs.id = checks.prob").
       All(&checkres)
+      // All(&checkres)
     if err != nil { return err }
 
     for i, c := range checkres { checkres[i].Assign = HashId(c.Prob) }
