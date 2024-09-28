@@ -895,6 +895,7 @@
     color: var(--color-secondary-dark);
     margin-left: 30px;
     margin-top: 50px;
+    margin-bottom: 20px;
 }
 
 #progressbar-wrapper{

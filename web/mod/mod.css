@@ -637,6 +637,7 @@
     color: var(--color-secondary-dark);
     margin-left: 30px;
     margin-top: 50px;
+    margin-bottom: 20px;
 }
 
 #progressbar-wrapper{
@@ -1326,7 +1327,7 @@
     flex-wrap: wrap;
     gap: 30px;
     width: 100%;
-    height: 100%;
+    /* height: 100%; */
     justify-content: space-around;
     align-items: flex-start;
     font-family: 'Lexend';
