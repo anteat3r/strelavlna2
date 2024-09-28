@@ -740,7 +740,6 @@ func DBAdminView(team string, prob string, sprob bool, schat bool) (text string,
         chat += l + "\x0a"
       }
 
-      chat = teamres.Chat
       banned = bres
       lastbanned = teamres.LastBanned.String()
     }
