@@ -735,13 +735,13 @@ func DBAdminView(team string, prob string, sprob bool, schat bool) (text string,
       }
 
       chat = ""
-      chlines := strings.Split(teamres.Chat, "\x0a")
+      chlines := strings.Split(teamres.Chat, "\x0b")
       for i, l := range chlines {
         line := strings.Split(l, "\x09")
         if len(line) <= 1 { continue }
         if line[1] != prob { continue }
         chat += line[0] + "\x09" + line[2]
-        if i < len(chlines)-1 { chat += "\x0a" }
+        if i < len(chlines)-1 { chat += "\x0b" }
       }
 
       banned = bres
