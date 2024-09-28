@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"maps"
 	"slices"
 	"strings"
@@ -574,13 +575,16 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
       Bought string `db:"bought"`
       Pending string `db:"pending"`
       Solved string `db:"solved"`
+      Banned bool `db:"banned"`
     }{}
     err := txDao.DB().
-      NewQuery("SELECT money, bought, pending, solved FROM teams WHERE id = {:team} LIMIT 1").
+      NewQuery("SELECT money, bought, pending, solved, banned FROM teams WHERE id = {:team} LIMIT 1").
       Bind(dbx.Params{ "team": team }).
       One(&teamres)
 
     if err != nil { return err }
+
+    if teamres.Banned { return dbErr("grade", "cannost grade while team is banned") }
 
     target := ParseRefList(teamres.Bought)
     tstring := "bought"
@@ -591,7 +595,7 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
     pending := ParseRefList(teamres.Pending)
     pending, found := SliceExclude(pending, prob)
 
-    if !found { return dbErr("solve", "prob not owned") }
+    if !found { return dbErr("grade", "prob not owned") }
 
     target = append(target, prob)
 
@@ -627,10 +631,17 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
 
     if err != nil { return err }
 
-    _, err = txDao.DB().
+    sres, err := txDao.DB().
       NewQuery("DELETE FROM checks WHERE id = {:check}").
       Bind(dbx.Params{ "check": check }).
-      Execute()
+      Rows()
+
+    for sres.Next() {
+      r := make(dbx.NullStringMap)
+      sres.ScanMap(r)
+      fmt.Printf("sdf %v\n", r)
+    }
+    sres.Close()
 
     if err != nil { return err }
 
