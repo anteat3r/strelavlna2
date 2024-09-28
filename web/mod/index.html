@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href='https://fonts.googleapis.com/css?family=Lexend' rel='stylesheet'>
     <link rel="stylesheet" href="../global.css">
-    <link rel="stylesheet" href="../modcenter/modcenter.css">
+    <link rel="stylesheet" href="../mod/mod.css">
     <title>Dopplerova vlna</title>
   </head>
   <body class="">
@@ -99,15 +99,16 @@
       </header>
       <div class="flex flex-row">
         <div id="teams-board">
-            <div id="teams-problems">
-                <div id="content-selector-wrapper">
+            <button id="home-button">Home</button>
+            <div id="checks-wrapper">
+                <!-- <div id="content-selector-wrapper">
                     <button id="content-selector-problems" class="content-selected">
                         <i class="fa-solid fa-list-check"></i>
                     </button>
                     <button id="content-selector-chats">
                         <i class="fa-solid fa-message"></i>
                     </button>
-                </div>
+                </div> -->
                 <div class="problem problem-focused problem-worked-on">
                     <div class="flex flex-row align-center">
                         <h2 class="problem-title">Lyžař</h2>
@@ -131,12 +132,12 @@
                 </div>
             </div>
         </div>
-        <div id="problem-wrapper">
+        <div id="check-wrapper" class="">
             <div id="team-name-wrapper">
                 <h2 id="team-name">Cream team</h2>
                 <p id="team-id">#j9zq7xjej6pyi53</p>
             </div>
-            <div id="problem-content-wrapper">
+            <div id="check-content-wrapper">
                 <p id="problem-id">#j9zq7xjej6pyi53</p>
                 <h2 id="problem-title">Lyžař [A]</h2>
                 <p id="problem-content">Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?</p>
@@ -156,9 +157,70 @@
                 </div>
             </div>
         </div>
+        <div id="mod-home-wrapper" class="hidden">
+            <div class="flex flex-column" style="height: 100%;">
+                <h2 style="margin-left: 40px; margin-bottom: 0px;">Role:</h2>
+                <div id="role-wrapper">
+                    <button class="role-selector-item" id="role-worker">
+                        <h2>Worker</h2>
+                        <p>Základní oprava úloh a chat</p>
+                    </button>
+                    <button class="role-selector-item" id="role-manager">
+                        <h2>Manager</h2>
+                        <p>Správa obecných informací</p>
+                    </button>
+                    <button class="role-selector-item" id="role-admin">
+                        <h2>Admin</h2>
+                        <p>Veškeré pravomoce</p>
+                    </button>
+                </div>
+                <div id="commands-wrapper">
+                    <p class="team-stats-paragraph">Průběh soutěže . . . .</p>
+                        <div id="progressbar-wrapper">
+                            <div id="progressbar-background-wrapper">
+                                <div class="progressbar-background-first"></div>
+                                <div class="progressbar-background"></div>
+                                <div class="progressbar-background"></div>
+                                <div class="progressbar-background-last"></div>
+                            </div>
+                            <div id="progressbar-foreground"></div>
+                            <div id="progressbar-cursor-wrapper">
+                                <p id="progressbar-percentage">32 %</p>
+                                <div id="triangle-down"></div>
+                                <div id="progressbar-cursor-spacer"></div>
+                                <div id="triangle-up"></div>
+                                <p id="progressbar-time-passed">0:38:03</p>
+                            </div>
+                        </div>
+                    <div id="nobody-commands" class="hidden">
+                        <h2>Tady se zobrazí pravomoce</h2>
+                    </div>
+                    <div id="worker-commands" class="hidden">
+                        <h2>Worker nemá žádné rozšiřující pravomoce</h2>
+                    </div>
+                    <div id="administrator-commands" class="">
+                        <div id="global-info-textfield-wrapper">
+                            <h2 id="global-info-title">Informace</h2>
+                            <div class="flex center-content">
+                                <textarea type="text" id="global-info-textfield" placeholder="Zadejte novou informaci"></textarea>
+                                <button id="global-info-submit"><i class="fa-solid fa-angle-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="help-center-wrapper">
-            <div id="help-center-title-wrapper">
-                <h2 id="help-center-title">Technická podpora</h2>
+            <div id="help-center-title-wrapper" class="">
+                <h2 id="help-center-title">Podpora</h2>
+                <button id="help-center-mute-button" class="chat-button-muted-">
+                    <i class="fa-solid fa-comment-slash mute-icon"></i>
+                    <i class="fa-solid fa-comment unmute-icon"></i>
+                    <div id="chat-mute-sliter"></div>
+                </button>
+                <p id="chat-loading-info">Načítání...</p>
+                <!-- <button id="help-center-mute-button" class="chat-button-muted"><i class="fa-solid fa-comment-slash"></i></button> -->
+                
             </div>
             <div id="chat-wrapper">
                 <div id="conversation-wrapper">
@@ -212,8 +274,8 @@
   </body>
   <!-- <script src="loading_animation.js"></script>
     <script src="login.js"></script> -->
-    <script src="../modcenter/dynamic_height.js"></script>
-    <script src="../modcenter/modcenter.js"></script>
+    <script src="../mod/dynamic_height.js"></script>
+    <script src="../mod/mod.js"></script>
     
   
 </html>

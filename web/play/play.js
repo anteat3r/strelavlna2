@@ -10,12 +10,14 @@ var team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "
 var problems_solved = 12;
 var problems_sold = 3;
 var global_chat = [];
+var seen_global_chat = true;
+var menu_focused_by = [];
 var problems = [];
 var myId = "";
 var chat_banned = false;
 
 //local states
-var focused_problem = "";
+var focused_check = "";
 
 const buy_button_wrapper = document.getElementById("buy-button-wrapper");
 const buy_button = document.getElementById("buy-button");
@@ -43,7 +45,7 @@ document.getElementById("send-message-button").addEventListener("click", functio
     if(chat_banned) return;
     const chat_input = document.getElementById("chat-input");
     if(chat_input.value.length > 200 || chat_input.value.length == 0) return;
-    sendMsg(focused_problem, chat_input.value);
+    sendMsg(focused_check, chat_input.value);
     chat_input.value = "";
 });
 
@@ -77,8 +79,9 @@ buy_button.addEventListener("click", function(){
 });
 
 document.getElementById("team-stats").addEventListener("click", function(){
-    unfocusProb(focused_problem);
-    focused_problem = "";
+    unfocusProb();
+    focusProb("");
+    focused_check = "";
     updateFocusedProblem();
     updateChat();
     updateProblemList();
@@ -89,12 +92,12 @@ document.getElementById("team-stats").addEventListener("click", function(){
 });
 
 document.getElementById("submit-answer-button").addEventListener("click", function(){
-    const answer_obj = problems.find(prob => prob.id == focused_problem);
+    const answer_obj = problems.find(prob => prob.id == focused_check);
     if(answer_obj != null && !answer_obj.pending){
         const answer_input = document.getElementById("answer-input");
         if(answer_input.value != ""){
             answer_obj.pending = true;
-            solveProb(focused_problem, answer_input.value);
+            solveProb(focused_check, answer_input.value);
             answer_input.value = "";
             updateFocusedProblem();
         }
@@ -111,7 +114,7 @@ function updateShop(){
             button.classList.add("subbuy-disabled");
         }
     });
-    const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
+    const focused_problem_obj = problems.find(prob => prob.id == focused_check);
     const sell_information = document.getElementById("sell-information");
     if(focused_problem_obj != null){
         if(focused_problem_obj.pending){
@@ -143,7 +146,7 @@ function updateShop(){
 
 function updateTeamStats(){
     document.getElementById("team-name").innerHTML = team_name;
-    document.getElementById("rank").innerHTML = team_rank;
+    document.getElementById("rank-number").innerHTML = team_rank;
     document.getElementById("team-balance").innerHTML = team_balance + " DC"
     document.getElementById("team-stats-main-title").innerHTML = team_name;
     document.getElementById("team-stats-main-balance").innerHTML = team_balance + " DC";
@@ -184,7 +187,7 @@ function updateProblemList(){
     problems_wrapper.innerHTML = "";
     for(prob of problems){
         problems_wrapper.innerHTML +=
-        `<div class="problem ${focused_problem == prob.id ? "problem-focused" : ""} ${prob.focused_by.length > (focused_problem == prob.id ? 1 : 0) ? "problem-worked-on" : ""} ${!prob.seen_chat ? "unseen-chat" : ""} ${prob.pending ? "problem-pending" : ""}" id="${prob.id}">
+        `<div class="problem ${focused_check == prob.id ? "problem-focused" : ""} ${prob.focused_by.length > (focused_check == prob.id ? 1 : 0) ? "problem-worked-on" : ""} ${!prob.seen_chat ? "unseen-chat" : ""} ${prob.pending ? "problem-pending" : ""}" id="${prob.id}">
             <div class="flex flex-row align-center">
                 <h2 class="problem-title"${prob.title.length > 12 ? `style="font-size: 15px"` : ""}>${prob.title}</h2>
                 <h2 class="problem-rank">[${prob.rank}]</h2>
@@ -196,13 +199,13 @@ function updateProblemList(){
     const problems_buttons = document.getElementById("teams-problems").getElementsByClassName("problem");
     for(const button of problems_buttons){
         button.addEventListener("click", function(){
-            if(focused_problem == this.id){
+            if(focused_check == this.id){
                 return;
             }
-            if(focused_problem != ""){
-                unfocusProb(focused_problem);
-            }
-            const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
+
+            unfocusProb();
+
+            const focused_problem_obj = problems.find(prob => prob.id == focused_check);
             if(focused_problem_obj != null){
                 const index = focused_problem_obj.focused_by.indexOf(myId);
                 if (index > -1) {
@@ -210,12 +213,12 @@ function updateProblemList(){
                 }
             }
             
-            focused_problem = this.id;
+            focused_check = this.id;
             updateProblemList();
             updateChat();
             updateFocusedProblem();
             updateShop();
-            focusProb(focused_problem);
+            focusProb(focused_check);
             document.getElementById("team-stats").classList.remove("team-stats-selected");
             problem_wrapper.classList.remove("hidden");
             team_stats_main_wrapper.classList.add("hidden");
@@ -227,15 +230,15 @@ function updateProblemList(){
 }
 
 function updateFocusedProblem(){
-    if(focused_problem == "" || !problems.some(prob => prob.id == focused_problem)){
-        focused_problem = "";
+    if(focused_check == "" || !problems.some(prob => prob.id == focused_check)){
+        focused_check = "";
         problem_wrapper.classList.add("hidden");
         team_stats_main_wrapper.classList.remove("hidden");
         return;
     }
     const problem_title = document.getElementById("problem-title");
     const problem_content = document.getElementById("problem-content");
-    const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
+    const focused_problem_obj = problems.find(prob => prob.id == focused_check);
     problem_title.innerHTML = focused_problem_obj.title + " [" + focused_problem_obj.rank + "]";
     problem_content.innerHTML = focused_problem_obj.problem_content;
     const answer_input_wrapper = document.getElementById("answer-input-wrapper");
@@ -254,6 +257,7 @@ function updateFocusedProblem(){
 }
 
 function updateChat(){
+    console.log(menu_focused_by);
     if(chat_banned){
         document.getElementById("help-center-wrapper").classList.add("chat-banned");
         document.getElementById("chat-banned-info").classList.remove("hidden");
@@ -263,8 +267,20 @@ function updateChat(){
     }
     const conversation_wrapper = document.getElementById("conversation-wrapper");
     conversation_wrapper.innerHTML = "";
-    if(focused_problem == "" || !problems.some(prob => prob.id == focused_problem)){
-        focused_problem = "";
+
+    if(menu_focused_by.length > 0){
+        seen_global_chat = true;
+    }
+    if(seen_global_chat){
+        document.getElementById("seen-global-chat-icon").classList.add("hidden");
+        document.getElementById("rank-number").classList.remove("hidden");
+    }else{
+        document.getElementById("seen-global-chat-icon").classList.remove("hidden");
+        document.getElementById("rank-number").classList.add("hidden");
+    }
+
+    if(focused_check == "" || !problems.some(prob => prob.id == focused_check)){
+        focused_check = "";
         for(const message of global_chat){
             conversation_wrapper.innerHTML += 
             `<div class="conversation-row ${message.author == "team" ? "message-my" : "message-their"}">
@@ -273,12 +289,13 @@ function updateChat(){
         }
         return;
     }
-    for(const message of problems.find(prob => prob.id == focused_problem).chat){
+    for(const message of problems.find(prob => prob.id == focused_check).chat){
         conversation_wrapper.innerHTML += 
         `<div class="conversation-row ${message.author == "team" ? "message-my" : "message-their"}">
             <p class="conversation-message">${message.content}</p>
         </div>`
     }
+    
     conversation_wrapper.scrollTop = conversation_wrapper.scrollHeight;
 }
 
@@ -404,13 +421,13 @@ function buyProblem(rank){
 }
 
 function sellProblem(){
-    if(!focused_problem || !problems.some(prob => prob.id == focused_problem) || problems.find(prob => prob.id == focused_problem).pending || clock_zeroed) return;
+    if(!focused_check || !problems.some(prob => prob.id == focused_check) || problems.find(prob => prob.id == focused_check).pending || clock_zeroed) return;
     const confirm_dialog = document.getElementById("confiramtion-dialog-bg");
     confirm_dialog.style.display = "block";
-    const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
+    const focused_problem_obj = problems.find(prob => prob.id == focused_check);
     document.getElementById("confirm-dialog-content").innerHTML = `Opravdu chcete prodat úlohu:<br><span class="bold">${focused_problem_obj.title}</span> za <span class="bold">${focused_problem_obj.rank == "A" ? 5 : focused_problem_obj.rank == "B" ? 10 : 15}</span> DC?`;
     document.getElementById("confirm-dialog-ok").addEventListener("click", function(){
-        sellProb(focused_problem);
+        sellProb(focused_check);
 
         confirm_dialog.style.display = "none";
         document.getElementById("confirm-dialog-ok").removeEventListener("click", arguments.callee);
@@ -440,12 +457,6 @@ function update(){
         }
         updateClock(remaining, passed);
     }
-
-
-
-
-
-
 
 }
 
@@ -518,9 +529,11 @@ function connectWS() {
         break;
       case "banned" :
         chat_banned = true;
+        updateChat();
         break;
       case "unbanned" :
         chat_banned = false;
+        updateChat();
         break;
       case "err":
         console.log(msg)
@@ -563,7 +576,7 @@ function focusProb(id) { //done
 
 /** @param {string} id */
 function unfocusProb() { //done
-    const focused_problem_obj = problems.find(prob => prob.id == focused_problem);
+    const focused_problem_obj = problems.find(prob => prob.id == focused_check);
     if(focused_problem_obj != null){
         const index = focused_problem_obj.focused_by.indexOf(myId);
         if (index > -1) {
@@ -587,6 +600,7 @@ function load() {
 function msgRecieved(id, msg) {
   if(id == "") {
     global_chat.push({author: "support", content: msg});
+    seen_global_chat = false;
     updateChat();
   } else {
     const problem = problems.find(prob => prob.id == id);
@@ -669,6 +683,15 @@ function probSolved(id, solution) {
 /** @param {string} idx
  * @param {string} id */
 function probFocused(id, idx) {
+    if(id == ""){
+        if(!menu_focused_by.includes(idx)){
+            menu_focused_by.push(idx);
+        }
+        seen_global_chat = true;
+        updateProblemList();
+        updateChat();
+        return;
+    }
     const problem = problems.find(prob => prob.id == id);
     console.log(id);
     if(!problem.focused_by.includes(idx)){
@@ -681,18 +704,15 @@ function probFocused(id, idx) {
  * @param {string} id */
 function probUnfocused(idx) {
     problems.forEach(prob => prob.focused_by = prob.focused_by.filter(focused => focused != idx));
+    menu_focused_by = menu_focused_by.filter(focused => focused != idx);
     updateProblemList();    
 }
   
 function focusCheck(){
-    if(!problems.some(prob => prob.id == focused_problem)){
-        focused_problem = "";
+    if(!problems.some(prob => prob.id == focused_check)){
+        focused_check = "";
     }
-    if(focused_problem == ""){
-        unfocusProb();
-    }else{
-        focusProb(focused_problem);
-    }
+    focusProb(focused_check);
 }
 
 /** @param {string} probid
@@ -780,7 +800,7 @@ function loaded(data) {
     // console.log(problems[0].chat);
     updateProblemList();
     updateShop();
+    updateFocusedProblem();
     updateTeamStats();
     updateChat();
-    updateFocusedProblem();
 }

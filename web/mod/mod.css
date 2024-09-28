@@ -147,6 +147,11 @@
     margin-top: 0px;
     width: 300px;
     min-width: 300px;
+    border-top: 2px var(--color-black-light) solid;
+    border-right: 2px var(--color-black-light) solid;
+    border-top-right-radius: 10px;
+    background-color: var(--color-black-white);
+    overflow-y: auto;
 }
 #team-stats{
     display: flex;
@@ -194,15 +199,12 @@
     margin: 10px;
 }
 
-#teams-problems{
-    border-top: 2px var(--color-black-light) solid;
-    border-right: 2px var(--color-black-light) solid;
-    border-top-right-radius: 10px;
-    background-color: var(--color-black-white);
-    overflow-y: auto;
+#checks-wrapper{
+    height: 100%;
+    
 }
 
-.problem{
+.check{
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -216,19 +218,19 @@
     cursor: pointer;
     user-select: none;
 }
-.problem:hover{
+.check:hover{
     background-color: var(--color-secondary-dark);
     border-color: var(--color-black);
     transition: background-color border-color 0s;
 }
-.problem-focused{
+.check-focused{
     background-color: var(--color-secondary-dark);
 }
-/* .problem-focused:hover{
+/* .check-focused:hover{
     background-color: var(--color-black);
     border-color: var(--color-black-light);
 } */
-.problem-title{
+.check-title{
     margin: 0px;
     font-family: 'Lexend';
     font-size: 25px;
@@ -238,14 +240,14 @@
     transition: color 0.3s ease-out;
 
 }
-.problem:hover .problem-title{
+.check:hover .check-title{
     color: white;
     transition: color 0s;
 }
-.problem-focused .problem-title{
+.check-focused .check-title{
     color: white;
 }
-.problem-rank{
+.check-rank{
     font-family: 'Lexend';
     font-size: 20px;
     font-weight: 800;
@@ -254,15 +256,15 @@
     transition: color 0.3s ease-out;
     transform: translateY(-2px);
 }
-.problem:hover .problem-rank{
+.check:hover .check-rank{
     color: white;
     transition: color 0s;
 }
-.problem-focused .problem-rank{
+.check-focused .check-rank{
     color: white;
 }
 
-.problem-pending{
+.check-pending{
     border-style: dashed !important;
 }
 
@@ -283,19 +285,19 @@
     background-color: #1bd35b;
     display: block;
 }
-.problem:hover .occupied-icon{
+.check:hover .occupied-icon{
     background-color: white;
     transition: background-color 0s;
 }
-.problem-focused .occupied-icon{
+.check-focused .occupied-icon{
     background-color: white;
 }
-.problem-worked-on .occupied-icon{
+.check-worked-on .occupied-icon{
     display: block;
 }
 
 
-#problem-wrapper{
+#check-wrapper{
     padding: 30px;
     padding-inline: 70px;
     position: relative;
@@ -356,6 +358,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 20px;
 }
 
 #help-center-title{
@@ -554,7 +557,7 @@
     transition: opacity 0.3s ease-out;
 }
 
-#team-stats-main-wrapper{
+#stats-wrapper{
     width: 100%;
     margin: 40px;
     margin-inline: 80px;
@@ -676,7 +679,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    background-color: var(--color-secondary-light);
+    background-color: var(--color-secondary-dark);
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     /* width: 32%; */
@@ -775,6 +778,21 @@
     margin-top: 0px;
     transform: translateX(25px);
 }
+
+#global-info-title{
+    font-family: 'Lexend';
+    font-size: 35px;
+    font-weight: 500;
+    letter-spacing: 8px;
+    color: var(--color-secondary-dark);
+    border-bottom: 2px var(--color-secondary-dark) dashed;
+    padding-bottom: 15px;
+    width: 350px;
+    text-align: center;
+    margin-bottom: 5px;
+    margin-top: 0px;
+}
+
 #price-list-items-wrapper{
     border-spacing: 0 15px;
 }
@@ -1057,7 +1075,7 @@
     user-select: none;
 }
 
-#problem-content-wrapper{
+#check-content-wrapper{
     position: relative;
     padding: 30px;  
     padding-top: 20px;
@@ -1096,6 +1114,7 @@
     align-items: center;
     justify-content: space-between;
     border-bottom: 2px var(--color-black) dotted;
+    background-image: linear-gradient(to top, rgba(255, 221, 158, 0.267), transparent);
 }
 #team-answer{
     margin: 0px;
@@ -1116,6 +1135,8 @@
     align-items: center;
     justify-content: space-between;
     padding-top: 5px;
+    background-image: linear-gradient(to bottom, rgba(161, 255, 158, 0.281), transparent);
+
 }
 #correct-answer{
     margin: 0px;
@@ -1163,4 +1184,330 @@
     text-align: center;
     padding: 0px;
     border-radius: 5px;
+}
+
+#home-button{
+    margin-top: 10px;
+    width: calc(100% - 30px);
+    height: 30px;
+    padding: 0px;
+    margin-inline: 15px;
+    font-family: 'Lexend';
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 5px;
+    color: var(--color-black);
+    transition: all 0.3s ease-out;
+}
+#home-button:hover{
+    background-color: var(--color-secondary-dark);
+    color: var(--color-secondary-white);
+    transition: all 0.0s;
+
+}
+
+.home-selected#home-button{
+    background-color: var(--color-secondary-dark);
+    color: var(--color-secondary-white);
+}
+
+#mod-home-wrapper{
+    width: 100%;
+    margin: 50px;
+    margin-inline: 80px;
+    border-radius: 10px;
+    background-color: var(--color-black-white);
+    padding: 30px;
+}
+
+#role-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-top: 20px;
+    padding-bottom: 20px;
+    border-bottom: 2px var(--color-black-glow) dashed;
+}
+.role-selector-item{
+    padding: 15px;
+    /* border: 2px white solid; */
+    background-color: var(--color-black-white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    border-radius: 10px;
+    transition: background-color 0.3s ease-out;
+}
+.role-selector-item:hover{
+    background-color: var(--color-secondary-dark);
+    transition: background-color 0.0s;
+}
+
+
+
+.role-selector-item h2{
+    border-bottom: var(--color-black-glow) 1px dashed;
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0px;
+    padding-inline: 15px;
+    padding-bottom: 5px;
+    color: var(--color-black);
+    transition: all 0.3s ease-out;
+}
+.role-selector-item:hover h2{
+    border-bottom: var(--color-secondary-white) 1px dashed;
+    color: var(--color-secondary-white);
+    transition: all 0.0s;
+}
+
+
+.role-selector-item p{
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-black-white);
+    margin-top: 20px;
+}
+.role-selected{
+    background-color: var(--color-secondary-dark);
+    transition: background-color 0.0s;
+}
+.role-selected h2{
+    border-bottom: var(--color-secondary-white) 1px dashed;
+    color: var(--color-secondary-white);
+    transition: all 0.0s;
+}
+
+#commands-wrapper{
+    height: 100%;
+    width: 100%;
+}
+
+#nobody-commands{
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Lexend';
+}
+#worker-commands{
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Lexend';
+}
+
+#administrator-commands{
+    padding-top: 80px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 30px;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    align-items: flex-start;
+    font-family: 'Lexend';
+}
+
+#global-info-textfield-wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items:center;
+    gap: 20px;
+}
+#global-info-textfield{
+    width: 300px;
+    height: 100px;
+    font-family: 'Lexend';
+    font-size: 15px;
+    font-weight: 500;
+    border: var(--color-black-glow) 2px solid;
+    border-radius: 5px;;
+    outline: none;
+    resize: none;
+    transition: border-color 0.3s ease-out;
+}
+
+#global-info-textfield:focus{
+    border-color: var(--color-secondary-dark);
+    transition: border-color 0.0s;
+}
+
+#global-info-submit{
+    margin-left: 5px;
+    height: 30px;
+    width: 30px;
+    border-radius: 5px;
+    text-align: center;
+    padding: 0px;
+    background-color: var(--color-secondary-dark);
+    color: var(--color-secondary-white);
+}
+.price-list-a-input{
+    outline: none;
+    width: 30px;
+    height: 30px;
+    border: 2px #30cf7e solid;
+    border-radius: 5px;
+    background-color: #98ffca;
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 500;
+    text-align: center;
+    color: #30cf7e;
+}
+
+.price-list-b-input{
+    outline: none;
+    width: 30px;
+    height: 30px;
+    border: 2px #3eb1df solid;
+    border-radius: 5px;
+    background-color: #88ddff;
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 500;
+    text-align: center;
+    color: #3eb1df;
+}
+
+
+.price-list-c-input{
+    outline: none;
+    width: 30px;
+    height: 30px;
+    border: 2px #e45528 solid;
+    border-radius: 5px;
+    background-color: #ffaa90;
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 500;
+    text-align: center;
+    color: #e45528;
+}
+#pric-list-and-submit-wrapper{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+#price-list-submit{
+    height: 30px;
+    width: 30px;
+    padding: 0px;
+    border-radius: 5px;
+    text-align: center;
+    background-color: var(--color-secondary-dark);
+    color: var(--color-secondary-white);
+}
+
+#help-center-mute-button{
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 30px;
+    width: 60px;
+    border-radius: 5px;
+    background-color: white;
+    color: white;
+    font-size: 15px;
+    text-align: center;
+    padding: 0px;
+    border: 2px var(--color-black) solid;
+}
+
+.chat-loading #help-center-mute-button{
+    display: none;
+}
+
+#chat-loading-info{
+    display: none;
+    font-family: 'Lexend';
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-black-glow);
+}
+
+.chat-loading #chat-loading-info{
+    display: block;
+}
+
+
+.mute-icon{
+    color: var(--color-black);
+    z-index: 1;
+    height: 28px;
+    width: 28px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.1s ease-out;
+}
+
+.unmute-icon{
+    color: #0bb258;
+    z-index: 1;
+    height: 28px;
+    width: 28px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.1s ease-out;
+}
+
+.chat-button-muted .mute-icon{
+    color: #e62a2a;
+    transition: color 0.1s ease-out;
+}
+.chat-button-muted .unmute-icon{
+    color: var(--color-black);
+    transition: color 0.1s ease-out;
+}
+
+#chat-mute-sliter{
+    position: absolute;
+    z-index: 0;
+    height: 30px;
+    width: 30px;
+    background-color: var(--color-black);
+    border-radius: 5px;
+    transform: translateX(26px);
+    transition: transform 0.1s ease-out;
+}
+
+.chat-button-muted #chat-mute-sliter{
+    transform: translateX(0px);
+    transition: transform 0.1s ease-out;
+}
+
+#grade-checks-title{
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-black);
+    margin: 0px;
+    text-align: center;
+    margin-top: 25px;
+}
+
+#chat-checks-title{
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-black);
+    margin: 0px;
+    text-align: center;
+    margin-top: 25px;
 }

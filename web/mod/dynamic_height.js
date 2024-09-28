@@ -1,5 +1,5 @@
 function adjustDivHeight() {
-    const div = document.getElementById('teams-problems');
+    const div = document.getElementById('teams-board');
     const chat_wrapper = document.getElementById("chat-wrapper");   
     const conversation_wrapper = document.getElementById("conversation-wrapper");
 
