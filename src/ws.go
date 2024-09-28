@@ -2,12 +2,14 @@ package src
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/google/martian/v3/log"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/daos"
@@ -75,6 +77,30 @@ func AdminSend(msg... string) {
     ch<- resmsg
   }
   adminsMutex.RUnlock()
+}
+
+func AdminSendIdx(idx int, msg... string) {
+  resmsg := strings.Join(msg, DELIM)
+  adminsMutex.RLock()
+  defer adminsMutex.RUnlock()
+  if len(AdminsChans) >= idx || idx < 0 {
+    fmt.Printf("admin invalid index %v, %v\n", idx, AdminsChans)
+    return
+  }
+  if AdminsChans[idx] != nil {
+    AdminsChans[idx]<- resmsg
+    return
+  }
+  i := 0
+  for _, ch := range AdminsChans {
+    if ch == nil { continue }
+    if i == idx {
+      ch<- resmsg
+      return
+    }
+    i++
+  }
+  fmt.Printf("admin indx not found %v, %v\n", idx, AdminsChans)
 }
 
 func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {

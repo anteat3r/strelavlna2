@@ -334,24 +334,32 @@ func DBView(team string, prob string) (text string, diff string, name string, oe
   return
 }
 
-func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
+func DBPlayerMsg(team string, prob string, msg string) (teamname string, name string, diff string, checku string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    banres := struct{
+    teamres := struct{
       Banned bool `db:"banned"`
+      Name string `db:"name"`
+      Bought string `db:"bought"`
+      Pending string `db:"pending"`
     }{}
     err := txDao.DB().
-      NewQuery("UPDATE teams SET chat = CONCAT(chat, 'p', CHAR(9), {:prob}, CHAR(9), {:text}, CHAR(11)) WHERE id = {:team} RETURNING banned").
+      NewQuery("UPDATE teams SET chat = CONCAT(chat, 'p', CHAR(9), {:prob}, CHAR(9), {:text}, CHAR(11)) WHERE id = {:team} RETURNING banned, name, bought, pending").
       Bind(dbx.Params{
         "prob": prob,
         "text": msg,
         "team": team,
       }).
-      One(&banres)
+      One(&teamres)
 
     if err != nil { return err }
 
-    if banres.Banned { return dbClownErr("chat", "banned") }
+    if teamres.Banned { return dbClownErr("chat", "banned") }
+
+    if !slices.Contains(ParseRefList(teamres.Bought), prob) &&
+       !slices.Contains(ParseRefList(teamres.Pending), prob) {
+      return dbErr("prob not owned")
+    }
     
     res := []struct{
       Id string `db:"id"`
@@ -366,7 +374,10 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
       All(&res)
     if err != nil { return err }
     
-    if len(res) == 1 { return nil }
+    if len(res) == 1 {  
+      checku = res[0].Id
+      return nil
+    }
 
     _, err = txDao.DB().
     NewQuery("INSERT INTO checks (id, team, prob, type, solution, created, updated) VALUES ({:id}, {:team}, {:prob}, 'msg', {:text}, {:created}, {:updated})").
@@ -380,7 +391,22 @@ func DBPlayerMsg(team string, prob string, msg string) (oerr error) {
       }).
       Execute()
 
+    probres := struct{
+      Diff string `db:"diff"`
+      Name string `db:"name"`
+    }{}
+    err = txDao.DB().
+      NewQuery("SELECT diff, name FROM probs WHERE id = {:id} LIMIT 1").
+      Bind(dbx.Params{
+        "id": team,
+      }).
+      All(&res)
+
     if err != nil { return err }
+
+    diff = probres.Diff
+    name = probres.Name
+    teamname = teamres.Name
 
     return nil
   })
@@ -649,7 +675,7 @@ func DBAdminDismiss(check string) (team string, prob string, oerr error) {
   return
 }
 
-func DBAdminView(prob string) (text string, sol string, oerr error) {
+func DBAdminView(team string, prob string) (text string, sol string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     probres := struct{
@@ -660,6 +686,18 @@ func DBAdminView(prob string) (text string, sol string, oerr error) {
       NewQuery("SELECT text, solution FROM probs WHERE id = {:prob} LIMIT 1").
       Bind(dbx.Params{ "prob": prob }).
       One(&probres)
+
+    if err != nil { return err }
+
+    teamres := struct{
+      Chat string `db:"chat"`
+      Banned bool `db:"banned"`
+      LastBanned types.DateTime `db:"last_banned"`
+    }{}
+    err = txDao.DB().
+      NewQuery("SELECT chat, banned, last_banned FROM teams WHERE id = {:team} LIMIT 1").
+      Bind(dbx.Params{ "team": team }).
+      One(&teamres)
 
     if err != nil { return err }
 
@@ -704,19 +742,76 @@ func DBAdminUnBan(team string) (oerr error) {
   return
 }
 
-func DBAdminInitLoad() (oerr error) {
+type adminInitLoad struct {
+  Checks []adminCheckRes `json:"checks"` 
+  Idx int `json:"idx"`
+  OnlineRound int64 `json:"online_round"`
+  OnlineRoundEnd int64 `json:"online_round_end"`
+  Banned []adminBannedRes `json:"banned"`
+}
+
+type adminBannedRes struct{
+  Id string `db:"id" json:"id"`
+  LastBanned string `db:"last_banned" json:"lastbanned"`
+}
+
+type adminCheckRes struct {
+  Team string `db:"checks.team" json:"teamid"`
+  Prob string `db:"checks.prob" json:"probid"`
+  Diff string `db:"probs.diff" json:"probdiff"`
+  ProbName string `db:"probs.name" json:"probname"`
+  Id string `db:"checks.id" json:"id"`
+  Assign int `json:"assign"`
+  TeamName string `db:"teams.name" json:"teamname"`
+  Type string `db:"checks.type" json:"type"`
+  Solution string `db:"probs.solution" json:"payload"`
+}
+
+func DBAdminInitLoad(idx int) (res string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    banresr := []struct{ Id string `db:"id"` }{}
+    banres := []adminBannedRes{}
     err := txDao.DB().
-      NewQuery("SELECT id FROM teams WHERE banned = TRUE").
-      All(&banresr)
+      NewQuery("SELECT id, last_banned FROM teams WHERE banned = TRUE").
+      All(&banres)
     if err != nil { return err }
 
-    banres := make([]string, len(banresr))
-    for i := range banresr { banres[i] = banresr[i].Id }
+    checkres := []adminCheckRes{}
+    err = txDao.DB().
+      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name, probs.diff, probs.name FROM checks INNER JOIN teams ON teams.id = checks.team INNER JOIN probs ON probs.id = checks.prob").
+      All(&checkres)
+    if err != nil { return err }
 
+    for i, c := range checkres { checkres[i].Assign = HashId(c.Prob) }
 
+    ActiveContestMu.RLock()
+    ac := ActiveContest
+    ActiveContestMu.RUnlock()
+
+    contres := struct{
+      OnlineRound types.DateTime `db:"online_round"`
+      OnlineRoundEnd types.DateTime `db:"online_round_end"`
+    }{}
+    err = txDao.DB().
+      NewQuery("SELECT online_round, online_round_end FROM contests WHERE id = {:contest} LIMIT 1").
+      Bind(dbx.Params{ "contest": ac }).
+      One(&contres)
+
+    ordelta := contres.OnlineRound.Time().Sub(time.Now()).Milliseconds()
+    oredelta := contres.OnlineRoundEnd.Time().Sub(time.Now()).Milliseconds()
+
+    resr := adminInitLoad{
+      Checks: checkres,
+      Idx: idx,
+      OnlineRound: ordelta,
+      OnlineRoundEnd: oredelta,
+      Banned: banres,
+    }
+
+    resb, err := json.Marshal(resr)
+    if err != nil { return err }
+
+    res = string(resb)
 
     return nil
   })
