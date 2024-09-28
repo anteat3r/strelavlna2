@@ -242,7 +242,7 @@ func DBBuyOld(team string, diff string) (id string, money int, name string, text
   return dbBuySrc(team, diff, "solved")
 }
 
-func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, csol string, oerr error) {
+func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, csol string, updated bool, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -293,6 +293,24 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
       Execute()
 
     if err != nil { return err }
+
+    ucres := []struct{
+      Id string `db:"id"`
+    }{}
+    err = txDao.DB().
+      NewQuery("UPDATE checks SET solution = {:text}, type = 'sol' WHERE team = {:team} AND prob = {:prob} RETURNING id").
+      Bind(dbx.Params{
+        "text": sol,
+        "team": team,
+        "prob": prob,
+      }).
+      All(&ucres)
+
+    if len(ucres) >= 1 {
+      updated = true
+      check = ucres[0].Id
+      return nil
+    }
 
     check = GetRandomId()
     _, err = txDao.DB().
@@ -369,16 +387,15 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
       Id string `db:"id"`
     }{}
     err = txDao.DB().
-      NewQuery("UPDATE checks SET solution = {:text} WHERE team = {:team} AND prob = {:prob} AND type = 'msg' RETURNING id").
+      NewQuery("SELECT id FROM checks WHERE team = {:team} AND prob = {:prob}").
       Bind(dbx.Params{
         "prob": prob,
-        "text": msg,
         "team": team,
       }).
       All(&res)
     if err != nil { return err }
     
-    if len(res) == 1 {  
+    if len(res) >= 1 {  
       check = res[0].Id
       upd = true
       return nil
