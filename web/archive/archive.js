@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
   const yearButtons = document.querySelectorAll(".year-button");
   const yearTitles = document.querySelectorAll(".year-title");
-  const mediaQuery = window.matchMedia("(max-width: 1100px)");
+  const mediaQuery = window.matchMedia("(max-width: 1000px)");
 
   function handleDesktopFeatures() {
     let activeButton = yearButtons[0];
