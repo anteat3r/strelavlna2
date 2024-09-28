@@ -726,6 +726,10 @@ function connectWS() {
         if (msg.length != 2) { cLe() }
         unbanned(msg[1]);
         break;
+      case "upgraded":
+        if (msg.length != 4) { cLe() }
+        upgraded(msg[1], msg[2], msg[3]);
+        break;
       case "err":
         console.log(msg)
       break;
@@ -822,6 +826,20 @@ function load() {
   socket.send("load");
 }
 
+
+
+
+
+function upgraded(checkid, answer, assignid){
+    const check_obj = checks.find(check => check.id == checkid);
+    check_obj.team_answer = answer;
+    check_obj.type = "grade";
+    check_obj.assignid = assignid;
+    updateCheckList();
+}
+
+
+
 /**
  * Store a problem in the cache of viewed problems
  * @param {string} probid - ID of the problem
@@ -881,27 +899,32 @@ function questioned(checkid, teamid, teamname, probid, probdiff, probname, messa
             teamid: teamid,
             assignid: assignid.toString(),
             teamname: teamname,
-            type: "chat",
+            type: probid == "" ? "globalchat" : "chat",
             focused_by: []
         }
     );
 
     console.log(checks);
-
-    cached_chats.push(
-        {
-            probid: probid,
-            teamid: teamid,
-            seen_chat: false,
-            banned: false,
-            chat: [
-                {
-                    author: "team",
-                    content: message
-                }
-            ]
-        }
-    )
+    if(!cached_chats.some(chat => chat.probid == probid && chat.teamid == teamid)){
+        cached_chats.push(
+            {
+                probid: probid,
+                teamid: teamid,
+                seen_chat: false,
+                banned: false,
+                chat: [
+                    {
+                        author: "team",
+                        content: message
+                    }
+                ]
+            }
+        )
+    }else{
+        const chat_obj = cached_chats.find(chat => chat.probid == probid && chat.teamid == teamid);
+        chat_obj.chat.push({author: "team", content: message});
+    }
+    
     updateCheckList();
     updateFocusedCheck();
     updateChat();
