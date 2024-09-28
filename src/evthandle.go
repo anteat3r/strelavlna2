@@ -72,11 +72,15 @@ func PlayerWsHandleMsg(
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
     sol := m[2]
-    check, _, teamname, _, csol, err := DBSolve(team, prob, sol)
+    check, _, teamname, _, csol, upd, err := DBSolve(team, prob, sol)
     if err != nil { return err }
     phash := strconv.Itoa(HashId(prob))
     tchan.Send("solved", prob, sol)
-    AdminSend("solved", check, team, prob, phash, teamname, sol, csol)
+    if upd {
+      AdminSend("upgraded", check, sol, phash)
+    } else {
+      AdminSend("solved", check, team, prob, phash, teamname, sol, csol)
+    }
 
   case "focus":
     if len(m) != 2 { return eIm(msg) }
