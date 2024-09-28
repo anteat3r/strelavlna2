@@ -9,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/martian/v3/log"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/daos"
