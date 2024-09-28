@@ -298,7 +298,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
       Id string `db:"id"`
     }{}
     err = txDao.DB().
-      NewQuery("UPDATE checks SET solution = {:text}, type = 'sol' WHERE team = {:team}, prob = {:prob} RETURNING id").
+      NewQuery("UPDATE checks SET solution = {:text}, type = 'sol' WHERE team = {:team} AND prob = {:prob} RETURNING id").
       Bind(dbx.Params{
         "text": sol,
         "team": team,
