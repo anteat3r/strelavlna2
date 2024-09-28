@@ -802,7 +802,7 @@ func DBAdminInitLoad(idx int) (res string, oerr error) {
 
     checkres := []adminCheckRes{}
     sres, err := txDao.DB().
-      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name, probs.diff, probs.name FROM checks INNER JOIN teams ON teams.id = checks.team INNER JOIN probs ON probs.id = checks.prob").
+      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name, probs.diff, probs.name FROM checks INNER JOIN teams t ON teams.id = checks.team INNER JOIN probs ON probs.id = checks.prob").
       Rows()
       // All(&checkres)
     if err != nil { return err }
