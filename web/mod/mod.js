@@ -30,24 +30,7 @@ var cached_problems = [{
     contet: "Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?",
 }];
 
-var cached_chats = [
-    {
-        probid: "huiadkshuiwabksjd",
-        teamid: "iuyeabkhkjnjhkj",
-        seen_chat: false,
-        banned: false,
-        chat: [
-            {
-                author: "team",
-                content: "Je to 5?"
-            },
-            {
-                author: "support",
-                content: "ano, je to 5."
-            }
-        ]
-    }
-];
+var cached_chats = [];
 
 //local states
 var focused_check = "";
@@ -105,7 +88,8 @@ reject_button.addEventListener("click", function(){
 document.getElementById("help-center-mute-button").addEventListener("click", function(){
     const focused_check_obj = checks.find(check => check.id == focused_check);
     if(focused_check_obj){
-        if(focused_check_obj.banned){
+        const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == focused_check_obj.teamid : chat.probid == focused_check_obj.probid);
+        if(chat_obj.banned){
             unban(focused_check_obj.teamid);
         }else{
             ban(focused_check_obj.teamid);
@@ -169,7 +153,9 @@ function updateCheckList(){
     for(const check of checks){
         if(check.focused_by.length > 0){
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
-            chat_obj.seen_chat = true;
+            if(chat_obj){
+                chat_obj.seen_chat = true;
+            }
         }
     }
     checks_wrapper.innerHTML = "";
@@ -181,6 +167,12 @@ function updateCheckList(){
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
+            let seen_chat;
+            if(!chat_obj){
+                seen_chat = false;
+            }else{
+                seen_chat = chat_obj.seen_chat;
+            }
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -190,7 +182,7 @@ function updateCheckList(){
             }
 
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -205,6 +197,12 @@ function updateCheckList(){
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
+            let seen_chat;
+            if(!chat_obj){
+                seen_chat = false;
+            }else{
+                seen_chat = chat_obj.seen_chat;
+            }
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -214,7 +212,7 @@ function updateCheckList(){
             }
             
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -230,6 +228,12 @@ function updateCheckList(){
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
+            let seen_chat;
+            if(!chat_obj){
+                seen_chat = false;
+            }else{
+                seen_chat = chat_obj.seen_chat;
+            }
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -238,7 +242,7 @@ function updateCheckList(){
                 rank = prob_obj.rank;
             }
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -252,6 +256,12 @@ function updateCheckList(){
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
+            let seen_chat;
+            if(!chat_obj){
+                seen_chat = false;
+            }else{
+                seen_chat = chat_obj.seen_chat;
+            }
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -260,7 +270,35 @@ function updateCheckList(){
                 rank = prob_obj.rank;
             }
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+                 <div class="flex flex-row align-center">
+                    <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
+                    <h2 class="check-rank">[${rank}]</h2>
+                </div>
+                <div class="occupied-icon"></div>
+            </div>`
+        }
+        checks_wrapper.innerHTML += `<div id="chat-checks-title">------ obecné odpovědi ------</div>`
+        for(const check of checks.filter(check => check.type == "globalchat" && check.focused_by.length <= (check.id == focused_check ? 1 : 0))){ //chats, that nobody works on
+            let title;
+            let rank;
+            const prob_obj = cached_problems.find(prob => prob.id == check.probid);
+            const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
+            let seen_chat;
+            if(!chat_obj){
+                seen_chat = false;
+            }else{
+                seen_chat = chat_obj.seen_chat;
+            }
+            if(!prob_obj){
+                title = "Dotaz";
+                rank = "-";
+            }else{
+                title = prob_obj.title;
+                rank = prob_obj.rank;
+            }
+            checks_wrapper.innerHTML +=
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -276,6 +314,12 @@ function updateCheckList(){
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
+            let seen_chat;
+            if(!chat_obj){
+                seen_chat = false;
+            }else{
+                seen_chat = chat_obj.seen_chat;
+            }
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -284,7 +328,7 @@ function updateCheckList(){
                 rank = prob_obj.rank;
             }
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -298,6 +342,12 @@ function updateCheckList(){
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
+            let seen_chat;
+            if(!chat_obj){
+                seen_chat = false;
+            }else{
+                seen_chat = chat_obj.seen_chat;
+            }
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -307,7 +357,35 @@ function updateCheckList(){
             }
 
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+                 <div class="flex flex-row align-center">
+                    <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
+                    <h2 class="check-rank">[${rank}]</h2>
+                </div>
+                <div class="occupied-icon"></div>
+            </div>`
+        }
+        checks_wrapper.innerHTML += `<div id="chat-checks-title">------ obecné odpovědi ------</div>`
+        for(const check of checks.filter(check => check.type == "globalchat" && check.focused_by.length <= (check.id == focused_check ? 1 : 0))){ //chats, that nobody works on
+            let title;
+            let rank;
+            const prob_obj = cached_problems.find(prob => prob.id == check.probid);
+            const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
+            let seen_chat;
+            if(!chat_obj){
+                seen_chat = false;
+            }else{
+                seen_chat = chat_obj.seen_chat;
+            }
+            if(!prob_obj){
+                title = "Dotaz";
+                rank = "-";
+            }else{
+                title = prob_obj.title;
+                rank = prob_obj.rank;
+            }
+            checks_wrapper.innerHTML +=
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -345,7 +423,7 @@ function updateCheckList(){
             const check_obj = checks.find(check => check.id == this.id);
             if(check_obj != null){
                 const prob_obj = cached_problems.find(prob => prob.id == check_obj.probid);
-                const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check_obj.teamid : chat.probid == check_obj.probid);
+                const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check_obj.teamid : chat.probid == check_obj.probid && chat.teamid == check_obj.teamid);
                 if(prob_obj != null){
                     send_problem = false;
                 }
@@ -392,7 +470,7 @@ function updateFocusedCheck(){
     const focused_check_obj = checks.find(check => check.id == focused_check);
     const focused_problem_obj = cached_problems.find(prob => prob.id == focused_check_obj.probid);
 
-    if(!focused_check_obj){
+    if(!focused_problem_obj){
         problem_title.innerHTML = "Načítání...";
         problem_content.innerHTML = "Načítání...";
     }else{
@@ -406,7 +484,7 @@ function updateFocusedCheck(){
     if(focused_check_obj.type == "grade"){
         problem_id.innerHTML = "#" + focused_check_obj.probid;
         team_answer.innerHTML = focused_check_obj.team_message;
-        correct_answer.innerHTML = focused_problem_obj.correct_answer;
+        correct_answer.innerHTML = focused_problem_obj ? focused_problem_obj.correct_answer : "Načítání...";
         grading_wrapper.classList.remove("hidden");
         check_content_wrapper.classList.remove("hidden");
     }else if(focused_check_obj.type == "chat"){
@@ -432,7 +510,7 @@ function updateChat(){
     document.getElementById("help-center-mute-button").classList.remove("hidden");
 
     const check_obj = checks.find(check => check.id == focused_check);
-    const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check_obj.teamid : chat.probid == check_obj.probid);
+    const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check_obj.teamid : chat.probid == check_obj.probid && chat.teamid == check_obj.teamid);
     const title_wrapper = document.getElementById("help-center-title-wrapper");
     const mute_button = document.getElementById("help-center-mute-button");
 
@@ -617,13 +695,13 @@ function connectWS() {
         if (msg.length != 3) { cLe() }
         checkFocused(msg[1], msg[2]);
       break;
-      case "viewedProb":
-        if (msg.length != 3) { cLe() }
-        viewedProb(msg[1], msg[2]);
+      case "viewedprob":
+        if (msg.length != 6) { cLe() }
+        viewedProb(msg[1], msg[2], msg[3], msg[4], msg[5]);
       break;
-      case "viewedChat":
-        if (msg.length != 3) { cLe() }
-        viewedChat(msg[1], msg[2], msg[3]);
+      case "viewedchat":
+        if (msg.length != 5) { cLe() }
+        viewedChat(msg[1], msg[2], msg[3], msg[4]);
       break;
       case "unfocused":
         if (msg.length != 2) { cLe() }
@@ -673,7 +751,14 @@ try {
  * @param {boolean} correct - Whether the answer is correct or not
  */
 function grade(checkid, teamid, probid, correct){
-    socket.send(`grade\x00${checkid}\x00${teamid}\x00${probid}\x00${correct ? "yes" : "no"}`);
+    const chat_obj = cached_chats.find(chat => chat.teamid == teamid);
+    if(!chat_obj){
+        socket.send(`msgsent\x00${teamid}\x00${chat_obj.chat[0].author}\x00${chat_obj.chat[0].content}`);
+    }else{
+        if(!chat_obj.banned){
+            socket.send(`grade\x00${checkid}\x00${teamid}\x00${probid}\x00${correct ? "yes" : "no"}`);
+        }
+    }
 }
 
 
@@ -746,6 +831,7 @@ function load() {
  * @param {string} content - Content of the problem
  */
 function viewedProb(probid, title, rank, correct_answer, content) {
+    console.log("lalalalal");
     if(!cached_problems.some(prob => prob.id == probid)){
         cached_problems.push({
             id: probid,
@@ -760,23 +846,30 @@ function viewedProb(probid, title, rank, correct_answer, content) {
 
 
 
-function viewedChat(probid, teamid, seen_chat, banned, chat) {
+function viewedChat(probid, teamid, banned, chat) {
     if(!cached_chats.some(chat => chat.probid == probid && chat.teamid == teamid)){
+        console.log(probid, teamid);
         var newchat = [];
         for (const line of chat.split("\x0b")) {
             if (line == "") continue;
             const [author, id, text] = line.split("\x09");
             newchat.push({author: author == "a" ? "support" : "team", content: text});
         }
+
         cached_chats.push({
             probid: probid,
             teamid: teamid,
-            seen_chat: seen_chat == "yes",
+            seen_chat: false,
             banned: banned == "yes",
             chat: newchat
         });
+        console.log(cached_chats);
+
     }
+    unfocusCheck();
+    updateFocusedCheck();
     updateChat();
+    updateCheckList();
 }
 
 
@@ -815,6 +908,7 @@ function questioned(checkid, teamid, teamname, probid, probdiff, probname, messa
 
 
 function solved(checkid, teamid, probid, assignid, teamname, team_answer, correct_answer){
+    console.log(team_answer);
     checks.push(
         {   
             id: checkid,
@@ -823,16 +917,23 @@ function solved(checkid, teamid, probid, assignid, teamname, team_answer, correc
             assignid: assignid,
             teamname: teamname,
             type: "grade",
-            team_answer: team_answer,
-            correct_answer: correct_answer,
+            team_message: team_answer,
             focused_by: []
         });
+    console.log(checks);
+    updateCheckList();
 }
 
 /**@param {string} probid
  * @param {string} checkid */
 function graded(probid, checkid){
-    console.log(probid, checkid);
+    const index = checks.findIndex(check => check.id == checkid);
+    if (index > -1) {
+        checks.splice(index, 1);
+    }
+    updateCheckList();
+    updateFocusedCheck();
+    updateChat();
 }
 
 /**
@@ -850,14 +951,15 @@ function dismissed(checkid){
 /** @param {string} teamid
  * @param {string} probid
  * @param {string} msg */
-function msgRecieved(probid, teamid, msg) {
-    const chat_obj = cached_chats.find(chat => probid == "" ? chat.teamid == teamid : chat.probid == probid);
+function msgRecieved(checkid, msg) {
+    const check_obj = checks.find(check => check.id == checkid);
+    const chat_obj = cached_chats.find(chat => check_obj.probid == "" ? chat.teamid == check_obj.teamid : chat.probid == check_obj.probid);
     if(chat_obj == null)return;
     chat_obj.chat.push({author: "team", content: msg});
     chat_obj.seen_chat = false;
+    console.log(check_obj.focused_by);
     updateChat();
     updateCheckList();
-    console.log(id, msg);
 }
 
 /** @param {string} teamid
@@ -940,17 +1042,22 @@ function loaded(data) {
             teamid: check.teamid,
             assignid: check.assign,
             teamname: check.teamname,
-            type: check.type, //grade, chat, globalchat
+            type: check.type == "sol" ? "grade" : check.probid == "" ? "globalchat" : "chat", //grade, chat, globalchat
             team_message: check.team_message,
             focused_by: [],
         }
     });
+
+    // console.log(data.checks[2].type =="sol" ? "grade" : data.checks[2].probid == "" ? "globalchat" : "chat");
+
+    checks.forEach(check => focusCheck(check.id, check.probid, check.teamid, check.probid != "", true));
     
-    console.log(data);
+    console.log("data");
+    console.log(checks);
     start_time = new Date(Date.now() + parseInt(data.online_round));
     end_time = new Date(Date.now() + parseInt(data.online_round_end));
     myId = data.idx.toString();
-    updateCheckList();
-    updateFocusedCheck();
-    updateChat();
+    // updateCheckList();
+    // updateFocusedCheck();
+    // updateChat();
 }
