@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"maps"
 	"slices"
 	"strings"
@@ -800,10 +801,19 @@ func DBAdminInitLoad(idx int) (res string, oerr error) {
     if err != nil { return err }
 
     checkres := []adminCheckRes{}
-    err = txDao.DB().
+    sres, err := txDao.DB().
       NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name, probs.diff, probs.name FROM checks INNER JOIN teams ON teams.id = checks.team INNER JOIN probs ON probs.id = checks.prob").
-      All(&checkres)
+      Rows()
+      // All(&checkres)
     if err != nil { return err }
+
+    for sres.Next() {
+      r := make(dbx.NullStringMap)
+      sres.ScanMap(r)
+      fmt.Printf("sdf %v\n", r)
+    }
+    sres.Close()
+
 
     for i, c := range checkres { checkres[i].Assign = HashId(c.Prob) }
 
