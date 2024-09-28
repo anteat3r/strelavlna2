@@ -852,7 +852,7 @@ function viewedChat(probid, teamid, banned, chat) {
         var newchat = [];
         for (const line of chat.split("\x0b")) {
             if (line == "") continue;
-            const [author, id, text] = line.split("\x09");
+            const [author, text] = line.split("\x09");
             newchat.push({author: author == "a" ? "support" : "team", content: text});
         }
 
