@@ -413,6 +413,7 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
     diff = probres.Diff
     name = probres.Name
     teamname = teamres.Name
+    check = cid
 
     return nil
   })
