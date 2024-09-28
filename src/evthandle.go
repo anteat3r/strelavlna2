@@ -72,10 +72,11 @@ func PlayerWsHandleMsg(
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
     sol := m[2]
-    check, diff, teamname, name, err := DBSolve(team, prob, sol)
+    check, _, teamname, _, csol, err := DBSolve(team, prob, sol)
     if err != nil { return err }
+    phash := strconv.Itoa(HashId(prob))
     tchan.Send("solved", prob, sol)
-    AdminSend("solved", check, team, prob, diff, teamname, name)
+    AdminSend("solved", check, team, prob, phash, teamname, sol, csol)
 
   case "focus":
     if len(m) != 2 { return eIm(msg) }
@@ -99,13 +100,14 @@ func PlayerWsHandleMsg(
       if c == '\x09' { return dbErr("chat", "invalid msg") }
       if c == '\x0b' { return dbErr("chat", "invalid msg") }
     }
-    teamname, name, diff, checku, err := DBPlayerMsg(team, prob, text)
+    upd, teamname, name, diff, check, err := DBPlayerMsg(team, prob, text)
     if err != nil { return err }
     tchan.Send("msgsent", prob, text)
-    if checku == "" {
-      AdminSend("msgrecd", team, teamname, prob, diff, name, text)
+    phash := strconv.Itoa(HashId(prob))
+    if !upd {
+      AdminSend("questioned", check, team, teamname, prob, diff, name, text, phash)
     } else {
-      AdminSend("msgchngd", checku, text)
+      AdminSend("msgrecd", check, text)
     }
     
   case "load":
@@ -176,16 +178,30 @@ func AdminWsHandleMsg(
     AdminSend("dismissed", check)
     
   case "focus":
-    if len(m) != 5 { return eIm(msg) }
+    if len(m) != 6 { return eIm(msg) }
     check := m[1]
-    team := m[2]
-    prob := m[3]
-    rtxt := m[4]
-    txt := rtxt == "yes"
-    if txt {
-      text, sol, err := DBAdminView(team, prob)    
-      if err != nil { return err }
-      perchan<- "viewed" + DELIM + prob + DELIM + text + DELIM + sol
+    prob := m[2]
+    team := m[3]
+    sprobt := m[4]
+    sprob := sprobt == "yes"
+    schatt := m[5]
+    schat := schatt == "yes"
+    text, sol, name, diff, chat, banned, _, err := DBAdminView(team, prob, sprob, schat)    
+    if err != nil { return err }
+    if sprob {
+      perchan<- "viewedprob" + DELIM +
+                 prob + DELIM +
+                 name + DELIM +
+                 diff + DELIM +
+                 sol + DELIM +
+                 text
+    }
+    if schat {
+      perchan<- "viewedchat" + DELIM +
+                 prob + DELIM +
+                 team + DELIM +
+                 banned + DELIM +
+                 chat
     }
     WriteTeamChan(team, "adminfocused", check, prob)
     AdminSend("focused", check, strconv.Itoa(idx))
