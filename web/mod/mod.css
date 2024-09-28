@@ -204,7 +204,7 @@
     
 }
 
-.problem{
+.check{
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -218,19 +218,19 @@
     cursor: pointer;
     user-select: none;
 }
-.problem:hover{
+.check:hover{
     background-color: var(--color-secondary-dark);
     border-color: var(--color-black);
     transition: background-color border-color 0s;
 }
-.problem-focused{
+.check-focused{
     background-color: var(--color-secondary-dark);
 }
-/* .problem-focused:hover{
+/* .check-focused:hover{
     background-color: var(--color-black);
     border-color: var(--color-black-light);
 } */
-.problem-title{
+.check-title{
     margin: 0px;
     font-family: 'Lexend';
     font-size: 25px;
@@ -240,14 +240,14 @@
     transition: color 0.3s ease-out;
 
 }
-.problem:hover .problem-title{
+.check:hover .check-title{
     color: white;
     transition: color 0s;
 }
-.problem-focused .problem-title{
+.check-focused .check-title{
     color: white;
 }
-.problem-rank{
+.check-rank{
     font-family: 'Lexend';
     font-size: 20px;
     font-weight: 800;
@@ -256,15 +256,15 @@
     transition: color 0.3s ease-out;
     transform: translateY(-2px);
 }
-.problem:hover .problem-rank{
+.check:hover .check-rank{
     color: white;
     transition: color 0s;
 }
-.problem-focused .problem-rank{
+.check-focused .check-rank{
     color: white;
 }
 
-.problem-pending{
+.check-pending{
     border-style: dashed !important;
 }
 
@@ -285,14 +285,14 @@
     background-color: #1bd35b;
     display: block;
 }
-.problem:hover .occupied-icon{
+.check:hover .occupied-icon{
     background-color: white;
     transition: background-color 0s;
 }
-.problem-focused .occupied-icon{
+.check-focused .occupied-icon{
     background-color: white;
 }
-.problem-worked-on .occupied-icon{
+.check-worked-on .occupied-icon{
     display: block;
 }
 
@@ -305,7 +305,7 @@
     position: relative;
 }
 
-#problem-title{
+#check-title{
     margin: 0px;
     font-family: 'Lexend';
     font-size: 35px;
@@ -313,7 +313,7 @@
     color: var(--color-secondary-dark);
 }
 
-#problem-content{
+#check-content{
     font-family: 'Lexend';
     font-size: 20px;
     font-weight: 500;
@@ -679,7 +679,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    background-color: var(--color-secondary-light);
+    background-color: var(--color-secondary-dark);
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     /* width: 32%; */
@@ -1075,7 +1075,7 @@
     user-select: none;
 }
 
-#problem-content-wrapper{
+#check-content-wrapper{
     position: relative;
     padding: 30px;  
     padding-top: 20px;
@@ -1084,7 +1084,7 @@
     margin-top: 30px;
 }
 
-#problem-id{
+#check-id{
     position: absolute;
     top: 10px;
     right: 10px;
@@ -1273,6 +1273,16 @@
     color: var(--color-black-white);
     margin-top: 20px;
 }
+.role-selected{
+    background-color: var(--color-secondary-dark);
+    transition: background-color 0.0s;
+}
+.role-selected h2{
+    border-bottom: var(--color-secondary-white) 1px dashed;
+    color: var(--color-secondary-white);
+    transition: all 0.0s;
+}
+
 #commands-wrapper{
     height: 100%;
     width: 100%;
@@ -1416,6 +1426,22 @@
     border: 2px var(--color-black) solid;
 }
 
+.chat-loading #help-center-mute-button{
+    display: none;
+}
+
+#chat-loading-info{
+    display: none;
+    font-family: 'Lexend';
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-black-glow);
+}
+
+.chat-loading #chat-loading-info{
+    display: block;
+}
+
 
 .mute-icon{
     color: var(--color-black);
@@ -1464,4 +1490,24 @@
 .chat-button-muted #chat-mute-sliter{
     transform: translateX(0px);
     transition: transform 0.1s ease-out;
+}
+
+#grade-checks-title{
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-black);
+    margin: 0px;
+    text-align: center;
+    margin-top: 25px;
+}
+
+#chat-checks-title{
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-black);
+    margin: 0px;
+    text-align: center;
+    margin-top: 25px;
 }

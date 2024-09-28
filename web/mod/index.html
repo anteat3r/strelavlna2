@@ -165,7 +165,7 @@
                         <h2>Worker</h2>
                         <p>Základní oprava úloh a chat</p>
                     </button>
-                    <button class="role-selector-item" id="role-administrator">
+                    <button class="role-selector-item" id="role-manager">
                         <h2>Manager</h2>
                         <p>Správa obecných informací</p>
                     </button>
@@ -175,6 +175,23 @@
                     </button>
                 </div>
                 <div id="commands-wrapper">
+                    <p class="team-stats-paragraph">Průběh soutěže . . . .</p>
+                        <div id="progressbar-wrapper">
+                            <div id="progressbar-background-wrapper">
+                                <div class="progressbar-background-first"></div>
+                                <div class="progressbar-background"></div>
+                                <div class="progressbar-background"></div>
+                                <div class="progressbar-background-last"></div>
+                            </div>
+                            <div id="progressbar-foreground"></div>
+                            <div id="progressbar-cursor-wrapper">
+                                <p id="progressbar-percentage">32 %</p>
+                                <div id="triangle-down"></div>
+                                <div id="progressbar-cursor-spacer"></div>
+                                <div id="triangle-up"></div>
+                                <p id="progressbar-time-passed">0:38:03</p>
+                            </div>
+                        </div>
                     <div id="nobody-commands" class="hidden">
                         <h2>Tady se zobrazí pravomoce</h2>
                     </div>
@@ -194,13 +211,14 @@
             </div>
         </div>
         <div id="help-center-wrapper">
-            <div id="help-center-title-wrapper">
+            <div id="help-center-title-wrapper" class="">
                 <h2 id="help-center-title">Podpora</h2>
                 <button id="help-center-mute-button" class="chat-button-muted-">
                     <i class="fa-solid fa-comment-slash mute-icon"></i>
                     <i class="fa-solid fa-comment unmute-icon"></i>
                     <div id="chat-mute-sliter"></div>
                 </button>
+                <p id="chat-loading-info">Načítání...</p>
                 <!-- <button id="help-center-mute-button" class="chat-button-muted"><i class="fa-solid fa-comment-slash"></i></button> -->
                 
             </div>
