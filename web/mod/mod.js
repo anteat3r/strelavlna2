@@ -33,7 +33,7 @@ var cached_chats = [
     {
         probid: "huiadkshuiwabksjd",
         teamid: "iuyeabkhkjnjhkj",
-        seen_chat: true,
+        seen_chat: false,
         banned: false,
         chat: [
             {
@@ -167,7 +167,8 @@ function updateCheckList(){
     const checks_wrapper = document.getElementById("checks-wrapper");
     for(const check of checks){
         if(check.focused_by.length > 0){
-            check.seen_chat = true;
+            const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
+            chat_obj.seen_chat = true;
         }
     }
     checks_wrapper.innerHTML = "";
@@ -178,6 +179,7 @@ function updateCheckList(){
             let title;
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
+            const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -187,7 +189,7 @@ function updateCheckList(){
             }
 
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!check.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -201,6 +203,7 @@ function updateCheckList(){
             let title;
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
+            const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -210,7 +213,7 @@ function updateCheckList(){
             }
             
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!check.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -225,6 +228,7 @@ function updateCheckList(){
             let title;
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
+            const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -233,7 +237,7 @@ function updateCheckList(){
                 rank = prob_obj.rank;
             }
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!check.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -246,6 +250,7 @@ function updateCheckList(){
             let title;
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
+            const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -254,7 +259,7 @@ function updateCheckList(){
                 rank = prob_obj.rank;
             }
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!check.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -269,6 +274,7 @@ function updateCheckList(){
             let title;
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
+            const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -277,7 +283,7 @@ function updateCheckList(){
                 rank = prob_obj.rank;
             }
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!check.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -290,6 +296,7 @@ function updateCheckList(){
             let title;
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
+            const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
@@ -297,8 +304,9 @@ function updateCheckList(){
                 title = prob_obj.title;
                 rank = prob_obj.rank;
             }
+
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!check.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!chat_obj.seen_chat ? "unseen-chat" : ""}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -841,7 +849,7 @@ function loaded(data) {
             id: check.id,
             probid: check.probid,
             teamid: check.teamid,
-            assignid: check.assignid,
+            assignid: check.assign,
             teamname: check.teamname,
             type: check.type, //grade, chat, globalchat
             payload: check.payload,
