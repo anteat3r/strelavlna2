@@ -1,8 +1,8 @@
 .archive-title{
-    font-size: 50px;
+    font-size: 40px;
     font-weight: 600;
     margin: auto;
-    padding: 20px;
+    padding-top: 0;
     padding-bottom: 40px;
     text-align: center;
     border-bottom: var(--color-main) solid;
@@ -14,14 +14,15 @@
 .year-selector{
     display: flex;
     flex-direction: column;
-    border: var(--color-main-light) solid 5px;
-    margin: 50px;
-    background-color: var(--color-main-white);
-    flex-grow: 2;
+    padding: 10px;
+    padding-inline: 20px;
+    background-color: #eafdff;
+    flex-grow: 20;
 }
 
 .year-button{
     font-family: 'Lexend';
+    color: white;
     font-size: 30px;
     font-weight: 600;
     padding-inline: 50px;
@@ -29,8 +30,8 @@
     padding-bottom: 20px;
     text-align: center;
     margin: 20px;
-    border: var(--color-main-light) solid 3px;
-    background-color: var(--color-secondary);
+    border: var(--color-main) solid 3px;
+    background-color: var(--color-main);
     border-radius: 10px;
     cursor: pointer;
 }
@@ -61,7 +62,7 @@
     text-align: center;
     margin: 20px;
     border: var(--color-main-light) solid 3px;
-    background-color: var(--color-secondary-light);
+    background-color: var(--color-main-light);
     border-radius: 10px;
 }
 .year-button i{
@@ -77,9 +78,9 @@
     padding-top: 20px;
     padding-bottom: 20px;
     text-align: center;
-    background-color: var(--color-secondary-glow);
+    background-color: #2600ff;
     margin: 20px;
-    border: var(--color-main-light) solid 3px;
+    border: #2600ff solid 3px;
     border-radius: 10px;
 }
 
@@ -91,10 +92,11 @@
     padding-top: 20px;
     padding-bottom: 20px;
     text-align: center;
-    background-color: white;
+    background-color: #2600ff;
     margin: 20px;
-    border: var(--color-main-light) solid 3px;
+    border: #2600ff solid 3px;
     border-radius: 10px;
+    cursor: default;
 }
 
 .current-year-button i{
@@ -109,9 +111,9 @@
   }
 
 .archive{
-    border-left: var(--color-secondary) dashed 5px;
+    border-left: var(--color-main) solid 5px;
     font-family: 'Lexend';
-    flex-grow: 8;
+    flex-grow: 80;
     max-width: calc(100vw-410px);
 }
 
@@ -126,11 +128,11 @@
 .online-round{
     margin: 0;
     padding-top: 25px;
-    padding-bottom: 50px;
 }
 
 .online-round h1{
     margin-left: 7vw;
+    font-size: 35px;
 }
 
 .online-round-covid{
@@ -141,6 +143,7 @@
 
 .online-round-covid h1{
     margin-left: 7vw;
+    font-size: 35px;
 }
 
 .normal-round{
@@ -151,11 +154,7 @@
 
 .normal-round h1{
     margin-left: 7vw;
-}
-
-.normal-round h2{
-    margin-left: 7vw;
-    font-size: 30px;
+    font-size: 35px;
 }
 
 .placement-wrapper{
@@ -211,9 +210,8 @@
 }
 
 .image-gallery{
-    padding-inline: 5vw;
-    padding-top: 20px;
     background-color: white;
+    padding-top: 20px;
 }
 
 .images{
@@ -254,7 +252,7 @@
     padding-top: 5px;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1000px) {
     .year-selector {
       display: none;
     }
@@ -281,13 +279,6 @@
         margin-top: 0;
         padding-top: 16.75px;
     }
-
-    .normal-round h2{
-        font-size: 25px;
-        margin-top: 0;
-        padding-top: 16.75px;
-    }
-
     .normal-round{
         padding: 0;
     }
@@ -387,7 +378,7 @@
     margin-left: 10px;
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 1000px) {
 .year-title i {
     display: none; 
 }
