@@ -677,7 +677,7 @@ func DBAdminDismiss(check string) (team string, prob string, oerr error) {
       Prob string `db:"prob"`
     }{}
     err := txDao.DB().
-      NewQuery("DELETE FROM checks WHERE id = {:check} LIMIT 1 RETURNING (team, prob)").
+      NewQuery("DELETE FROM checks WHERE id = {:check}  RETURNING (team, prob)").
       Bind(dbx.Params{ "check": check }).
       One(&checkres)
 
