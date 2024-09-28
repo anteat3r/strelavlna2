@@ -261,7 +261,7 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     adminsMutex.RLock()
     i := -1
     for j, c := range AdminsChans {
-      if c == nil { continue }
+      if c != nil { continue }
       i = j
       break
     }
