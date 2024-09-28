@@ -737,6 +737,7 @@ func DBAdminView(team string, prob string, sprob bool, schat bool) (text string,
       chlines := strings.Split(teamres.Chat, "\x0a")
       for _, l := range chlines {
         line := strings.Split(l, "\x09")
+        if len(line) <= 1 { continue }
         if line[1] != prob { continue }
         chat += l + "\x0a"
       }
