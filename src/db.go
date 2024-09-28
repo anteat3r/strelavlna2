@@ -825,7 +825,7 @@ func DBAdminInitLoad(idx int) (res string, oerr error) {
       Solution string `db:"solution"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name AS teamname FROM checks INNER JOIN teams ON teams.id = checks.team").
+      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name AS teamname FROM checks INNER JOIN teams ON teams.id = checks.team WHERE checks.prob = ''").
       All(&gcheckres)
     if err != nil { return err }
 
