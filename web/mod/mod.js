@@ -49,6 +49,34 @@ updateChat();
 
 //buy events
 
+document.getElementById("team-id").addEventListener("click", function(){
+    const team_id = document.getElementById("team-id");
+    navigator.clipboard.writeText(team_id.innerHTML.slice(1));
+    const icon = document.getElementById("copy-team-id-clipboard");
+    const icon_copied = document.getElementById("copy-team-id-clipboard-copied");
+    icon.classList.add("hidden");
+    icon_copied.classList.remove("hidden");
+
+    setTimeout(function(){
+        icon.classList.remove("hidden");
+        icon_copied.classList.add("hidden");
+    }, 3000);
+});
+
+document.getElementById("problem-id").addEventListener("click", function(){
+    const problem_id = document.getElementById("problem-id");
+    navigator.clipboard.writeText(problem_id.innerHTML.slice(1));
+    const icon = document.getElementById("copy-problem-id-clipboard");
+    const icon_copied = document.getElementById("copy-problem-id-clipboard-copied");
+    icon.classList.add("hidden");
+    icon_copied.classList.remove("hidden");
+
+    setTimeout(function(){
+        icon.classList.remove("hidden");
+        icon_copied.classList.add("hidden");
+    }, 3000);
+});
+
 document.getElementById("send-message-button").addEventListener("click", function(){
     const chat_input = document.getElementById("chat-input");
     if(chat_input.value.length > 200 || chat_input.value.length == 0) return;
