@@ -923,7 +923,7 @@ func DBAdminSetInfo(info string) (oerr error) {
     ActiveContestMu.RUnlock()
 
     _, err := txDao.DB().
-      NewQuery("UPDATE contest SET info = {:info} WHERE id = {:contest}").
+      NewQuery("UPDATE contests SET info = {:info} WHERE id = {:contest}").
       Bind(dbx.Params{ "contest": res, "info": info }).
       Execute()
     if err != nil { return err }
