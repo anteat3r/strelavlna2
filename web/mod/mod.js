@@ -7,28 +7,31 @@ var menu_focused_by = [];
 var myId = "";
 var myRole = "nobody";
 
-var global_information = "Dobrý den";
+var contest_info = "";
+var contest_name = "";
 
 var checks = [
-    {
-        id: "uihdabskbnb",
-        probid: "huiadkshuiwabksjd",
-        teamid: "iuyeabkhkjnjhkj",
-        assignid: "iadksibd",
-        teamname: "Team 1",
-        type: "grade", //grade, chat, globalchat
-        team_message: "",
-        focused_by: [],
-    }
+    // {
+    //     id: "uihdabskbnb",
+    //     probid: "huiadkshuiwabksjd",
+    //     teamid: "iuyeabkhkjnjhkj",
+    //     assignid: "iadksibd",
+    //     teamname: "Team 1",
+    //     type: "grade", //grade, chat, globalchat
+    //     team_message: "",
+    //     focused_by: [],
+    // }
 ];
 
-var cached_problems = [{
-    id: "huiadkshuiwabksjd",
-    title: "Lyžař",
-    rank: "C",
-    correct_answer: "5",
-    contet: "Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?",
-}];
+var cached_problems = [
+//     {
+//     id: "huiadkshuiwabksjd",
+//     title: "Lyžař",
+//     rank: "C",
+//     correct_answer: "5",
+//     contet: "Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?",
+// }
+];
 
 var cached_chats = [];
 
@@ -45,7 +48,6 @@ const mod_home_wrapper = document.getElementById("mod-home-wrapper");
 updateCheckList();
 updateFocusedCheck();
 updateChat();
-
 
 //buy events
 
@@ -81,7 +83,7 @@ document.getElementById("send-message-button").addEventListener("click", functio
     const chat_input = document.getElementById("chat-input");
     if(chat_input.value.length > 200 || chat_input.value.length == 0) return;
     const focused_check_obj = checks.find(check => check.id == focused_check);
-    
+    if(!focused_check_obj) return;
     sendMsg(focused_check_obj.teamid, focused_check_obj.probid, chat_input.value);
     chat_input.value = "";
 });
@@ -125,10 +127,17 @@ document.getElementById("help-center-mute-button").addEventListener("click", fun
     }
 });
 
+document.getElementById("global-info-submit").addEventListener("click", function(){
+    const textfield = document.getElementById("global-info-textfield");
+    setInfo(textfield.value);
+    textfield.value = "";
+})
+
 function updateModHome(){
+    const title = document.getElementById("title").innerHTML = contest_name;
     const textfield_wrapper = document.getElementById("global-info-textfield-wrapper");
     const textfield = document.getElementById("global-info-textfield");
-    textfield.placeholder = global_information;
+    textfield.placeholder = contest_info;
     const role_worker = document.getElementById("role-worker");
     const role_manager = document.getElementById("role-manager");
     const role_admin = document.getElementById("role-admin");
@@ -155,6 +164,8 @@ function updateModHome(){
     }
 
 }
+
+
 
 const role_button_worker = document.getElementById("role-worker");
 const role_button_manager = document.getElementById("role-manager");
@@ -795,6 +806,10 @@ function connectWS() {
         if (msg.length != 4) { cLe() }
         upgraded(msg[1], msg[2], msg[3]);
         break;
+      case "gotinfo":
+        if (msg.length != 2) { cLe() }
+        gotInfo(msg[1]);
+        break;
       case "err":
         console.log(msg)
       break;
@@ -812,6 +827,11 @@ try {
     }
 }
 
+
+
+function setInfo(info){
+    socket.send(`setinfo\x00${info}`);
+}
 /**
  * Send a grade to the server
  * @param {string} checkid - ID of the check
@@ -895,6 +915,15 @@ function load() {
 
 
 
+
+
+
+
+function gotInfo(info) {
+    contest_info = info;
+    updateModHome();
+}
+
 function upgraded(checkid, answer, assignid){
     const check_obj = checks.find(check => check.id == checkid);
     check_obj.team_answer = answer;
@@ -902,8 +931,6 @@ function upgraded(checkid, answer, assignid){
     check_obj.assignid = assignid;
     updateCheckList();
 }
-
-
 
 /**
  * Store a problem in the cache of viewed problems
@@ -1145,7 +1172,10 @@ function loaded(data) {
     start_time = new Date(Date.now() + parseInt(data.online_round));
     end_time = new Date(Date.now() + parseInt(data.online_round_end));
     myId = data.idx.toString();
+    contest_info = data.contest_info;
+    contest_name = data.contest_name;
     // updateCheckList();
     // updateFocusedCheck();
     // updateChat();
+    updateModHome();
 }

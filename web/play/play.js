@@ -1,5 +1,8 @@
 const redirects = false;
 //global states
+var contest_name = "";
+var contest_info = "";
+var seen_contest_info = true;
 var team_balance = 400;
 var team_name = "Team 1";
 var team_rank = "14";
@@ -79,6 +82,20 @@ buy_button.addEventListener("click", function(){
 });
 
 document.getElementById("team-stats").addEventListener("click", function(){
+    if(!seen_contest_info){
+        const warnings = document.getElementsByClassName("information-warning");
+        seen_contest_info = true;
+
+        for(const warning of warnings){
+            warning.classList.add("blink");
+        }
+
+        setTimeout(function(){
+            for(const warning of warnings){
+                warning.classList.remove("blink");
+            }
+        }, 3000);
+    }
     unfocusProb();
     focusProb("");
     focused_check = "";
@@ -151,10 +168,8 @@ function updateTeamStats(){
     document.getElementById("team-stats-main-title").innerHTML = team_name;
     document.getElementById("team-stats-main-balance").innerHTML = team_balance + " DC";
     document.getElementById("team-stats-main-rank").innerHTML = team_rank;
-    document.getElementById("statistics-balance").innerHTML = team_balance + " DC";
-    document.getElementById("statistics-rank").innerHTML = team_rank;
-    document.getElementById("statistics-solved").innerHTML = problems_solved;
-    document.getElementById("statistics-sold").innerHTML = problems_sold;
+    document.getElementById("information-content").innerHTML = contest_info;
+    document.getElementById("title").innerHTML = contest_name;
     const team_stats_players_wrapper = document.getElementById("team-stats-players-wrapper");
     team_stats_players_wrapper.innerHTML = "";
     for(const member of team_members){
@@ -271,7 +286,7 @@ function updateChat(){
     if(menu_focused_by.length > 0){
         seen_global_chat = true;
     }
-    if(seen_global_chat){
+    if(seen_global_chat && seen_contest_info){
         document.getElementById("seen-global-chat-icon").classList.add("hidden");
         document.getElementById("rank-number").classList.remove("hidden");
     }else{
@@ -535,6 +550,10 @@ function connectWS() {
         chat_banned = false;
         updateChat();
         break;
+      case "gotinfo":
+        if (msg.length != 2) { cLe() }
+        gotinfo(msg[1]);
+      break;
       case "err":
         console.log(msg)
       break;
@@ -594,6 +613,21 @@ function sendMsg(id, text) { //done
 function load() {
   socket.send("load");
 }
+
+function gotinfo(info){
+    contest_info = info;
+    let seen = false;
+    if(info == "") {
+        seen = true;
+    }
+    if(focused_check == ""){
+        seen = true;
+    }
+    seen_contest_info = seen;
+    updateChat();
+    updateTeamStats();
+}
+
 
 /** @param {string} msg
  * @param {string} id */
@@ -797,6 +831,8 @@ function loaded(data) {
     problems_sold = parseInt(data.numsold);
     chat_banned = data.banned;
     myId = data.idx.toString();
+    contest_info = data.contest_info;
+    contest_name = data.contest_name;
     updatePriceList();
     // console.log(problems[0].chat);
     updateProblemList();

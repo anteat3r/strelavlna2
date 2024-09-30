@@ -580,6 +580,7 @@
     border-left: 2px var(--color-secondary-light) dashed;
     border-top-left-radius: 10px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
@@ -590,6 +591,7 @@
     font-weight: 700;
     color: var(--color-secondary-dark);
     margin: 10px;
+    padding-inline: 10px;
 }
 
 .chat-banned #help-center-title-wrapper{
@@ -1198,7 +1200,7 @@
     border-bottom-right-radius: 5px;
 }
 
-#statistics-wrapper{
+#information-wrapper{
     padding: 30px;
     padding-right: 50px;
     padding-top: 0px;
@@ -1207,7 +1209,7 @@
     align-items: center;
 }
 
-#statistics-title{
+#information-title{
     font-family: 'Lexend';
     font-size: 35px;
     font-weight: 500;
@@ -1220,37 +1222,51 @@
     margin-top: 0px;
 }
 
-#statistics-content-wrapper{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    gap: 10px;
-}
-
-.statistics-row{
+#information-content-wrapper{
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
     align-items: center;
+    justify-content: center;
     width: 100%;
-    background-color: var(--color-secondary-glow);
-    padding-inline: 10px;
-    padding: 10px;
-    border-radius: 5px;
+    max-width: 400px;
+    gap: 10px;
+    
 }
 
-.statistics-row p{
+#information-content{
     font-family: 'Lexend';
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 500;
     color: var(--color-secondary-dark);
-    margin: 0px;
+    padding-left: 10px;
+    transition: color 0.5s ease-out;
+}
+.info-higlighted#information-content{
+    color: #30cf7e;
+    transition: color 0.0s;
 }
 
-.statistics-spacer{
-    height: 20px;
+.information-warning{
+    font-family: 'Lexend';
+    font-size: 150px;
+    font-weight: 700;
+    color: #e44821;
+    margin: 0px;
+    margin-top: 15px;
+    opacity: 0;
 }
+
+@keyframes blink {
+    0% { opacity: 1; }
+    49% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+.blink {
+    animation: blink 1s linear infinite;
+}
+
 
 #chat-banned-info{
     margin: 0px;
