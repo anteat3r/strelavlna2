@@ -49,6 +49,34 @@ updateChat();
 
 //buy events
 
+document.getElementById("team-id").addEventListener("click", function(){
+    const team_id = document.getElementById("team-id");
+    navigator.clipboard.writeText(team_id.innerHTML.slice(1));
+    const icon = document.getElementById("copy-team-id-clipboard");
+    const icon_copied = document.getElementById("copy-team-id-clipboard-copied");
+    icon.classList.add("hidden");
+    icon_copied.classList.remove("hidden");
+
+    setTimeout(function(){
+        icon.classList.remove("hidden");
+        icon_copied.classList.add("hidden");
+    }, 3000);
+});
+
+document.getElementById("problem-id").addEventListener("click", function(){
+    const problem_id = document.getElementById("problem-id");
+    navigator.clipboard.writeText(problem_id.innerHTML.slice(1));
+    const icon = document.getElementById("copy-problem-id-clipboard");
+    const icon_copied = document.getElementById("copy-problem-id-clipboard-copied");
+    icon.classList.add("hidden");
+    icon_copied.classList.remove("hidden");
+
+    setTimeout(function(){
+        icon.classList.remove("hidden");
+        icon_copied.classList.add("hidden");
+    }, 3000);
+});
+
 document.getElementById("send-message-button").addEventListener("click", function(){
     const chat_input = document.getElementById("chat-input");
     if(chat_input.value.length > 200 || chat_input.value.length == 0) return;
@@ -167,22 +195,26 @@ function updateCheckList(){
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
-            let seen_chat;
+            let seen_chat = false;
+            let loaded = true;
             if(!chat_obj){
-                seen_chat = false;
+                loaded = false;
             }else{
                 seen_chat = chat_obj.seen_chat;
             }
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
+                if(check.probid != ""){
+                    loaded = false;
+                }
             }else{
                 title = prob_obj.title;
                 rank = prob_obj.rank;
             }
 
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""} ${loaded ? "" : "check-not-loaded"}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -198,21 +230,25 @@ function updateCheckList(){
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             let seen_chat;
+            let loaded = true;
             if(!chat_obj){
-                seen_chat = false;
+                loaded = false;
             }else{
                 seen_chat = chat_obj.seen_chat;
             }
             if(!prob_obj){
-                title = "Nové hodnocení";
+                title = "Nová otázka";
                 rank = "-";
+                if(check.probid != ""){
+                    loaded = false;
+                }
             }else{
                 title = prob_obj.title;
                 rank = prob_obj.rank;
             }
             
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""} ${loaded ? "" : "check-not-loaded"}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -229,20 +265,25 @@ function updateCheckList(){
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             let seen_chat;
+            let loaded = true;
             if(!chat_obj){
-                seen_chat = false;
+                loaded = false;
             }else{
                 seen_chat = chat_obj.seen_chat;
             }
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
+                if(check.probid != ""){
+                    loaded = false;
+                }
             }else{
                 title = prob_obj.title;
                 rank = prob_obj.rank;
             }
+
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!seen_chat ? "unseen-chat" : ""} ${loaded ? "" : "check-not-loaded"}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -257,20 +298,25 @@ function updateCheckList(){
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             let seen_chat;
+            let loaded = true;
             if(!chat_obj){
-                seen_chat = false;
+                loaded = false;
             }else{
                 seen_chat = chat_obj.seen_chat;
             }
             if(!prob_obj){
-                title = "Nové hodnocení";
+                title = "Nová otázka";
                 rank = "-";
+                if(check.probid != ""){
+                    loaded = false;
+                }
             }else{
                 title = prob_obj.title;
                 rank = prob_obj.rank;
             }
+
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!seen_chat ? "unseen-chat" : ""} ${loaded ? "" : "check-not-loaded"}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -285,20 +331,25 @@ function updateCheckList(){
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             let seen_chat;
+            let loaded = true;
             if(!chat_obj){
-                seen_chat = false;
+                loaded = false;
             }else{
                 seen_chat = chat_obj.seen_chat;
             }
             if(!prob_obj){
-                title = "Dotaz";
+                title = "Nová otázka";
                 rank = "-";
+                if(check.probid != ""){
+                    loaded = false;
+                }
             }else{
                 title = prob_obj.title;
                 rank = prob_obj.rank;
             }
+
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!seen_chat ? "unseen-chat" : ""} ${loaded ? "" : "check-not-loaded"}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -315,20 +366,25 @@ function updateCheckList(){
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             let seen_chat;
+            let loaded = true;
             if(!chat_obj){
-                seen_chat = false;
+                loaded = false;
             }else{
                 seen_chat = chat_obj.seen_chat;
             }
             if(!prob_obj){
                 title = "Nové hodnocení";
                 rank = "-";
+                if(check.probid != ""){
+                    loaded = false;
+                }
             }else{
                 title = prob_obj.title;
                 rank = prob_obj.rank;
             }
+
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""} ${loaded ? "" : "check-not-loaded"}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -343,21 +399,25 @@ function updateCheckList(){
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             let seen_chat;
+            let loaded = true;
             if(!chat_obj){
-                seen_chat = false;
+                loaded = false;
             }else{
                 seen_chat = chat_obj.seen_chat;
             }
             if(!prob_obj){
-                title = "Nové hodnocení";
+                title = "Nová otázka";
                 rank = "-";
+                if(check.probid != ""){
+                    loaded = false;
+                }
             }else{
                 title = prob_obj.title;
                 rank = prob_obj.rank;
             }
 
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""} ${loaded ? "" : "check-not-loaded"}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -365,27 +425,32 @@ function updateCheckList(){
                 <div class="occupied-icon"></div>
             </div>`
         }
-        checks_wrapper.innerHTML += `<div id="chat-checks-title">------ obecné odpovědi ------</div>`
-        for(const check of checks.filter(check => check.type == "globalchat" && check.focused_by.length <= (check.id == focused_check ? 1 : 0))){ //chats, that nobody works on
+        checks_wrapper.innerHTML += `<div id="globalchat-checks-title">------ obecné odpovědi ------</div>`
+        for(const check of checks.filter(check => check.type == "globalchat")){ //chats, that nobody works on
             let title;
             let rank;
             const prob_obj = cached_problems.find(prob => prob.id == check.probid);
             const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check.teamid : chat.probid == check.probid);
             let seen_chat;
+            let loaded = true;
             if(!chat_obj){
-                seen_chat = false;
+                loaded = false;
             }else{
                 seen_chat = chat_obj.seen_chat;
             }
             if(!prob_obj){
-                title = "Dotaz";
+                title = "Nová otázka";
                 rank = "-";
+                if(check.probid != ""){
+                    loaded = false;
+                }
             }else{
                 title = prob_obj.title;
                 rank = prob_obj.rank;
             }
+
             checks_wrapper.innerHTML +=
-            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${!seen_chat ? "unseen-chat" : ""}" id="${check.id}">
+            `<div class="check ${focused_check == check.id ? "check-focused" : ""} ${check.focused_by.length > (focused_check == check.id ? 1 : 0) ? "check-worked-on" : ""} ${!seen_chat ? "unseen-chat" : ""} ${loaded ? "" : "check-not-loaded"}" id="${check.id}">
                  <div class="flex flex-row align-center">
                     <h2 class="check-title"${title.length > 12 ? `style="font-size: 15px"` : ""}>${title}</h2>
                     <h2 class="check-rank">[${rank}]</h2>
@@ -423,8 +488,8 @@ function updateCheckList(){
             const check_obj = checks.find(check => check.id == this.id);
             if(check_obj != null){
                 const prob_obj = cached_problems.find(prob => prob.id == check_obj.probid);
-                const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check_obj.teamid : chat.probid == check_obj.probid && chat.teamid == check_obj.teamid);
-                if(prob_obj != null){
+                const chat_obj = cached_chats.find(chat => chat.teamid == check_obj.teamid && chat.probid == check_obj.probid);
+                if(prob_obj != null || check_obj.type == "globalchat"){
                     send_problem = false;
                 }
                 if(chat_obj != null){
@@ -510,7 +575,7 @@ function updateChat(){
     document.getElementById("help-center-mute-button").classList.remove("hidden");
 
     const check_obj = checks.find(check => check.id == focused_check);
-    const chat_obj = cached_chats.find(chat => chat.probid == "" ? chat.teamid == check_obj.teamid : chat.probid == check_obj.probid && chat.teamid == check_obj.teamid);
+    const chat_obj = cached_chats.find(chat => chat.teamid == check_obj.teamid && chat.probid == check_obj.probid);
     const title_wrapper = document.getElementById("help-center-title-wrapper");
     const mute_button = document.getElementById("help-center-mute-button");
 
@@ -656,7 +721,7 @@ function connectWS() {
   socket.addEventListener("error", (e) => {
       console.log(e);
       if(redirects){
-        window.location.href = `login.html?id=${id}`;
+        window.location.href = `../login/id=${id}`;
       }
   });
 
@@ -725,6 +790,10 @@ function connectWS() {
       case "unbanned":
         if (msg.length != 2) { cLe() }
         unbanned(msg[1]);
+        break;
+      case "upgraded":
+        if (msg.length != 4) { cLe() }
+        upgraded(msg[1], msg[2], msg[3]);
         break;
       case "err":
         console.log(msg)
@@ -822,6 +891,20 @@ function load() {
   socket.send("load");
 }
 
+
+
+
+
+function upgraded(checkid, answer, assignid){
+    const check_obj = checks.find(check => check.id == checkid);
+    check_obj.team_answer = answer;
+    check_obj.type = "grade";
+    check_obj.assignid = assignid;
+    updateCheckList();
+}
+
+
+
 /**
  * Store a problem in the cache of viewed problems
  * @param {string} probid - ID of the problem
@@ -866,7 +949,6 @@ function viewedChat(probid, teamid, banned, chat) {
         console.log(cached_chats);
 
     }
-    unfocusCheck();
     updateFocusedCheck();
     updateChat();
     updateCheckList();
@@ -881,27 +963,32 @@ function questioned(checkid, teamid, teamname, probid, probdiff, probname, messa
             teamid: teamid,
             assignid: assignid.toString(),
             teamname: teamname,
-            type: "chat",
+            type: probid == "" ? "globalchat" : "chat",
             focused_by: []
         }
     );
 
     console.log(checks);
-
-    cached_chats.push(
-        {
-            probid: probid,
-            teamid: teamid,
-            seen_chat: false,
-            banned: false,
-            chat: [
-                {
-                    author: "team",
-                    content: message
-                }
-            ]
-        }
-    )
+    if(!cached_chats.some(chat => chat.probid == probid && chat.teamid == teamid)){
+        cached_chats.push(
+            {
+                probid: probid,
+                teamid: teamid,
+                seen_chat: false,
+                banned: false,
+                chat: [
+                    {
+                        author: "team",
+                        content: message
+                    }
+                ]
+            }
+        )
+    }else{
+        const chat_obj = cached_chats.find(chat => chat.probid == probid && chat.teamid == teamid);
+        chat_obj.chat.push({author: "team", content: message});
+    }
+    
     updateCheckList();
     updateFocusedCheck();
     updateChat();
@@ -955,7 +1042,7 @@ function dismissed(checkid){
  * @param {string} msg */
 function msgRecieved(checkid, msg) {
     const check_obj = checks.find(check => check.id == checkid);
-    const chat_obj = cached_chats.find(chat => check_obj.probid == "" ? chat.teamid == check_obj.teamid : chat.probid == check_obj.probid);
+    const chat_obj = cached_chats.find(chat => chat.teamid == check_obj.teamid && chat.probid == check_obj.probid);
     if(chat_obj == null)return;
     chat_obj.chat.push({author: "team", content: msg});
     chat_obj.seen_chat = false;
@@ -1051,7 +1138,7 @@ function loaded(data) {
     });
 
 
-    checks.forEach(check => focusCheck(check.id, check.probid, check.teamid, check.probid != "", true));
+    // checks.forEach(check => focusCheck(check.id, check.probid, check.teamid, check.probid != "", true));
     
     console.log("data");
     console.log(checks);
