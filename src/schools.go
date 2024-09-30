@@ -462,7 +462,7 @@ func LoadSchoolsEndp(dao *daos.Dao) echo.HandlerFunc {
 
 func LoadProbEndp(dao *daos.Dao) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		f, _ := os.ReadFile("/home/rosta/strelavlna2/ulohy1.tsv")
+		f, _ := os.ReadFile("/opt/strelavlna2/ulohy1.tsv")
 		lines := strings.Split(string(f), "&^&")
 		data := [][]string{}
 		for _, l := range lines {
