@@ -475,7 +475,11 @@ func LoadProbEndp(dao *daos.Dao) echo.HandlerFunc {
         log.Info(l)
         continue
       }
-			rec.Set("type", l[0])
+      tp := "math"
+      if l[0] == "F" {
+        tp = "physics"
+      }
+			rec.Set("type", tp)
 			rec.Set("name", l[0] + l[1])
 			rec.Set("solution", l[2])
 			rec.Set("diff", l[3])
