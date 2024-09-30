@@ -471,6 +471,10 @@ func LoadProbEndp(dao *daos.Dao) echo.HandlerFunc {
 		coll, _ := dao.FindCollectionByNameOrId("probs")
 		for _, l := range data {
 			rec := models.NewRecord(coll)
+      if len(l) < 6 {
+        log.Info(l)
+        continue
+      }
 			rec.Set("type", l[0])
 			rec.Set("name", l[0] + l[1])
 			rec.Set("solution", l[2])
