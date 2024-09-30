@@ -452,6 +452,8 @@ type teamRes struct {
   Name string `json:"name"`
   OnlineRound int64 `json:"online_round"`
   OnlineRoundEnd int64 `json:"online_round_end"`
+  ContestName string `json:"contest_name"`
+  ContestInfo string `json:"contest_info"`
   Costs map[string]int `json:"costs"`
   Checks []checkRes `json:"checks"`
   Rank int `json:"rank"`
@@ -530,11 +532,13 @@ func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
     if err != nil { return err }
 
     contres := struct{
+      Name string `db:"name"`
+      Info string `db:"info"`
       OnlineRound types.DateTime `db:"online_round"`
       OnlineRoundEnd types.DateTime `db:"online_round_end"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT online_round, online_round_end FROM contests WHERE id = {:contest} LIMIT 1").
+      NewQuery("SELECT online_round, online_round_end, name, info FROM contests WHERE id = {:contest} LIMIT 1").
       Bind(dbx.Params{ "contest": teamres.Contest }).
       One(&contres)
 
@@ -563,6 +567,8 @@ func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
       Name: teamres.Name,
       OnlineRound: ordelta,
       OnlineRoundEnd: oredelta,
+      ContestName: contres.Name,
+      ContestInfo: contres.Info,
       Checks: checkres,
       Banned: teamres.Banned,
       Player1: teamres.Player1,
@@ -808,6 +814,8 @@ type adminInitLoad struct {
   Idx int `json:"idx"`
   OnlineRound int64 `json:"online_round"`
   OnlineRoundEnd int64 `json:"online_round_end"`
+  ContestName string `json:"contest_name"`
+  ContestInfo string `json:"contest_info"`
   Banned []adminBannedRes `json:"banned"`
 }
 
@@ -876,9 +884,11 @@ func DBAdminInitLoad(idx int) (res string, oerr error) {
     contres := struct{
       OnlineRound types.DateTime `db:"online_round"`
       OnlineRoundEnd types.DateTime `db:"online_round_end"`
+      Name string `db:"name"`
+      Info string `db:"info"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT online_round, online_round_end FROM contests WHERE id = {:contest} LIMIT 1").
+      NewQuery("SELECT online_round, online_round_end, name, info FROM contests WHERE id = {:contest} LIMIT 1").
       Bind(dbx.Params{ "contest": ac }).
       One(&contres)
 
@@ -891,12 +901,32 @@ func DBAdminInitLoad(idx int) (res string, oerr error) {
       OnlineRound: ordelta,
       OnlineRoundEnd: oredelta,
       Banned: banres,
+      ContestName: contres.Name,
+      ContestInfo: contres.Info,
     }
 
     resb, err := json.Marshal(resr)
     if err != nil { return err }
 
     res = string(resb)
+
+    return nil
+  })
+  return
+}
+
+func DBAdminSetInfo(info string) (oerr error) {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+
+    ActiveContestMu.RLock()
+    res := ActiveContest
+    ActiveContestMu.RUnlock()
+
+    _, err := txDao.DB().
+      NewQuery("UPDATE contests SET info = {:info} WHERE id = {:contest}").
+      Bind(dbx.Params{ "contest": res, "info": info }).
+      Execute()
+    if err != nil { return err }
 
     return nil
   })

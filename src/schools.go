@@ -459,3 +459,33 @@ func LoadSchoolsEndp(dao *daos.Dao) echo.HandlerFunc {
 		return nil
 	}
 }
+
+func LoadProbEndp(dao *daos.Dao) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		f, _ := os.ReadFile("/opt/strelavlna2/ulohy1.tsv")
+		lines := strings.Split(string(f), "&^&")
+		data := [][]string{}
+		for _, l := range lines {
+			data = append(data, strings.Split(l, "#"))
+		}
+		coll, _ := dao.FindCollectionByNameOrId("probs")
+		for _, l := range data {
+			rec := models.NewRecord(coll)
+      if len(l) < 6 {
+        log.Info(l)
+        continue
+      }
+      tp := "math"
+      if l[0] == "F" {
+        tp = "physics"
+      }
+			rec.Set("type", tp)
+			rec.Set("name", l[0] + l[1])
+			rec.Set("solution", l[2])
+			rec.Set("diff", l[3])
+			rec.Set("text", l[5])
+			dao.SaveRecord(rec)
+		}
+		return nil
+	}
+}
