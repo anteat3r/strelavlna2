@@ -459,3 +459,51 @@ func LoadSchoolsEndp(dao *daos.Dao) echo.HandlerFunc {
 		return nil
 	}
 }
+
+func LoadProbEndp(dao *daos.Dao) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		f, _ := os.ReadFile("/home/rosta/strelavlna2/ulohy1.tsv")
+		lines := strings.Split(string(f), "\n")
+		data := [][]string{}
+		for _, l := range lines {
+			data = append(data, strings.Split(l, "#"))
+		}
+		coll, _ := dao.FindCollectionByNameOrId("probs")
+		for _, l := range data {
+			rec := models.NewRecord(coll)
+			rec.Set("red_izo", tint(l[0]))
+			rec.Set("ico", tint(l[1]))
+			rec.Set("zrizovatel", tint(l[2]))
+			rec.Set("uzemi", l[3])
+			rec.Set("kraj", l[4])
+			rec.Set("okres", l[5])
+			rec.Set("spravni_urad", l[6])
+			rec.Set("orp", tint(l[7]))
+			rec.Set("orp_nazev", l[8])
+			rec.Set("plny_nazev", l[9])
+			rec.Set("zkraceny_nazev", l[10])
+			rec.Set("ulice", l[11])
+			rec.Set("c_p", tint(l[12]))
+			rec.Set("c_or", tint(l[13]))
+			rec.Set("c_obce", l[14])
+			rec.Set("psc", tint(l[15]))
+			rec.Set("misto", l[16])
+			rec.Set("kod_ruian", tint(l[17]))
+			rec.Set("telefon", l[18])
+			rec.Set("fax", l[19])
+			rec.Set("email_1", l[20])
+			rec.Set("email_2", l[21])
+			rec.Set("www", l[22])
+			rec.Set("reditel", l[23])
+			rec.Set("izo", tint(l[24]))
+			rec.Set("typ", l[25])
+			// rec.Set("druh", l[26])
+			rec.Set("kapacita", tint(l[34]))
+			t, _ := time.Parse("2.1.2006", l[35])
+			dt, _ := types.ParseDateTime(t)
+			rec.Set("datum_zahajeni_cinnosti", dt)
+			dao.SaveRecord(rec)
+		}
+		return nil
+	}
+}
