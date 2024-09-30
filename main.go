@@ -150,11 +150,6 @@ func main() {
     )
 
     e.Router.GET(
-      "/load",
-      src.LoadProbEndp(app.Dao()),
-    )
-
-    e.Router.GET(
       "/api/admin/loadactivec",
       func(c echo.Context) error {
         src.ActiveContestMu.RLock()
