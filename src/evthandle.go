@@ -240,6 +240,18 @@ func AdminWsHandleMsg(
     if err != nil { return err }
     perchan<- "loaded" + DELIM + res
 
+  case "setinfo":
+    if len(m) != 2 { return eIm(msg) }
+    info := m[1]
+    err := DBAdminSetInfo(info)
+    if err != nil { return err }
+    teamChanMapMutex.Lock()
+    for _, tc := range TeamChanMap {
+      tc.Send("gotinfo", info)
+    }
+    teamChanMapMutex.Unlock()
+    AdminSend("gotinfo", info)
+
   }
 
   sLog("adminevt", email, msg)
