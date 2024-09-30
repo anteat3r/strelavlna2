@@ -470,14 +470,12 @@ func LoadProbEndp(dao *daos.Dao) echo.HandlerFunc {
 		}
 		coll, _ := dao.FindCollectionByNameOrId("probs")
 		for _, l := range data {
-      if len(l) < 5 {
-        log.Info(l)
-        continue
-      }
 			rec := models.NewRecord(coll)
-			rec.Set("solution", l[1])
-			rec.Set("diff", l[2])
-			rec.Set("zadani", l[4])
+			rec.Set("type", l[0])
+			rec.Set("name", l[0] + l[1])
+			rec.Set("solution", l[2])
+			rec.Set("diff", l[3])
+			rec.Set("text", l[5])
 			dao.SaveRecord(rec)
 		}
 		return nil
