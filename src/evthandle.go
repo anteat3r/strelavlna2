@@ -104,12 +104,12 @@ func PlayerWsHandleMsg(
       if c == '\x09' { return dbErr("chat", "invalid msg") }
       if c == '\x0b' { return dbErr("chat", "invalid msg") }
     }
-    upd, teamname, name, diff, check, workers, err := DBPlayerMsg(team, prob, text)
+    upd, teamname, name, diff, check, workers, chat, err := DBPlayerMsg(team, prob, text)
     if err != nil { return err }
     tchan.Send("msgsent", prob, text)
     phash := strconv.Itoa(HashId(workers))
     if !upd {
-      AdminSend("questioned", check, team, teamname, prob, diff, name, text, phash)
+      AdminSend("questioned", check, team, teamname, prob, diff, name, text, phash, chat)
     } else {
       AdminSend("msgrecd", check, text)
     }
