@@ -261,7 +261,7 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     adminsMutex.RLock()
     _, ok := AdminsChans[adminid]
-    if !ok {
+    if ok {
       adminsMutex.RUnlock()
       return nErr("admin already connected")
     }
