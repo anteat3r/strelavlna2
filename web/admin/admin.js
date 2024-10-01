@@ -9,7 +9,7 @@ function clown() {  {
   x.height = 1080/1920*vw;
   x.style.display = "block";
   x.play();
-  setInterval(function(e){
+  setInterval(function(){
     x.style.display = "none";
   }, 3270);
 } }
@@ -19,7 +19,7 @@ if (pb.authStore.isValid) {
   $("#title").innerHTML = pb.authStore.model.email;
 }
 
-$("#auth-login").addEventListener("click", async (e) => {
+$("#auth-login").addEventListener("click", async () => {
   let res = await pb.admins.authWithPassword(
     $("#auth-email").value,
     $("#auth-pass").value,
@@ -27,7 +27,7 @@ $("#auth-login").addEventListener("click", async (e) => {
   console.log(res);
 });
 
-$("#activec-load").addEventListener("click", async (e) => {clown();
+$("#activec-load").addEventListener("click", async () => {clown();
   const res = await fetch(
     "/api/admin/loadactivec",
     {headers: {"Authorization": pb.authStore.token},
@@ -37,7 +37,7 @@ $("#activec-load").addEventListener("click", async (e) => {clown();
   $("#activec-inp").value = sres;
 });
 
-$("#activec-set").addEventListener("click", async (e) => {clown();
+$("#activec-set").addEventListener("click", async () => {clown();
   let payload = $("#activec-inp").value;
   if (payload == "<nil> <nil>") {
     alert("invalid contest");
@@ -50,7 +50,7 @@ $("#activec-set").addEventListener("click", async (e) => {clown();
   console.log(res);
 });
 
-$("#activec-set-empty").addEventListener("click", async (e) => {clown();
+$("#activec-set-empty").addEventListener("click", async () => {clown();
   const res = await fetch(
     "/api/admin/setactivecem",
     {headers: {"Authorization": pb.authStore.token},
@@ -58,7 +58,7 @@ $("#activec-set-empty").addEventListener("click", async (e) => {clown();
   console.log(res);
 });
 
-$("#costs-load").addEventListener("click", async (e) => {clown();
+$("#costs-load").addEventListener("click", async () => {clown();
   const res = await fetch(
     "/api/admin/loadcosts",
     {headers: {"Authorization": pb.authStore.token},
@@ -68,7 +68,7 @@ $("#costs-load").addEventListener("click", async (e) => {clown();
   $("#costs-p").innerHTML = sres;
 });
 
-$("#costs-set").addEventListener("click", async (e) => {clown();
+$("#costs-set").addEventListener("click", async () => {clown();
   const res = await fetch(
     `/api/admin/setcosts?k=${ $("#costs-key-inp").value }&v=${ $("#costs-val-inp").value }`,
     {headers: {"Authorization": pb.authStore.token},
@@ -77,9 +77,18 @@ $("#costs-set").addEventListener("click", async (e) => {clown();
   console.log(sres);
 });
 
-$("#costs-rem").addEventListener("click", async (e) => {clown();
+$("#costs-rem").addEventListener("click", async () => {clown();
   const res = await fetch(
     `/api/admin/remcosts?k=${ $("#costs-key-inp").value }`,
+    {headers: {"Authorization": pb.authStore.token},
+  })
+  let sres = await res.text();
+  console.log(sres);
+});
+
+$("#hash-set").addEventListener("click", async () => {clown();
+  const res = await fetch(
+    `/api/admin/probhash?s=${ $("#hash-inp").value }`,
     {headers: {"Authorization": pb.authStore.token},
   })
   let sres = await res.text();

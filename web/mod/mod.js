@@ -8,7 +8,7 @@ var myId = "";
 var myRole = "nobody";
 
 var contest_info = "";
-var contest_name = "";
+var contest_name = "X";
 
 var checks = [
     // {
@@ -187,6 +187,11 @@ role_button_admin.addEventListener("click", function(){
 
 function setRole(role){
     myRole = role;
+    if(myRole == "worker"){
+        work();
+    }else{
+        unwork();
+    }
     updateModHome();
     updateCheckList();
 }
@@ -562,6 +567,16 @@ function updateFocusedCheck(){
     team_name.innerHTML = focused_check_obj.teamname;
     team_id.innerHTML = "#" + focused_check_obj.teamid;
 
+    const img = document.getElementById("problem-image");
+    if(!focused_problem_obj || focused_problem_obj.image == ""){
+        img.classList.add("hidden");
+    }else{
+        img.classList.remove("hidden");
+        img.src = `http://strela-vlna.gchd.cz/api/files/probs/${focused_problem_obj.id}/${focused_problem_obj.image}`;
+
+    }
+
+
     if(focused_check_obj.type == "grade"){
         problem_id.innerHTML = "#" + focused_check_obj.probid;
         team_answer.innerHTML = focused_check_obj.team_message;
@@ -762,8 +777,8 @@ function connectWS() {
         solved(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
       break;
       case "questioned":
-        if (msg.length != 9) { cLe() }
-        questioned(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7], msg[8]);
+        if (msg.length != 10) { cLe() }
+        questioned(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7], msg[8], msg[9]);
       break;
       case "msgrecd":
         if (msg.length != 4) { cLe() }
@@ -782,8 +797,8 @@ function connectWS() {
         checkFocused(msg[1], msg[2]);
       break;
       case "viewedprob":
-        if (msg.length != 6) { cLe() }
-        viewedProb(msg[1], msg[2], msg[3], msg[4], msg[5]);
+        if (msg.length != 7) { cLe() }
+        viewedProb(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6]);
       break;
       case "viewedchat":
         if (msg.length != 5) { cLe() }
@@ -921,6 +936,12 @@ function load() {
   socket.send("load");
 }
 
+function work() {
+  socket.send("work");
+}
+function unwork() {
+  socket.send("unwork");
+}
 
 
 
@@ -951,7 +972,7 @@ function upgraded(checkid, answer, assignid){
  * @param {string} correct_answer - Answer to the problem
  * @param {string} content - Content of the problem
  */
-function viewedProb(probid, title, rank, correct_answer, content) {
+function viewedProb(probid, title, rank, correct_answer, content, image) {
     console.log("lalalalal");
     if(!cached_problems.some(prob => prob.id == probid)){
         cached_problems.push({
@@ -959,7 +980,8 @@ function viewedProb(probid, title, rank, correct_answer, content) {
             title: title,
             rank: rank,
             correct_answer: correct_answer,
-            content: content
+            content: content,
+            image: image,
         });
     }
     updateFocusedCheck();
@@ -993,7 +1015,7 @@ function viewedChat(probid, teamid, banned, chat) {
 }
 
 
-function questioned(checkid, teamid, teamname, probid, probdiff, probname, message, assignid){
+function questioned(checkid, teamid, teamname, probid, probdiff, probname, message, assignid, chat){
     checks.push(
         {   
             id: checkid,
@@ -1008,18 +1030,19 @@ function questioned(checkid, teamid, teamname, probid, probdiff, probname, messa
 
     console.log(checks);
     if(!cached_chats.some(chat => chat.probid == probid && chat.teamid == teamid)){
+        var newchat = [];
+        for (const line of chat.split("\x0b")) {
+            if (line == "") continue;
+            const [author, text] = line.split("\x09");
+            newchat.push({author: author == "a" ? "support" : "team", content: text});
+        }
         cached_chats.push(
             {
                 probid: probid,
                 teamid: teamid,
                 seen_chat: false,
                 banned: false,
-                chat: [
-                    {
-                        author: "team",
-                        content: message
-                    }
-                ]
+                chat: newchat,
             }
         )
     }else{

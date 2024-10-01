@@ -1,6 +1,6 @@
 const redirects = false;
 //global states
-var contest_name = "";
+var contest_name = "X";
 var contest_info = "";
 var seen_contest_info = true;
 var team_balance = 400;
@@ -45,6 +45,13 @@ updatePriceList();
 
 
 //buy events
+
+document.getElementById("chat-input").addEventListener("keydown", function(e){
+    if(e.key == "Enter" && e.shiftKey){
+        e.preventDefault();
+        document.getElementById("send-message-button").click();
+    }
+});
 
 document.getElementById("send-message-button").addEventListener("click", function(){
     if(chat_banned) return;
@@ -123,6 +130,14 @@ document.getElementById("submit-answer-button").addEventListener("click", functi
     }
 });
 
+document.getElementById("answer-input").addEventListener("focus", function(){
+    const focused_problem_obj = problems.find(prob => prob.id == focused_check);
+    if(focused_problem_obj != null){
+        focused_problem_obj.incorrect = false;
+    }
+    updateFocusedProblem();
+    updateProblemList();
+});
 
 
 function updateShop(){
@@ -199,12 +214,15 @@ function updateProblemList(){
     for(const prob of problems){
         if(prob.focused_by.length > 0){
             prob.seen_chat = true;
+            if(focused_check != prob.id){
+                prob.incorrect = false;
+            }
         }
     }
     problems_wrapper.innerHTML = "";
     for(prob of problems){
         problems_wrapper.innerHTML +=
-        `<div class="problem ${focused_check == prob.id ? "problem-focused" : ""} ${prob.focused_by.length > (focused_check == prob.id ? 1 : 0) ? "problem-worked-on" : ""} ${!prob.seen_chat ? "unseen-chat" : ""} ${prob.pending ? "problem-pending" : ""}" id="${prob.id}">
+        `<div class="problem ${focused_check == prob.id ? "problem-focused" : ""} ${prob.focused_by.length > (focused_check == prob.id ? 1 : 0) ? "problem-worked-on" : ""} ${!prob.seen_chat ? "unseen-chat" : ""} ${prob.pending ? "problem-pending" : ""} ${prob.incorrect ? "problem-incorrect" : ""} ${prob.correct ? "problem-correct" : ""}" id="${prob.id}">
             <div class="flex flex-row align-center">
                 <h2 class="problem-title"${prob.title.length > 12 ? `style="font-size: 15px"` : ""}>${prob.title}</h2>
                 <h2 class="problem-rank">[${prob.rank}]</h2>
@@ -263,10 +281,34 @@ function updateFocusedProblem(){
 
     const answer_input_wrapper = document.getElementById("answer-input-wrapper");
     const answer_input = document.getElementById("answer-input");
-    if(focused_problem_obj.pending){
+
+    const img = document.getElementById("problem-image");
+    if(focused_problem_obj.image == ""){
+        img.classList.add("hidden");
+    }else{
+        img.classList.remove("hidden");
+    }
+
+    img.src = `http://strela-vlna.gchd.cz/api/files/probs/${focused_check}/${focused_problem_obj.image}`;
+    
+    if(focused_problem_obj.pending || focused_problem_obj.incorrect || focused_problem_obj.correct){
         answer_input.placeholder = "Odpověděli jste: " + focused_problem_obj.solution;
+        console.log("solution");
+        console.log(focused_problem_obj.solution);
     }else{
         answer_input.placeholder = "Odpověď";
+    }
+
+    if(focused_problem_obj.incorrect){
+        answer_input_wrapper.classList.add("incorrect");
+    }else{
+        answer_input_wrapper.classList.remove("incorrect");
+    }
+
+    if(focused_problem_obj.correct){
+        answer_input_wrapper.classList.add("correct");
+    }else{
+        answer_input_wrapper.classList.remove("correct");
     }
 
     if(focused_problem_obj.pending || clock_zeroed){
@@ -511,31 +553,31 @@ function connectWS() {
 
       case "msgrecd":
         if (msg.length != 3) { cLe() }
-        msgRecieved(msg[1], msg[2])
+        msgRecieved(msg[1], msg[2]);
       break;
       case "sold":
         if (msg.length != 3) { cLe() }
-        probSold(msg[1], msg[2])
+        probSold(msg[1], msg[2]);
       break;
       case "bought":
-        if (msg.length != 6) { cLe() }
-        probBought(msg[1], msg[2], msg[3], msg[4], msg[5])
+        if (msg.length != 7) { cLe() }
+        probBought(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6]);
       break;
       case "solved":
         if (msg.length != 3) { cLe() }
-        probSolved(msg[1], msg[2])
+        probSolved(msg[1], msg[2]);
       break;
       case "focused":
         if (msg.length != 3) { cLe() }
-        probFocused(msg[1], msg[2])
+        probFocused(msg[1], msg[2]);
       break;
       case "unfocused":
         if (msg.length != 2) { cLe() }
-        probUnfocused(msg[1])
+        probUnfocused(msg[1]);
       break;
       case "msgsent":
         if (msg.length != 4) { cLe() }
-        msgSent(msg[1], msg[2], msg[3])
+        msgSent(msg[1], msg[2], msg[3]);
       break;
       case "focuscheck":
         focusCheck();
@@ -686,8 +728,9 @@ function probSold(id, money) {
  * @param {string} diff
  * @param {string} money
  * @param {string} name
- * @param {string} text */
-function probBought(id, diff, money, name, text) {
+ * @param {string} text 
+ * @param {string} imgsrc*/
+function probBought(id, diff, money, name, text, imgname) {
     const new_problem = {
         id: id,
         title: name,
@@ -695,7 +738,10 @@ function probBought(id, diff, money, name, text) {
         focused_by: [],
         can_answer: true,
         seen_chat: true,
+        incorrect: false,
+        correct: false,
         problem_content: text,
+        image: imgname,
         chat: []
     }
     problems.push(new_problem);
@@ -761,10 +807,17 @@ function focusCheck(){
 function graded(probid, correct, money) {
     const problem = problems.find(prob => prob.id == probid);
     if(correct == "yes"){
-        problems = problems.filter(prob => prob.id != probid);
-    }else{
+        problem.correct = true;
         problem.pending = false;
-        problem.solution = "";
+        updateProblemList();
+        setTimeout(() => {
+            problems = problems.filter(prob => prob.id != probid);
+            updateProblemList();
+            updateFocusedProblem();
+        }, 2000);
+    }else{
+        problem.incorrect = true;
+        problem.pending = false;
     }
     team_balance = parseInt(money);
     updateTeamStats();
@@ -790,7 +843,10 @@ function loaded(data) {
             can_answer: true,
             seen_chat: true,
             pending: false,
+            incorrect: false,
+            correct: false,
             solution: "",
+            image: bought.image,
             problem_content: bought.text,
             chat: [],
         }
@@ -805,6 +861,9 @@ function loaded(data) {
             can_answer: true,
             seen_chat: true,
             pending: true,
+            incorrect: false,
+            correct: false,
+            image: pending.image,
             solution: data.checks.find(check => check.probid == pending.id).solution,
             problem_content: pending.text,
             chat: [],

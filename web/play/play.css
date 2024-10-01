@@ -304,6 +304,28 @@
     color: var(--color-secondary-dark);
 }
 
+.problem-incorrect{
+    border-color: #e61f1f !important;
+    background-color: #fff0f0 !important;
+}
+.problem-incorrect .problem-title{
+    color: #801212 !important;
+}
+.problem-incorrect .problem-rank{
+    color: #801212 !important;
+}
+
+.problem-correct{
+    border-color: #0bb258 !important;
+    background-color: #e6fff2 !important;
+}
+.problem-correct .problem-title{
+    color: #145532 !important;
+}
+.problem-correct .problem-rank{
+    color: #145532 !important;
+}
+
 
 .occupied-icon{
     width: 14px;
@@ -573,6 +595,28 @@
 .cannot-answer button{
     background-color: #a0a0a0 !important;
     cursor: not-allowed;
+}
+
+.incorrect #answer-input{
+    border-color: #e61f1f;
+    background-color: #fff0f0;
+}
+.incorrect #submit-answer-button{
+    background-color: #e61f1f;
+}
+.incorrect #answer-input::placeholder{
+    color: #801212;
+}
+
+.correct #answer-input{
+    border-color: #1f9f1f;
+    background-color: #f0fff0;
+}
+.correct #submit-answer-button{
+    background-color: #1f9f1f;
+}
+.correct #answer-input::placeholder{
+    color: #0f5f0f;
 }
 
 #help-center-wrapper{
@@ -1289,9 +1333,19 @@
 }
 
 .MJX-TEX{
-    font-size: 35px;
+    font-size: 25px;
     background-color: #e3f8ff;
-    padding: 5px;
+    padding: 10px;
     border-radius: 10px;
     margin: 10px;
+}
+
+#problem-image{
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 700px;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
 }

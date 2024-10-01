@@ -57,24 +57,24 @@ func PlayerWsHandleMsg(
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
-    prob, money, name, text, err := DBBuy(team, diff)
+    prob, money, name, text, img, err := DBBuy(team, diff)
     if err != nil { return err }
-    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text)
+    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img)
 
-  case "buyold":
-    if len(m) != 2 { return eIm(msg) }
-    diff := m[1]
-    prob, money, name, text, err := DBBuyOld(team, diff)
-    if err != nil { return err }
-    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text)
+  // case "buyold":
+  //   if len(m) != 2 { return eIm(msg) }
+  //   diff := m[1]
+  //   prob, money, name, text, err := DBBuyOld(team, diff)
+  //   if err != nil { return err }
+  //   tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text)
 
   case "solve":
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
     sol := m[2]
-    check, _, teamname, _, csol, upd, err := DBSolve(team, prob, sol)
+    check, _, teamname, _, csol, upd, workers, err := DBSolve(team, prob, sol)
     if err != nil { return err }
-    phash := strconv.Itoa(HashId(prob))
+    phash := HashId(workers)
     tchan.Send("solved", prob, sol)
     if upd {
       AdminSend("upgraded", check, sol, phash)
@@ -104,12 +104,12 @@ func PlayerWsHandleMsg(
       if c == '\x09' { return dbErr("chat", "invalid msg") }
       if c == '\x0b' { return dbErr("chat", "invalid msg") }
     }
-    upd, teamname, name, diff, check, err := DBPlayerMsg(team, prob, text)
+    upd, teamname, name, diff, check, workers, chat, err := DBPlayerMsg(team, prob, text)
     if err != nil { return err }
     tchan.Send("msgsent", prob, text)
-    phash := strconv.Itoa(HashId(prob))
+    phash := HashId(workers)
     if !upd {
-      AdminSend("questioned", check, team, teamname, prob, diff, name, text, phash)
+      AdminSend("questioned", check, team, teamname, prob, diff, name, text, phash, chat)
     } else {
       AdminSend("msgrecd", check, text)
     }
@@ -130,7 +130,7 @@ func PlayerWsHandleMsg(
 
   }
 
-  log.Info("playerevt", team, msg)
+  sLog("playerevt", team, msg)
 
   return nil
 }
@@ -139,7 +139,7 @@ func AdminWsHandleMsg(
   email string,
   perchan chan string,
   msg string,
-  idx int,
+  id string,
 ) (oerr error) {
   defer func(){
     if oerr != nil {
@@ -190,7 +190,7 @@ func AdminWsHandleMsg(
     sprob := sprobt == "yes"
     schatt := m[5]
     schat := schatt == "yes"
-    text, sol, name, diff, chat, banned, _, err := DBAdminView(team, prob, sprob, schat)    
+    text, sol, name, diff, chat, banned, _, img, err := DBAdminView(team, prob, sprob, schat)    
     if err != nil { return err }
     if sprob {
       perchan<- "viewedprob" + DELIM +
@@ -198,7 +198,8 @@ func AdminWsHandleMsg(
                  name + DELIM +
                  diff + DELIM +
                  sol + DELIM +
-                 text
+                 text + DELIM +
+                 img
     }
     if schat {
       perchan<- "viewedchat" + DELIM +
@@ -208,11 +209,11 @@ func AdminWsHandleMsg(
                  chat
     }
     WriteTeamChan(team, "adminfocused", check, prob)
-    AdminSend("focused", check, strconv.Itoa(idx))
+    AdminSend("focused", check, id)
     
   case "unfocus":
     if len(m) != 1 { return eIm(msg) }
-    AdminSend("unfocused", strconv.Itoa(idx))
+    AdminSend("unfocused", id)
 
   case "focuscheck":
     if len(m) != 1 { return eIm(msg) }
@@ -236,7 +237,7 @@ func AdminWsHandleMsg(
 
   case "load":
     if len(m) != 1 { return eIm(msg) }
-    res, err := DBAdminInitLoad(idx)
+    res, err := DBAdminInitLoad(id)
     if err != nil { return err }
     perchan<- "loaded" + DELIM + res
 
@@ -251,6 +252,26 @@ func AdminWsHandleMsg(
     }
     teamChanMapMutex.Unlock()
     AdminSend("gotinfo", info)
+
+  case "work":
+    if len(m) != 1 { return eIm(msg) }
+    workersMutex.Lock()
+    Workers[id] = struct{}{}
+    workersMutex.Unlock()
+    res, err := DBReAssign()
+    if err != nil { return err }
+    WriteTeamChan("reassigned", res)
+    perchan<- "working"
+
+  case "unwork":
+    if len(m) != 1 { return eIm(msg) }
+    workersMutex.Lock()
+    delete(Workers, id)
+    workersMutex.Unlock()
+    res, err := DBReAssign()
+    if err != nil { return err }
+    WriteTeamChan("reassigned", res)
+    perchan<- "unworking"
 
   }
 
