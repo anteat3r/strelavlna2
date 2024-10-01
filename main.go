@@ -272,7 +272,7 @@ func main() {
     return nil
   })
 
-  app.OnCollectionBeforeUpdateRequest().Add(func(e *core.CollectionUpdateEvent) error {
+  app.OnRecordBeforeUpdateRequest().Add(func(e *core.RecordUpdateEvent) error {
     fmt.Println("%#v\n", e)
     return nil
   })
