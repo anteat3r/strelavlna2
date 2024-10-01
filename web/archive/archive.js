@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const yearData = {
     "2023": [
       {
-        id: "2023_strela", // Unique ID for each entry
+        id: "2023_strela",
         title: "Pražská střela 2023",
         placeNameOnline1: "N/A",
         placeNameOnline2: "N/A",
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function() {
         imageLink3: "../images/placeholder.png",
       },
       {
-        id: "2023_vlna", // Unique ID for each entry
+        id: "2023_vlna",
         title: "Dopplerova vlna 2023",
         placeNameOnline1: "N/A",
         placeNameOnline2: "N/A",
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     "2022": [
       {
-        id: "2022_strela", // Unique ID for each entry
+        id: "2022_strela",
         title: "Pražská střela 2022",
         placeNameOnline1: "N/A",
         placeNameOnline2: "N/A",
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function() {
         imageLink3: "../images/placeholder.png",
       },
       {
-        id: "2022_vlna", // Unique ID for each entry
+        id: "2022_vlna",
         title: "Dopplerova vlna 2022",
         placeNameOnline1: "N/A",
         placeNameOnline2: "N/A",
@@ -57,72 +57,17 @@ document.addEventListener("DOMContentLoaded", function() {
         imageLink3: "../images/placeholder.png",
       }
     ],
-    "2019": [
-      {
-        id: "2019_strela", // Unique ID for each entry
-        title: "Pražská střela 2019",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      },
-      {
-        id: "2019_vlna", // Unique ID for each entry
-        title: "Dopplerova vlna 2019",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      }
-    ],
-    "2018": [
-      {
-        id: "2018_strela", // Unique ID for each entry
-        title: "Pražská střela 2018",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      },
-      {
-        id: "2018_vlna", // Unique ID for each entry
-        title: "Dopplerova vlna 2018",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      }
-    ],
+    // Other years...
   };
 
   // Function to generate the HTML for each year entry
   function generateYearHTML(year, data) {
     return data.map(entry => `
-      <div class="archive-year archive-${entry.id}" style="max-height: 0; overflow: hidden;">
-        <div class="year-title">
+      <div class="archive-year archive-${entry.id}">
+        <div class="year-title" style="cursor: pointer;">
           ${entry.title} <i class="fas fa-chevron-right"></i>
         </div>
-        <div class="archive-mobile">
+        <div class="archive-mobile" style="max-height: 0; overflow: hidden;"> <!-- Content hidden by default -->
           <div class="online-round">
             <h1>Online kolo</h1>
             <div class="placement-wrapper">
@@ -195,6 +140,21 @@ document.addEventListener("DOMContentLoaded", function() {
     } else {
       console.error("No .year-selector found in the HTML.");
     }
+
+    // Hide all titles except for the year 2023
+    hideAllTitlesExcept('2023');
+  }
+
+  // Function to hide all year titles except the selected year
+  function hideAllTitlesExcept(year) {
+    const allTitles = document.querySelectorAll('.archive-year');
+    allTitles.forEach(function(title) {
+      if (!title.classList.contains(`archive-${year}_strela`) && !title.classList.contains(`archive-${year}_vlna`)) {
+        title.style.display = 'none'; // Hide the title
+      } else {
+        title.style.display = 'block'; // Show the title
+      }
+    });
   }
 
   // Call the functions to render the content
@@ -209,14 +169,24 @@ document.addEventListener("DOMContentLoaded", function() {
 
   let activeButton = yearButtons[0];
   activeButton.classList.add("current-year-button");
-  const initialYearDiv = document.querySelector(`.archive-${yearData[activeButton.textContent.trim()][0].id}`); // Use the ID of the first entry for initial height
 
-  // Check if the initialYearDiv exists before setting max height
-  if (initialYearDiv) {
-    setMaxHeight(initialYearDiv);
-  } else {
-    console.error("No initial year div found");
-  }
+  // Enable unrolling each year entry by clicking on the .year-title
+  const yearTitles = document.querySelectorAll('.year-title');
+  yearTitles.forEach(function(title) {
+    title.addEventListener("click", function() {
+      const parent = title.parentElement; // Get the parent .archive-year div
+      const content = parent.querySelector('.archive-mobile');
+      const icon = title.querySelector('i'); // Get the icon to rotate
+
+      if (content.style.maxHeight === "0px" || !content.style.maxHeight) {
+        content.style.maxHeight = content.scrollHeight + "px"; // Expand
+        icon.style.transform = "rotate(90deg)"; // Rotate the arrow 90 degrees
+      } else {
+        content.style.maxHeight = "0"; // Collapse
+        icon.style.transform = "rotate(0deg)"; // Reset the arrow to its original position
+      }
+    });
+  });
 
   yearButtons.forEach(function(button) {
     button.addEventListener("click", function() {
@@ -233,30 +203,26 @@ document.addEventListener("DOMContentLoaded", function() {
       button.classList.add("current-year-button");
       activeButton = button;
 
-      const yearDivs = document.querySelectorAll(`.archive-${year}_strela, .archive-${year}_vlna`); // Look for all entries of the specified year
-
-      // Check if yearDivs exist before calling setMaxHeight
-      if (yearDivs.length > 0) {
-        yearDivs.forEach(setMaxHeight); // Set max height for all entries of the specified year
-      } else {
-        console.error(`No year div found for year: ${year}`);
-      }
+      // Show only the titles for the selected year
+      hideAllTitlesExcept(year);
     });
   });
 
   function hideAllYears() {
     const yearDivs = document.querySelectorAll(".archive-year");
     yearDivs.forEach(function(div) {
-      div.style.maxHeight = "0";
+      const content = div.querySelector('.archive-mobile');
+      content.style.maxHeight = "0"; // Collapse the content
+      const icon = div.querySelector('.year-title i'); // Reset the arrow to its original position
+      icon.style.transform = "rotate(0deg)";
     });
   }
 
   function setMaxHeight(element) {
     if (!element) return; // Safeguard if element is null
 
-    element.classList.add("active");
-
-    const contentHeight = element.scrollHeight;
-    element.style.maxHeight = contentHeight + "px";
+    const content = element.querySelector('.archive-mobile');
+    const contentHeight = content.scrollHeight;
+    content.style.maxHeight = contentHeight + "px";
   }
 });

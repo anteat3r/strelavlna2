@@ -8,7 +8,7 @@ var myId = "";
 var myRole = "nobody";
 
 var contest_info = "";
-var contest_name = "";
+var contest_name = "X";
 
 var checks = [
     // {
@@ -82,6 +82,20 @@ document.getElementById("problem-id").addEventListener("click", function(){
         icon.classList.remove("hidden");
         icon_copied.classList.add("hidden");
     }, 3000);
+});
+
+document.getElementById("chat-input").addEventListener("keydown", function(e){
+    if(e.key == "Enter"){
+        if(e.shiftKey){
+            const text = this.value;
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            this.selectionStart = this.selectionEnd = start;
+        }else{
+            e.preventDefault();
+            document.getElementById("send-message-button").click();
+        }
+    }
 });
 
 document.getElementById("send-message-button").addEventListener("click", function(){
