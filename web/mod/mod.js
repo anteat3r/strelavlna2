@@ -975,6 +975,7 @@ function reassigned(items){
         if(check_obj != null){
             if(check_obj.id == focused_check && item.assign != myId){
                 focused_check = "";
+                unfocusCheck();
             }
             check_obj.assignid = item.assign;
         }
