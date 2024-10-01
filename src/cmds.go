@@ -1,12 +1,14 @@
 package src
 
 import (
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v5"
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/tools/types"
@@ -107,7 +109,31 @@ func LoadProbEndp(dao *daos.Dao) echo.HandlerFunc {
 
 func ProbWorkEndp(dao *daos.Dao) echo.HandlerFunc {
 	return func(c echo.Context) error {
-    _, err := dao.DB().NewQuery("UPDATE probs SET text = REPLACE(text, '\\$', '$')").Execute()
-		return err
+    res := []struct{
+      Id string `db:"id"`
+      Workers string `db:"workers"`
+    }{}
+    err := dao.DB().NewQuery("SELECT id, workers FROM probs").All(&res)
+    if err != nil { return err }
+
+    vals := []rune{}
+    for i := range 0x7e-0x21 {
+      v := 0x21 + i
+      vals = append(vals, rune(v))
+    }
+
+    for _, p := range res {
+      for i := range vals {
+          j := rand.Intn(i + 1)
+          vals[i], vals[j] = vals[j], vals[i]
+      }
+      wrk := string(vals)
+      _, err := dao.DB().NewQuery("UPDATE probs SET workers = {:workers} WHERE id = {:id}").
+      Bind(dbx.Params{ "workers": wrk, "id": p.Id }).
+      Execute()
+      if err != nil { log.Error(err) }
+    }
+
+		return nil
 	}
 }
