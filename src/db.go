@@ -437,7 +437,7 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
       Bind(dbx.Params{
         "id": prob,
       }).
-      All(&probres)
+      One(&probres)
 
     if err != nil { return err }
 
