@@ -272,7 +272,7 @@ func main() {
     return nil
   })
 
-  app.OnAdminBeforeUpdateRequest().Add(func(e *core.AdminUpdateEvent) error {
+  app.OnCollectionBeforeUpdateRequest().Add(func(e *core.CollectionUpdateEvent) error {
     fmt.Println("%#v\n", e)
     return nil
   })
