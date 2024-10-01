@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/anteat3r/golog"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/daos"
@@ -334,13 +335,12 @@ func AdminWsLoop(
   sLog("admin quit", oerr)
   conn.Close()
 
+  err := AdminWsHandleMsg(email, perchan, "unwork", id)
+  if err != nil { log.Error(err) }
+
   adminsMutex.Lock()
   delete(AdminsChans, id)
   adminsMutex.Unlock()
-
-  workersMutex.Lock()
-  delete(Workers, id)
-  workersMutex.Unlock()
 
   adminCntMu.Lock()
   AdminCnt -= 1

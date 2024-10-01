@@ -953,3 +953,39 @@ func DBAdminSetInfo(info string) (oerr error) {
   })
   return
 }
+
+type reassignRes struct {
+  Id string `json:"id"`
+  Assign string `json:"assign"`
+}
+
+func DBReAssign() (res string, oerr error) {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+    
+    checkres := []struct{
+      Id string `db:"id"`
+      Work string `db:"workers"`
+    }{}
+    err := txDao.DB().
+      NewQuery("SELECT checks.id, probs.workers FROM checks INNER JOIN probs ON probs.id = checks.prob").
+      All(&checkres)
+    if err != nil { return err }
+
+    resl := make([]reassignRes, len(checkres))
+    for i, c := range checkres {
+      resl[i] = reassignRes{
+        Id: c.Id,
+        Assign: HashId(c.Work),
+      }
+    }
+
+    resb, err := json.Marshal(resl)
+    if err != nil { return err }
+
+    res = string(resb)
+
+    return nil
+
+  })
+  return
+}

@@ -258,6 +258,9 @@ func AdminWsHandleMsg(
     workersMutex.Lock()
     Workers[id] = struct{}{}
     workersMutex.Unlock()
+    res, err := DBReAssign()
+    if err != nil { return err }
+    WriteTeamChan("reassigned", res)
     perchan<- "working"
 
   case "unwork":
@@ -265,6 +268,9 @@ func AdminWsHandleMsg(
     workersMutex.Lock()
     delete(Workers, id)
     workersMutex.Unlock()
+    res, err := DBReAssign()
+    if err != nil { return err }
+    WriteTeamChan("reassigned", res)
     perchan<- "unworking"
 
   }
