@@ -107,7 +107,7 @@ func LoadProbEndp(dao *daos.Dao) echo.HandlerFunc {
 
 func ProbWorkEndp(dao *daos.Dao) echo.HandlerFunc {
 	return func(c echo.Context) error {
-    _, err := dao.DB().NewQuery("UDPATE teams SET text = REPLACE(text, '\\\\$', '$')").Execute()
+    _, err := dao.DB().NewQuery("UPDATE teams SET text = REPLACE(text, '\\\\$', '$')").Execute()
 		return err
 	}
 }
