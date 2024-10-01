@@ -51,6 +51,11 @@ updateChat();
 
 //buy events
 
+document.getElementById("chat-dismiss-button").addEventListener("click", function(){
+    if(focused_check == "") return;
+    dismiss(focused_check);
+})
+
 document.getElementById("team-id").addEventListener("click", function(){
     const team_id = document.getElementById("team-id");
     navigator.clipboard.writeText(team_id.innerHTML.slice(1));
@@ -533,6 +538,7 @@ function updateFocusedCheck(){
         return;
     }
     const grading_wrapper = document.getElementById("grading-wrapper");
+    const chat_dismiss_wrapper = document.getElementById("chat-dismiss-wrapper");
     const check_content_wrapper = document.getElementById("check-content-wrapper");
 
     const team_name = document.getElementById("team-name");
@@ -563,13 +569,16 @@ function updateFocusedCheck(){
         correct_answer.innerHTML = focused_problem_obj ? focused_problem_obj.correct_answer : "Načítání...";
         grading_wrapper.classList.remove("hidden");
         check_content_wrapper.classList.remove("hidden");
+        chat_dismiss_wrapper.classList.add("hidden");
     }else if(focused_check_obj.type == "chat"){
         problem_id.innerHTML = "#" + focused_check_obj.probid;
         grading_wrapper.classList.add("hidden");
         check_content_wrapper.classList.remove("hidden");
+        chat_dismiss_wrapper.classList.remove("hidden");
     }else if(focused_check_obj.type == "globalchat"){
         grading_wrapper.classList.add("hidden");
         check_content_wrapper.classList.add("hidden");
+        chat_dismiss_wrapper.classList.remove("hidden");
     }else{
         console.error("Unknown check type: " + focused_check_obj.type);
     }
@@ -926,10 +935,11 @@ function gotInfo(info) {
 
 function upgraded(checkid, answer, assignid){
     const check_obj = checks.find(check => check.id == checkid);
-    check_obj.team_answer = answer;
+    check_obj.team_message = answer;
     check_obj.type = "grade";
     check_obj.assignid = assignid;
     updateCheckList();
+    updateFocusedCheck();
 }
 
 /**
@@ -1062,6 +1072,7 @@ function dismissed(checkid){
     }
     updateCheckList();
     updateFocusedCheck();
+    updateChat();
 }
 
 /** @param {string} teamid
@@ -1070,6 +1081,7 @@ function dismissed(checkid){
 function msgRecieved(checkid, msg) {
     const check_obj = checks.find(check => check.id == checkid);
     const chat_obj = cached_chats.find(chat => chat.teamid == check_obj.teamid && chat.probid == check_obj.probid);
+    console.log(check_obj, chat_obj);
     if(chat_obj == null)return;
     chat_obj.chat.push({author: "team", content: msg});
     chat_obj.seen_chat = false;
@@ -1083,7 +1095,7 @@ function msgRecieved(checkid, msg) {
  * @param {string} msg */
  
 function msgSent(teamid, probid, msg) {
-    const chat_obj = cached_chats.find(chat => probid == "" ? chat.teamid == teamid : chat.probid == probid);
+    const chat_obj = cached_chats.find(chat => chat.teamid == teamid && chat.probid == probid);
     if(chat_obj == null)return;
     chat_obj.chat.push({author: "support", content: msg});
     updateChat();

@@ -1101,6 +1101,40 @@
     user-select: none;
 }
 
+#chat-dismiss-wrapper{
+    position: absolute;
+    width: calc(100% - 140px - 60px);
+    bottom: 0px;
+    margin-top: auto;
+    height: 100px;
+    padding: 30px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+#chat-dismiss-button{
+    width: 320px;
+    height: 40px;
+    border: 2px #161616 solid;
+    background-color: #f1f1f1;
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 500;
+    color: #161616;
+    text-align: center;
+    padding: 0px;
+    border-radius: 5px;
+    transition: all 0.3s ease-out;
+}
+
+#chat-dismiss-button:hover{
+    background-color: var(--color-secondary-dark);
+    color: #ffffff;
+    transition: all 0.0s;
+}
+
 #grading-wrapper{
     position: absolute;
     width: calc(100% - 140px - 60px);
