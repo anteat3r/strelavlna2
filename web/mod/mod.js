@@ -849,6 +849,10 @@ function connectWS() {
         if (msg.length != 2) { cLe() }
         gotInfo(msg[1]);
         break;
+      case "reassigned":
+        if (msg.length != 2) { cLe() }
+        reassigned(msg[1]);
+        break;
       case "err":
         console.log(msg)
       break;
@@ -963,6 +967,24 @@ function unwork() {
 
 
 
+
+function reassigned(items){
+    items = JSON.parse(items);
+    for(item of items){
+        const check_obj = checks.find(check => check.id == item.id);
+        if(check_obj != null){
+            if(check_obj.id == focused_check && item.assign != myId && myRole == "worker"){
+                focused_check = "";
+                unfocusCheck();
+            }
+            check_obj.assignid = item.assign;
+        }
+    }
+    updateCheckList();
+    updateFocusedCheck();
+    updateChat();
+    updateModHome();
+}
 
 function gotInfo(info) {
     contest_info = info;
@@ -1159,6 +1181,12 @@ function checkFocused(checkid, modid) {
     if(!check.focused_by.includes(modid)){
         check.focused_by.push(modid);
     }
+    if(modid != myId && checkid == focused_check){
+        focused_check = "";
+        unfocusCheck();
+        updateFocusedCheck();
+    }
+
     updateCheckList();    
     updateChat();
 }
