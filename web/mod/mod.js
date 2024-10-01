@@ -187,6 +187,11 @@ role_button_admin.addEventListener("click", function(){
 
 function setRole(role){
     myRole = role;
+    if(myRole == "worker"){
+        work();
+    }else{
+        unwork();
+    }
     updateModHome();
     updateCheckList();
 }
@@ -931,6 +936,12 @@ function load() {
   socket.send("load");
 }
 
+function work() {
+  socket.send("work");
+}
+function unwork() {
+  socket.send("unwork");
+}
 
 
 
