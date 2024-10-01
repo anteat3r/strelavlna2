@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"errors"
-	"html/template"
+	"fmt"
 	"net/http"
-	"net/mail"
 	"os"
 	"strconv"
 	"strings"
@@ -17,7 +15,6 @@ import (
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/cron"
-	"github.com/pocketbase/pocketbase/tools/mailer"
 	"github.com/pocketbase/pocketbase/tools/types"
 
 	log "github.com/anteat3r/golog"
@@ -272,6 +269,11 @@ func main() {
     if err != nil { panic(err) }
     src.ChecksColl = cll
 
+    return nil
+  })
+
+  app.OnAdminBeforeUpdateRequest().Add(func(e *core.AdminUpdateEvent) error {
+    fmt.Println("%#v\n", e)
     return nil
   })
 
