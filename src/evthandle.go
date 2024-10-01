@@ -260,7 +260,7 @@ func AdminWsHandleMsg(
     workersMutex.Unlock()
     res, err := DBReAssign()
     if err != nil { return err }
-    WriteTeamChan("reassigned", res)
+    AdminSend("reassigned", res)
     perchan<- "working"
 
   case "unwork":
@@ -270,7 +270,7 @@ func AdminWsHandleMsg(
     workersMutex.Unlock()
     res, err := DBReAssign()
     if err != nil { return err }
-    WriteTeamChan("reassigned", res)
+    AdminSend("reassigned", res)
     perchan<- "unworking"
 
   }

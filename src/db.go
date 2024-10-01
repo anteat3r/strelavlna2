@@ -33,6 +33,7 @@ var (
 
 func HashId(work string) (res string) {
   workersMutex.RLock()
+  log.Info(Workers)
   for _, c := range strings.Split(work, " ") {
     if _, ok := Workers[c]; ok { res = c }
   }
