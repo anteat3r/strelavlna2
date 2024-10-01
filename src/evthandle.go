@@ -72,9 +72,9 @@ func PlayerWsHandleMsg(
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
     sol := m[2]
-    check, _, teamname, _, csol, upd, err := DBSolve(team, prob, sol)
+    check, _, teamname, _, csol, upd, workers, err := DBSolve(team, prob, sol)
     if err != nil { return err }
-    phash := strconv.Itoa(HashId(prob))
+    phash := strconv.Itoa(HashId(workers))
     tchan.Send("solved", prob, sol)
     if upd {
       AdminSend("upgraded", check, sol, phash)
@@ -104,10 +104,10 @@ func PlayerWsHandleMsg(
       if c == '\x09' { return dbErr("chat", "invalid msg") }
       if c == '\x0b' { return dbErr("chat", "invalid msg") }
     }
-    upd, teamname, name, diff, check, err := DBPlayerMsg(team, prob, text)
+    upd, teamname, name, diff, check, workers, err := DBPlayerMsg(team, prob, text)
     if err != nil { return err }
     tchan.Send("msgsent", prob, text)
-    phash := strconv.Itoa(HashId(prob))
+    phash := strconv.Itoa(HashId(workers))
     if !upd {
       AdminSend("questioned", check, team, teamname, prob, diff, name, text, phash)
     } else {

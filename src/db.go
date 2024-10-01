@@ -31,16 +31,17 @@ var (
   ChecksColl *models.Collection
 )
 
-func HashId(id string) int {
-  res := 0
-  for _, r := range id {
-    res += int(r)
-  }
+func HashId(work string) int {
   adminCntMu.RLock()
   cnt := AdminCnt
   adminCntMu.RUnlock()
-  if cnt == 0 { cnt = 1 }
-  return res % cnt
+  if cnt < 0 { cnt = 0}
+
+  for _, c := range work {
+    i := int(c) - ProbWorkCharOffset
+    if i < cnt { return i }
+  }
+  return 0
 }
  
 func ParseRefList(s string) []string {
@@ -243,7 +244,7 @@ func DBBuyOld(team string, diff string) (id string, money int, name string, text
   return dbBuySrc(team, diff, "solved")
 }
 
-func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, csol string, updated bool, oerr error) {
+func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, csol string, updated bool, workers string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -271,9 +272,10 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
       Name string `db:"name"`
       Text string `db:"text"`
       Sol string `db:"solution"`
+      Workers string `db:"workers"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT diff, name, text FROM probs WHERE id = {:prob} LIMIT 1").
+      NewQuery("SELECT diff, name, text, workers FROM probs WHERE id = {:prob} LIMIT 1").
       Bind(dbx.Params{ "prob": prob }).
       One(&probres)
 
@@ -283,6 +285,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
     diff = probres.Diff
     name = probres.Name
     csol = probres.Sol
+    workers = probres.Workers
     
     _, err = txDao.DB().
       NewQuery("UPDATE teams SET pending = {:pending}, bought = {:bought} WHERE id = {:id}").
@@ -356,7 +359,7 @@ func DBView(team string, prob string) (text string, diff string, name string, oe
   return
 }
 
-func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname string, name string, diff string, check string, oerr error) {
+func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname string, name string, diff string, check string, workers string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -418,9 +421,10 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
     probres := struct{
       Diff string `db:"diff"`
       Name string `db:"name"`
+      Workers string `db:"workers"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT diff, name FROM probs WHERE id = {:id} LIMIT 1").
+      NewQuery("SELECT diff, name, workers FROM probs WHERE id = {:id} LIMIT 1").
       Bind(dbx.Params{
         "id": team,
       }).
@@ -432,6 +436,7 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
     name = probres.Name
     teamname = teamres.Name
     check = cid
+    workers = probres.Workers
 
     return nil
   })
