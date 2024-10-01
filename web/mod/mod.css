@@ -1617,3 +1617,11 @@
     opacity: 1;
     transition: opacity 0.0s;
 }
+
+.MJX-TEX{
+    font-size: 35px;
+    background-color: #e0ecf5;
+    padding: 5px;
+    border-radius: 10px;
+    margin: 10px;
+}

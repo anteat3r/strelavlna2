@@ -259,6 +259,9 @@
     color: white;
     transition: color 0s;
 }
+.problem:hover.problem-pending .problem-title{
+    color: var(--color-secondary-dark);
+}
 .problem-focused .problem-title{
     color: white;
 }
@@ -275,6 +278,9 @@
     color: white;
     transition: color 0s;
 }
+.problem:hover.problem-pending .problem-rank{
+    color: var(--color-secondary-dark);
+}
 .problem-focused .problem-rank{
     color: white;
 }
@@ -283,7 +289,7 @@
     border-style: dashed !important;
 }
 
-.problem-focused.problem-pending{
+.problem-pending{
     border-color: var(--color-secondary-light) !important;
     /* border-style: solid !important; */
     background-color: var(--color-secondary-white) !important;
@@ -1280,4 +1286,12 @@
 
 #seen-global-chat-icon{
     margin: 0px;
+}
+
+.MJX-TEX{
+    font-size: 35px;
+    background-color: #e3f8ff;
+    padding: 5px;
+    border-radius: 10px;
+    margin: 10px;
 }

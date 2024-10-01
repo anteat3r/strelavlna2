@@ -167,7 +167,6 @@ function updateModHome(){
         role_admin.classList.add("role-selected");
         textfield_wrapper.classList.remove("hidden");
     }
-
 }
 
 
@@ -582,6 +581,8 @@ function updateFocusedCheck(){
     }else{
         console.error("Unknown check type: " + focused_check_obj.type);
     }
+    MathJax.typeset();
+
 }
 
 function updateChat(){
