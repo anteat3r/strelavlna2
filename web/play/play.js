@@ -1,6 +1,6 @@
 const redirects = false;
 //global states
-var contest_name = "";
+var contest_name = "X";
 var contest_info = "";
 var seen_contest_info = true;
 var team_balance = 400;
@@ -45,6 +45,13 @@ updatePriceList();
 
 
 //buy events
+
+document.getElementById("chat-input").addEventListener("keydown", function(e){
+    if(e.key == "Enter" && e.shiftKey){
+        e.preventDefault();
+        document.getElementById("send-message-button").click();
+    }
+});
 
 document.getElementById("send-message-button").addEventListener("click", function(){
     if(chat_banned) return;

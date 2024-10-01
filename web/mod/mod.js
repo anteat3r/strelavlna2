@@ -8,7 +8,7 @@ var myId = "";
 var myRole = "nobody";
 
 var contest_info = "";
-var contest_name = "";
+var contest_name = "X";
 
 var checks = [
     // {
