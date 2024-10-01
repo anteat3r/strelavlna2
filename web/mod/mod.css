@@ -1118,7 +1118,7 @@
     width: 320px;
     height: 40px;
     border: 2px #161616 solid;
-    background-color: #f1f1f1;
+    background-color: #e8f3f7;
     font-family: 'Lexend';
     font-size: 20px;
     font-weight: 500;
@@ -1619,7 +1619,7 @@
 }
 
 .MJX-TEX{
-    font-size: 35px;
+    font-size: 25px;
     background-color: #e0ecf5;
     padding: 5px;
     border-radius: 10px;
