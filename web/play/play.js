@@ -42,6 +42,8 @@ updateShop();
 updatePriceList();
 
 
+
+
 //buy events
 
 document.getElementById("send-message-button").addEventListener("click", function(){
@@ -255,7 +257,10 @@ function updateFocusedProblem(){
     const problem_content = document.getElementById("problem-content");
     const focused_problem_obj = problems.find(prob => prob.id == focused_check);
     problem_title.innerHTML = focused_problem_obj.title + " [" + focused_problem_obj.rank + "]";
-    problem_content.innerHTML = focused_problem_obj.problem_content;
+
+    const content = focused_problem_obj.problem_content;
+    problem_content.innerHTML = content;
+
     const answer_input_wrapper = document.getElementById("answer-input-wrapper");
     const answer_input = document.getElementById("answer-input");
     if(focused_problem_obj.pending){
@@ -269,6 +274,7 @@ function updateFocusedProblem(){
     }else{
         answer_input_wrapper.classList.remove("cannot-answer");
     }
+    MathJax.typeset();
 }
 
 function updateChat(){
