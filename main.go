@@ -272,15 +272,6 @@ func main() {
     return nil
   })
 
-  app.OnRecordBeforeUpdateRequest().Add(func(e *core.RecordUpdateEvent) error {
-    fmt.Printf("%#v\n", e.UploadedFiles["img"][0].OriginalName)
-    return nil
-  })
-  app.OnRecordAfterUpdateRequest().Add(func(e *core.RecordUpdateEvent) error {
-    fmt.Printf("%#v\n", e)
-    return nil
-  })
-
   src.App = app
 
   if err := app.Start(); err != nil {
