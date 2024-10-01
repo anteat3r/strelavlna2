@@ -1181,6 +1181,12 @@ function checkFocused(checkid, modid) {
     if(!check.focused_by.includes(modid)){
         check.focused_by.push(modid);
     }
+    if(modid != myId && checkid == focused_check){
+        focused_check = "";
+        unfocusCheck();
+        updateFocusedCheck();
+    }
+
     updateCheckList();    
     updateChat();
 }
