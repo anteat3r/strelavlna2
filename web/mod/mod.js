@@ -973,7 +973,7 @@ function reassigned(items){
     for(item of items){
         const check_obj = checks.find(check => check.id == item.id);
         if(check_obj != null){
-            if(check_obj.id == focused_check && item.assign != myId){
+            if(check_obj.id == focused_check && item.assign != myId && myRole == "worker"){
                 focused_check = "";
                 unfocusCheck();
             }
