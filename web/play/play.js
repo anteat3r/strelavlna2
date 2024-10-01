@@ -47,9 +47,16 @@ updatePriceList();
 //buy events
 
 document.getElementById("chat-input").addEventListener("keydown", function(e){
-    if(e.key == "Enter" && e.shiftKey){
-        e.preventDefault();
-        document.getElementById("send-message-button").click();
+    if(e.key == "Enter"){
+        if(e.shiftKey){
+            const text = this.value;
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            this.selectionStart = this.selectionEnd = start;
+        }else{
+            e.preventDefault();
+            document.getElementById("send-message-button").click();
+        }
     }
 });
 

@@ -84,6 +84,20 @@ document.getElementById("problem-id").addEventListener("click", function(){
     }, 3000);
 });
 
+document.getElementById("chat-input").addEventListener("keydown", function(e){
+    if(e.key == "Enter"){
+        if(e.shiftKey){
+            const text = this.value;
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            this.selectionStart = this.selectionEnd = start;
+        }else{
+            e.preventDefault();
+            document.getElementById("send-message-button").click();
+        }
+    }
+});
+
 document.getElementById("send-message-button").addEventListener("click", function(){
     const chat_input = document.getElementById("chat-input");
     if(chat_input.value.length > 200 || chat_input.value.length == 0) return;
