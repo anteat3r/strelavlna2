@@ -273,7 +273,11 @@ func main() {
   })
 
   app.OnRecordBeforeUpdateRequest().Add(func(e *core.RecordUpdateEvent) error {
-    fmt.Println("%#v\n", e)
+    fmt.Printf("%#v\n", e)
+    return nil
+  })
+  app.OnRecordAfterUpdateRequest().Add(func(e *core.RecordUpdateEvent) error {
+    fmt.Printf("%#v\n", e)
     return nil
   })
 
