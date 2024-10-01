@@ -123,6 +123,14 @@ document.getElementById("submit-answer-button").addEventListener("click", functi
     }
 });
 
+document.getElementById("answer-input").addEventListener("focus", function(){
+    const focused_problem_obj = problems.find(prob => prob.id == focused_check);
+    if(focused_problem_obj != null){
+        focused_problem_obj.incorrect = false;
+    }
+    updateFocusedProblem();
+    updateProblemList();
+});
 
 
 function updateShop(){
@@ -199,12 +207,15 @@ function updateProblemList(){
     for(const prob of problems){
         if(prob.focused_by.length > 0){
             prob.seen_chat = true;
+            if(focused_check != prob.id){
+                prob.incorrect = false;
+            }
         }
     }
     problems_wrapper.innerHTML = "";
     for(prob of problems){
         problems_wrapper.innerHTML +=
-        `<div class="problem ${focused_check == prob.id ? "problem-focused" : ""} ${prob.focused_by.length > (focused_check == prob.id ? 1 : 0) ? "problem-worked-on" : ""} ${!prob.seen_chat ? "unseen-chat" : ""} ${prob.pending ? "problem-pending" : ""}" id="${prob.id}">
+        `<div class="problem ${focused_check == prob.id ? "problem-focused" : ""} ${prob.focused_by.length > (focused_check == prob.id ? 1 : 0) ? "problem-worked-on" : ""} ${!prob.seen_chat ? "unseen-chat" : ""} ${prob.pending ? "problem-pending" : ""} ${prob.incorrect ? "problem-incorrect" : ""} ${prob.correct ? "problem-correct" : ""}" id="${prob.id}">
             <div class="flex flex-row align-center">
                 <h2 class="problem-title"${prob.title.length > 12 ? `style="font-size: 15px"` : ""}>${prob.title}</h2>
                 <h2 class="problem-rank">[${prob.rank}]</h2>
@@ -263,10 +274,24 @@ function updateFocusedProblem(){
 
     const answer_input_wrapper = document.getElementById("answer-input-wrapper");
     const answer_input = document.getElementById("answer-input");
-    if(focused_problem_obj.pending){
+    if(focused_problem_obj.pending || focused_problem_obj.incorrect || focused_problem_obj.correct){
         answer_input.placeholder = "Odpověděli jste: " + focused_problem_obj.solution;
+        console.log("solution");
+        console.log(focused_problem_obj.solution);
     }else{
         answer_input.placeholder = "Odpověď";
+    }
+
+    if(focused_problem_obj.incorrect){
+        answer_input_wrapper.classList.add("incorrect");
+    }else{
+        answer_input_wrapper.classList.remove("incorrect");
+    }
+
+    if(focused_problem_obj.correct){
+        answer_input_wrapper.classList.add("correct");
+    }else{
+        answer_input_wrapper.classList.remove("correct");
     }
 
     if(focused_problem_obj.pending || clock_zeroed){
@@ -695,6 +720,8 @@ function probBought(id, diff, money, name, text) {
         focused_by: [],
         can_answer: true,
         seen_chat: true,
+        incorrect: false,
+        correct: false,
         problem_content: text,
         chat: []
     }
@@ -761,10 +788,17 @@ function focusCheck(){
 function graded(probid, correct, money) {
     const problem = problems.find(prob => prob.id == probid);
     if(correct == "yes"){
-        problems = problems.filter(prob => prob.id != probid);
-    }else{
+        problem.correct = true;
         problem.pending = false;
-        problem.solution = "";
+        updateProblemList();
+        setTimeout(() => {
+            problems = problems.filter(prob => prob.id != probid);
+            updateProblemList();
+            updateFocusedProblem();
+        }, 2000);
+    }else{
+        problem.incorrect = true;
+        problem.pending = false;
     }
     team_balance = parseInt(money);
     updateTeamStats();
@@ -790,6 +824,8 @@ function loaded(data) {
             can_answer: true,
             seen_chat: true,
             pending: false,
+            incorrect: false,
+            correct: false,
             solution: "",
             problem_content: bought.text,
             chat: [],
@@ -805,6 +841,8 @@ function loaded(data) {
             can_answer: true,
             seen_chat: true,
             pending: true,
+            incorrect: false,
+            correct: false,
             solution: data.checks.find(check => check.probid == pending.id).solution,
             problem_content: pending.text,
             chat: [],
