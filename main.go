@@ -150,6 +150,11 @@ func main() {
     )
 
     e.Router.GET(
+      "/probwork",
+      src.ProbWorkEndp(app.Dao()),
+    )
+
+    e.Router.GET(
       "/api/admin/loadactivec",
       func(c echo.Context) error {
         src.ActiveContestMu.RLock()
