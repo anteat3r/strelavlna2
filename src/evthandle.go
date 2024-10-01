@@ -57,16 +57,16 @@ func PlayerWsHandleMsg(
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
-    prob, money, name, text, err := DBBuy(team, diff)
+    prob, money, name, text, img, err := DBBuy(team, diff)
     if err != nil { return err }
-    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text)
+    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img)
 
-  case "buyold":
-    if len(m) != 2 { return eIm(msg) }
-    diff := m[1]
-    prob, money, name, text, err := DBBuyOld(team, diff)
-    if err != nil { return err }
-    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text)
+  // case "buyold":
+  //   if len(m) != 2 { return eIm(msg) }
+  //   diff := m[1]
+  //   prob, money, name, text, err := DBBuyOld(team, diff)
+  //   if err != nil { return err }
+  //   tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text)
 
   case "solve":
     if len(m) != 3 { return eIm(msg) }
@@ -190,7 +190,7 @@ func AdminWsHandleMsg(
     sprob := sprobt == "yes"
     schatt := m[5]
     schat := schatt == "yes"
-    text, sol, name, diff, chat, banned, _, err := DBAdminView(team, prob, sprob, schat)    
+    text, sol, name, diff, chat, banned, _, img, err := DBAdminView(team, prob, sprob, schat)    
     if err != nil { return err }
     if sprob {
       perchan<- "viewedprob" + DELIM +
@@ -198,7 +198,8 @@ func AdminWsHandleMsg(
                  name + DELIM +
                  diff + DELIM +
                  sol + DELIM +
-                 text
+                 text + DELIM +
+                 img
     }
     if schat {
       perchan<- "viewedchat" + DELIM +
