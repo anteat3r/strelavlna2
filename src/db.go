@@ -31,16 +31,17 @@ var (
   ChecksColl *models.Collection
 )
 
-func HashId(id string) int {
-  res := 0
-  for _, r := range id {
-    res += int(r)
-  }
+func HashId(work string) int {
   adminCntMu.RLock()
   cnt := AdminCnt
   adminCntMu.RUnlock()
-  if cnt == 0 { cnt = 1 }
-  return res % cnt
+  if cnt < 0 { cnt = 0}
+
+  for _, c := range work {
+    i := int(c) - ProbWorkCharOffset
+    if i < cnt { return i }
+  }
+  return 0
 }
  
 func ParseRefList(s string) []string {
@@ -168,7 +169,7 @@ func DBSell(team string, prob string) (money int, oerr error) {
   return
 }
 
-func dbBuySrc(team string, diff string, srcField string) (prob string, money int, name string, text string, oerr error) {
+func dbBuySrc(team string, diff string, srcField string) (prob string, money int, name string, text string, img string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
     diffcost, ok := GetCost(diff)
     if !ok { return dbClownErr("buy", "invalid diff") }
@@ -193,9 +194,10 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
       Id string `db:"id"`
       Name string `db:"name"`
       Text string `db:"text"`
+      Img string `db:"img"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT id, name, text FROM probs WHERE id IN " +
+      NewQuery("SELECT id, name, text, img FROM probs WHERE id IN " +
                 RefListToInExpr(ParseRefList(teamres.Free)) +
                 " AND diff = {:diff} LIMIT 1").
         Bind(dbx.Params{ "diff": diff }).
@@ -217,6 +219,7 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
     money = teamres.Money - diffcost
     name = probres.Name
     text = probres.Text
+    img = probres.Img
 
     _, err = txDao.DB().
       NewQuery("UPDATE teams SET money = {:money}, free = {:free}, bought = {:bought} WHERE id = {:team}").
@@ -235,15 +238,15 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
   return
 }
 
-func DBBuy(team string, diff string) (id string, money int, name string, text string, oerr error) {
+func DBBuy(team string, diff string) (id string, money int, name string, text string, img string, oerr error) {
   return dbBuySrc(team, diff, "free")
 }
 
-func DBBuyOld(team string, diff string) (id string, money int, name string, text string, oerr error) {
+func DBBuyOld(team string, diff string) (id string, money int, name string, text string, img string, oerr error) {
   return dbBuySrc(team, diff, "solved")
 }
 
-func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, csol string, updated bool, oerr error) {
+func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, csol string, updated bool, workers string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -271,9 +274,10 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
       Name string `db:"name"`
       Text string `db:"text"`
       Sol string `db:"solution"`
+      Workers string `db:"workers"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT diff, name, text FROM probs WHERE id = {:prob} LIMIT 1").
+      NewQuery("SELECT diff, name, text, workers FROM probs WHERE id = {:prob} LIMIT 1").
       Bind(dbx.Params{ "prob": prob }).
       One(&probres)
 
@@ -283,6 +287,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
     diff = probres.Diff
     name = probres.Name
     csol = probres.Sol
+    workers = probres.Workers
     
     _, err = txDao.DB().
       NewQuery("UPDATE teams SET pending = {:pending}, bought = {:bought} WHERE id = {:id}").
@@ -356,7 +361,7 @@ func DBView(team string, prob string) (text string, diff string, name string, oe
   return
 }
 
-func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname string, name string, diff string, check string, oerr error) {
+func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname string, name string, diff string, check string, workers string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -418,9 +423,10 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
     probres := struct{
       Diff string `db:"diff"`
       Name string `db:"name"`
+      Workers string `db:"workers"`
     }{}
     err = txDao.DB().
-      NewQuery("SELECT diff, name FROM probs WHERE id = {:id} LIMIT 1").
+      NewQuery("SELECT diff, name, workers FROM probs WHERE id = {:id} LIMIT 1").
       Bind(dbx.Params{
         "id": team,
       }).
@@ -432,6 +438,7 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
     name = probres.Name
     teamname = teamres.Name
     check = cid
+    workers = probres.Workers
 
     return nil
   })
@@ -443,6 +450,7 @@ type probRes struct {
   Diff string `db:"diff" json:"diff"`
   Text string `db:"text" json:"text"`
   Id string `db:"id" json:"id"`
+  Img string `db:"img" json:"image"`
 }
 
 type teamRes struct {
@@ -502,14 +510,14 @@ func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
 
     boughtprobsres := []probRes{}
     err = txDao.DB().
-      NewQuery("SELECT id, name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Bought))).
+      NewQuery("SELECT id, name, diff, text, img FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Bought))).
       All(&boughtprobsres)
 
     if err != nil { return err }
 
     pendingprobsres := []probRes{}
     err = txDao.DB().
-      NewQuery("SELECT id, name, diff, text FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Pending))).
+      NewQuery("SELECT id, name, diff, text, img FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Pending))).
       All(&pendingprobsres)
 
     if err != nil { return err }
@@ -716,7 +724,7 @@ func DBAdminDismiss(check string) (team string, prob string, oerr error) {
   return
 }
 
-func DBAdminView(team string, prob string, sprob bool, schat bool) (text string, sol string, name string, diff string, chat string, banned string, lastbanned string, oerr error) {
+func DBAdminView(team string, prob string, sprob bool, schat bool) (text string, sol string, name string, diff string, chat string, banned string, lastbanned string, img string, oerr error) {
   if !sprob && !schat { return }
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
@@ -726,9 +734,10 @@ func DBAdminView(team string, prob string, sprob bool, schat bool) (text string,
         Sol string `db:"solution"`
         Diff string `db:"diff"`
         Name string `db:"name"`
+        Img string `db:"img"`
       }{}
       err := txDao.DB().
-        NewQuery("SELECT text, solution, diff, name FROM probs WHERE id = {:prob} LIMIT 1").
+        NewQuery("SELECT text, solution, diff, name, img FROM probs WHERE id = {:prob} LIMIT 1").
         Bind(dbx.Params{ "prob": prob }).
         One(&probres)
 
@@ -738,6 +747,7 @@ func DBAdminView(team string, prob string, sprob bool, schat bool) (text string,
       sol = probres.Sol
       diff = probres.Diff
       name = probres.Name
+      img = probres.Img
     }
 
     if schat {

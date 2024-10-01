@@ -1,12 +1,14 @@
 package src
 
 import (
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v5"
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/tools/types"
@@ -105,9 +107,99 @@ func LoadProbEndp(dao *daos.Dao) echo.HandlerFunc {
 	}
 }
 
+const ProbWorkCharOffset = 0x21
+
 func ProbWorkEndp(dao *daos.Dao) echo.HandlerFunc {
 	return func(c echo.Context) error {
-    _, err := dao.DB().NewQuery("UPDATE probs SET text = REPLACE(text, '\\$', '$')").Execute()
-		return err
+
+    cnt, err := strconv.Atoi(c.QueryParam("s"))
+    if err != nil { return err }
+
+    res := []struct{
+      Id string `db:"id"`
+      Workers string `db:"workers"`
+    }{}
+    err = dao.DB().NewQuery("SELECT id, workers FROM probs").All(&res)
+    if err != nil { return err }
+
+    vals := []rune{}
+    for i := range cnt {
+      v := ProbWorkCharOffset + i
+      vals = append(vals, rune(v))
+    }
+
+    for _, p := range res {
+      for i := range vals {
+          j := rand.Intn(i + 1)
+          vals[i], vals[j] = vals[j], vals[i]
+      }
+      wrk := string(vals)
+      _, err := dao.DB().NewQuery("UPDATE probs SET workers = {:workers} WHERE id = {:id}").
+      Bind(dbx.Params{ "workers": wrk, "id": p.Id }).
+      Execute()
+      if err != nil { log.Error(err) }
+    }
+
+		return nil
 	}
 }
+
+    //
+    // e.Router.GET(
+    //   "/api/admin/sendspam",
+    //   func(c echo.Context) error {
+    //     comp, err := app.Dao().FindRecordById("contests", c.QueryParam("id"))
+    //     if err != nil { return err }
+    //
+    //     tmpls, err := app.Dao().FindFirstRecordByData("texts", "name", "spam_mail")
+    //     if err != nil { return err }
+    //
+    //     var renbuf bytes.Buffer
+    //     tmpl, err := template.New("mail_check_mail").Parse(tmpls.GetString("text"))
+    //     if err != nil { return err }
+    //
+    //     err = tmpl.Execute(&renbuf, struct{
+    //       CompSubject,
+    //       CompName,
+    //       OnlineRound,
+    //       FinalRound,
+    //       RegistrationStart,
+    //       RegistrationEnd string
+    //     }{
+    //       comp.GetString("subject"),
+    //       comp.GetString("name"),
+    //       comp.GetDateTime("online_round").Time().Format("1.2.2006 15:04:05"),
+    //       comp.GetDateTime("final_round").Time().Format("1.2.2006 15:04:05"),
+    //       comp.GetDateTime("registration_start").Time().Format("1.2.2006 15:04:05"),
+    //       comp.GetDateTime("registration_end").Time().Format("1.2.2006 15:04:05"),
+    //     })
+    //     if err != nil { return err }
+    //
+    //     msg := renbuf.String()
+    //
+    //     res := []struct{
+    //       Email1 string `db:"email_1"`
+    //       Email2 string `db:"email_2"`
+    //     }{}
+    //     err = app.Dao().DB().NewQuery("SELECT email_1, email_2 FROM skoly WHERE email_1 != '' OR email_2 != ''").
+    //       All(&res)
+    //     if err != nil { return err }
+    //     for _, s := range res {
+    //       var e string
+    //       if s.Email1 != "" { e = s.Email1 } else if s.Email2 != "" { e = s.Email2 }
+    //       mailerc.Send(&mailer.Message{
+    //         From: mail.Address{
+    //           Address: "strela-vlna@gchd.cz",
+    //           Name: "Střela Vlna",
+    //         },
+    //         To: []mail.Address{{Address: e}},
+    //         Subject: "",
+    //         HTML: msg,
+    //       })
+    //     }
+    //     return c.String(200, "")
+    //   },
+    //   // apis.RequireAdminAuth(),
+    // )
+    //
+    //

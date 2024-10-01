@@ -1,11 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"errors"
-	"html/template"
 	"net/http"
-	"net/mail"
 	"os"
 	"strconv"
 	"strings"
@@ -17,7 +14,6 @@ import (
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/cron"
-	"github.com/pocketbase/pocketbase/tools/mailer"
 	"github.com/pocketbase/pocketbase/tools/types"
 
 	log "github.com/anteat3r/golog"
@@ -150,11 +146,6 @@ func main() {
     )
 
     e.Router.GET(
-      "/probwork",
-      src.ProbWorkEndp(app.Dao()),
-    )
-
-    e.Router.GET(
       "/api/admin/loadactivec",
       func(c echo.Context) error {
         src.ActiveContestMu.RLock()
@@ -245,60 +236,8 @@ func main() {
     )
 
     e.Router.GET(
-      "/api/admin/sendspam",
-      func(c echo.Context) error {
-        comp, err := app.Dao().FindRecordById("contests", c.QueryParam("id"))
-        if err != nil { return err }
-
-        tmpls, err := app.Dao().FindFirstRecordByData("texts", "name", "spam_mail")
-        if err != nil { return err }
-
-        var renbuf bytes.Buffer
-        tmpl, err := template.New("mail_check_mail").Parse(tmpls.GetString("text"))
-        if err != nil { return err }
-
-        err = tmpl.Execute(&renbuf, struct{
-          CompSubject,
-          CompName,
-          OnlineRound,
-          FinalRound,
-          RegistrationStart,
-          RegistrationEnd string
-        }{
-          comp.GetString("subject"),
-          comp.GetString("name"),
-          comp.GetDateTime("online_round").Time().Format("1.2.2006 15:04:05"),
-          comp.GetDateTime("final_round").Time().Format("1.2.2006 15:04:05"),
-          comp.GetDateTime("registration_start").Time().Format("1.2.2006 15:04:05"),
-          comp.GetDateTime("registration_end").Time().Format("1.2.2006 15:04:05"),
-        })
-        if err != nil { return err }
-
-        msg := renbuf.String()
-
-        res := []struct{
-          Email1 string `db:"email_1"`
-          Email2 string `db:"email_2"`
-        }{}
-        err = app.Dao().DB().NewQuery("SELECT email_1, email_2 FROM skoly WHERE email_1 != '' OR email_2 != ''").
-          All(&res)
-        if err != nil { return err }
-        for _, s := range res {
-          var e string
-          if s.Email1 != "" { e = s.Email1 } else if s.Email2 != "" { e = s.Email2 }
-          mailerc.Send(&mailer.Message{
-            From: mail.Address{
-              Address: "strela-vlna@gchd.cz",
-              Name: "Střela Vlna",
-            },
-            To: []mail.Address{{Address: e}},
-            Subject: "",
-            HTML: msg,
-          })
-        }
-        return c.String(200, "")
-      },
-      // apis.RequireAdminAuth(),
+      "/api/admin/probhash",
+      src.ProbWorkEndp(app.Dao()),
     )
 
     initcont, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecont")
