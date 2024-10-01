@@ -435,7 +435,7 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
     err = txDao.DB().
       NewQuery("SELECT diff, name, workers FROM probs WHERE id = {:id} LIMIT 1").
       Bind(dbx.Params{
-        "id": team,
+        "id": prob,
       }).
       All(&res)
 
