@@ -977,6 +977,8 @@ function reassigned(items){
         }
     }
     updateCheckList();
+    updateFocusedCheck();
+    updateChat();
 }
 
 function gotInfo(info) {
