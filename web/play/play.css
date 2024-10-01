@@ -1339,3 +1339,13 @@
     border-radius: 10px;
     margin: 10px;
 }
+
+#problem-image{
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 700px;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}

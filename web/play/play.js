@@ -274,6 +274,16 @@ function updateFocusedProblem(){
 
     const answer_input_wrapper = document.getElementById("answer-input-wrapper");
     const answer_input = document.getElementById("answer-input");
+
+    const img = document.getElementById("problem-image");
+    if(focused_problem_obj.image == ""){
+        img.classList.add("hidden");
+    }else{
+        img.classList.remove("hidden");
+    }
+
+    img.src = `http://strela-vlna.gchd.cz/api/files/probs/${focused_check}/${focused_problem_obj.image}`;
+    
     if(focused_problem_obj.pending || focused_problem_obj.incorrect || focused_problem_obj.correct){
         answer_input.placeholder = "Odpověděli jste: " + focused_problem_obj.solution;
         console.log("solution");
@@ -536,31 +546,31 @@ function connectWS() {
 
       case "msgrecd":
         if (msg.length != 3) { cLe() }
-        msgRecieved(msg[1], msg[2])
+        msgRecieved(msg[1], msg[2]);
       break;
       case "sold":
         if (msg.length != 3) { cLe() }
-        probSold(msg[1], msg[2])
+        probSold(msg[1], msg[2]);
       break;
       case "bought":
-        if (msg.length != 6) { cLe() }
-        probBought(msg[1], msg[2], msg[3], msg[4], msg[5])
+        if (msg.length != 7) { cLe() }
+        probBought(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6]);
       break;
       case "solved":
         if (msg.length != 3) { cLe() }
-        probSolved(msg[1], msg[2])
+        probSolved(msg[1], msg[2]);
       break;
       case "focused":
         if (msg.length != 3) { cLe() }
-        probFocused(msg[1], msg[2])
+        probFocused(msg[1], msg[2]);
       break;
       case "unfocused":
         if (msg.length != 2) { cLe() }
-        probUnfocused(msg[1])
+        probUnfocused(msg[1]);
       break;
       case "msgsent":
         if (msg.length != 4) { cLe() }
-        msgSent(msg[1], msg[2], msg[3])
+        msgSent(msg[1], msg[2], msg[3]);
       break;
       case "focuscheck":
         focusCheck();
@@ -711,8 +721,9 @@ function probSold(id, money) {
  * @param {string} diff
  * @param {string} money
  * @param {string} name
- * @param {string} text */
-function probBought(id, diff, money, name, text) {
+ * @param {string} text 
+ * @param {string} imgsrc*/
+function probBought(id, diff, money, name, text, imgname) {
     const new_problem = {
         id: id,
         title: name,
@@ -723,6 +734,7 @@ function probBought(id, diff, money, name, text) {
         incorrect: false,
         correct: false,
         problem_content: text,
+        image: imgname,
         chat: []
     }
     problems.push(new_problem);
@@ -827,6 +839,7 @@ function loaded(data) {
             incorrect: false,
             correct: false,
             solution: "",
+            image: bought.image,
             problem_content: bought.text,
             chat: [],
         }
@@ -843,6 +856,7 @@ function loaded(data) {
             pending: true,
             incorrect: false,
             correct: false,
+            image: pending.image,
             solution: data.checks.find(check => check.probid == pending.id).solution,
             problem_content: pending.text,
             chat: [],
