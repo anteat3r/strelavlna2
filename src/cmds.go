@@ -112,28 +112,29 @@ const ProbWorkCharOffset = 0x21
 func ProbWorkEndp(dao *daos.Dao) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-    cnt, err := strconv.Atoi(c.QueryParam("s"))
-    if err != nil { return err }
-
     res := []struct{
       Id string `db:"id"`
       Workers string `db:"workers"`
     }{}
-    err = dao.DB().NewQuery("SELECT id, workers FROM probs").All(&res)
+    err := dao.DB().NewQuery("SELECT id, workers FROM probs").All(&res)
     if err != nil { return err }
 
-    vals := []rune{}
-    for i := range cnt {
-      v := ProbWorkCharOffset + i
-      vals = append(vals, rune(v))
-    }
+    adminres := []struct{
+      Id string `db:"id"`
+      Email string `db:"email"`
+    }{}
+    err = dao.DB().NewQuery("SELECT id, email FROM _admins").All(&adminres)
+    if err != nil { return err }
+
+    admins := make([]string, len(adminres))
+    for i := range adminres { admins[i] = adminres[i].Id }
 
     for _, p := range res {
-      for i := range vals {
+      for i := range admins {
           j := rand.Intn(i + 1)
-          vals[i], vals[j] = vals[j], vals[i]
+          admins[i], admins[j] = admins[j], admins[i]
       }
-      wrk := string(vals)
+      wrk := strings.Join(admins, " ")
       _, err := dao.DB().NewQuery("UPDATE probs SET workers = {:workers} WHERE id = {:id}").
       Bind(dbx.Params{ "workers": wrk, "id": p.Id }).
       Execute()

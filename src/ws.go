@@ -61,8 +61,11 @@ var (
   TeamChanMap = make(map[string]*TeamChanMu)
   teamChanMapMutex = sync.Mutex{}
 
-  AdminsChans = make(TeamChans, 10)
+  AdminsChans = make(map[string]chan string)
   adminsMutex = sync.RWMutex{}
+
+  Workers = make(map[string]struct{})
+  workersMutex = sync.RWMutex{}
 
   AdminCnt = 0
   adminCntMu = sync.RWMutex{}
@@ -78,29 +81,29 @@ func AdminSend(msg... string) {
   adminsMutex.RUnlock()
 }
 
-func AdminSendIdx(idx int, msg... string) {
-  resmsg := strings.Join(msg, DELIM)
-  adminsMutex.RLock()
-  defer adminsMutex.RUnlock()
-  if len(AdminsChans) >= idx || idx < 0 {
-    fmt.Printf("admin invalid index %v, %v\n", idx, AdminsChans)
-    return
-  }
-  if AdminsChans[idx] != nil {
-    AdminsChans[idx]<- resmsg
-    return
-  }
-  i := 0
-  for _, ch := range AdminsChans {
-    if ch == nil { continue }
-    if i == idx {
-      ch<- resmsg
-      return
-    }
-    i++
-  }
-  fmt.Printf("admin indx not found %v, %v\n", idx, AdminsChans)
-}
+// func AdminSendIdx(idx int, msg... string) {
+//   resmsg := strings.Join(msg, DELIM)
+//   adminsMutex.RLock()
+//   defer adminsMutex.RUnlock()
+//   if len(AdminsChans) >= idx || idx < 0 {
+//     fmt.Printf("admin invalid index %v, %v\n", idx, AdminsChans)
+//     return
+//   }
+//   if AdminsChans[idx] != nil {
+//     AdminsChans[idx]<- resmsg
+//     return
+//   }
+//   i := 0
+//   for _, ch := range AdminsChans {
+//     if ch == nil { continue }
+//     if i == idx {
+//       ch<- resmsg
+//       return
+//     }
+//     i++
+//   }
+//   fmt.Printf("admin indx not found %v, %v\n", idx, AdminsChans)
+// }
 
 func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
   return func(c echo.Context) error {
@@ -259,28 +262,22 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     if err != nil { return err }
 
     adminsMutex.RLock()
-    i := -1
-    for j, c := range AdminsChans {
-      if c != nil { continue }
-      i = j
-      break
+    _, ok := AdminsChans[adminid]
+    if !ok {
+      adminsMutex.RUnlock()
+      return nErr("admin already connected")
     }
     adminsMutex.RUnlock()
     perchan := make(chan string, 10)
     adminsMutex.Lock()
-    if i == -1 { 
-      AdminsChans = append(AdminsChans, perchan)
-      i = len(AdminsChans) - 1
-    } else {
-      AdminsChans[i] = perchan
-    }
+    AdminsChans[adminid] = perchan
     adminsMutex.Unlock()
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
 
     sLog("admin connected", adminrec.GetId(), adminrec.Email)
-    go AdminWsLoop(conn, adminrec.Email, perchan, i)
+    go AdminWsLoop(conn, adminrec.Email, perchan, adminid)
 
     return nil
   }
@@ -290,7 +287,7 @@ func AdminWsLoop(
   conn *websocket.Conn,
   email string,
   perchan chan string,
-  idx int,
+  id string,
 ) {
   adminCntMu.Lock()
   AdminCnt += 1
@@ -328,7 +325,7 @@ func AdminWsLoop(
         oerr = nErr("r chan closed")
         break loop
       }
-      err := AdminWsHandleMsg(email, perchan, m, idx)
+      err := AdminWsHandleMsg(email, perchan, m, id)
       if err != nil {
         perchan<- "err" + DELIM + err.Error()
       }
@@ -336,11 +333,17 @@ func AdminWsLoop(
   }
   sLog("admin quit", oerr)
   conn.Close()
+
   adminsMutex.Lock()
-  AdminsChans[idx] = nil
+  delete(AdminsChans, id)
   adminsMutex.Unlock()
+
+  workersMutex.Lock()
+  delete(Workers, id)
+  workersMutex.Unlock()
+
   adminCntMu.Lock()
   AdminCnt -= 1
   adminCntMu.Unlock()
-  AdminSend("unfocused", strconv.Itoa(idx))
+  AdminSend("unfocused", id)
 }

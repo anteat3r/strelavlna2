@@ -74,7 +74,7 @@ func PlayerWsHandleMsg(
     sol := m[2]
     check, _, teamname, _, csol, upd, workers, err := DBSolve(team, prob, sol)
     if err != nil { return err }
-    phash := strconv.Itoa(HashId(workers))
+    phash := HashId(workers)
     tchan.Send("solved", prob, sol)
     if upd {
       AdminSend("upgraded", check, sol, phash)
@@ -107,7 +107,7 @@ func PlayerWsHandleMsg(
     upd, teamname, name, diff, check, workers, chat, err := DBPlayerMsg(team, prob, text)
     if err != nil { return err }
     tchan.Send("msgsent", prob, text)
-    phash := strconv.Itoa(HashId(workers))
+    phash := HashId(workers)
     if !upd {
       AdminSend("questioned", check, team, teamname, prob, diff, name, text, phash, chat)
     } else {
@@ -139,7 +139,7 @@ func AdminWsHandleMsg(
   email string,
   perchan chan string,
   msg string,
-  idx int,
+  id string,
 ) (oerr error) {
   defer func(){
     if oerr != nil {
@@ -209,11 +209,11 @@ func AdminWsHandleMsg(
                  chat
     }
     WriteTeamChan(team, "adminfocused", check, prob)
-    AdminSend("focused", check, strconv.Itoa(idx))
+    AdminSend("focused", check, id)
     
   case "unfocus":
     if len(m) != 1 { return eIm(msg) }
-    AdminSend("unfocused", strconv.Itoa(idx))
+    AdminSend("unfocused", id)
 
   case "focuscheck":
     if len(m) != 1 { return eIm(msg) }
@@ -237,7 +237,7 @@ func AdminWsHandleMsg(
 
   case "load":
     if len(m) != 1 { return eIm(msg) }
-    res, err := DBAdminInitLoad(idx)
+    res, err := DBAdminInitLoad(id)
     if err != nil { return err }
     perchan<- "loaded" + DELIM + res
 
@@ -252,6 +252,20 @@ func AdminWsHandleMsg(
     }
     teamChanMapMutex.Unlock()
     AdminSend("gotinfo", info)
+
+  case "work":
+    if len(m) != 1 { return eIm(msg) }
+    workersMutex.Lock()
+    Workers[id] = struct{}{}
+    workersMutex.Unlock()
+    perchan<- "working"
+
+  case "unwork":
+    if len(m) != 1 { return eIm(msg) }
+    workersMutex.Lock()
+    delete(Workers, id)
+    workersMutex.Unlock()
+    perchan<- "unworking"
 
   }
 
