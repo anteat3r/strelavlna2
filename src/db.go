@@ -39,6 +39,7 @@ func HashId(id string) int {
   adminCntMu.RLock()
   cnt := AdminCnt
   adminCntMu.RUnlock()
+  if cnt == 0 { cnt = 1 }
   return res % cnt
 }
  
