@@ -130,7 +130,7 @@ func PlayerWsHandleMsg(
 
   }
 
-  log.Info("playerevt", team, msg)
+  sLog("playerevt", team, msg)
 
   return nil
 }
