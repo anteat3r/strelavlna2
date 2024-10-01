@@ -849,6 +849,10 @@ function connectWS() {
         if (msg.length != 2) { cLe() }
         gotInfo(msg[1]);
         break;
+      case "reassigned":
+        if (msg.length != 2) { cLe() }
+        reassigned(msg[1]);
+        break;
       case "err":
         console.log(msg)
       break;
@@ -963,6 +967,17 @@ function unwork() {
 
 
 
+
+function reassigned(items){
+    items = JSON.parse(items);
+    for(item of items){
+        const check_obj = checks.find(check => check.id == item.id);
+        if(check_obj != null){
+            check_obj.assignid = item.assign;
+        }
+    }
+    updateCheckList();
+}
 
 function gotInfo(info) {
     contest_info = info;
