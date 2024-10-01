@@ -361,7 +361,7 @@ func DBView(team string, prob string) (text string, diff string, name string, oe
   return
 }
 
-func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname string, name string, diff string, check string, workers string, oerr error) {
+func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname string, name string, diff string, check string, workers string, chat string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -369,9 +369,10 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
       Name string `db:"name"`
       Bought string `db:"bought"`
       Pending string `db:"pending"`
+      Chat string `db:"chat"`
     }{}
     err := txDao.DB().
-      NewQuery("UPDATE teams SET chat = CONCAT(chat, 'p', CHAR(9), {:prob}, CHAR(9), {:text}, CHAR(11)) WHERE id = {:team} RETURNING banned, name, bought, pending").
+      NewQuery("UPDATE teams SET chat = CONCAT(chat, 'p', CHAR(9), {:prob}, CHAR(9), {:text}, CHAR(11)) WHERE id = {:team} RETURNING banned, name, bought, pending, chat").
       Bind(dbx.Params{
         "prob": prob,
         "text": msg,
@@ -405,6 +406,15 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
       check = res[0].Id
       upd = true
       return nil
+    }
+
+    chlines := strings.Split(teamres.Chat, "\x0b")
+    for i, l := range chlines {
+      line := strings.Split(l, "\x09")
+      if len(line) <= 1 { continue }
+      if line[1] != prob { continue }
+      chat += line[0] + "\x09" + line[2]
+      if i < len(chlines)-1 { chat += "\x0b" }
     }
 
     cid := GetRandomId()
