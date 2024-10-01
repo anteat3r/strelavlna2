@@ -31,17 +31,13 @@ var (
   ChecksColl *models.Collection
 )
 
-func HashId(work string) int {
-  adminCntMu.RLock()
-  cnt := AdminCnt
-  adminCntMu.RUnlock()
-  if cnt < 0 { cnt = 0}
-
-  for _, c := range work {
-    i := int(c) - ProbWorkCharOffset
-    if i < cnt { return i }
+func HashId(work string) (res string) {
+  workersMutex.RLock()
+  for _, c := range strings.Split(work, " ") {
+    if _, ok := Workers[c]; ok { res = c }
   }
-  return 0
+  workersMutex.RUnlock()
+  return res
 }
  
 func ParseRefList(s string) []string {
@@ -832,7 +828,7 @@ func DBAdminUnBan(team string) (oerr error) {
 
 type adminInitLoad struct {
   Checks []adminCheckRes `json:"checks"` 
-  Idx int `json:"idx"`
+  Id string `json:"idx"`
   OnlineRound int64 `json:"online_round"`
   OnlineRoundEnd int64 `json:"online_round_end"`
   ContestName string `json:"contest_name"`
@@ -851,13 +847,14 @@ type adminCheckRes struct {
   Diff string `db:"diff" json:"probdiff"`
   ProbName string `db:"name" json:"probname"`
   Id string `db:"id" json:"id"`
-  Assign int `json:"assign"`
+  Assign string `json:"assign"`
   TeamName string `db:"teamname" json:"teamname"`
   Type string `db:"type" json:"type"`
   Solution string `db:"solution" json:"team_message"`
+  Work string `db:"workers"`
 }
 
-func DBAdminInitLoad(idx int) (res string, oerr error) {
+func DBAdminInitLoad(id string) (res string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     banres := []adminBannedRes{}
@@ -868,14 +865,14 @@ func DBAdminInitLoad(idx int) (res string, oerr error) {
 
     checkres := []adminCheckRes{}
     err = txDao.DB().
-      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name AS teamname, probs.diff, probs.name FROM checks INNER JOIN teams ON teams.id = checks.team INNER JOIN probs ON probs.id = checks.prob").
+      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name AS teamname, probs.diff, probs.name, probs.workers FROM checks INNER JOIN teams ON teams.id = checks.team INNER JOIN probs ON probs.id = checks.prob").
       All(&checkres)
     if err != nil { return err }
 
     gcheckres := []struct{
       Team string `db:"team"`
       Id string `db:"id"`
-      Assign int `json:"assign"`
+      Assign string `json:"assign"`
       TeamName string `db:"teamname"`
       Type string `db:"type"`
       Solution string `db:"solution"`
@@ -896,7 +893,10 @@ func DBAdminInitLoad(idx int) (res string, oerr error) {
       })
     }
 
-    for i, c := range checkres { checkres[i].Assign = HashId(c.Prob) }
+    for i, c := range checkres {
+      if c.Work == "" { continue }
+      checkres[i].Assign = HashId(c.Work)
+    }
 
     ActiveContestMu.RLock()
     ac := ActiveContest
@@ -918,7 +918,7 @@ func DBAdminInitLoad(idx int) (res string, oerr error) {
 
     resr := adminInitLoad{
       Checks: checkres,
-      Idx: idx,
+      Id: id,
       OnlineRound: ordelta,
       OnlineRoundEnd: oredelta,
       Banned: banres,
@@ -950,6 +950,42 @@ func DBAdminSetInfo(info string) (oerr error) {
     if err != nil { return err }
 
     return nil
+  })
+  return
+}
+
+type reassignRes struct {
+  Id string `json:"id"`
+  Assign string `json:"assign"`
+}
+
+func DBReAssign() (res string, oerr error) {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+    
+    checkres := []struct{
+      Id string `db:"id"`
+      Work string `db:"workers"`
+    }{}
+    err := txDao.DB().
+      NewQuery("SELECT checks.id, probs.workers FROM checks INNER JOIN probs ON probs.id = checks.prob").
+      All(&checkres)
+    if err != nil { return err }
+
+    resl := make([]reassignRes, len(checkres))
+    for i, c := range checkres {
+      resl[i] = reassignRes{
+        Id: c.Id,
+        Assign: HashId(c.Work),
+      }
+    }
+
+    resb, err := json.Marshal(resl)
+    if err != nil { return err }
+
+    res = string(resb)
+
+    return nil
+
   })
   return
 }
