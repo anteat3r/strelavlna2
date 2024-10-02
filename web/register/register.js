@@ -415,7 +415,7 @@ register_button.addEventListener("click", function(){
     .then(data => {
         
         if(reponse.ok){
-            window.location.href = "registration_request_succsessful.html";
+            window.location.href = "https://strela-vlna.gchd.cz/registration_request_succsessful";
             
         }else{
             alert(`Registrace selhala: ${data}`);
