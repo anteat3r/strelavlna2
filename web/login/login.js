@@ -8,17 +8,18 @@ const button = document.getElementById("validate_play");
 function checkId(id){
     animation_color = "#3eb1df";
     is_loading_running = true;
-    fetch(`https://strela-vlna.gchd.cz/api/validate_play?id=${id}`)
+    fetch(`https://strela-vlna.gchd.cz/api/login?id=${id}`)
         .then(response => response.text())
         .then(data => {
             console.log(data);
             if(data == "free"){
                 window.location.href = `../play/?id=${id}`;
             }else if(data == "not running"){
-                login_message.innerHTML = "*Hra momentě neběží";
+                window.location.href = `../waitroom/?id=${id}`;
             }else if(data == "full"){
-                console.log("hehheha");
                 login_message.innerHTML = "*Maximální počet hráču na tým dosažen";
+            }else if(data == "admin"){
+                window.location.href = `../mod/?id=${id}`;
             }else{
                 id_field.value = "";
                 const url = new URL(window.location.href);
