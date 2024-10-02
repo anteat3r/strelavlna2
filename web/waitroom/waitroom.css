@@ -42,6 +42,7 @@ audio {
     color: var(--color-secondary-dark);
     text-align: center;
     margin: 0px;
+    min-width: 500px;
 }
 
 #waitroom-timer-wrapper{

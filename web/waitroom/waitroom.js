@@ -227,7 +227,11 @@ function frame(){
     if (this_second != last_second) {
         last_second = this_second;
         for (const timer of document.getElementsByClassName('waitroom-timer')) {
-            timer.innerText = new Date(remaining).toISOString().substr(11, 8);
+            if (Math.floor(remaining / 86400000) == 0) {
+                timer.innerText = new Date(remaining).toISOString().substr(11, 8);
+            } else {
+                timer.innerText = "Zbývá " + Math.floor(remaining / 86400000) + ' dní';
+            }
         }
     }
     
