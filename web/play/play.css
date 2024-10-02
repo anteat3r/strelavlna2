@@ -326,6 +326,27 @@
     color: #145532 !important;
 }
 
+.problem-focused.problem-incorrect{
+    background-color: #e61f1f !important;
+}
+.problem-focused.problem-correct{
+    background-color: #0bb258 !important;
+}
+
+.problem-focused.problem-incorrect .problem-title{
+    color: white !important;
+}
+.problem-focused.problem-correct .problem-title{
+    color: white !important;
+}
+.problem-focused.problem-incorrect .problem-rank{
+    color: white !important;
+}
+.problem-focused.problem-correct .problem-rank{
+    color: white !important;
+}
+
+
 
 .occupied-icon{
     width: 14px;
@@ -361,6 +382,22 @@
     border-radius: 100px;
     transform: translateX(5px);
 }
+
+.problem-incorrect .occupied-icon{
+    background-color: #e61f1f;
+}
+.problem-correct .occupied-icon{
+    background-color: #0bb258;
+}
+
+.problem-focused.problem-incorrect .occupied-icon{
+    background-color: white;
+}
+.problem-focused.problem-correct .occupied-icon{
+    background-color: white;
+}
+
+
 
 #shop-actions-wrapper{
     border-top: 2px var(--color-secondary-light) dashed;
