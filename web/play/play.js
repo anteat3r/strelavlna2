@@ -146,6 +146,14 @@ document.getElementById("answer-input").addEventListener("focus", function(){
     updateProblemList();
 });
 
+document.getElementById("answer-input").addEventListener("keydown", function(e){
+    if(e.key == "Enter"){
+        e.preventDefault();
+        this.blur();
+        document.getElementById("submit-answer-button").click();
+    }
+});
+
 
 function updateShop(){
     buy_buttons.forEach(function(button, n){
