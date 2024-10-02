@@ -131,7 +131,7 @@ func main() {
     )
 
     e.Router.GET(
-      "/api/validate_play",
+      "/api/login",
       src.PlayCheckEndpoint(app.Dao()),
     )
 
