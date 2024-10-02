@@ -112,7 +112,14 @@ func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
     if teamid == "" { return c.String(400, "invalid") }
 
     team, err := dao.FindRecordById("teams", teamid)
-    if err != nil { return c.String(400, "invalid") }
+    if err != nil {
+      _, err := dao.FindAdminById(teamid)
+      if err != nil {
+        return c.String(400, "invalid")
+      } else {
+        return c.String(200, "admin")
+      }
+    }
     cont := team.GetString("contest")
 
     ActiveContestMu.RLock()
