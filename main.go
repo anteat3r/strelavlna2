@@ -240,6 +240,11 @@ func main() {
       src.ProbWorkEndp(app.Dao()),
     )
 
+    e.Router.GET(
+      "/api/admin/contsetup",
+      src.SetupContEndp(app.Dao()),
+    )
+
     initcont, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecont")
     if err != nil { return err }
 

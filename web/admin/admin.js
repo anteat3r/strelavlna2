@@ -94,3 +94,12 @@ $("#hash-set").addEventListener("click", async () => {clown();
   let sres = await res.text();
   console.log(sres);
 });
+
+$("#setup-set").addEventListener("click", async () => {clown();
+  const res = await fetch(
+    `/api/admin/contsetup?id=${ $("#setup-inp").value }`,
+    {headers: {"Authorization": pb.authStore.token},
+  })
+  let sres = await res.text();
+  console.log(sres);
+});

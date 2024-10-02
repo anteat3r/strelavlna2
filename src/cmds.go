@@ -145,6 +145,27 @@ func ProbWorkEndp(dao *daos.Dao) echo.HandlerFunc {
 	}
 }
 
+func SetupContEndp(dao *daos.Dao) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+    cont := c.QueryParam("id")
+    if cont == "" { return nErr("invalid param") }
+
+    contres := struct{
+      Probs string `db:"probs"`
+    }{}
+    err := dao.DB().NewQuery("SELECT probs FROM contests WHERE id = {:id} LIMIT 1").
+      Bind(dbx.Params{ "id": cont }).One(&contres)
+    if err != nil { return err }
+
+    _, err = dao.DB().
+    NewQuery("UPDATE teams SET chat = '', banned = FALSE, last_banned = '', free = {:probs}, bought = '[]', pending = '[]', solved = '[]', sold = '[]', money = 100 WHERE contest = {:id}").Bind(dbx.Params{ "probs": contres.Probs, "id": cont }).Execute()
+    if err != nil { return err }
+
+		return nil
+	}
+}
+
     //
     // e.Router.GET(
     //   "/api/admin/sendspam",
