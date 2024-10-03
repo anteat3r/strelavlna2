@@ -105,9 +105,10 @@
 }
 
 .archive-year {
-    overflow: hidden;
-    transition: max-height 0.5s ease-out;
-  }
+    overflow: hidden; 
+    transition: max-height 0.15s ease-out, opacity 0.15s ease-out; /* Add opacity transition */
+    opacity: 1; /* Default opacity */
+}
 
 .archive{
     border-left: var(--color-main) solid 5px;
@@ -119,7 +120,6 @@
 .archive-mobile {
     transition: max-height 0.5s ease-out; /* Smooth transition for max-height */
     overflow: hidden; 
-    max-height: 0;
 }
 
 .year-title{
@@ -264,8 +264,7 @@
     text-align: center;
     padding-top: 5px;
 }
-
-@media (max-width: 1000px) or (pointer: coarse) {
+@media (max-width: 1000px){
     .year-selector {
       display: none;
     }
@@ -322,7 +321,6 @@
     }
     .archive-year{
         max-height: none;
-        display: block;
     }
 
     .archive{
