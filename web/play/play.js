@@ -1,4 +1,4 @@
-const redirects = false;
+const redirects = true;
 //global states
 var contest_name = "X";
 var contest_info = "";
