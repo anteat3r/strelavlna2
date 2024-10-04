@@ -113,9 +113,9 @@ $("#migrate-set").addEventListener("click", async () => {clown();
   console.log(sres);
 });
 
-$("#query-load").addEventListener("click", async () => {clown();
+$("#query-set").addEventListener("click", async () => {clown();
   const res = await fetch(
-    `/api/admin/query?id=${encodeURIComponent( $("#query-inp").value )}`,
+    `/api/admin/query?q=${encodeURIComponent( $("#query-inp").value )}`,
     {headers: {"Authorization": pb.authStore.token},
   })
   let sres = await res.text();
