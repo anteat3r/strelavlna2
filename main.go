@@ -152,6 +152,16 @@ func main() {
     )
 
     e.Router.GET(
+      "/api/admin/schema",
+      func(c echo.Context) error {
+        coll, err := app.Dao().FindCollectionByNameOrId(c.QueryParam("c"))
+        if err != nil { return err }
+        return c.JSON(200, coll.Schema)
+      },
+      // apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
       "/api/admin/loadactivec",
       func(c echo.Context) error {
         src.ActiveContestMu.RLock()
