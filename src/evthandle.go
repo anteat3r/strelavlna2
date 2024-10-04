@@ -3,6 +3,7 @@ package src
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	log "github.com/anteat3r/golog"
 )
@@ -29,10 +30,12 @@ func PlayerWsHandleMsg(
   tchan *TeamChanMu,
   idx int,
 ) (oerr error) {
+  now := time.Now()
   ActiveContestMu.RLock()
-  if ActiveContest == "" {
+  if now.After(ActiveContestStart) &&
+     now.Before(ActiveContestEnd) {
     ActiveContestMu.RUnlock()
-    return dbErr("contest ended")
+    return dbErr("contest not running")
   }
   ActiveContestMu.RUnlock()
   // defer func(){

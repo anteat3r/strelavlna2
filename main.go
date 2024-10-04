@@ -10,6 +10,7 @@ import (
 
 	"github.com/anteat3r/strelavlna2/src"
 	"github.com/labstack/echo/v5"
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
@@ -148,6 +149,37 @@ func main() {
     e.Router.GET(
       "/api/admin/migrateregreq",
       src.SendTeams(app.Dao(), mailerc, time.Millisecond),
+      apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/schema",
+      func(c echo.Context) error {
+        coll, err := app.Dao().FindCollectionByNameOrId(c.QueryParam("c"))
+        if err != nil { return err }
+        return c.JSON(200, coll)
+      },
+      // apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/query",
+      func(c echo.Context) error {
+        rows, err := app.Dao().DB().NewQuery(c.QueryParam("q")).Rows()
+        if err != nil { return err }
+        
+        res := make([]map[string]string, 0)
+        for rows.Next() {
+          nullmap := make(dbx.NullStringMap)
+          rows.ScanMap(nullmap)
+          defmap := make(map[string]string)
+          for k, v := range nullmap { defmap[k] = v.String }
+          res = append(res, defmap)
+        }
+        if rows.Err() != nil { return rows.Err() }
+        
+        return c.JSON(200, res)
+      },
       apis.RequireAdminAuth(),
     )
 

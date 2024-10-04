@@ -1386,3 +1386,187 @@
     height: auto;
     object-fit: contain;
 }
+
+
+#wait-wrapper{
+    height: 30px;
+}
+#wait-time{
+    font-family: 'Lexend';
+    font-size: 50px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+    margin-top: 100px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#wait-animation-canvas {
+    width: 100%;
+    /* border: 1px solid black; */
+    /* margin-top: 20px; */
+    transform: translateY(-130px);
+}
+
+audio {
+    margin-top: 20px;
+}
+.waitroom-title{
+    display: inline-block;
+    position: relative;
+    font-family: 'Lexend';
+    font-size: 35px;
+    font-weight: 500;
+    letter-spacing: 8px;
+    color: var(--color-secondary-dark);
+    margin-top: 30px;
+    margin-bottom: 0px;
+    text-align: center;
+}
+.waitroom-timer{
+    position: absolute;
+
+    font-family: 'Lexend';
+    font-size: 35px;
+    font-weight: 500;
+    letter-spacing: 8px;
+    color: var(--color-secondary-dark);
+    text-align: center;
+    margin: 0px;
+    min-width: 500px;
+}
+
+#waitroom-timer-wrapper{
+    position: relative;
+    margin-bottom: 0px;
+    margin-top: 70px;
+}
+
+
+#note-button{
+    height: 30px;
+    width: 30px;
+    text-align: center;
+    padding: 0px;
+    background-color: var(--color-secondary-glow);
+    color: var(--color-secondary-dark);
+    transition: background-color 0.3s ease-out, color 0.3s ease-out;
+    font-size: 14px;
+}
+
+#note-button:hover{
+    background-color: var(--color-secondary);
+    color: white;
+    transition: background-color 0.0s, color 0.0s;
+}
+
+#waitroom-title-wrapper{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border-bottom: 2px var(--color-secondary-glow) dashed;
+    padding-bottom: 15px;
+}
+
+#wait-title-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    margin-top: 30px;
+    gap: 5px;
+}
+#wait-title{
+    height: 25px;
+    width: 150px;
+    background-color: var(--color-secondary-glow);
+    border-radius: 5px;
+    font-family: 'Lexend';
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    text-align: center;
+    margin: 0px;
+    padding-top: 5px;
+}
+
+
+.container{
+    overflow: hidden;
+}
+
+#results-team-wrapper{
+    padding-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#results-team-name{
+    font-family: 'Lexend';
+    font-size: 35px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+    margin-bottom: 15px;
+}
+
+#results-players-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 2px var(--color-secondary-dark) dashed;
+    padding-inline: 15px;
+}
+.results-player{
+    margin: 0px;
+    border-radius: 5px;
+    background-color: var(--color-secondary-glow);
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px;
+    padding-inline: 8px;
+}
+
+#results-wrapper{
+    margin: 30px;
+    margin-inline:100px;
+    background-color: var(--color-secondary-glow);
+    border-radius: 10px;
+    height: 100%;
+}
+#results-title{
+    font-family: 'Lexend';
+    font-size: 35px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+    background-color: var(--color-secondary-light);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 10px;
+}
+#results-loading-wrapper{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 150px;
+    padding-bottom: 50px;
+}
+#results-loading-text{
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+    margin-top: 20px;
+}
