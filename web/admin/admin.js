@@ -112,3 +112,13 @@ $("#migrate-set").addEventListener("click", async () => {clown();
   let sres = await res.text();
   console.log(sres);
 });
+
+$("#query-load").addEventListener("click", async () => {clown();
+  const res = await fetch(
+    `/api/admin/query?id=${encodeURIComponent( $("#query-inp").value )}`,
+    {headers: {"Authorization": pb.authStore.token},
+  })
+  let sres = await res.text();
+  if (sres == "") { sres = "<nil> <nil>" }
+  $("#query-p").innerHTML = sres;
+});

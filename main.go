@@ -165,7 +165,7 @@ func main() {
     e.Router.POST(
       "/api/admin/query",
       func(c echo.Context) error {
-        rows, err := app.Dao().DB().NewQuery("").Rows()
+        rows, err := app.Dao().DB().NewQuery(c.QueryParam("q")).Rows()
         if err != nil { return err }
         
         res := make([]map[string]string, 0)
