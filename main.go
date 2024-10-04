@@ -162,7 +162,7 @@ func main() {
       // apis.RequireAdminAuth(),
     )
 
-    e.Router.POST(
+    e.Router.GET(
       "/api/admin/query",
       func(c echo.Context) error {
         rows, err := app.Dao().DB().NewQuery(c.QueryParam("q")).Rows()
