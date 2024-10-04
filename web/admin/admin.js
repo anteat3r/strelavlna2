@@ -118,7 +118,15 @@ $("#query-set").addEventListener("click", async () => {clown();
     `/api/admin/query?q=${encodeURIComponent( $("#query-inp").value )}`,
     {headers: {"Authorization": pb.authStore.token},
   })
-  let sres = JSON.stringify(JSON.parse(await res.text()), undefined, 2);
+  let sres = await res.text();
   if (sres == "") { sres = "<nil> <nil>" }
-  $("#query-p").innerHTML = sres;
+  let pres = "";
+  for (const r of JSON.parse(sres)) {
+    res += r.id + "\n"
+    for (const [key, value] of Object.entries(r)) {
+      res += `    ${key}: ${value}\n`
+    }
+    res += "\n"
+  }
+  $("#query-p").innerHTML = pres;
 });
