@@ -146,8 +146,9 @@ func main() {
     )
 
     e.Router.GET(
-      "/api/admin/migratereqreg",
+      "/api/admin/migrateregreq",
       src.SendTeams(app.Dao(), mailerc, time.Millisecond),
+      apis.RequireAdminAuth(),
     )
 
     e.Router.GET(

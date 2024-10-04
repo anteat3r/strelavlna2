@@ -103,3 +103,12 @@ $("#setup-set").addEventListener("click", async () => {clown();
   let sres = await res.text();
   console.log(sres);
 });
+
+$("#migrate-set").addEventListener("click", async () => {clown();
+  const res = await fetch(
+    `/api/admin/migrateregreq`,
+    {headers: {"Authorization": pb.authStore.token},
+  })
+  let sres = await res.text();
+  console.log(sres);
+});
