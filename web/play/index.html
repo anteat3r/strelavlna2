@@ -7,6 +7,7 @@
     <link href='https://fonts.googleapis.com/css?family=Lexend' rel='stylesheet'>
     <link rel="stylesheet" href="../global.css">
     <link rel="stylesheet" href="../play/play.css">
+
     <title>Dopplerova vlna</title>
     <script type="text/javascript">
         window.MathJax = {
@@ -19,7 +20,7 @@
       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
   </head>
-  <body class="">
+  <body>
     <div id="confiramtion-dialog-bg">
         <div id="confirm-dialog-wrapper">
             <div id="confirm-dialog">
@@ -107,220 +108,252 @@
         </div>
 
       </header>
-      <div class="flex flex-row">
-        <div id="teams-board">
-            <div id="team-stats" class="team-stats-selected">
-                <div id="team-name-wrapper">
-                    <h2 id="team-name">Team 1 heheheha h kjhsdk hkasjd</h2>
-                    <div id="rank" class="unseen-chat">
-                        <span id="rank-number">14</span>
-                        <div class="occupied-icon hidden" id="seen-global-chat-icon"></div>
-                    </div>
-                </div>
-                <div id="team-balance-wrapper">
-                    <h2 id="team-balance">1540 DC</h2>
-                    <p id="team-stats-view-link">více</p>
-                </div>
-            </div>
-            <div id="teams-problems">
-                <div class="problem problem-focused problem-worked-on">
-                    <div class="flex flex-row align-center">
-                        <h2 class="problem-title">Lyžař</h2>
-                        <h2 class="problem-rank">[A]</h2>
-                    </div>
-                    <div class="occupied-icon"></div>
-                </div>
-                <div class="problem problem-worked-on">
-                    <div class="flex flex-row align-center">
-                        <h2 class="problem-title">Lyžař</h2>
-                        <h2 class="problem-rank">[A]</h2>
-                    </div>
-                    <div class="occupied-icon"></div>
-                </div>
-                <div class="problem">
-                    <div class="flex flex-row align-center">
-                        <h2 class="problem-title">Lyžař</h2>
-                        <h2 class="problem-rank">[A]</h2>
-                    </div>
-                    <div class="occupied-icon"></div>
-                </div>
-            </div>
-            <div id="shop-actions-wrapper">
-                <div class="flex flex-row space-between">
-                    <div id="buy-button-wrapper" class="buy-button-close">
-                        <button id="buy-button">
-                            Koupit
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        <div id="buy-dropdown-wrapper">
-                            <button id="easy-buy" class="subbuy-button subbuy-disabled">
-                                <h2 class="buy-dropdown-difficulty">[A]</h2>
-                                <p class="buy-description">Nejlehčí</p>
-                            </button>
-                            <button id="medium-buy" class="subbuy-button">
-                                <h2 class="buy-dropdown-difficulty">[B]</h2>
-                                <p class="buy-description">Střední</p>
-                            </button>
-                            <button id="hard-buy" class="subbuy-button">
-                                <h2 class="buy-dropdown-difficulty">[C]</h2>
-                                <p class="buy-description">Nejtěžší</p>
-                            </button>
+      <div id="wait-wrapper" class="hidden">
+        <div id="wait-title-wrapper">
+            <p id="wait-title">Čekárna</p>
+            <button id="note-button">
+                <i class="fa-brands fa-itunes-note"></i>
+            </button>
+        </div>
+        <h1 id="wait-time">0:24:12</h1>
+        <canvas width="2000" height="650" id="wait-animation-canvas"></canvas>
+        <audio loop id="audio">
+            <source src="../music/elevatorMusic2.mp3" type="audio/mp3" loop>
+            Your browser does not support the audio element.
+        </audio>
+      </div>
+      <div id="play-wrapper" class="hidden">
+        <div class="flex flex-row">
+            <div id="teams-board">
+                <div id="team-stats" class="team-stats-selected">
+                    <div id="team-name-wrapper">
+                        <h2 id="team-name">Team 1 heheheha h kjhsdk hkasjd</h2>
+                        <div id="rank" class="unseen-chat">
+                            <span id="rank-number">14</span>
+                            <div class="occupied-icon hidden" id="seen-global-chat-icon"></div>
                         </div>
                     </div>
-                    <div id="sell-action-wrapper">
-                        <button id="sell-button">Prodat</button>
-                        <p id="sell-information">*Prodá aktuální úlohu:</p>
+                    <div id="team-balance-wrapper">
+                        <h2 id="team-balance">1540 DC</h2>
+                        <p id="team-stats-view-link">více</p>
                     </div>
                 </div>
-                
-            </div>
-        </div>
-        <div id="problem-wrapper" class="hidden">
-            <h2 id="problem-title">Lyžař [A]</h2>
-            <p id="problem-content">Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?</p>
-            <img src="" id="problem-image">
-            <div id="answer-input-wrapper" class="cannot-answer">
-                <input id="answer-input" placeholder="Odpověď">
-                <button id="submit-answer-button">
-                    <i class="fas fa-angle-right"></i>
-                </button>
-            </div>
-        </div>
-        <div id="team-stats-main-wrapper" class="">
-            <div class="flex-column">
-                <div id="team-stats-first-row">
-                    <h2 id="team-stats-main-balance">1055 DC</h2>
-                    <div id="team-stats-main-title-wrapper">
-                        <h2 id="team-stats-main-title">Chcípáci</h2>
-                        <div id="team-stats-players-wrapper">
-                            <h2 class="team-stats-player">Pepa</h2>
-                            <h2 class="team-stats-player">Honza</h2>
-                            <h2 class="team-stats-player">Kateřina</h2>
+                <div id="teams-problems">
+                    <div class="problem problem-focused problem-worked-on">
+                        <div class="flex flex-row align-center">
+                            <h2 class="problem-title">Lyžař</h2>
+                            <h2 class="problem-rank">[A]</h2>
+                        </div>
+                        <div class="occupied-icon"></div>
+                    </div>
+                    <div class="problem problem-worked-on">
+                        <div class="flex flex-row align-center">
+                            <h2 class="problem-title">Lyžař</h2>
+                            <h2 class="problem-rank">[A]</h2>
+                        </div>
+                        <div class="occupied-icon"></div>
+                    </div>
+                    <div class="problem">
+                        <div class="flex flex-row align-center">
+                            <h2 class="problem-title">Lyžař</h2>
+                            <h2 class="problem-rank">[A]</h2>
+                        </div>
+                        <div class="occupied-icon"></div>
+                    </div>
+                </div>
+                <div id="shop-actions-wrapper">
+                    <div class="flex flex-row space-between">
+                        <div id="buy-button-wrapper" class="buy-button-close">
+                            <button id="buy-button">
+                                Koupit
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div id="buy-dropdown-wrapper">
+                                <button id="easy-buy" class="subbuy-button subbuy-disabled">
+                                    <h2 class="buy-dropdown-difficulty">[A]</h2>
+                                    <p class="buy-description">Nejlehčí</p>
+                                </button>
+                                <button id="medium-buy" class="subbuy-button">
+                                    <h2 class="buy-dropdown-difficulty">[B]</h2>
+                                    <p class="buy-description">Střední</p>
+                                </button>
+                                <button id="hard-buy" class="subbuy-button">
+                                    <h2 class="buy-dropdown-difficulty">[C]</h2>
+                                    <p class="buy-description">Nejtěžší</p>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="sell-action-wrapper">
+                            <button id="sell-button">Prodat</button>
+                            <p id="sell-information">*Prodá aktuální úlohu:</p>
                         </div>
                     </div>
-                    <h2 id="team-stats-main-rank">14</h2>
-                </div>
-                <p class="team-stats-paragraph">Průběh soutěže . . . .</p>
-                <div id="progressbar-wrapper">
-                    <div id="progressbar-background-wrapper">
-                        <div class="progressbar-background-first"></div>
-                        <div class="progressbar-background"></div>
-                        <div class="progressbar-background"></div>
-                        <div class="progressbar-background-last"></div>
-                    </div>
-                    <div id="progressbar-foreground"></div>
-                    <div id="progressbar-cursor-wrapper">
-                        <p id="progressbar-percentage">32 %</p>
-                        <div id="triangle-down"></div>
-                        <div id="progressbar-cursor-spacer"></div>
-                        <div id="triangle-up"></div>
-                        <p id="progressbar-time-passed">0:38:03</p>
-                    </div>
-                </div>
-                <div id="team-stats-second-row">
-                    <div id="price-list-wrapper">
-                        <h2 id="price-list-title">Ceník</h2>
-                        <table id="price-list-items-wrapper">
-                            <thead>
-                                <tr id="price-list-row-names">
-                                    <th class="price-list-empty"></th>
-                                    <th id="price-list-name-buy" class="price-list-name">Nákup</th>
-                                    <th id="price-list-name-solve" class="price-list-name">Vyřešení</th>
-                                    <th id="price-list-name-sell" class="price-list-name">Prodej</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr id="price-list-row-a">
-                                    <td id="price-list-item-a-wrapper"><h2 id="price-list-item-a">A</h2></td>
-                                    <td id="price-list-a-buy">10 DC</td>
-                                    <td id="price-list-a-solve">15 DC</td>
-                                    <td id="price-list-a-sell">5 DC</td>
-                                </tr>
-                                <tr id="price-list-row-b">
-                                    <td id="price-list-item-b-wrapper"><h2 id="price-list-item-b">B</h2></td>
-                                    <td id="price-list-b-buy">20 DC</td>
-                                    <td id="price-list-b-solve">35 DC</td>
-                                    <td id="price-list-b-sell">10 DC</td>
-                                </tr>
-                                <tr id="price-list-row-c">
-                                    <td id="price-list-item-c-wrapper"><h2 id="price-list-item-c">C</h2></td>
-                                    <td id="price-list-c-buy">30 DC</td>
-                                    <td id="price-list-c-solve">60 DC</td>
-                                    <td id="price-list-c-sell">15 DC</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div id="information-wrapper">
-                        <h2 id="information-title">Informace</h2>
-                        <div id="information-content-wrapper">
-                            <h1 class="information-warning">!</h1>
-                            <p id="information-content">Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?</p>
-                            <h1 class="information-warning">!</h1>
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
-        </div>
-        <div id="help-center-wrapper">
-            <div id="help-center-title-wrapper">
-                <h2 id="help-center-title">Technická podpora</h2>
-            </div>
-            <div id="chat-wrapper">
-                <div id="conversation-wrapper">
-                    <div class="conversation-row message-my">
-                        <p class="conversation-message">shgdi ahdi ugi</p>
-                    </div>
-                    <div class="conversation-row message-their">
-                        <p class="conversation-message">k jsahdkj hsadjh wiouaksdjh wiauh skdjhwoai ksdh kjahwiu gabkj</p>
-                    </div>
-                    <div class="conversation-row message-their">
-                        <p class="conversation-message">heheheha</p>
-                    </div>
-                    <div class="conversation-row message-their">
-                        <p class="conversation-message">heheheha</p>
-                    </div>
-                    <div class="conversation-row message-their">
-                        <p class="conversation-message">heheheha</p>
-                    </div>
-                    <div class="conversation-row message-their">
-                        <p class="conversation-message">heheheha</p>
-                    </div>
-                    <div class="conversation-row message-my">
-                        <p class="conversation-message">heheheha asid jshdk jhskajhs khdkjh igwk ai wy iaugf  quiwgdai shgdi ahdi ugi</p>
-                    </div>
-                    <div class="conversation-row message-their">
-                        <p class="conversation-message">k jsahdkj hsadjh wiouaksdjh wiauh skdjhwoai ksdh kjahwiu gabkj</p>
-                    </div>
-                    <div class="conversation-row message-their">
-                        <p class="conversation-message">heheheha</p>
-                    </div>
-                    <div class="conversation-row message-their">
-                        <p class="conversation-message">heheheha</p>
-                    </div>
-                    <div class="conversation-row message-their">
-                        <p class="conversation-message">heheheha</p>
-                    </div>
-                    <div class="conversation-row message-their">
-                        <p class="conversation-message">heheheha</p>
-                    </div>
-                </div>
-                <div id="chat-controlls-wrapper">
-                    <textarea id="chat-input" placeholder="Zpráva"></textarea>
-                    <button id="send-message-button">
-                        <i class="fas fa-angle-up"></i>
+            <div id="problem-wrapper" class="hidden">
+                <h2 id="problem-title">Lyžař [A]</h2>
+                <p id="problem-content">Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?</p>
+                <img src="" id="problem-image">
+                <div id="answer-input-wrapper" class="cannot-answer">
+                    <input id="answer-input" placeholder="Odpověď">
+                    <button id="submit-answer-button">
+                        <i class="fas fa-angle-right"></i>
                     </button>
                 </div>
-                <p id="chat-banned-info">*Psaní na technickou podporu Vám bylo znemožněno z důvodu spamu. Zkuste to prosím později.</p>
             </div>
-        </div>
+            <div id="team-stats-main-wrapper" class="">
+                <div class="flex-column">
+                    <div id="team-stats-first-row">
+                        <h2 id="team-stats-main-balance">1055 DC</h2>
+                        <div id="team-stats-main-title-wrapper">
+                            <h2 id="team-stats-main-title">Chcípáci</h2>
+                            <div id="team-stats-players-wrapper">
+                                <h2 class="team-stats-player">Pepa</h2>
+                                <h2 class="team-stats-player">Honza</h2>
+                                <h2 class="team-stats-player">Kateřina</h2>
+                            </div>
+                        </div>
+                        <h2 id="team-stats-main-rank">14</h2>
+                    </div>
+                    <p class="team-stats-paragraph">Průběh soutěže . . . .</p>
+                    <div id="progressbar-wrapper">
+                        <div id="progressbar-background-wrapper">
+                            <div class="progressbar-background-first"></div>
+                            <div class="progressbar-background"></div>
+                            <div class="progressbar-background"></div>
+                            <div class="progressbar-background-last"></div>
+                        </div>
+                        <div id="progressbar-foreground"></div>
+                        <div id="progressbar-cursor-wrapper">
+                            <p id="progressbar-percentage">32 %</p>
+                            <div id="triangle-down"></div>
+                            <div id="progressbar-cursor-spacer"></div>
+                            <div id="triangle-up"></div>
+                            <p id="progressbar-time-passed">0:38:03</p>
+                        </div>
+                    </div>
+                    <div id="team-stats-second-row">
+                        <div id="price-list-wrapper">
+                            <h2 id="price-list-title">Ceník</h2>
+                            <table id="price-list-items-wrapper">
+                                <thead>
+                                    <tr id="price-list-row-names">
+                                        <th class="price-list-empty"></th>
+                                        <th id="price-list-name-buy" class="price-list-name">Nákup</th>
+                                        <th id="price-list-name-solve" class="price-list-name">Vyřešení</th>
+                                        <th id="price-list-name-sell" class="price-list-name">Prodej</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="price-list-row-a">
+                                        <td id="price-list-item-a-wrapper"><h2 id="price-list-item-a">A</h2></td>
+                                        <td id="price-list-a-buy">10 DC</td>
+                                        <td id="price-list-a-solve">15 DC</td>
+                                        <td id="price-list-a-sell">5 DC</td>
+                                    </tr>
+                                    <tr id="price-list-row-b">
+                                        <td id="price-list-item-b-wrapper"><h2 id="price-list-item-b">B</h2></td>
+                                        <td id="price-list-b-buy">20 DC</td>
+                                        <td id="price-list-b-solve">35 DC</td>
+                                        <td id="price-list-b-sell">10 DC</td>
+                                    </tr>
+                                    <tr id="price-list-row-c">
+                                        <td id="price-list-item-c-wrapper"><h2 id="price-list-item-c">C</h2></td>
+                                        <td id="price-list-c-buy">30 DC</td>
+                                        <td id="price-list-c-solve">60 DC</td>
+                                        <td id="price-list-c-sell">15 DC</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="information-wrapper">
+                            <h2 id="information-title">Informace</h2>
+                            <div id="information-content-wrapper">
+                                <h1 class="information-warning">!</h1>
+                                <p id="information-content">Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?</p>
+                                <h1 class="information-warning">!</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="help-center-wrapper">
+                <div id="help-center-title-wrapper">
+                    <h2 id="help-center-title">Technická podpora</h2>
+                </div>
+                <div id="chat-wrapper">
+                    <div id="conversation-wrapper">
+                        <div class="conversation-row message-my">
+                            <p class="conversation-message">shgdi ahdi ugi</p>
+                        </div>
+                        <div class="conversation-row message-their">
+                            <p class="conversation-message">k jsahdkj hsadjh wiouaksdjh wiauh skdjhwoai ksdh kjahwiu gabkj</p>
+                        </div>
+                        <div class="conversation-row message-their">
+                            <p class="conversation-message">heheheha</p>
+                        </div>
+                        <div class="conversation-row message-their">
+                            <p class="conversation-message">heheheha</p>
+                        </div>
+                        <div class="conversation-row message-their">
+                            <p class="conversation-message">heheheha</p>
+                        </div>
+                        <div class="conversation-row message-their">
+                            <p class="conversation-message">heheheha</p>
+                        </div>
+                        <div class="conversation-row message-my">
+                            <p class="conversation-message">heheheha asid jshdk jhskajhs khdkjh igwk ai wy iaugf  quiwgdai shgdi ahdi ugi</p>
+                        </div>
+                        <div class="conversation-row message-their">
+                            <p class="conversation-message">k jsahdkj hsadjh wiouaksdjh wiauh skdjhwoai ksdh kjahwiu gabkj</p>
+                        </div>
+                        <div class="conversation-row message-their">
+                            <p class="conversation-message">heheheha</p>
+                        </div>
+                        <div class="conversation-row message-their">
+                            <p class="conversation-message">heheheha</p>
+                        </div>
+                        <div class="conversation-row message-their">
+                            <p class="conversation-message">heheheha</p>
+                        </div>
+                        <div class="conversation-row message-their">
+                            <p class="conversation-message">heheheha</p>
+                        </div>
+                    </div>
+                    <div id="chat-controlls-wrapper">
+                        <textarea id="chat-input" placeholder="Zpráva"></textarea>
+                        <button id="send-message-button">
+                            <i class="fas fa-angle-up"></i>
+                        </button>
+                    </div>
+                    <p id="chat-banned-info">*Psaní na technickou podporu Vám bylo znemožněno z důvodu spamu. Zkuste to prosím později.</p>
+                </div>
+            </div>
+          </div>
+      </div>
+      <div id="results-wrapper" class="hidden">
+            <h2 id="results-title">Výsledky</h2>
+            <div id="results-team-wrapper">
+                <h2 id="results-team-name">Chcípáci</h2>
+                <div id="results-players-wrapper">
+                    <h2 class="results-player">Pepa</h2>
+                    <h2 class="results-player">Honza</h2>
+                    <h2 class="results-player">Kateřina</h2>
+                </div>
+            </div>
+
+            <div id="results-loading-wrapper">
+                <canvas id="loading-animation-canvas" width="90" height="90"></canvas>
+                <p id="results-loading-text">Čeká se na vyhodnocení úloh</p>
+            </div>
       </div>
     </div>
   </body>
-  <!-- <script src="loading_animation.js"></script>
-    <script src="login.js"></script> -->
-    <script src="../play/dynamic_height.js"></script>
-    <script src="../play/play.js"></script>
+  <script src="../play/waitroom.js"></script>
+  <script src="../play/dynamic_height.js"></script>
+  <script src="../play/loading_animation.js"></script>
+  <script src="../play/play.js"></script>
     
   
 </html>

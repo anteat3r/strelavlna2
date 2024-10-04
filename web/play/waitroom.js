@@ -1,5 +1,3 @@
-const redirects = false;
-
 var is_playing = true;
 const is_mobile = !window.matchMedia("(pointer: fine)").matches;
 console.log(is_mobile);
@@ -47,7 +45,7 @@ audioSrc.connect(analyser);
 analyser.connect(audioCtx.destination);
 
 
-const canvas = document.querySelector('canvas');
+const canvas = document.getElementById('wait-animation-canvas');
 const canvasCtx = canvas.getContext('2d');
 
 var stones = []
@@ -214,32 +212,32 @@ function drawSilentLines() {
 }
 
 var last_second = Math.floor(Date.now()/1000);
-function frame(){
-    updateSpectrogramMountains();
-    const now = Date.now();
-    const remaining = target_time - now;
+// function frame(){
+//     updateSpectrogramMountains();
+//     const now = Date.now();
+//     const remaining = target_time - now;
 
-    if (remaining <= 0 && redirects) {
-        window.location.href = `../play?id=${id}`;
-    }
+//     if (remaining <= 0 && redirects) {
+//         window.location.href = `../play?id=${id}`;
+//     }
 
-    const this_second = Math.floor(now/1000);
-    if (this_second != last_second) {
-        last_second = this_second;
-        for (const timer of document.getElementsByClassName('waitroom-timer')) {
-            if (Math.floor(remaining / 86400000) == 0) {
-                timer.innerText = new Date(remaining).toISOString().substr(11, 8);
-            } else {
-                timer.innerText = "Zbývá " + Math.floor(remaining / 86400000) + ' dní';
-            }
-        }
-    }
+//     const this_second = Math.floor(now/1000);
+//     if (this_second != last_second) {
+//         last_second = this_second;
+//         for (const timer of document.getElementsByClassName('waitroom-timer')) {
+//             if (Math.floor(remaining / 86400000) == 0) {
+//                 timer.innerText = new Date(remaining).toISOString().substr(11, 8);
+//             } else {
+//                 timer.innerText = "Zbývá " + Math.floor(remaining / 86400000) + ' dní';
+//             }
+//         }
+//     }
     
-    // document.getElementById('waitroom-timer').innerText = new Date(remaining).toISOString().substr(11, 8);
+//     // document.getElementById('waitroom-timer').innerText = new Date(remaining).toISOString().substr(11, 8);
     
     
-    requestAnimationFrame(frame);
-}
+//     requestAnimationFrame(frame);
+// }
 
 audioElement.onplay = () => {
     audioCtx.resume();
@@ -247,7 +245,7 @@ audioElement.onplay = () => {
 pregenerateStones(130, 1);
 console.log(stones);
 drawSilentLines();
-frame();
+// frame();
 
 
 function playStop(){

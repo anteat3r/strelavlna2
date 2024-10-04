@@ -1,7 +1,8 @@
-const redirects = true;
+const redirects = false;
 //global states
 var contest_name = "X";
 var contest_info = "";
+var contest_state = "ended";
 var seen_contest_info = true;
 var team_balance = 400;
 var team_name = "Team 1";
@@ -18,9 +19,12 @@ var menu_focused_by = [];
 var problems = [];
 var myId = "";
 var chat_banned = false;
+var results_ready = false;
 
 //local states
 var focused_check = "";
+
+var clock_zeroed = false;
 
 const buy_button_wrapper = document.getElementById("buy-button-wrapper");
 const buy_button = document.getElementById("buy-button");
@@ -512,14 +516,47 @@ function sellProblem(){
     });
 }
 
+function contestStateUpdated(){
+    if(contest_state == "waiting"){
+        document.getElementById("wait-wrapper").classList.remove("hidden");
+        document.getElementById("play-wrapper").classList.add("hidden");
+        document.getElementById("results-wrapper").classList.add("hidden");
+    }else if(contest_state == "running"){
+        document.getElementById("wait-wrapper").classList.add("hidden");
+        document.getElementById("play-wrapper").classList.remove("hidden");
+        document.getElementById("results-wrapper").classList.add("hidden");
+
+        updateChat();
+        updateFocusedProblem();
+        updateProblemList();
+        updateShop();
+    }else if(contest_state == "ended"){
+        document.getElementById("wait-wrapper").classList.add("hidden");
+        document.getElementById("play-wrapper").classList.add("hidden");
+        document.getElementById("results-wrapper").classList.remove("hidden");
+    }
+}
 
 
 
+let lastSecond = 0;
 
-var lastSecond = 0;
-var clock_zeroed = false;
+let last_contest_state = "";
 function update(){
     requestAnimationFrame(update);
+    if(last_contest_state != contest_state){
+        last_contest_state = contest_state;
+        contestStateUpdated();
+    }
+    if(contest_state == "waiting"){
+        updateSpectrogramMountains();
+    }
+    if(contest_state == "ended"){
+        if(!results_ready && !is_loading_running){
+            is_loading_running = true;
+            animation_color = '#3eb1df';
+        }
+    }
 
     //clock
     const now = new Date().getTime();
@@ -550,7 +587,7 @@ function connectWS() {
   socket.addEventListener("error", (e) => {
       console.log(e);
       if(redirects){
-        window.location.href = `login.html?id=${id}`;
+        window.location.href = `../login?id=${id}`;
       }
   });
 
@@ -630,7 +667,7 @@ try {
     if(redirects){
         const searchParams = new URLSearchParams(window.location.search);
         const id = searchParams.get("id");
-        window.location.href = `login.html?id=${id}`;
+        window.location.href = `../login?id=${id}`;
     }
 }
 // connectWS();
