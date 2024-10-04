@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	log "github.com/anteat3r/golog"
 	"github.com/gorilla/websocket"
@@ -54,6 +55,8 @@ func (c *TeamChanMu) Count() int {
 
 var (
   ActiveContest = ""
+  ActiveContestStart time.Time
+  ActiveContestEnd time.Time
   ActiveContestMu = sync.RWMutex{}
 
   nErr = errors.New
@@ -125,7 +128,7 @@ func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
     ActiveContestMu.RLock()
     if cont != ActiveContest { 
       ActiveContestMu.RUnlock()
-      return c.String(400, "not running")
+      return c.String(400, "not ready")
     }
     ActiveContestMu.RUnlock()
 
