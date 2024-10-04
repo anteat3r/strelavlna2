@@ -122,11 +122,11 @@ $("#query-set").addEventListener("click", async () => {clown();
   if (sres == "") { sres = "<nil> <nil>" }
   let pres = "";
   for (const r of JSON.parse(sres)) {
-    res += r.id + "\n"
+    pres += r.id + "\n"
     for (const [key, value] of Object.entries(r)) {
-      res += `    ${key}: ${value}\n`
+      pres += `    ${key}: ${value}\n`
     }
-    res += "\n"
+    pres += "\n"
   }
   $("#query-p").innerHTML = pres;
 });
