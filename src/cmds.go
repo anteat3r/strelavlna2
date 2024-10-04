@@ -11,6 +11,7 @@ import (
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
+	"github.com/pocketbase/pocketbase/tools/mailer"
 	"github.com/pocketbase/pocketbase/tools/types"
 
 	log "github.com/anteat3r/golog"
@@ -165,6 +166,66 @@ func SetupContEndp(dao *daos.Dao) echo.HandlerFunc {
 		return nil
 	}
 }
+
+func CashBuyEndp(dao *daos.Dao) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+    cost, ok := GetCost(c.QueryParam("d"))
+    if !ok { return c.String(400, "invalid diff") }
+
+    team := c.QueryParam("t")
+
+    dao.RunInTransaction(func(txDao *daos.Dao) error {
+      teamres := struct{
+        Money int `db:"money"`
+      }{}
+      err := txDao.DB().NewQuery("SELECT money FROM teams WHERE id = {:team} LIMIT 1").
+        Bind(dbx.Params{ "team": team }).
+        One(&teamres)
+      if err != nil { return err }
+
+      if teamres.Money < cost { return nErr("not enough money") }
+
+      _, err = txDao.DB().NewQuery("UPDATE teams SET money = {:money} WHERE id = {:team}").
+        Bind(dbx.Params{ "money": teamres.Money - cost, "team": team }).
+        Execute()
+
+        return nil
+
+      
+
+    })
+
+
+		return nil
+	}
+}
+
+func SendTeams(dao *daos.Dao, mailerc mailer.Mailer, timeout time.Duration) echo.HandlerFunc {
+  return func(c echo.Context) error {
+    recs, err := dao.FindRecordsByFilter(
+      "teams_reg_req",
+      `id != ""`,
+      "-created",
+      0, 0,
+    )
+    if err != nil {
+      return c.String(500, err.Error())
+    }
+    for _, rec := range recs {
+      dt := rec.GetDateTime("updated").Time()
+      if !time.Now().After(dt.Add(timeout)) { continue }
+      err = TeamRegisterSendEmail(rec, dao, mailerc)
+      if err != nil { log.Error(err) }
+      ndt, _ := types.ParseDateTime(time.Now().Add(time.Hour * 24 * 7 * 10000))
+      rec.Set("updated", ndt)
+      err = dao.SaveRecord(rec)
+      if err != nil { log.Error(err) }
+    }
+    return c.String(200, "")
+  }
+}
+
 
     //
     // e.Router.GET(

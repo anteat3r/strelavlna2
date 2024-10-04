@@ -146,6 +146,11 @@ func main() {
     )
 
     e.Router.GET(
+      "/api/admin/migratereqreg",
+      src.SendTeams(app.Dao(), mailerc, time.Millisecond),
+    )
+
+    e.Router.GET(
       "/api/admin/loadactivec",
       func(c echo.Context) error {
         src.ActiveContestMu.RLock()
