@@ -33,7 +33,7 @@ type TeamChanMu struct {
   mu sync.RWMutex
   ch TeamChans
 }
-func (c *TeamChanMu) Send(msg... string) {
+func (c *TeamChanMu) Send(team string, msg... string) {
   resmsg := strings.Join(msg, DELIM)
   c.mu.RLock()
   for _, ch := range c.ch {
@@ -41,6 +41,7 @@ func (c *TeamChanMu) Send(msg... string) {
     ch<- resmsg
   }
   c.mu.RUnlock()
+  fmt.Printf("%v >- %v -> %v", time.Now(), team, resmsg)
 }
 func (c *TeamChanMu) Count() int {
   i := 0
@@ -82,6 +83,7 @@ func AdminSend(msg... string) {
     ch<- resmsg
   }
   adminsMutex.RUnlock()
+  fmt.Printf("%v >>- -> %v", time.Now(), msg)
 }
 
 // func AdminSendIdx(idx int, msg... string) {
@@ -198,12 +200,11 @@ func WriteTeamChan(teamid string, msg... string) {
   teamChanMapMutex.Lock()
   res := TeamChanMap[teamid]
   if res == nil {
-    fmt.Printf("aid %v\n", TeamChanMap)
     teamChanMapMutex.Unlock()
     return
   }
   teamChanMapMutex.Unlock()
-  res.Send(msg...)
+  res.Send(teamid, msg...)
 }
 
 func PlayerWsLoop(

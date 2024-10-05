@@ -1,6 +1,7 @@
 package src
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -38,11 +39,11 @@ func PlayerWsHandleMsg(
     return dbErr("contest not running")
   }
   ActiveContestMu.RUnlock()
-  // defer func(){
-  //   if oerr != nil {
-  //     sLog("playerevterr", team, msg, oerr.Error())
-  //   }
-  // }()
+  defer func(){
+    if oerr != nil {
+      fmt.Printf("%v *>- %v <-* %v <- %v", now, team, oerr.Error(), msg)
+    }
+  }()
 
   // log.Info("")
 
@@ -55,14 +56,14 @@ func PlayerWsHandleMsg(
     prob := m[1]
     money, err := DBSell(team, prob)
     if err != nil { return err }
-    tchan.Send("sold", prob, strconv.Itoa(money))
+    tchan.Send(team, "sold", prob, strconv.Itoa(money))
 
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
     prob, money, name, text, img, err := DBBuy(team, diff)
     if err != nil { return err }
-    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img)
+    tchan.Send(team, "bought", prob, diff, strconv.Itoa(money), name, text, img)
 
   // case "buyold":
   //   if len(m) != 2 { return eIm(msg) }
@@ -78,7 +79,7 @@ func PlayerWsHandleMsg(
     check, _, teamname, _, csol, upd, workers, err := DBSolve(team, prob, sol)
     if err != nil { return err }
     phash := HashId(workers)
-    tchan.Send("solved", prob, sol)
+    tchan.Send(team, "solved", prob, sol)
     if upd {
       AdminSend("upgraded", check, sol, phash)
     } else {
@@ -91,11 +92,11 @@ func PlayerWsHandleMsg(
     // text, diff, name, err := DBView(team, prob)
     // if err != nil { return err }
     // perchan<- "viewed" + DELIM + diff + DELIM + name + DELIM + text
-    tchan.Send("focused", prob, strconv.Itoa(idx))
+    tchan.Send(team, "focused", prob, strconv.Itoa(idx))
 
   case "unfocus":
     if len(m) != 1 { return eIm(msg) }
-    tchan.Send("unfocused", strconv.Itoa(idx))
+    tchan.Send(team, "unfocused", strconv.Itoa(idx))
 
   case "chat":
     if len(m) != 3 { return eIm(msg) }
@@ -109,7 +110,7 @@ func PlayerWsHandleMsg(
     }
     upd, teamname, name, diff, check, workers, chat, err := DBPlayerMsg(team, prob, text)
     if err != nil { return err }
-    tchan.Send("msgsent", prob, text)
+    tchan.Send(team, "msgsent", prob, text)
     phash := HashId(workers)
     if !upd {
       AdminSend("questioned", check, team, teamname, prob, diff, name, text, phash, chat)
@@ -122,18 +123,18 @@ func PlayerWsHandleMsg(
     res, err := DBPlayerInitLoad(team, idx)
     if err != nil { return err }
     perchan<- "loaded" + DELIM + res
-    tchan.Send("focuscheck")
+    tchan.Send(team, "focuscheck")
 
   case "focuscheck":
     if len(m) != 1 { return eIm(msg) }
-    tchan.Send("focuscheck")
+    tchan.Send(team, "focuscheck")
 
   default:
     return eIm(msg)
 
   }
 
-  sLog("playerevt", team, msg)
+  fmt.Printf("%v >- %v <- %v", now, team, msg)
 
   return nil
 }
@@ -146,7 +147,7 @@ func AdminWsHandleMsg(
 ) (oerr error) {
   defer func(){
     if oerr != nil {
-      sLog("adminevterr", email, msg, oerr.Error())
+      fmt.Printf("%v *>>- %v <-* %v <- %v", time.Now(), id, oerr.Error(), msg)
     }
   }()
 
@@ -250,8 +251,8 @@ func AdminWsHandleMsg(
     err := DBAdminSetInfo(info)
     if err != nil { return err }
     teamChanMapMutex.Lock()
-    for _, tc := range TeamChanMap {
-      tc.Send("gotinfo", info)
+    for id, tc := range TeamChanMap {
+      tc.Send(id, "gotinfo", info)
     }
     teamChanMapMutex.Unlock()
     AdminSend("gotinfo", info)
@@ -278,7 +279,7 @@ func AdminWsHandleMsg(
 
   }
 
-  sLog("adminevt", email, msg)
+  fmt.Printf("%v >>- %v <- %v", time.Now(), id, msg)
 
   return nil
 }

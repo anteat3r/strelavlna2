@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"maps"
 	"slices"
 	"strings"
@@ -679,7 +678,6 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
     for sres.Next() {
       r := make(dbx.NullStringMap)
       sres.ScanMap(r)
-      fmt.Printf("sdf %v\n", r)
     }
     sres.Close()
 
