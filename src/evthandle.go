@@ -1,6 +1,8 @@
 package src
 
 import (
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -21,6 +23,10 @@ func sLog(v... any) {
   log.InfoT("%v ", 1, v...)
 }
 
+func formTime() string {
+  return time.Now().Format("2006-01-02 15:04:05.000000")
+}
+
 const DELIM = "\x00"
 
 func PlayerWsHandleMsg(
@@ -30,24 +36,28 @@ func PlayerWsHandleMsg(
   tchan *TeamChanMu,
   idx int,
 ) (oerr error) {
+  m := strings.Split(msg, DELIM)
+  if len(m) == 0 { return eIm(msg) }
+
   now := time.Now()
   ActiveContestMu.RLock()
-  if now.After(ActiveContestStart) &&
-     now.Before(ActiveContestEnd) {
+  if m[0] != "load" &&
+     !( now.After(ActiveContestStart) &&
+     now.Before(ActiveContestEnd) ) {
     ActiveContestMu.RUnlock()
     return dbErr("contest not running")
   }
   ActiveContestMu.RUnlock()
-  // defer func(){
-  //   if oerr != nil {
-  //     sLog("playerevterr", team, msg, oerr.Error())
-  //   }
-  // }()
+  readmsg := strings.Join(m, "|")
+
+  defer func(){
+    if oerr != nil {
+      fmt.Printf("%s *>- %s:%d <-* %s <- %s\n", formTime(), team, idx, strings.ReplaceAll(oerr.Error(), "\x00", "|"), readmsg)
+    }
+  }()
 
   // log.Info("")
 
-  m := strings.Split(msg, DELIM)
-  if len(m) == 0 { return eIm(msg) }
   switch m[0] {
 
   case "sell":
@@ -55,14 +65,14 @@ func PlayerWsHandleMsg(
     prob := m[1]
     money, err := DBSell(team, prob)
     if err != nil { return err }
-    tchan.Send("sold", prob, strconv.Itoa(money))
+    tchan.Send(team, "sold", prob, strconv.Itoa(money))
 
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
     prob, money, name, text, img, err := DBBuy(team, diff)
     if err != nil { return err }
-    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img)
+    tchan.Send(team, "bought", prob, diff, strconv.Itoa(money), name, text, img)
 
   // case "buyold":
   //   if len(m) != 2 { return eIm(msg) }
@@ -78,7 +88,7 @@ func PlayerWsHandleMsg(
     check, _, teamname, _, csol, upd, workers, err := DBSolve(team, prob, sol)
     if err != nil { return err }
     phash := HashId(workers)
-    tchan.Send("solved", prob, sol)
+    tchan.Send(team, "solved", prob, sol)
     if upd {
       AdminSend("upgraded", check, sol, phash)
     } else {
@@ -91,11 +101,11 @@ func PlayerWsHandleMsg(
     // text, diff, name, err := DBView(team, prob)
     // if err != nil { return err }
     // perchan<- "viewed" + DELIM + diff + DELIM + name + DELIM + text
-    tchan.Send("focused", prob, strconv.Itoa(idx))
+    tchan.Send(team, "focused", prob, strconv.Itoa(idx))
 
   case "unfocus":
     if len(m) != 1 { return eIm(msg) }
-    tchan.Send("unfocused", strconv.Itoa(idx))
+    tchan.Send(team, "unfocused", strconv.Itoa(idx))
 
   case "chat":
     if len(m) != 3 { return eIm(msg) }
@@ -109,7 +119,7 @@ func PlayerWsHandleMsg(
     }
     upd, teamname, name, diff, check, workers, chat, err := DBPlayerMsg(team, prob, text)
     if err != nil { return err }
-    tchan.Send("msgsent", prob, text)
+    tchan.Send(team, "msgsent", prob, text)
     phash := HashId(workers)
     if !upd {
       AdminSend("questioned", check, team, teamname, prob, diff, name, text, phash, chat)
@@ -122,18 +132,18 @@ func PlayerWsHandleMsg(
     res, err := DBPlayerInitLoad(team, idx)
     if err != nil { return err }
     perchan<- "loaded" + DELIM + res
-    tchan.Send("focuscheck")
+    tchan.Send(team, "focuscheck")
 
   case "focuscheck":
     if len(m) != 1 { return eIm(msg) }
-    tchan.Send("focuscheck")
+    tchan.Send(team, "focuscheck")
 
   default:
     return eIm(msg)
 
   }
 
-  sLog("playerevt", team, msg)
+  fmt.Printf("%s >- %s:%d <- %s\n", formTime(), team, idx, readmsg)
 
   return nil
 }
@@ -144,9 +154,10 @@ func AdminWsHandleMsg(
   msg string,
   id string,
 ) (oerr error) {
+  readmsg := strings.ReplaceAll(msg, "\x00", "|")
   defer func(){
     if oerr != nil {
-      sLog("adminevterr", email, msg, oerr.Error())
+      fmt.Printf("%s *>>- %s <-* %s <- %s\n", formTime(), id, strings.ReplaceAll(oerr.Error(), "\x00", "|"), readmsg)
     }
   }()
 
@@ -250,8 +261,8 @@ func AdminWsHandleMsg(
     err := DBAdminSetInfo(info)
     if err != nil { return err }
     teamChanMapMutex.Lock()
-    for _, tc := range TeamChanMap {
-      tc.Send("gotinfo", info)
+    for id, tc := range TeamChanMap {
+      tc.Send(id, "gotinfo", info)
     }
     teamChanMapMutex.Unlock()
     AdminSend("gotinfo", info)
@@ -276,9 +287,57 @@ func AdminWsHandleMsg(
     AdminSend("reassigned", res)
     perchan<- "unworking"
 
+  case "chngprob":
+    if len(m) != 6 { return eIm(msg) }
+    prob := m[1]
+    ndiff := m[2]
+    nname := m[3]
+    ntext := m[4]
+    nsol := m[5]
+    teams, err := DBAdminEditProb(prob, ndiff, nname, ntext, nsol)
+    if err != nil { return err }
+    for _, t := range teams {
+      WriteTeamChan(t, "probchngd", ndiff, nname, ntext, nsol)
+    }
+    AdminSend("probchngd", ndiff, nname, ntext, nsol)
+
+  case "parselog":
+    if len(m) != 1 { return eIm(msg) }
+    log, err := LoadLog()
+    if err != nil { return err }
+    teamChanMapMutex.Lock()
+    for t, c := range TeamChanMap {
+      tlog := FilterLogTeam(log, t)
+      c.Send(t, "gotlog", strings.Join(tlog, "\n"))
+    }
+    teamChanMapMutex.Unlock()
+
   }
 
-  sLog("adminevt", email, msg)
+  fmt.Printf("%s >>- %s <- %s\n", formTime(), id, readmsg)
 
   return nil
 }
+
+func LoadLog() ([]string, error) {
+  bts, err := os.ReadFile("/opt/strelavlna2/sv2.log")
+  if err != nil { return nil, err }
+  lns := strings.Split(string(bts), "\n")
+  flns := make([]string, 0, len(lns) / 100)
+  for _, l := range lns {
+    if !strings.Contains(l, "bought") &&
+       !strings.Contains(l, "solved") { continue }
+    flns = append(flns, l)
+  }
+  return flns, nil
+}
+
+func FilterLogTeam(log []string, team string) []string {
+  flog := make([]string, len(log) / 100)
+  for _, l := range log {
+    if !strings.Contains(l, team) { continue }
+    flog = append(flog, l)
+  }
+  return flog
+}
+

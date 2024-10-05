@@ -33,14 +33,16 @@ type TeamChanMu struct {
   mu sync.RWMutex
   ch TeamChans
 }
-func (c *TeamChanMu) Send(msg... string) {
+func (c *TeamChanMu) Send(team string, msg... string) {
   resmsg := strings.Join(msg, DELIM)
+  readmsg := strings.Join(msg, "|")
   c.mu.RLock()
   for _, ch := range c.ch {
     if ch == nil { continue }
     ch<- resmsg
   }
   c.mu.RUnlock()
+  fmt.Printf("%s >- %s   -> %s\n", formTime(), team, readmsg)
 }
 func (c *TeamChanMu) Count() int {
   i := 0
@@ -76,12 +78,14 @@ var (
 
 func AdminSend(msg... string) {
   resmsg := strings.Join(msg, DELIM)
+  readmsg := strings.Join(msg, "|")
   adminsMutex.RLock()
   for _, ch := range AdminsChans {
     if ch == nil { continue }
     ch<- resmsg
   }
   adminsMutex.RUnlock()
+  fmt.Printf("%s >>- -> %s\n", formTime(), readmsg)
 }
 
 // func AdminSendIdx(idx int, msg... string) {
@@ -187,7 +191,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
 
-    sLog("player connected", teamrec.GetId(), teamrec.GetString("name"))
+    fmt.Printf("%s >- %s:%d + >->\n", formTime(), teamrec.GetId(), i)
     go PlayerWsLoop(conn, teamid, perchan, teamchan, i)
 
     return nil
@@ -198,12 +202,11 @@ func WriteTeamChan(teamid string, msg... string) {
   teamChanMapMutex.Lock()
   res := TeamChanMap[teamid]
   if res == nil {
-    fmt.Printf("aid %v\n", TeamChanMap)
     teamChanMapMutex.Unlock()
     return
   }
   teamChanMapMutex.Unlock()
-  res.Send(msg...)
+  res.Send(teamid, msg...)
 }
 
 func PlayerWsLoop(
@@ -252,12 +255,12 @@ func PlayerWsLoop(
       }
     }
   }
-  sLog("player quit", team, oerr)
+  fmt.Printf("%s >- %s:%d - <-< %s\n", formTime(), team, idx, oerr.Error())
   conn.Close()
   tchan.mu.Lock()
   tchan.ch[idx] = nil
   tchan.mu.Unlock()
-  tchan.Send("unfocused", strconv.Itoa(idx))
+  tchan.Send(team, "unfocused", strconv.Itoa(idx))
 }
 
 func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
@@ -284,7 +287,7 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
 
-    sLog("admin connected", adminrec.GetId(), adminrec.Email)
+    fmt.Printf("%s >>- %s + >->\n", formTime(), adminrec.GetId())
     go AdminWsLoop(conn, adminrec.Email, perchan, adminid)
 
     return nil
@@ -339,7 +342,7 @@ func AdminWsLoop(
       }
     }
   }
-  sLog("admin quit", oerr)
+  fmt.Printf("%s >>- %s - <-< %s\n", formTime(), id, oerr.Error())
   conn.Close()
 
   err := AdminWsHandleMsg(email, perchan, "unwork", id)

@@ -1,5 +1,10 @@
 /*nothing yet*/
-pre {
+p {
+  font-family: monospace;
   width: 100%;
-  overflow-x: auto;
+  word-wrap: break-word;
+}
+
+#query-inp {
+  width: 100%;
 }

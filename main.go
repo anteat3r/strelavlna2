@@ -195,20 +195,70 @@ func main() {
     )
 
     e.Router.GET(
-      "/api/admin/setactivec",
+      "/api/admin/loadactivecstart",
       func(c echo.Context) error {
-        log.Info(c.QueryParams())
+        src.ActiveContestMu.RLock()
+        res := src.ActiveContestStart
+        src.ActiveContestMu.RUnlock()
+        return c.String(200, res.Format("2006-01-02T15:04"))
+      },
+      apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/loadactivecend",
+      func(c echo.Context) error {
+        src.ActiveContestMu.RLock()
+        res := src.ActiveContestEnd
+        src.ActiveContestMu.RUnlock()
+        return c.String(200, res.Format("2006-01-02T15:04"))
+      },
+      apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/setactivecstart",
+      func(c echo.Context) error {
         if c.QueryParam("i") == "" {
-          log.Info("soadij")
           return c.String(400, "invalid param")
         }
-        log.Info("asod")
+        t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
+        if err != nil { return err }
         src.ActiveContestMu.Lock()
-        log.Info("asod")
-        src.ActiveContest = c.QueryParam("i")
-        log.Info("asod")
+        src.ActiveContestStart = t
         src.ActiveContestMu.Unlock()
-        log.Info("asod")
+        app.Logger().Info(`ActiveContestStart set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
+        return c.String(200, "")
+      },
+      apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/setactivecend",
+      func(c echo.Context) error {
+        if c.QueryParam("i") == "" {
+          return c.String(400, "invalid param")
+        }
+        t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
+        if err != nil { return err }
+        src.ActiveContestMu.Lock()
+        src.ActiveContestEnd = t
+        src.ActiveContestMu.Unlock()
+        app.Logger().Info(`ActiveContestEnd set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
+        return c.String(200, "")
+      },
+      apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/api/admin/setactivec",
+      func(c echo.Context) error {
+        if c.QueryParam("i") == "" {
+          return c.String(400, "invalid param")
+        }
+        src.ActiveContestMu.Lock()
+        src.ActiveContest = c.QueryParam("i")
+        src.ActiveContestMu.Unlock()
         app.Logger().Info(`ActiveContest set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
         return c.String(200, "")
       },
@@ -291,6 +341,28 @@ func main() {
     text_ = strings.TrimSuffix(text_, "</p>")
 
     src.ActiveContest = text_
+
+    initcontstrt, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecontstart")
+    if err != nil { return err }
+
+    text_2 := initcontstrt.GetString("text")
+    text_2 = strings.TrimPrefix(text_2, "<p>")
+    text_2 = strings.TrimSuffix(text_2, "</p>")
+    t, err := time.Parse("2006-01-02T15:04 -0700", text_2)
+    if err != nil { panic(err) }
+
+    src.ActiveContestStart = t
+
+    initcontend, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecontend")
+    if err != nil { return err }
+
+    text_3 := initcontend.GetString("text")
+    text_3 = strings.TrimPrefix(text_3, "<p>")
+    text_3 = strings.TrimSuffix(text_3, "</p>")
+    t2, err := time.Parse("2006-01-02T15:04 -0700", text_3)
+    if err != nil { panic(err) }
+
+    src.ActiveContestEnd = t2
 
     initcosts, err := app.Dao().FindFirstRecordByData("texts", "name", "def_costs")
     if err != nil { return err }
