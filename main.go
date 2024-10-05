@@ -345,27 +345,27 @@ func main() {
 
     src.ActiveContest = text_
 
-    initcontstrt, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecontstart")
-    if err != nil { return err }
-
-    text_2 := initcontstrt.GetString("text")
-    text_2 = strings.TrimPrefix(text_2, "<p>")
-    text_2 = strings.TrimSuffix(text_2, "</p>")
-    t, err := time.Parse("2006-01-02T15:04", text_2)
-    if err != nil { panic(err) }
-
-    src.ActiveContestStart = t
-
-    initcontend, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecontend")
-    if err != nil { return err }
-
-    text_3 := initcontend.GetString("text")
-    text_3 = strings.TrimPrefix(text_3, "<p>")
-    text_3 = strings.TrimSuffix(text_3, "</p>")
-    t2, err := time.Parse("2006-01-02T15:04", text_3)
-    if err != nil { panic(err) }
-
-    src.ActiveContestEnd = t2
+    // initcontstrt, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecontstart")
+    // if err != nil { return err }
+    //
+    // text_2 := initcontstrt.GetString("text")
+    // text_2 = strings.TrimPrefix(text_2, "<p>")
+    // text_2 = strings.TrimSuffix(text_2, "</p>")
+    // t, err := time.Parse("2006-01-02T15:04", text_2)
+    // if err != nil { panic(err) }
+    //
+    // src.ActiveContestStart = t
+    //
+    // initcontend, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecontend")
+    // if err != nil { return err }
+    //
+    // text_3 := initcontend.GetString("text")
+    // text_3 = strings.TrimPrefix(text_3, "<p>")
+    // text_3 = strings.TrimSuffix(text_3, "</p>")
+    // t2, err := time.Parse("2006-01-02T15:04", text_3)
+    // if err != nil { panic(err) }
+    //
+    // src.ActiveContestEnd = t2
 
     initcosts, err := app.Dao().FindFirstRecordByData("texts", "name", "def_costs")
     if err != nil { return err }
