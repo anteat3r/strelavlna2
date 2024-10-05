@@ -41,7 +41,7 @@ func (c *TeamChanMu) Send(team string, msg... string) {
     ch<- resmsg
   }
   c.mu.RUnlock()
-  fmt.Printf("%v >- %v -> %v", time.Now(), team, resmsg)
+  fmt.Printf("%v >- %v -> %v", time.Now(), team, strings.ReplaceAll(resmsg, "\x00", "|"))
 }
 func (c *TeamChanMu) Count() int {
   i := 0
@@ -83,7 +83,7 @@ func AdminSend(msg... string) {
     ch<- resmsg
   }
   adminsMutex.RUnlock()
-  fmt.Printf("%v >>- -> %v", time.Now(), msg)
+  fmt.Printf("%v >>- -> %v", time.Now(), strings.ReplaceAll(resmsg, "\x00", "|"))
 }
 
 // func AdminSendIdx(idx int, msg... string) {
