@@ -222,7 +222,7 @@ func main() {
         if c.QueryParam("i") == "" {
           return c.String(400, "invalid param")
         }
-        t, err := time.Parse("2006-01-02T15:04", c.QueryParam("i"))
+        t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
         if err != nil { return err }
         src.ActiveContestMu.Lock()
         src.ActiveContestStart = t
@@ -239,7 +239,7 @@ func main() {
         if c.QueryParam("i") == "" {
           return c.String(400, "invalid param")
         }
-        t, err := time.Parse("2006-01-02T15:04", c.QueryParam("i"))
+        t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
         if err != nil { return err }
         src.ActiveContestMu.Lock()
         src.ActiveContestEnd = t
