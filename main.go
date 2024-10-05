@@ -348,7 +348,7 @@ func main() {
     text_2 := initcontstrt.GetString("text")
     text_2 = strings.TrimPrefix(text_2, "<p>")
     text_2 = strings.TrimSuffix(text_2, "</p>")
-    t, err := time.Parse("2006-01-02T15:04", text_2)
+    t, err := time.Parse("2006-01-02T15:04 -0700", text_2)
     if err != nil { panic(err) }
 
     src.ActiveContestStart = t
@@ -359,7 +359,7 @@ func main() {
     text_3 := initcontend.GetString("text")
     text_3 = strings.TrimPrefix(text_3, "<p>")
     text_3 = strings.TrimSuffix(text_3, "</p>")
-    t2, err := time.Parse("2006-01-02T15:04", text_3)
+    t2, err := time.Parse("2006-01-02T15:04 -0700", text_3)
     if err != nil { panic(err) }
 
     src.ActiveContestEnd = t2

@@ -2,6 +2,7 @@ package src
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -286,9 +287,57 @@ func AdminWsHandleMsg(
     AdminSend("reassigned", res)
     perchan<- "unworking"
 
+  case "chngprob":
+    if len(m) != 6 { return eIm(msg) }
+    prob := m[1]
+    ndiff := m[2]
+    nname := m[3]
+    ntext := m[4]
+    nsol := m[5]
+    teams, err := DBAdminEditProb(prob, ndiff, nname, ntext, nsol)
+    if err != nil { return err }
+    for _, t := range teams {
+      WriteTeamChan(t, "probchngd", ndiff, nname, ntext, nsol)
+    }
+    AdminSend("probchngd", ndiff, nname, ntext, nsol)
+
+  case "parselog":
+    if len(m) != 1 { return eIm(msg) }
+    log, err := LoadLog()
+    if err != nil { return err }
+    teamChanMapMutex.Lock()
+    for t, c := range TeamChanMap {
+      tlog := FilterLogTeam(log, t)
+      c.Send(t, "gotlog", strings.Join(tlog, "\n"))
+    }
+    teamChanMapMutex.Unlock()
+
   }
 
   fmt.Printf("%s >>- %s <- %s\n", formTime(), id, readmsg)
 
   return nil
 }
+
+func LoadLog() ([]string, error) {
+  bts, err := os.ReadFile("/opt/strelavlna2/sv2.log")
+  if err != nil { return nil, err }
+  lns := strings.Split(string(bts), "\n")
+  flns := make([]string, 0, len(lns) / 100)
+  for _, l := range lns {
+    if !strings.Contains(l, "bought") &&
+       !strings.Contains(l, "solved") { continue }
+    flns = append(flns, l)
+  }
+  return flns, nil
+}
+
+func FilterLogTeam(log []string, team string) []string {
+  flog := make([]string, len(log) / 100)
+  for _, l := range log {
+    if !strings.Contains(l, team) { continue }
+    flog = append(flog, l)
+  }
+  return flog
+}
+

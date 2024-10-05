@@ -988,3 +988,31 @@ func DBReAssign() (res string, oerr error) {
   })
   return
 }
+
+func DBAdminEditProb(prob string, ndiff string, nname string, ntext string, nsol string) (teams []string, oerr error) {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+
+    _, err := txDao.DB().
+      NewQuery("UPDATE probs SET diff = {:diff}, name = {:name}, text = {:text}, solution = {:sol} WHERE id = {:id}").
+      Bind(dbx.Params{
+        "diff": ndiff,
+        "name": nname,
+        "text": ntext,
+        "solution": nsol,
+        "id": prob,
+      }).Execute()
+    if err != nil { return err }
+
+    teamres := []string{}
+    err = txDao.DB().
+      NewQuery("SELECT id FROM teams WHERE bought LIKE {:prob} OR pending LIKE {:prob}").
+      Bind(dbx.Params{ "prob": prob }).
+      All(&teamres)
+    if err != nil { return nil }
+
+    teams = teamres
+
+    return nil
+  })
+  return
+}
