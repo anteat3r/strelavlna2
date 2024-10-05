@@ -138,3 +138,39 @@ $("#query-set").addEventListener("click", async () => {clown();
   }
   $("#query-p").innerHTML = pres;
 });
+
+$("#activecstrt-set").addEventListener("click", async () => {clown();
+  let payload = $("#activecstrt-inp").value;
+  const res = await fetch(
+    `/api/admin/setactivecstart?i=${ payload }`,
+    {headers: {"Authorization": pb.authStore.token},
+  })
+  console.log(res);
+});
+
+$("#activecend-set").addEventListener("click", async () => {clown();
+  let payload = $("#activecend-inp").value;
+  const res = await fetch(
+    `/api/admin/setactivecend?i=${ payload }`,
+    {headers: {"Authorization": pb.authStore.token},
+  })
+  console.log(res);
+});
+
+$("#activecstrt-load").addEventListener("click", async () => {clown();
+  const res = await fetch(
+    "/api/admin/loadactivecstart",
+    {headers: {"Authorization": pb.authStore.token},
+  })
+  let sres = await res.text();
+  $("#activecstrt-inp").value = sres;
+});
+
+$("#activecend-load").addEventListener("click", async () => {clown();
+  const res = await fetch(
+    "/api/admin/loadactivecend",
+    {headers: {"Authorization": pb.authStore.token},
+  })
+  let sres = await res.text();
+  $("#activecend-inp").value = sres;
+});

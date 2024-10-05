@@ -35,15 +35,20 @@ func PlayerWsHandleMsg(
   tchan *TeamChanMu,
   idx int,
 ) (oerr error) {
+  m := strings.Split(msg, DELIM)
+  if len(m) == 0 { return eIm(msg) }
+
   now := time.Now()
   ActiveContestMu.RLock()
-  if now.After(ActiveContestStart) &&
-     now.Before(ActiveContestEnd) {
+  if m[0] != "load" &&
+     !( now.After(ActiveContestStart) &&
+     now.Before(ActiveContestEnd) ) {
     ActiveContestMu.RUnlock()
     return dbErr("contest not running")
   }
   ActiveContestMu.RUnlock()
-  readmsg := strings.ReplaceAll(msg, "\x00", "|")
+  readmsg := strings.Join(m, "|")
+
   defer func(){
     if oerr != nil {
       fmt.Printf("%s *>- %s:%d <-* %s <- %s\n", formTime(), team, idx, oerr.Error(), readmsg)
@@ -52,8 +57,6 @@ func PlayerWsHandleMsg(
 
   // log.Info("")
 
-  m := strings.Split(msg, DELIM)
-  if len(m) == 0 { return eIm(msg) }
   switch m[0] {
 
   case "sell":
