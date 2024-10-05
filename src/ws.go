@@ -191,7 +191,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
 
-    fmt.Printf("%s >- %s:%d + >->\n", formTime(), i, teamrec.GetId())
+    fmt.Printf("%s >- %s:%d + >->\n", formTime(), teamrec.GetId(), i)
     go PlayerWsLoop(conn, teamid, perchan, teamchan, i)
 
     return nil
