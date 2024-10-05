@@ -1,5 +1,4 @@
 /*nothing yet*/
-pre {
-  width: 100%;
-  overflow-x: auto;
+p {
+  font-family: monospace;
 }
