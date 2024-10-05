@@ -189,7 +189,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
 
-    sLog("player connected", teamrec.GetId(), teamrec.GetString("name"))
+    fmt.Printf("%v >- %v + >->\n", strings.Split(time.Now().String(), "+")[0], teamrec.GetId())
     go PlayerWsLoop(conn, teamid, perchan, teamchan, i)
 
     return nil
@@ -253,7 +253,7 @@ func PlayerWsLoop(
       }
     }
   }
-  sLog("player quit", team, oerr)
+  fmt.Printf("%v >- %v - <-< %v\n", strings.Split(time.Now().String(), "+")[0], team, oerr.Error())
   conn.Close()
   tchan.mu.Lock()
   tchan.ch[idx] = nil
@@ -285,7 +285,7 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
 
-    sLog("admin connected", adminrec.GetId(), adminrec.Email)
+    fmt.Printf("%v >>- %v + >->\n", strings.Split(time.Now().String(), "+")[0], adminrec.GetId())
     go AdminWsLoop(conn, adminrec.Email, perchan, adminid)
 
     return nil
@@ -340,7 +340,7 @@ func AdminWsLoop(
       }
     }
   }
-  sLog("admin quit", oerr)
+  fmt.Printf("%v >>- %v - <-< %v\n", strings.Split(time.Now().String(), "+")[0], id, oerr.Error())
   conn.Close()
 
   err := AdminWsHandleMsg(email, perchan, "unwork", id)
