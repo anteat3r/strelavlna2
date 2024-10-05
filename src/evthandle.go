@@ -41,7 +41,7 @@ func PlayerWsHandleMsg(
   ActiveContestMu.RUnlock()
   defer func(){
     if oerr != nil {
-      fmt.Printf("%v *>- %v <-* %v <- %v", now, team, oerr.Error(), strings.ReplaceAll(msg, "\x00", "|"))
+      fmt.Printf("%v *>- %v <-* %v <- %v\n", now, team, oerr.Error(), strings.ReplaceAll(msg, "\x00", "|"))
     }
   }()
 
@@ -134,7 +134,7 @@ func PlayerWsHandleMsg(
 
   }
 
-  fmt.Printf("%v >- %v <- %v", now, team, strings.ReplaceAll(msg, "\x00", "|"))
+  fmt.Printf("%v >- %v <- %v\n", now, team, strings.ReplaceAll(msg, "\x00", "|"))
 
   return nil
 }
@@ -147,7 +147,7 @@ func AdminWsHandleMsg(
 ) (oerr error) {
   defer func(){
     if oerr != nil {
-      fmt.Printf("%v *>>- %v <-* %v <- %v", time.Now(), id, oerr.Error(), strings.ReplaceAll(msg, "\x00", "|"))
+      fmt.Printf("%v *>>- %v <-* %v <- %v\n", time.Now(), id, oerr.Error(), strings.ReplaceAll(msg, "\x00", "|"))
     }
   }()
 
@@ -279,7 +279,7 @@ func AdminWsHandleMsg(
 
   }
 
-  fmt.Printf("%v >>- %v <- %v", time.Now(), id, strings.ReplaceAll(msg, "\x00", "|"))
+  fmt.Printf("%v >>- %v <- %v\n", time.Now(), id, strings.ReplaceAll(msg, "\x00", "|"))
 
   return nil
 }
