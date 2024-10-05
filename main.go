@@ -219,7 +219,6 @@ func main() {
     e.Router.GET(
       "/api/admin/setactivecstart",
       func(c echo.Context) error {
-        log.Info(c.QueryParams())
         if c.QueryParam("i") == "" {
           return c.String(400, "invalid param")
         }
@@ -237,7 +236,6 @@ func main() {
     e.Router.GET(
       "/api/admin/setactivecend",
       func(c echo.Context) error {
-        log.Info(c.QueryParams())
         if c.QueryParam("i") == "" {
           return c.String(400, "invalid param")
         }
@@ -255,7 +253,6 @@ func main() {
     e.Router.GET(
       "/api/admin/setactivec",
       func(c echo.Context) error {
-        log.Info(c.QueryParams())
         if c.QueryParam("i") == "" {
           return c.String(400, "invalid param")
         }
