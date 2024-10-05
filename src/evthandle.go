@@ -51,7 +51,7 @@ func PlayerWsHandleMsg(
 
   defer func(){
     if oerr != nil {
-      fmt.Printf("%s *>- %s:%d <-* %s <- %s\n", formTime(), team, idx, oerr.Error(), readmsg)
+      fmt.Printf("%s *>- %s:%d <-* %s <- %s\n", formTime(), team, idx, strings.ReplaceAll(oerr.Error(), "\x00", "|"), readmsg)
     }
   }()
 
@@ -156,7 +156,7 @@ func AdminWsHandleMsg(
   readmsg := strings.ReplaceAll(msg, "\x00", "|")
   defer func(){
     if oerr != nil {
-      fmt.Printf("%s *>>- %s <-* %s <- %s\n", formTime(), id, oerr.Error(), readmsg)
+      fmt.Printf("%s *>>- %s <-* %s <- %s\n", formTime(), id, strings.ReplaceAll(oerr.Error(), "\x00", "|"), readmsg)
     }
   }()
 
