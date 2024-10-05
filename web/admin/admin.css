@@ -4,3 +4,7 @@ p {
   width: 100%;
   word-wrap: break-word;
 }
+
+#query-inp {
+  width: 100%;
+}
