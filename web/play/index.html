@@ -347,6 +347,97 @@
                 <canvas id="loading-animation-canvas" width="90" height="90"></canvas>
                 <p id="results-loading-text">Čeká se na vyhodnocení úloh</p>
             </div>
+            <div id="results-content-wrapper" class="hidden">
+                <canvas id="results-graph-canvas" width="400" height="400"></canvas>
+                <div id="results-middle-container">
+                    <div id="results-accuracy-wrapper">
+                        <h2 id="resutls-accuracy-title">Úspěšnost</h2>
+                        <div id="results-accuracy-chart-wrapper">
+                            <div id="results-accuracy-labels-wrapper">
+                                <p id="results-accuracy-label-a">A</p>
+                                <p id="results-accuracy-label-b">B</p>
+                                <p id="results-accuracy-label-c">C</p>
+                            </div>
+                            <div id="results-accuracy-chart">
+                                <div class="results-acccuracy-chart-row">
+                                    <i class="fa-solid fa-circle-xmark results-accuracy-incorrect-icon"></i>
+                                    <div class="results-accuracy-value-wrapper">
+                                        <div class="results-accuracy-incorrect-filler"></div>
+                                        <div id="results-accuracy-correct-filler-a" class="results-accuracy-correct-filler"></div>
+                                    </div>
+                                    <i class="fa-solid fa-circle-check results-accuracy-correct-icon"></i>
+                                </div>
+                                <div class="results-acccuracy-chart-row">
+                                    <i class="fa-solid fa-circle-xmark results-accuracy-incorrect-icon"></i>
+                                    <div class="results-accuracy-value-wrapper">
+                                        <div class="results-accuracy-incorrect-filler"></div>
+                                        <div id="results-accuracy-correct-filler-b" class="results-accuracy-correct-filler"></div>
+                                    </div>
+                                    <i class="fa-solid fa-circle-check results-accuracy-correct-icon"></i>
+                                </div>
+                                <div class="results-acccuracy-chart-row">
+                                    <i class="fa-solid fa-circle-xmark results-accuracy-incorrect-icon"></i>
+                                    <div class="results-accuracy-value-wrapper">
+                                        <div class="results-accuracy-incorrect-filler"></div>
+                                        <div id="results-accuracy-correct-filler-c" class="results-accuracy-correct-filler"></div>
+                                    </div>
+                                    <i class="fa-solid fa-circle-check results-accuracy-correct-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="results-income-wrapper">
+                        <h2 id="results-income-title">Výdělek</h2>
+                        <div id="results-income-chart-wrapper">
+                            <canvas id="results-income-canvas" height="150" width="150"></canvas>
+                            <div id="results-income-labels-wrapper">
+                                <div class="results-income-label-row">
+                                    <div id="results-income-label-box-a"></div>
+                                    <p class="results-income-label">Výdělek řešením úloh A</p>
+                                </div>
+                                <div class="results-income-label-row">
+                                    <div id="results-income-label-box-b"></div>
+                                    <p class="results-income-label">Výdělek řešením úloh B</p>
+                                </div>
+                                <div class="results-income-label-row">
+                                    <div id="results-income-label-box-c"></div>
+                                    <p class="results-income-label">Výdělek řešením úloh C</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="results-right-container">
+                    <div id="results-problem-stats-wrapper">
+                        <div id="results-solved-problems-wrapper">
+                            <h2 id="results-solved-problems-title">Vyřešené úlohy</h2>
+                            <div id="results-solved-problems-chart">
+                                <div id="results-solved-problems-a">14</div>
+                                <div id="results-solved-problems-b">8</div>
+                                <div id="results-solved-problems-c">7</div>
+                            </div>
+                        </div>
+                        <div id="results-sold-problems-wrapper">
+                            <h2 id="results-sold-problems-title">Prodané úlohy</h2>
+                            <div id="results-sold-problems-chart">
+                                <div id="results-sold-problems-a">2</div>
+                                <div id="results-sold-problems-b">1</div>
+                                <div id="results-sold-problems-c">3</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="results-addtional-stats-wrapper">
+                        <div class="results-addtional-stats-row">
+                            <p class="results-addtiona-stats-label">Odpovědi za minutu:</p>
+                            <p id="results-additional-stats-content-apm">1.54</p>
+                        </div>
+                        <div class="results-addtional-stats-row">
+                            <p class="results-addtiona-stats-label">Správné odpovědi za minutu:</p>
+                            <p id="results-additional-stats-content-capm">0.58</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
       </div>
     </div>
   </body>
@@ -354,6 +445,7 @@
   <script src="../play/dynamic_height.js"></script>
   <script src="../play/loading_animation.js"></script>
   <script src="../play/play.js"></script>
+  <script src="../play/results.js"></script>
     
   
 </html>
