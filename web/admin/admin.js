@@ -128,7 +128,7 @@ $("#query-set").addEventListener("click", async () => {clown();
       if (key.length > mklen) { mklen = key.length }
     }
     for (const [key, value] of Object.entries(r)) {
-      pres += `${"&nbsp;".repeat(mklen+3-key.length)}${key}:&nbsp;${value}<br>`
+      pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: yellow;">${key}</span>:&nbsp;${value}<br>`
     }
     pres += "<br>"
   }
