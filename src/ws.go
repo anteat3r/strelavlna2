@@ -260,7 +260,7 @@ func PlayerWsLoop(
   tchan.mu.Lock()
   tchan.ch[idx] = nil
   tchan.mu.Unlock()
-  tchan.Send("unfocused", strconv.Itoa(idx))
+  tchan.Send(team, "unfocused", strconv.Itoa(idx))
 }
 
 func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
