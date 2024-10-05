@@ -22,6 +22,10 @@ func sLog(v... any) {
   log.InfoT("%v ", 1, v...)
 }
 
+func formTime() string {
+  return time.Now().Format("2006-01-02 15:04:05.000000")
+}
+
 const DELIM = "\x00"
 
 func PlayerWsHandleMsg(
@@ -39,9 +43,10 @@ func PlayerWsHandleMsg(
     return dbErr("contest not running")
   }
   ActiveContestMu.RUnlock()
+  readmsg := strings.ReplaceAll(msg, "\x00", "|")
   defer func(){
     if oerr != nil {
-      fmt.Printf("%v *>- %v <-* %v <- %v\n", strings.Split(now.String(), "+")[0], team, oerr.Error(), strings.ReplaceAll(msg, "\x00", "|"))
+      fmt.Printf("%s *>- %s:%d <-* %s <- %s\n", formTime(), team, idx, oerr.Error(), readmsg)
     }
   }()
 
@@ -134,7 +139,7 @@ func PlayerWsHandleMsg(
 
   }
 
-  fmt.Printf("%v >- %v <- %v\n", strings.Split(now.String(), "+")[0], team, strings.ReplaceAll(msg, "\x00", "|"))
+  fmt.Printf("%s >- %s:%d <- %s\n", formTime(), team, idx, readmsg)
 
   return nil
 }
@@ -145,9 +150,10 @@ func AdminWsHandleMsg(
   msg string,
   id string,
 ) (oerr error) {
+  readmsg := strings.ReplaceAll(msg, "\x00", "|")
   defer func(){
     if oerr != nil {
-      fmt.Printf("%v *>>- %v <-* %v <- %v\n", strings.Split(time.Now().String(), "+")[0], id, oerr.Error(), strings.ReplaceAll(msg, "\x00", "|"))
+      fmt.Printf("%s *>>- %s <-* %s <- %s\n", formTime(), id, oerr.Error(), readmsg)
     }
   }()
 
@@ -279,7 +285,7 @@ func AdminWsHandleMsg(
 
   }
 
-  fmt.Printf("%v >>- %v <- %v\n", strings.Split(time.Now().String(), "+")[0], id, strings.ReplaceAll(msg, "\x00", "|"))
+  fmt.Printf("%s >>- %s <- %s\n", formTime(), id, readmsg)
 
   return nil
 }

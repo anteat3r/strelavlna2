@@ -35,13 +35,14 @@ type TeamChanMu struct {
 }
 func (c *TeamChanMu) Send(team string, msg... string) {
   resmsg := strings.Join(msg, DELIM)
+  readmsg := strings.Join(msg, "|")
   c.mu.RLock()
   for _, ch := range c.ch {
     if ch == nil { continue }
     ch<- resmsg
   }
   c.mu.RUnlock()
-  fmt.Printf("%v >- %v -> %v\n", strings.Split(time.Now().String(), "+")[0], team, strings.ReplaceAll(resmsg, "\x00", "|"))
+  fmt.Printf("%s >- %s -> %s\n", formTime(), team, readmsg)
 }
 func (c *TeamChanMu) Count() int {
   i := 0
@@ -77,13 +78,14 @@ var (
 
 func AdminSend(msg... string) {
   resmsg := strings.Join(msg, DELIM)
+  readmsg := strings.Join(msg, "|")
   adminsMutex.RLock()
   for _, ch := range AdminsChans {
     if ch == nil { continue }
     ch<- resmsg
   }
   adminsMutex.RUnlock()
-  fmt.Printf("%v >>- -> %v\n", strings.Split(time.Now().String(), "+")[0], strings.ReplaceAll(resmsg, "\x00", "|"))
+  fmt.Printf("%s >>- -> %s\n", formTime(), readmsg)
 }
 
 // func AdminSendIdx(idx int, msg... string) {
@@ -189,7 +191,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
 
-    fmt.Printf("%v >- %v + >->\n", strings.Split(time.Now().String(), "+")[0], teamrec.GetId())
+    fmt.Printf("%s >- %s:%d + >->\n", formTime(), i, teamrec.GetId())
     go PlayerWsLoop(conn, teamid, perchan, teamchan, i)
 
     return nil
@@ -253,7 +255,7 @@ func PlayerWsLoop(
       }
     }
   }
-  fmt.Printf("%v >- %v - <-< %v\n", strings.Split(time.Now().String(), "+")[0], team, oerr.Error())
+  fmt.Printf("%s >- %s:%d - <-< %s\n", formTime(), team, idx, oerr.Error())
   conn.Close()
   tchan.mu.Lock()
   tchan.ch[idx] = nil
@@ -285,7 +287,7 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
 
-    fmt.Printf("%v >>- %v + >->\n", strings.Split(time.Now().String(), "+")[0], adminrec.GetId())
+    fmt.Printf("%s >>- %s + >->\n", formTime(), adminrec.GetId())
     go AdminWsLoop(conn, adminrec.Email, perchan, adminid)
 
     return nil
@@ -340,7 +342,7 @@ func AdminWsLoop(
       }
     }
   }
-  fmt.Printf("%v >>- %v - <-< %v\n", strings.Split(time.Now().String(), "+")[0], id, oerr.Error())
+  fmt.Printf("%s >>- %s - <-< %s\n", formTime(), id, oerr.Error())
   conn.Close()
 
   err := AdminWsHandleMsg(email, perchan, "unwork", id)
