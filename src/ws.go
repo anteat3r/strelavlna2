@@ -42,7 +42,7 @@ func (c *TeamChanMu) Send(team string, msg... string) {
     ch<- resmsg
   }
   c.mu.RUnlock()
-  fmt.Printf("%s >- %s -> %s\n", formTime(), team, readmsg)
+  fmt.Printf("%s >- %s   -> %s\n", formTime(), team, readmsg)
 }
 func (c *TeamChanMu) Count() int {
   i := 0
