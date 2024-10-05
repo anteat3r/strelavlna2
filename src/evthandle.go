@@ -40,6 +40,9 @@ func PlayerWsHandleMsg(
 
   now := time.Now()
   ActiveContestMu.RLock()
+  log.Info(now)
+  log.Info(ActiveContestStart)
+  log.Info(ActiveContestEnd)
   if m[0] != "load" &&
      !( now.After(ActiveContestStart) &&
      now.Before(ActiveContestEnd) ) {

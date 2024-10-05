@@ -223,9 +223,9 @@ func main() {
         if c.QueryParam("i") == "" {
           return c.String(400, "invalid param")
         }
-        src.ActiveContestMu.Lock()
         t, err := time.Parse("2006-01-02T15:04", c.QueryParam("i"))
         if err != nil { return err }
+        src.ActiveContestMu.Lock()
         src.ActiveContestStart = t
         src.ActiveContestMu.Unlock()
         app.Logger().Info(`ActiveContestStart set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
@@ -241,9 +241,9 @@ func main() {
         if c.QueryParam("i") == "" {
           return c.String(400, "invalid param")
         }
-        src.ActiveContestMu.Lock()
         t, err := time.Parse("2006-01-02T15:04", c.QueryParam("i"))
         if err != nil { return err }
+        src.ActiveContestMu.Lock()
         src.ActiveContestEnd = t
         src.ActiveContestMu.Unlock()
         app.Logger().Info(`ActiveContestEnd set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
