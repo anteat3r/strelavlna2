@@ -2,4 +2,5 @@
 p {
   font-family: monospace;
   width: 100%;
+  word-wrap: break-word;
 }
