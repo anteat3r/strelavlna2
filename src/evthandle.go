@@ -303,11 +303,11 @@ func AdminWsHandleMsg(
 
   case "parselog":
     if len(m) != 1 { return eIm(msg) }
-    log, err := LoadLog()
+    llog, err := LoadLog()
     if err != nil { return err }
     teamChanMapMutex.Lock()
     for t, c := range TeamChanMap {
-      tlog := FilterLogTeam(log, t)
+      tlog := FilterLogTeam(llog, t)
       c.Send(t, "gotlog", strings.Join(tlog, "\n"))
     }
     teamChanMapMutex.Unlock()
