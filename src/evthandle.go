@@ -307,7 +307,6 @@ func AdminWsHandleMsg(
     if err != nil { return err }
     teamChanMapMutex.Lock()
     for t, c := range TeamChanMap {
-      log.Info(t, c)
       tlog := FilterLogTeam(llog, t)
       c.Send(t, "gotlog", strings.Join(tlog, "\n"))
     }
