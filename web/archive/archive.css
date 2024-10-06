@@ -18,7 +18,8 @@
     padding-inline: 20px;
     background-color: #eafdff;
     flex-grow: 20;
-    width: 20vw;
+    width: 20vw; /* Ensure the width remains consistent */
+    box-sizing: border-box; /* Include padding in the width calculation */
 }
 
 .year-button{
@@ -35,6 +36,8 @@
     background-color: var(--color-main);
     border-radius: 10px;
     cursor: pointer;
+    box-sizing: border-box;
+
 }
 
 .year-button-covid{
@@ -115,7 +118,6 @@
     border-left: var(--color-main) solid 5px;
     font-family: 'Lexend';
     flex-grow: 80;
-    max-width: calc(100vw-410px);
 }
 
 .archive-mobile {
@@ -129,6 +131,8 @@
     font-weight: 600;
     text-align: center;
     background-color: #d5f5ff;
+    width: auto;
+    box-sizing: border-box;
 }
 
 .year-title i {
