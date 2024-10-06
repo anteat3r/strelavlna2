@@ -826,3 +826,10 @@ a:hover{
 .bold{
     font-weight: 700;
 }
+
+.visible{
+    opacity: 1;
+}
+.invisible{
+    opacity: 0;
+}
