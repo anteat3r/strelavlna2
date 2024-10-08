@@ -1,152 +1,6 @@
+import yearData from "../archive/archive.json" with {type: 'json'};
 document.addEventListener("DOMContentLoaded", function() {
-  const yearData = {
-    "2023": [
-      {
-        id: "2023_strela",
-        title: "Pražská střela 2023",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      },
-      {
-        id: "2023_vlna",
-        title: "Dopplerova vlna 2023",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      }
-    ],
-    "2022": [
-      {
-        id: "2022_strela",
-        title: "Pražská střela 2022",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      },
-      {
-        id: "2022_vlna",
-        title: "Dopplerova vlna 2022",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      }
-    ],
-    "2021": [
-      {
-        id: "2021_strela",
-        title: "Pražská střela 2021",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-      },
-      {
-        id: "2021_vlna",
-        title: "Dopplerova vlna 2021",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-      }
-    ],
-    "2020": [
-      {
-        id: "2020_strela",
-        title: "Pražská střela 2020",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-      },
-      {
-        id: "2020_vlna",
-        title: "Dopplerova vlna 2020",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-      }
-    ],
-    "2019": [
-      {
-        id: "2019_strela",
-        title: "Pražská střela 2019",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      },
-      {
-        id: "2019_vlna",
-        title: "Dopplerova vlna 2019",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      }
-    ],
-    "2018": [
-      {
-        id: "2018_strela",
-        title: "Pražská střela 2018",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      },
-      {
-        id: "2018_vlna",
-        title: "Dopplerova vlna 2018",
-        placeNameOnline1: "N/A",
-        placeNameOnline2: "N/A",
-        placeNameOnline3: "N/A",
-        placeNameNormal1: "N/A",
-        placeNameNormal2: "N/A",
-        placeNameNormal3: "N/A",
-        imageLink1: "../images/placeholder.png",
-        imageLink2: "../images/placeholder.png",
-        imageLink3: "../images/placeholder.png",
-      }
-    ],
-  };
-
-  const mediaQuery = window.matchMedia("(max-width: 1000px)");
+const mediaQuery = window.matchMedia("(max-width: 1000px)");
 
   function generateYearHTML(year, data) {
     return data.map(entry => `
@@ -155,52 +9,54 @@ document.addEventListener("DOMContentLoaded", function() {
           ${entry.title} <i class="fas fa-chevron-right"></i>
         </div>
         <div class="archive-mobile" style="max-height: 0; overflow: hidden;">
-          <div class="online-round">
-            <h1>Online kolo</h1>
-            <div class="placement-wrapper">
-              <div>
-                <p class="first-place">1. místo</p>
-                <p class="place-name">${entry.placeNameOnline1}</p>
-              </div>
-              <div>
-                <p class="second-place">2. místo</p>
-                <p class="place-name">${entry.placeNameOnline2}</p>
-              </div>
-              <div>
-                <p class="third-place">3. místo</p>
-                <p class="place-name">${entry.placeNameOnline3}</p>
+          ${year === "2019" || year === "2018" ? '' : `
+            <div class="online-round">
+              <h1>Online kolo</h1>
+              <div class="placement-wrapper">
+                <div>
+                  <p class="first-place">1. místo</p>
+                  <p class="place-name">${entry.placeNameOnline1}</p>
+                </div>
+                <div>
+                  <p class="second-place">2. místo</p>
+                  <p class="place-name">${entry.placeNameOnline2}</p>
+                </div>
+                <div>
+                  <p class="third-place">3. místo</p>
+                  <p class="place-name">${entry.placeNameOnline3}</p>
+                </div>
               </div>
             </div>
-          </div>
+          `}
           ${year === "2020" || year === "2021" ? '' : `
-          <div class="normal-round">
-            <h1>Prezenční kolo</h1>
-            <div class="placement-wrapper">
-              <div>
-                <p class="first-place">1. místo</p>
-                <p class="place-name">${entry.placeNameNormal1}</p>
+            <div class="normal-round">
+              <h1>Prezenční kolo</h1>
+              <div class="placement-wrapper">
+                <div>
+                  <p class="first-place">1. místo</p>
+                  <p class="place-name">${entry.placeNameNormal1}</p>
+                </div>
+                <div>
+                  <p class="second-place">2. místo</p>
+                  <p class="place-name">${entry.placeNameNormal2}</p>
+                </div>
+                <div>
+                  <p class="third-place">3. místo</p>
+                  <p class="place-name">${entry.placeNameNormal3}</p>
+                </div>
               </div>
-              <div>
-                <p class="second-place">2. místo</p>
-                <p class="place-name">${entry.placeNameNormal2}</p>
-              </div>
-              <div>
-                <p class="third-place">3. místo</p>
-                <p class="place-name">${entry.placeNameNormal3}</p>
+              <div class="image-gallery">
+                <h1>Fotogalerie</h1>
+                <div class="images">
+                  <img src="${entry.imageLink1}">
+                  <img src="${entry.imageLink2}">
+                  <img src="${entry.imageLink3}">
+                </div>
+                <div class="more-button">
+                  <a href="about:blank" target="_blank">Více</a>
+                </div>
               </div>
             </div>
-            <div class="image-gallery">
-              <h1>Fotogalerie</h1>
-              <div class="images">
-                <img src="${entry.imageLink1}">
-                <img src="${entry.imageLink2}">
-                <img src="${entry.imageLink3}">
-              </div>
-              <div class="more-button">
-                <a href="about:blank" target="_blank">Více</a>
-              </div>
-            </div>
-          </div>
           `}
         </div>
       </div>      
