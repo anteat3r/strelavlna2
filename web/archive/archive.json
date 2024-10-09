@@ -1,0 +1,134 @@
+{
+    "2023": [
+      {
+        "id": "2023_strela",
+        "title": "Pražská střela 2023",
+        "placeNameOnline1": "N/A",
+        "placeNameOnline2": "N/A",
+        "placeNameOnline3": "N/A",
+        "placeNameNormal1": "N/A",
+        "placeNameNormal2": "N/A",
+        "placeNameNormal3": "N/A",
+        "imageLink1": "../images/placeholder.png",
+        "imageLink2": "../images/placeholder.png",
+        "imageLink3": "../images/placeholder.png"
+      },
+      {
+        "id": "2023_vlna",
+        "title": "Dopplerova vlna 2023",
+        "placeNameOnline1": "N/A",
+        "placeNameOnline2": "N/A",
+        "placeNameOnline3": "N/A",
+        "placeNameNormal1": "N/A",
+        "placeNameNormal2": "N/A",
+        "placeNameNormal3": "N/A",
+        "imageLink1": "../images/placeholder.png",
+        "imageLink2": "../images/placeholder.png",
+        "imageLink3": "../images/placeholder.png"
+      }
+    ],
+    "2022": [
+        {
+          "id": "2022_strela",
+          "title": "Pražská střela 2022",
+          "placeNameOnline1": "N/A",
+          "placeNameOnline2": "N/A",
+          "placeNameOnline3": "N/A",
+          "placeNameNormal1": "N/A",
+          "placeNameNormal2": "N/A",
+          "placeNameNormal3": "N/A",
+          "imageLink1": "../images/placeholder.png",
+          "imageLink2": "../images/placeholder.png",
+          "imageLink3": "../images/placeholder.png"
+        },
+        {
+          "id": "2022_vlna",
+          "title": "Dopplerova vlna 2022",
+          "placeNameOnline1": "N/A",
+          "placeNameOnline2": "N/A",
+          "placeNameOnline3": "N/A",
+          "placeNameNormal1": "N/A",
+          "placeNameNormal2": "N/A",
+          "placeNameNormal3": "N/A",
+          "imageLink1": "../images/placeholder.png",
+          "imageLink2": "../images/placeholder.png",
+          "imageLink3": "../images/placeholder.png"
+        }
+      ],
+      "2021": [
+        {
+          "id": "2021_strela",
+          "title": "Pražská střela 2021",
+          "placeNameOnline1": "N/A",
+          "placeNameOnline2": "N/A",
+          "placeNameOnline3": "N/A"
+        },
+        {
+          "id": "2021_vlna",
+          "title": "Dopplerova vlna 2021",
+          "placeNameOnline1": "N/A",
+          "placeNameOnline2": "N/A",
+          "placeNameOnline3": "N/A"
+        }
+      ],
+      "2020": [
+        {
+          "id": "2020_strela",
+          "title": "Pražská střela 2020",
+          "placeNameOnline1": "N/A",
+          "placeNameOnline2": "N/A",
+          "placeNameOnline3": "N/A"
+        },
+        {
+          "id": "2020_vlna",
+          "title": "Dopplerova vlna 2020",
+          "placeNameOnline1": "N/A",
+          "placeNameOnline2": "N/A",
+          "placeNameOnline3": "N/A"
+        }
+      ],
+      "2019": [
+        {
+          "id": "2019_strela",
+          "title": "Pražská střela 2019",
+          "placeNameNormal1": "N/A",
+          "placeNameNormal2": "N/A",
+          "placeNameNormal3": "N/A",
+          "imageLink1": "../images/placeholder.png",
+          "imageLink2": "../images/placeholder.png",
+          "imageLink3": "../images/placeholder.png"
+        },
+        {
+          "id": "2019_vlna",
+          "title": "Dopplerova vlna 2019",
+          "placeNameNormal1": "N/A",
+          "placeNameNormal2": "N/A",
+          "placeNameNormal3": "N/A",
+          "imageLink1": "../images/placeholder.png",
+          "imageLink2": "../images/placeholder.png",
+          "imageLink3": "../images/placeholder.png"
+        }
+      ],
+      "2018": [
+        {
+          "id": "2018_strela",
+          "title": "Pražská střela 2018",
+          "placeNameNormal1": "N/A",
+          "placeNameNormal2": "N/A",
+          "placeNameNormal3": "N/A",
+          "imageLink1": "../images/placeholder.png",
+          "imageLink2": "../images/placeholder.png",
+          "imageLink3": "../images/placeholder.png"
+        },
+        {
+          "id": "2018_vlna",
+          "title": "Dopplerova vlna 2018",
+          "placeNameNormal1": "N/A",
+          "placeNameNormal2": "N/A",
+          "placeNameNormal3": "N/A",
+          "imageLink1": "../images/placeholder.png",
+          "imageLink2": "../images/placeholder.png",
+          "imageLink3": "../images/placeholder.png"
+        }
+      ]
+}
