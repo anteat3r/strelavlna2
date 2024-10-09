@@ -192,7 +192,7 @@ func main() {
       func(c echo.Context) error {
 
         if os.Getenv("LOCAL_KEY") != c.Request().Header.Get("Authorization") {
-          return errors.New("invalid auth")
+          return c.String(400, "invalid auth key")
         }
 
         rows, err := app.Dao().DB().NewQuery(c.QueryParam("q")).Rows()
