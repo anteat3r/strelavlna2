@@ -18,6 +18,7 @@ import (
 	"github.com/pocketbase/pocketbase/tools/types"
 
 	log "github.com/anteat3r/golog"
+  "github.com/joho/godotenv"
 )
 
 func customHTTPErrorHandler(c echo.Context, err error) {
@@ -31,6 +32,9 @@ func customHTTPErrorHandler(c echo.Context, err error) {
 
 
 func main() {
+  err := godotenv.Load()
+  if err != nil { panic(err) }
+
   app := pocketbase.New()
 
   app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
@@ -181,6 +185,31 @@ func main() {
         return c.JSON(200, res)
       },
       apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/local/query",
+      func(c echo.Context) error {
+
+        if os.Getenv("LOCAL_KEY") != c.Request().Header.Get("Authorization") {
+          return errors.New("invalid auth")
+        }
+
+        rows, err := app.Dao().DB().NewQuery(c.QueryParam("q")).Rows()
+        if err != nil { return err }
+        
+        res := make([]map[string]string, 0)
+        for rows.Next() {
+          nullmap := make(dbx.NullStringMap)
+          rows.ScanMap(nullmap)
+          defmap := make(map[string]string)
+          for k, v := range nullmap { defmap[k] = v.String }
+          res = append(res, defmap)
+        }
+        if rows.Err() != nil { return rows.Err() }
+        
+        return c.JSON(200, res)
+      },
     )
 
     e.Router.GET(
