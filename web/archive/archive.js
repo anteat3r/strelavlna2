@@ -1,4 +1,6 @@
 import yearData from "../archive/archive.json" with {type: 'json'};
+//https://docs.google.com/spreadsheets/d/1KPlhODXQD08uxGzW3EeDqy0YM-MSqdEPGbkCX594-Yc/edit?pli=1&gid=0#gid=0
+//https://eu.zonerama.com/Strela-Vlna/1416376
 document.addEventListener("DOMContentLoaded", function() {
 const mediaQuery = window.matchMedia("(max-width: 1000px)");
 
@@ -53,7 +55,7 @@ const mediaQuery = window.matchMedia("(max-width: 1000px)");
                   <img src="${entry.imageLink3}">
                 </div>
                 <div class="more-button">
-                  <a href="about:blank" target="_blank">Více</a>
+                  <a href="${entry.galleryLink}" target="_blank">Více</a>
                 </div>
               </div>
             </div>

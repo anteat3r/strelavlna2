@@ -11,7 +11,8 @@
         "placeNameNormal3": "N/A",
         "imageLink1": "../images/placeholder.png",
         "imageLink2": "../images/placeholder.png",
-        "imageLink3": "../images/placeholder.png"
+        "imageLink3": "../images/placeholder.png",
+        "galleryLink": "https://eu.zonerama.com/Strela-Vlna/1416376"
       },
       {
         "id": "2023_vlna",
@@ -24,7 +25,8 @@
         "placeNameNormal3": "N/A",
         "imageLink1": "../images/placeholder.png",
         "imageLink2": "../images/placeholder.png",
-        "imageLink3": "../images/placeholder.png"
+        "imageLink3": "../images/placeholder.png",
+        "galleryLink": "https://docs.google.com/spreadsheets/d/1KPlhODXQD08uxGzW3EeDqy0YM-MSqdEPGbkCX594-Yc/edit?pli=1&gid=0#gid=0"
       }
     ],
     "2022": [
@@ -39,7 +41,8 @@
           "placeNameNormal3": "N/A",
           "imageLink1": "../images/placeholder.png",
           "imageLink2": "../images/placeholder.png",
-          "imageLink3": "../images/placeholder.png"
+          "imageLink3": "../images/placeholder.png",
+          "galleryLink": "about:blank"
         },
         {
           "id": "2022_vlna",
@@ -52,7 +55,8 @@
           "placeNameNormal3": "N/A",
           "imageLink1": "../images/placeholder.png",
           "imageLink2": "../images/placeholder.png",
-          "imageLink3": "../images/placeholder.png"
+          "imageLink3": "../images/placeholder.png",
+          "galleryLink": "about:blank"
         }
       ],
       "2021": [
@@ -96,7 +100,8 @@
           "placeNameNormal3": "N/A",
           "imageLink1": "../images/placeholder.png",
           "imageLink2": "../images/placeholder.png",
-          "imageLink3": "../images/placeholder.png"
+          "imageLink3": "../images/placeholder.png",
+          "galleryLink": "about:blank"
         },
         {
           "id": "2019_vlna",
@@ -106,7 +111,8 @@
           "placeNameNormal3": "N/A",
           "imageLink1": "../images/placeholder.png",
           "imageLink2": "../images/placeholder.png",
-          "imageLink3": "../images/placeholder.png"
+          "imageLink3": "../images/placeholder.png",
+          "galleryLink": "about:blank"
         }
       ],
       "2018": [
@@ -118,7 +124,8 @@
           "placeNameNormal3": "N/A",
           "imageLink1": "../images/placeholder.png",
           "imageLink2": "../images/placeholder.png",
-          "imageLink3": "../images/placeholder.png"
+          "imageLink3": "../images/placeholder.png",
+          "galleryLink": "about:blank"
         },
         {
           "id": "2018_vlna",
@@ -128,7 +135,8 @@
           "placeNameNormal3": "N/A",
           "imageLink1": "../images/placeholder.png",
           "imageLink2": "../images/placeholder.png",
-          "imageLink3": "../images/placeholder.png"
+          "imageLink3": "../images/placeholder.png",
+          "galleryLink": "about:blank"
         }
       ]
 }
