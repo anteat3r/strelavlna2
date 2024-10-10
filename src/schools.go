@@ -48,6 +48,7 @@ func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
 			Id                string         `db:"id" json:"id"`
 			Subject           string         `db:"subject" json:"subject"`
 			Name              string         `db:"name" json:"name"`
+   Public   bool `db:"public" json:"public"`
 			OnlineRound       types.DateTime `db:"online_round" json:"online_round"`
 			FinalRound        types.DateTime `db:"final_round" json:"final_round"`
 			RegistrationStart types.DateTime `db:"registration_start" json:"registration_start"`
