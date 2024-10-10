@@ -56,7 +56,7 @@ func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
 		var err error
 		if after {
 			err = dao.DB().
-				NewQuery("SELECT * FROM contests WHERE registration_start < date('now') AND public").
+				NewQuery("SELECT * FROM contests WHERE registration_start < date('now') AND public = TRUE").
 				All(&res)
 		} else {
 			err = dao.DB().
