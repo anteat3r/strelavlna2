@@ -238,6 +238,7 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     rec.Set("player3", res.PlayerName3)
     rec.Set("player4", res.PlayerName4)
     rec.Set("player5", res.PlayerName5)
+    rec.Set("last_sent", types.NowDateTime())
 
     err = dao.SaveRecord(rec)
     if err != nil { return err }
