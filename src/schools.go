@@ -334,7 +334,9 @@ func TeamRegisterConfirmEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerF
     if err != nil { return err }
 
     rec := models.NewRecord(coll)
-    rec.Load(res.PublicExport())
+    olddata := res.PublicExport()
+    delete(olddata, "last_sent")
+    rec.Load(olddata)
 
     err = dao.SaveRecord(rec)
     if err != nil { return err }
