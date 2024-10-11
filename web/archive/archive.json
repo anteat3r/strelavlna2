@@ -1,6 +1,7 @@
 {
     "2023": [
       {
+        "type": "vlna",
         "id": "2023_strela",
         "title": "Pražská střela 2023",
         "placeNameOnline1": "N/A",
@@ -15,6 +16,7 @@
         "galleryLink": "https://eu.zonerama.com/Strela-Vlna/1416376"
       },
       {
+        "type": "vlna",
         "id": "2023_vlna",
         "title": "Dopplerova vlna 2023",
         "placeNameOnline1": "N/A",
@@ -31,6 +33,7 @@
     ],
     "2022": [
         {
+          "type": "vlna",
           "id": "2022_strela",
           "title": "Pražská střela 2022",
           "placeNameOnline1": "N/A",
@@ -45,6 +48,7 @@
           "galleryLink": "about:blank"
         },
         {
+          "type": "vlna",  
           "id": "2022_vlna",
           "title": "Dopplerova vlna 2022",
           "placeNameOnline1": "N/A",
@@ -61,6 +65,7 @@
       ],
       "2021": [
         {
+          "type": "vlna",  
           "id": "2021_strela",
           "title": "Pražská střela 2021",
           "placeNameOnline1": "N/A",
@@ -68,6 +73,7 @@
           "placeNameOnline3": "N/A"
         },
         {
+          "type": "vlna",  
           "id": "2021_vlna",
           "title": "Dopplerova vlna 2021",
           "placeNameOnline1": "N/A",
@@ -77,6 +83,7 @@
       ],
       "2020": [
         {
+          "type": "vlna",  
           "id": "2020_strela",
           "title": "Pražská střela 2020",
           "placeNameOnline1": "N/A",
@@ -84,6 +91,7 @@
           "placeNameOnline3": "N/A"
         },
         {
+          "type": "vlna",  
           "id": "2020_vlna",
           "title": "Dopplerova vlna 2020",
           "placeNameOnline1": "N/A",
@@ -93,6 +101,7 @@
       ],
       "2019": [
         {
+          "type": "vlna",  
           "id": "2019_strela",
           "title": "Pražská střela 2019",
           "placeNameNormal1": "N/A",
@@ -104,6 +113,7 @@
           "galleryLink": "about:blank"
         },
         {
+          "type": "vlna",  
           "id": "2019_vlna",
           "title": "Dopplerova vlna 2019",
           "placeNameNormal1": "N/A",
@@ -117,6 +127,7 @@
       ],
       "2018": [
         {
+          "type": "vlna",  
           "id": "2018_strela",
           "title": "Pražská střela 2018",
           "placeNameNormal1": "N/A",
@@ -128,6 +139,7 @@
           "galleryLink": "about:blank"
         },
         {
+          "type": "vlna",  
           "id": "2018_vlna",
           "title": "Dopplerova vlna 2018",
           "placeNameNormal1": "N/A",

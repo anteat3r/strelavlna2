@@ -1,9 +1,20 @@
-import yearData from "../archive/archive.json" with {type: 'json'};
-//https://docs.google.com/spreadsheets/d/1KPlhODXQD08uxGzW3EeDqy0YM-MSqdEPGbkCX594-Yc/edit?pli=1&gid=0#gid=0
+//https://docs.google.com/spreadsheets/d/1KPlhODXQD08uxGzW3EeDqy0YM-MSqdEPGbkCX594-Yc/edit?pli=1&gid=0#gid=0;
 //https://eu.zonerama.com/Strela-Vlna/1416376
 document.addEventListener("DOMContentLoaded", function() {
 const mediaQuery = window.matchMedia("(max-width: 1000px)");
+let yearData;
 
+fetch('../archive/archive.json')
+  .then(response => {
+    return response.json();
+  })
+  .then(data => {
+    yearData = data;
+    initialize();
+  })
+  .catch(error => {
+    console.error('Error loading JSON:', error);
+  });
   function generateYearHTML(year, data) {
     return data.map(entry => `
       <div class="archive-year archive-${entry.id}">
@@ -96,13 +107,15 @@ const mediaQuery = window.matchMedia("(max-width: 1000px)");
   yearSelector.insertAdjacentElement('afterend', archiveContainer);
 }
 
+
 function initialize() {
   renderArchiveContent();
   handleYearButtons();
   handleYearTitles();
   if (!mediaQuery.matches) {
-    hideAllTitlesExcept("2023");
+    hideAllTitlesExcept('2023'); // Show only 2023 titles on desktop after initial load
   }
+
 }
 
 function handleYearButtons() {
@@ -202,9 +215,6 @@ function handleResize() {
   }
   lastWidth = currentWidth; // Update the last width
 }
-
-// Initialize the content and event listeners
-initialize();
 
 // Listen for window resize events
 window.addEventListener('resize', handleResize);
