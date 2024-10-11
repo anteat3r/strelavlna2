@@ -48,6 +48,7 @@ func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
 			Id                string         `db:"id" json:"id"`
 			Subject           string         `db:"subject" json:"subject"`
 			Name              string         `db:"name" json:"name"`
+   Public   bool `db:"public" json:"public"`
 			OnlineRound       types.DateTime `db:"online_round" json:"online_round"`
 			FinalRound        types.DateTime `db:"final_round" json:"final_round"`
 			RegistrationStart types.DateTime `db:"registration_start" json:"registration_start"`
@@ -56,7 +57,7 @@ func ContestsEndp(dao *daos.Dao, after bool) echo.HandlerFunc {
 		var err error
 		if after {
 			err = dao.DB().
-				NewQuery("SELECT * FROM contests WHERE registration_start < date('now') AND public").
+				NewQuery("SELECT * FROM contests WHERE registration_start < datetime('now') AND registration_end > datetime('now') AND public = TRUE").
 				All(&res)
 		} else {
 			err = dao.DB().
@@ -237,6 +238,7 @@ func TeamRegisterEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     rec.Set("player3", res.PlayerName3)
     rec.Set("player4", res.PlayerName4)
     rec.Set("player5", res.PlayerName5)
+    rec.Set("last_sent", types.NowDateTime())
 
     err = dao.SaveRecord(rec)
     if err != nil { return err }
@@ -332,7 +334,9 @@ func TeamRegisterConfirmEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerF
     if err != nil { return err }
 
     rec := models.NewRecord(coll)
-    rec.Load(res.PublicExport())
+    olddata := res.PublicExport()
+    delete(olddata, "last_sent")
+    rec.Load(olddata)
 
     err = dao.SaveRecord(rec)
     if err != nil { return err }
