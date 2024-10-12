@@ -15,6 +15,7 @@ const balance_chart_arrow_size = 10;
 const balance_chart_ticks_X_separation = 10;
 const arrows_extend = 35;
 
+
 const balance_chart_X_axis_label = "t (min)";
 const balance_chart_Y_axis_label = "DC";
 
@@ -26,6 +27,8 @@ let sold = [2, 1, 3];
 let accuracy = [0.45, 0.36, 0.12];
 let income_portions = [0.3, 0.1, 0.6];
 let balance_chart = [{x:0, y: 50}, {x:15*60000, y: 100}, {x:22*60000, y: 40}, {x:50*60000, y: 250}, {x:75*60000, y: 220}, {x:120*60000, y: 245}];
+let balance = 245;
+let rank = 5;
 
 //animation variables
 
@@ -526,6 +529,28 @@ function generateTicks(){
     }
 }
 
+function setBalance(){
+    const DOM = document.getElementById("results-team-balance");
+    DOM.classList.add("text-invisible");
+    setTimeout(e=>{
+        DOM.innerHTML = balance.toString();
+    }, 750)
+    setTimeout(e=>{
+        DOM.classList.remove("text-invisible");
+    }, 1000);
+}
+function setRank(){
+    const DOM = document.getElementById("results-team-rank");
+    DOM.classList.add("text-invisible");
+    setTimeout(e=>{
+        DOM.innerHTML = rank.toString();
+    }, 750)
+    setTimeout(e=>{
+        DOM.classList.remove("text-invisible");
+    }, 1000);
+}
+
+
 
 function resultsAnimationFrame(){
     requestAnimationFrame(resultsAnimationFrame);
@@ -548,7 +573,8 @@ setTimeout(e=>{
 
 
 
-
+    setTimeout(setBalance, 1000);
+    setTimeout(setRank, 10000);
 
     animation_start_balance_chart_X = true;
     setTimeout(e=>{animation_start_balance_chart_Y = true;}, 300);
