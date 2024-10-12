@@ -32,8 +32,9 @@ type TeamChans []chan string
 type TeamChanMu struct {
   mu sync.RWMutex
   ch TeamChans
+  id string
 }
-func (c *TeamChanMu) Send(team string, msg... string) {
+func (c *TeamChanMu) Send(msg... string) {
   resmsg := strings.Join(msg, DELIM)
   readmsg := strings.Join(msg, "|")
   c.mu.RLock()
@@ -42,7 +43,8 @@ func (c *TeamChanMu) Send(team string, msg... string) {
     ch<- resmsg
   }
   c.mu.RUnlock()
-  fmt.Printf("%s >- %s   -> %s\n", formTime(), team, readmsg)
+  fmt.Printf("%s >- %s   -> %s\n", formTime(), c.id, readmsg)
+  JSONlog(c.id, false, false, -1, readmsg)
 }
 func (c *TeamChanMu) Count() int {
   i := 0
@@ -86,6 +88,7 @@ func AdminSend(msg... string) {
   }
   adminsMutex.RUnlock()
   fmt.Printf("%s >>- -> %s\n", formTime(), readmsg)
+  JSONlog("", true, false, 0, readmsg)
 }
 
 // func AdminSendIdx(idx int, msg... string) {
@@ -166,7 +169,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     teamChanMapMutex.Lock()
     teamchan, ok := TeamChanMap[teamid]
     if !ok {
-      teamchan = &TeamChanMu{sync.RWMutex{}, make([]chan string, 5, 5)}
+      teamchan = &TeamChanMu{sync.RWMutex{}, make([]chan string, 5, 5), teamid}
       TeamChanMap[teamid] = teamchan
     }
     teamChanMapMutex.Unlock()
@@ -192,6 +195,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     if err != nil { return err }
 
     fmt.Printf("%s >- %s:%d + >->\n", formTime(), teamrec.GetId(), i)
+    JSONlog(teamid, false, true, i, ":connect")
     go PlayerWsLoop(conn, teamid, perchan, teamchan, i)
 
     return nil
@@ -206,7 +210,7 @@ func WriteTeamChan(teamid string, msg... string) {
     return
   }
   teamChanMapMutex.Unlock()
-  res.Send(teamid, msg...)
+  res.Send(msg...)
 }
 
 func PlayerWsLoop(
@@ -256,11 +260,12 @@ func PlayerWsLoop(
     }
   }
   fmt.Printf("%s >- %s:%d - <-< %s\n", formTime(), team, idx, oerr.Error())
+  JSONlog(team, false, true, idx, ":disconnect")
   conn.Close()
   tchan.mu.Lock()
   tchan.ch[idx] = nil
   tchan.mu.Unlock()
-  tchan.Send(team, "unfocused", strconv.Itoa(idx))
+  tchan.Send("unfocused", strconv.Itoa(idx))
 }
 
 func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
@@ -288,6 +293,7 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     if err != nil { return err }
 
     fmt.Printf("%s >>- %s + >->\n", formTime(), adminrec.GetId())
+    JSONlog(adminrec.GetId(), true, true, 0, ":connect")
     go AdminWsLoop(conn, adminrec.Email, perchan, adminid)
 
     return nil
@@ -343,6 +349,7 @@ func AdminWsLoop(
     }
   }
   fmt.Printf("%s >>- %s - <-< %s\n", formTime(), id, oerr.Error())
+  JSONlog(id, true, true, 0, ":disconnect")
   conn.Close()
 
   err := AdminWsHandleMsg(email, perchan, "unwork", id)

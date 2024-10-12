@@ -120,18 +120,35 @@ func DBSell(team string, prob string) (money int, oerr error) {
       Sold string `db:"sold"`
       Money int `db:"money"`
     }{}
+
+    // err := txDao.DB().
+    //   NewQuery("SELECT bought, sold, money FROM teams WHERE id = {:team} LIMIT 1").
+    //   Bind(dbx.Params{ "team": team }).
+    //   One(&teamres)
+    // if err != nil { return err }
+
     err := txDao.DB().
-      NewQuery("SELECT bought, sold, money FROM teams WHERE id = {:team} LIMIT 1").
-      Bind(dbx.Params{ "team": team }).
+      Select("bought", "sold", "money").
+      From("teams").
+      Where(dbx.HashExp{"id": team}).
+      Limit(1).
       One(&teamres)
     if err != nil { return err }
 
     probres := struct{
       Diff string `db:"diff"`
     }{}
+    // err = txDao.DB().
+    //   NewQuery("SELECT diff FROM probs WHERE id = {:prob} LIMIT 1").
+    //   Bind(dbx.Params{ "prob": prob }).
+    //   One(&probres)
+    // if err != nil { return err }
+
     err = txDao.DB().
-      NewQuery("SELECT diff FROM probs WHERE id = {:prob} LIMIT 1").
-      Bind(dbx.Params{ "prob": prob }).
+      Select("diff").
+      From("probs").
+      Where(dbx.HashExp{"id": prob}).
+      Limit(1).
       One(&probres)
     if err != nil { return err }
 
@@ -148,14 +165,26 @@ func DBSell(team string, prob string) (money int, oerr error) {
 
     money = teamres.Money + cost
 
+    // _, err = txDao.DB().
+    //   NewQuery("UPDATE teams SET money = {:money}, bought = {:bought}, sold = {:sold} WHERE id = {:team}").
+    //   Bind(dbx.Params{
+    //     "money": money,
+    //     "bought": StringifyRefList(bought),
+    //     "sold": StringifyRefList(sold),
+    //     "team": team,
+    //   }).
+    //   Execute()
+
     _, err = txDao.DB().
-      NewQuery("UPDATE teams SET money = {:money}, bought = {:bought}, sold = {:sold} WHERE id = {:team}").
-      Bind(dbx.Params{
-        "money": money,
-        "bought": StringifyRefList(bought),
-        "sold": StringifyRefList(sold),
-        "team": team,
-      }).
+      Update(
+        "teams",
+        dbx.Params{
+          "money": money,
+          "bought": StringifyRefList(bought),
+          "sold": StringifyRefList(sold),
+        },
+        dbx.HashExp{"id": team},
+      ).
       Execute()
 
     if err != nil { return err }
@@ -175,11 +204,18 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
       Free string `db:"free"`
       Bought string `db:"bought"`
     }{}
-    err := txDao.DB().
-      NewQuery("SELECT money, free, bought FROM teams WHERE id = {:team} LIMIT 1").
-      Bind(dbx.Params{ "team": team }).
-      One(&teamres)
+    // err := txDao.DB().
+    //   NewQuery("SELECT money, free, bought FROM teams WHERE id = {:team} LIMIT 1").
+    //   Bind(dbx.Params{ "team": team }).
+    //   One(&teamres)
+    // if err != nil { return err }
 
+    err := txDao.DB().
+      Select("money", "free", "bought").
+      From("teams").
+      Where(dbx.HashExp{"id": team}).
+      Limit(1).
+      One(&teamres)
     if err != nil { return err }
 
     if diffcost > teamres.Money {
@@ -192,12 +228,20 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
       Text string `db:"text"`
       Img string `db:"img"`
     }{}
+    // err = txDao.DB().
+    //   NewQuery("SELECT id, name, text, img FROM probs WHERE id IN " +
+    //             RefListToInExpr(ParseRefList(teamres.Free)) +
+    //             " AND diff = {:diff} LIMIT 1").
+    //     Bind(dbx.Params{ "diff": diff }).
+    //     One(&probres)
+
     err = txDao.DB().
-      NewQuery("SELECT id, name, text, img FROM probs WHERE id IN " +
-                RefListToInExpr(ParseRefList(teamres.Free)) +
-                " AND diff = {:diff} LIMIT 1").
-        Bind(dbx.Params{ "diff": diff }).
-        One(&probres)
+      Select("id", "name", "text", "img").
+      From("probs").
+      Where(dbx.NewExp("id IN " + RefListToInExpr(ParseRefList(teamres.Free)))).
+      AndWhere(dbx.HashExp{"diff": diff}).
+      Limit(1).
+      One(&probres)
 
     if err == sql.ErrNoRows { return dbErr("no prob found") }
     if err != nil { return err }
@@ -217,14 +261,26 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
     text = probres.Text
     img = probres.Img
 
+    // _, err = txDao.DB().
+    //   NewQuery("UPDATE teams SET money = {:money}, free = {:free}, bought = {:bought} WHERE id = {:team}").
+    //   Bind(dbx.Params{
+    //     "money": money,
+    //     "free": StringifyRefList(free),
+    //     "bought": StringifyRefList(bought),
+    //     "team": team,
+    //   }).
+    //   Execute()
+
     _, err = txDao.DB().
-      NewQuery("UPDATE teams SET money = {:money}, free = {:free}, bought = {:bought} WHERE id = {:team}").
-      Bind(dbx.Params{
-        "money": money,
-        "free": StringifyRefList(free),
-        "bought": StringifyRefList(bought),
-        "team": team,
-      }).
+      Update(
+        "teams",
+        dbx.Params{
+          "money": money,
+          "free": StringifyRefList(free),
+          "bought": StringifyRefList(bought),
+        },
+        dbx.HashExp{"id": team},
+      ).
       Execute()
 
     if err != nil { return err }
@@ -250,11 +306,18 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
       Bought string `db:"bought"`
       Pending string `db:"pending"`
     }{}
-    err := txDao.DB().
-      NewQuery("SELECT name, bought, pending FROM teams WHERE id = {:team} LIMIT 1").
-      Bind(dbx.Params{ "team": team }).
-      One(&teamres)
+    // err := txDao.DB().
+    //   NewQuery("SELECT name, bought, pending FROM teams WHERE id = {:team} LIMIT 1").
+    //   Bind(dbx.Params{ "team": team }).
+    //   One(&teamres)
+    // if err != nil { return err }
 
+    err := txDao.DB().
+      Select("name", "bought", "pending").
+      From("teams").
+      Where(dbx.HashExp{"id": team}).
+      Limit(1).
+      One(&teamres)
     if err != nil { return err }
 
     bought := ParseRefList(teamres.Bought)
@@ -272,11 +335,18 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
       Sol string `db:"solution"`
       Workers string `db:"workers"`
     }{}
-    err = txDao.DB().
-      NewQuery("SELECT diff, name, text, workers FROM probs WHERE id = {:prob} LIMIT 1").
-      Bind(dbx.Params{ "prob": prob }).
-      One(&probres)
+    // err = txDao.DB().
+    //   NewQuery("SELECT diff, name, text, workers FROM probs WHERE id = {:prob} LIMIT 1").
+    //   Bind(dbx.Params{ "prob": prob }).
+    //   One(&probres)
+    // if err != nil { return err }
 
+    err = txDao.DB().
+      Select("diff", "name", "text", "solution", "workers").
+      From("probs").
+      Where(dbx.HashExp{"id": prob}).
+      Limit(1).
+      One(&teamres)
     if err != nil { return err }
 
     teamname = teamres.Name
@@ -285,16 +355,28 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
     csol = probres.Sol
     workers = probres.Workers
     
-    _, err = txDao.DB().
-      NewQuery("UPDATE teams SET pending = {:pending}, bought = {:bought} WHERE id = {:id}").
-      Bind(dbx.Params{
-        "pending": StringifyRefList(pending),
-        "bought": StringifyRefList(bought),
-        "id": team,
-      }).
-      Execute()
+    // _, err = txDao.DB().
+    //   NewQuery("UPDATE teams SET pending = {:pending}, bought = {:bought} WHERE id = {:id}").
+    //   Bind(dbx.Params{
+    //     "pending": StringifyRefList(pending),
+    //     "bought": StringifyRefList(bought),
+    //     "id": team,
+    //   }).
+    //   Execute()
+    // if err != nil { return err }
 
+    _, err = txDao.DB().
+      Update(
+        "teams",
+        dbx.Params{
+          "pending": StringifyRefList(pending),
+          "bought": StringifyRefList(bought),
+        },
+        dbx.HashExp{"id": team},
+      ).
+      Execute()
     if err != nil { return err }
+
 
     ucres := []struct{
       Id string `db:"id"`
@@ -315,18 +397,32 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
     }
 
     check = GetRandomId()
-    _, err = txDao.DB().
-      NewQuery("INSERT INTO checks (id, team, prob, type, solution, created, updated) VALUES ({:id}, {:team}, {:prob}, 'sol', {:text}, {:created}, {:updated})").
-      Bind(dbx.Params{
-        "id": check,
-        "prob": prob,
-        "text": sol,
-        "team": team,
-        "created": types.NowDateTime(),
-        "updated": types.NowDateTime(),
-      }).
-      Execute()
+    // _, err = txDao.DB().
+    //   NewQuery("INSERT INTO checks (id, team, prob, type, solution, created, updated) VALUES ({:id}, {:team}, {:prob}, 'sol', {:text}, {:created}, {:updated})").
+    //   Bind(dbx.Params{
+    //     "id": check,
+    //     "prob": prob,
+    //     "text": sol,
+    //     "team": team,
+    //     "created": types.NowDateTime(),
+    //     "updated": types.NowDateTime(),
+    //   }).
+    //   Execute()
+    // if err != nil { return err }
 
+    _, err = txDao.DB().
+      Insert(
+        "checks",
+        dbx.Params{
+          "id": check,
+          "prob": prob,
+          "text": sol,
+          "team": team,
+          "created": types.NowDateTime(),
+          "updated": types.NowDateTime(),
+        },
+      ).
+      Execute()
     if err != nil { return err }
 
     return nil
@@ -389,12 +485,19 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
     res := []struct{
       Id string `db:"id"`
     }{}
+    // err = txDao.DB().
+    //   NewQuery("SELECT id FROM checks WHERE team = {:team} AND prob = {:prob}").
+    //   Bind(dbx.Params{
+    //     "prob": prob,
+    //     "team": team,
+    //   }).
+    //   All(&res)
+    // if err != nil { return err }
+
     err = txDao.DB().
-      NewQuery("SELECT id FROM checks WHERE team = {:team} AND prob = {:prob}").
-      Bind(dbx.Params{
-        "prob": prob,
-        "team": team,
-      }).
+      Select("id").
+      From("checks").
+      Where(dbx.HashExp{"team": team, "prob": prob}).
       All(&res)
     if err != nil { return err }
     
@@ -414,30 +517,53 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
     }
 
     cid := GetRandomId()
-    _, err = txDao.DB().
-    NewQuery("INSERT INTO checks (id, team, prob, type, solution, created, updated) VALUES ({:id}, {:team}, {:prob}, 'msg', {:text}, {:created}, {:updated})").
-      Bind(dbx.Params{
-        "id": cid,
-        "prob": prob,
-        "text": msg,
-        "team": team,
-        "created": types.NowDateTime(),
-        "updated": types.NowDateTime(),
-      }).
+    // _, err = txDao.DB().
+    //   NewQuery("INSERT INTO checks (id, team, prob, type, solution, created, updated) VALUES ({:id}, {:team}, {:prob}, 'msg', {:text}, {:created}, {:updated})").
+    //   Bind(dbx.Params{
+    //     "id": cid,
+    //     "prob": prob,
+    //     "text": msg,
+    //     "team": team,
+    //     "created": types.NowDateTime(),
+    //     "updated": types.NowDateTime(),
+    //   }).
+    //   Execute()
+    // if err != nil { return err }
+
+    txDao.DB().
+      Insert(
+        "checks",
+        dbx.Params{
+          "id": cid,
+          "prob": prob,
+          "text": msg,
+          "team": team,
+          "created": types.NowDateTime(),
+          "updated": types.NowDateTime(),
+        },
+      ).
       Execute()
+    if err != nil { return err }
 
     probres := struct{
       Diff string `db:"diff"`
       Name string `db:"name"`
       Workers string `db:"workers"`
     }{}
-    err = txDao.DB().
-      NewQuery("SELECT diff, name, workers FROM probs WHERE id = {:id} LIMIT 1").
-      Bind(dbx.Params{
-        "id": prob,
-      }).
-      One(&probres)
+    // err = txDao.DB().
+    //   NewQuery("SELECT diff, name, workers FROM probs WHERE id = {:id} LIMIT 1").
+    //   Bind(dbx.Params{
+    //     "id": prob,
+    //   }).
+    //   One(&probres)
+    // if err != nil { return err }
 
+    err = txDao.DB().
+      Select("diff", "name", "workers").
+      From("probs").
+      Where(dbx.HashExp{"id": prob}).
+      Limit(1).
+      One(&probres)
     if err != nil { return err }
 
     diff = probres.Diff
@@ -507,25 +633,44 @@ func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
       Player5 string `db:"player5"`
       Contest string `db:"contest"`
     }{}
-    err := txDao.DB().
-      NewQuery("SELECT bought, pending, sold, solved, chat, money, banned, player1, player2, player3, player4, player5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
-      Bind(dbx.Params{ "team": team }).
-      One(&teamres)
+    // err := txDao.DB().
+    //   NewQuery("SELECT bought, pending, sold, solved, chat, money, banned, player1, player2, player3, player4, player5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
+    //   Bind(dbx.Params{ "team": team }).
+    //   One(&teamres)
+    // if err != nil { return err }
 
+    err := txDao.DB().
+      Select("bought", "pending", "sold", "solved", "chat", "money", "banned", "player1", "player2", "player3", "player4", "player5", "name", "contest").
+      From("teams").
+      Where(dbx.HashExp{"id": team}).
+      Limit(1).
+      One(&teamres)
     if err != nil { return err }
 
     boughtprobsres := []probRes{}
-    err = txDao.DB().
-      NewQuery("SELECT id, name, diff, text, img FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Bought))).
-      All(&boughtprobsres)
+    // err = txDao.DB().
+    //   NewQuery("SELECT id, name, diff, text, img FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Bought))).
+    //   All(&boughtprobsres)
+    // if err != nil { return err }
 
+    err = txDao.DB().
+      Select("id", "name", "diff", "text", "img").
+      From("probs").
+      Where(dbx.NewExp("id IN " + RefListToInExpr(ParseRefList(teamres.Bought)))).
+      All(&boughtprobsres)
     if err != nil { return err }
 
     pendingprobsres := []probRes{}
-    err = txDao.DB().
-      NewQuery("SELECT id, name, diff, text, img FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Pending))).
-      All(&pendingprobsres)
+    // err = txDao.DB().
+    //   NewQuery("SELECT id, name, diff, text, img FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Pending))).
+    //   All(&pendingprobsres)
+    // if err != nil { return err }
 
+    err = txDao.DB().
+      Select("id", "name", "diff", "text", "img").
+      From("probs").
+      Where(dbx.NewExp("id IN " + RefListToInExpr(ParseRefList(teamres.Pending)))).
+      All(&pendingprobsres)
     if err != nil { return err }
 
     soldres := struct{
@@ -534,7 +679,6 @@ func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
     err = txDao.DB().
       NewQuery("SELECT count(*) FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Sold))).
       One(&soldres)
-
     if err != nil { return err }
 
     solvedres := struct{
@@ -606,7 +750,7 @@ func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
   return
 }
 
-func DBAdminGrade(check string, team string, prob string, corr bool) (money int, oerr error) {
+func DBAdminGrade(check string, team string, prob string, corr bool) (money int, final bool, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -654,9 +798,7 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
     if !ok { log.Error("invalid diff", team, prob) }
 
     money = teamres.Money
-    if corr {
-      money += cost
-    }
+    if corr { money += cost }
 
     _, err = txDao.DB().
       NewQuery("UPDATE teams SET money = {:money}, " + tstring + " = {:target}, pending = {:pending} WHERE id = {:team}").
@@ -670,18 +812,26 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
 
     if err != nil { return err }
 
-    sres, err := txDao.DB().
+    _, err = txDao.DB().
       NewQuery("DELETE FROM checks WHERE id = {:check}").
       Bind(dbx.Params{ "check": check }).
       Rows()
-
-    for sres.Next() {
-      r := make(dbx.NullStringMap)
-      sres.ScanMap(r)
-    }
-    sres.Close()
-
     if err != nil { return err }
+
+    ActiveContestMu.Lock()
+    ac := ActiveContest
+    acend := ActiveContestEnd
+    ActiveContestMu.Unlock()
+    if ac == "" || time.Now().Before(acend) { return nil }
+
+    checkcnt := 0
+    err = txDao.DB().
+      Select("count(*)").
+      From("checks").
+      One(&checkcnt)
+    if err != nil { return err }
+
+    if checkcnt == 0 { final = true }
 
     return nil
   })
