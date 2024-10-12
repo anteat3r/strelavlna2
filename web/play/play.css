@@ -1499,6 +1499,7 @@ audio {
 }
 
 #results-team-wrapper{
+    position: relative;
     padding-top: 15px;
     display: flex;
     flex-direction: column;
@@ -1624,7 +1625,7 @@ audio {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    align-items: center;
+    align-items: left;
     border-right: 2px var(--color-secondary-dark) dashed;
     padding-top: 10px;
     padding-bottom: 10px;
@@ -1942,4 +1943,67 @@ audio {
     font-weight: 700;
     color: var(--color-secondary-dark);
     margin: 0px;
+}
+#results-team-balance-wrapper{
+    position: absolute;
+    left: 200px;
+    min-width: 200px;
+    top: 42px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#results-team-balance-title{
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+}
+#results-team-balance{
+    font-family: 'Lexend';
+    font-size: 50px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    min-width: 130px;
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+    padding-inline: 20px;
+    border-top: 2px var(--color-secondary-dark) dashed;
+    margin-top: 7px;
+    transition: color 0.5s ease-out;
+}
+
+#results-team-rank-wrapper{
+    position: absolute;
+    right: 200px;
+    min-width: 200px;
+    top: 42px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#results-team-rank-title{
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+}
+#results-team-rank{
+    font-family: 'Lexend';
+    font-size: 50px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    min-width: 100px;
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+    padding-inline: 20px;
+    border-top: 2px var(--color-secondary-dark) dashed;
+    margin-top: 7px;
+    transition: color 0.5s ease-out;
 }
