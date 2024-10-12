@@ -15,6 +15,9 @@ const balance_chart_arrow_size = 10;
 const balance_chart_ticks_X_separation = 10;
 const arrows_extend = 35;
 
+const balance_chart_X_axis_label = "t (min)";
+const balance_chart_Y_axis_label = "DC";
+
 
 let apm = 1.54;
 let capm = 0.58;
@@ -22,7 +25,7 @@ let solved = [14, 8, 7];
 let sold = [2, 1, 3];
 let accuracy = [0.45, 0.36, 0.12];
 let income_portions = [0.3, 0.1, 0.6];
-let balance_chart = [{x:0, y: 50}, {x:15*60000, y: 100}, {x:22*60000, y: 40}, {x:50*60000, y: 150}, {x:75*60000, y: 120}, {x:120*60000, y: 200}];
+let balance_chart = [{x:0, y: 50}, {x:15*60000, y: 100}, {x:22*60000, y: 40}, {x:50*60000, y: 250}, {x:75*60000, y: 220}, {x:120*60000, y: 245}];
 
 //animation variables
 
@@ -51,6 +54,11 @@ let balance_chart_label_state_outline_X = 0.0;
 let balance_chart_label_state_outline_Y = 0.0;
 let balance_chart_label_state_fill_X = 0.0;
 let balance_chart_label_state_fill_Y = 0.0;
+let balance_chart_X_axis_label_state = 0.0;
+let balance_chart_Y_axis_label_state = 0.0;
+let balance_chart_final_dot_state = 0.0;
+let balance_chart_final_ring_state = 0.0;
+let balance_chart_final_line_state = 0.0;
 
 let animation_started_apm = false;
 let animation_started_capm = false;
@@ -67,6 +75,11 @@ let animation_start_balance_chart_labels_outline_X = false;
 let animation_start_balance_chart_labels_outline_Y = false;
 let animation_start_balance_chart_labels_fill_X = false;
 let animation_start_balance_chart_labels_fill_Y = false;
+let animation_start_balance_chart_X_axis_label = false;
+let animation_start_balance_chart_Y_axis_label = false;
+let animation_start_balance_chart_final_dot = false;
+let animation_start_balance_chart_final_ring = false;
+let animation_start_balance_chart_final_line = false;
 
 
 //DOM elements
@@ -179,6 +192,23 @@ function animationUpdate(){
         }
     }
 
+    if(animation_start_balance_chart_X_axis_label){
+        balance_chart_X_axis_label_state += (1 - balance_chart_X_axis_label_state)*0.02;
+    }
+    if(animation_start_balance_chart_Y_axis_label){
+        balance_chart_Y_axis_label_state += (1 - balance_chart_Y_axis_label_state)*0.02;
+    }
+
+    if(animation_start_balance_chart_final_dot){
+        balance_chart_final_dot_state += (1 - balance_chart_final_dot_state)*0.1;
+    }
+    if(animation_start_balance_chart_final_ring){
+        balance_chart_final_ring_state += (1 - balance_chart_final_ring_state)*0.1;
+    }
+    if(animation_start_balance_chart_final_line){
+        balance_chart_final_line_state += (1 - balance_chart_final_line_state)*0.05;
+    }
+
 }
 
 function drawResults(){
@@ -229,6 +259,7 @@ function drawResults(){
     }
 
     // balance chart
+    
     const normalized_balance_chart = [];
 
     const balance_chart_max_X = balance_chart.reduce((a, b) => Math.max(a, b.x), 0);
@@ -242,8 +273,21 @@ function drawResults(){
     balance_chart_ctx.lineJoin = "round";
     
 
-    
+    let dotX = normalized_balance_chart[normalized_balance_chart.length-1].x*(balance_chart_canvas.width-balance_chart_internal_padding*2)+balance_chart_internal_padding;
+    let dotY = (1-normalized_balance_chart[normalized_balance_chart.length-1].y)*(balance_chart_canvas.height-balance_chart_internal_padding*2)+balance_chart_internal_padding;
     balance_chart_ctx.clearRect(0, 0, balance_chart_canvas.width, balance_chart_canvas.height);
+    
+    if(balance_chart_final_line_state > 0){
+        const n = 50;
+        for(let i = 0; i < n * balance_chart_final_line_state; i++){
+            const x = dotX - (dotX - balance_chart_internal_padding) * i / n;
+            const y = dotY;
+            balance_chart_ctx.beginPath();
+            balance_chart_ctx.arc(x, y, 1, 0, 2*Math.PI);
+            balance_chart_ctx.fillStyle = "#64c3e9";
+            balance_chart_ctx.fill();
+        }
+    }
     
     balance_chart_ctx.beginPath();
     balance_chart_ctx.moveTo(normalized_balance_chart[0].x*(balance_chart_canvas.width-balance_chart_internal_padding*2)+balance_chart_internal_padding, (1-normalized_balance_chart[0].y)*(balance_chart_canvas.height-balance_chart_internal_padding*2)+balance_chart_internal_padding);
@@ -251,12 +295,24 @@ function drawResults(){
         balance_chart_ctx.lineTo(normalized_balance_chart[i].x*(balance_chart_canvas.width-balance_chart_internal_padding*2)+balance_chart_internal_padding, (1-normalized_balance_chart[i].y)*(balance_chart_canvas.height-balance_chart_internal_padding*2)+balance_chart_internal_padding);
     }
     balance_chart_ctx.stroke();
-    if(animation_balance_chart_progress == 1){
+    if(balance_chart_final_dot_state > 0){
         balance_chart_ctx.beginPath();
-        balance_chart_ctx.arc(normalized_balance_chart[normalized_balance_chart.length-1].x*(balance_chart_canvas.width-balance_chart_internal_padding*2)+balance_chart_internal_padding, (1-normalized_balance_chart[normalized_balance_chart.length-1].y)*(balance_chart_canvas.height-balance_chart_internal_padding*2)+balance_chart_internal_padding, 5, 0, 2*Math.PI);
+        balance_chart_ctx.arc(dotX, dotY, balance_chart_final_dot_state * 5, 0, 2*Math.PI);
         balance_chart_ctx.fillStyle = "#3eb1df";
         balance_chart_ctx.fill();
     }
+    if(balance_chart_final_ring_state > 0){
+        const offset = (Date.now() * 0.001) % (2*Math.PI);
+        const n = 7;
+        for(let i = 0; i < n; i++){
+            balance_chart_ctx.beginPath();
+            balance_chart_ctx.arc(dotX, dotY, balance_chart_final_ring_state * 10, (i-0.5)*2*Math.PI/n + offset, i*2*Math.PI/n + offset);
+            balance_chart_ctx.strokeStyle = "#3eb1df";
+            balance_chart_ctx.stroke();
+        }
+    }
+
+
 
     balance_chart_ctx.strokeStyle = "#0f455a";
     balance_chart_ctx.lineWidth = 3;
@@ -406,6 +462,34 @@ function drawResults(){
             balance_chart_ctx.restore();
         }
     }
+
+    //axis labels
+    if(balance_chart_X_axis_label_state > 0){
+        let textSize = balance_chart_ctx.measureText(balance_chart_X_axis_label);
+        textSize = {width: textSize.width, height: 16};
+        const gradient = balance_chart_ctx.createLinearGradient(-textSize.width, 0, textSize.width*2, 0);
+        gradient.addColorStop(balance_chart_X_axis_label_state/3*2, '#0f455a');
+        gradient.addColorStop(balance_chart_X_axis_label_state/3*2+1/6, '#4b35cc');
+        gradient.addColorStop(balance_chart_X_axis_label_state/3*2 + 1/3, 'transparent');
+        balance_chart_ctx.fillStyle = gradient;
+        balance_chart_ctx.save();
+        balance_chart_ctx.translate(balance_chart_canvas.width - balance_chart_internal_padding + arrows_extend - textSize.width, balance_chart_canvas.height - balance_chart_internal_padding - textSize.height);
+        balance_chart_ctx.fillText(balance_chart_X_axis_label, 0, 0);
+        balance_chart_ctx.restore();
+    }
+    if(balance_chart_Y_axis_label_state > 0){
+        let textSize = balance_chart_ctx.measureText(balance_chart_Y_axis_label);
+        textSize = {width: textSize.width, height: 16};
+        const gradient = balance_chart_ctx.createLinearGradient(-textSize.width, 0, textSize.width*2, 0);
+        gradient.addColorStop(balance_chart_Y_axis_label_state/3*2, '#0f455a');
+        gradient.addColorStop(balance_chart_Y_axis_label_state/3*2+1/6, '#4b35cc');
+        gradient.addColorStop(balance_chart_Y_axis_label_state/3*2 + 1/3, 'transparent');
+        balance_chart_ctx.fillStyle = gradient;
+        balance_chart_ctx.save();
+        balance_chart_ctx.translate(balance_chart_internal_padding + balance_chart_arrow_size + 5, balance_chart_internal_padding - arrows_extend + textSize.height);
+        balance_chart_ctx.fillText(balance_chart_Y_axis_label, 0, 0);
+        balance_chart_ctx.restore();
+    }
 }
 
 function generateTicks(){
@@ -457,10 +541,10 @@ for(item of main_wrappers){
 }
 
 setTimeout(e=>{
-    setTimeout(e=>{main_wrappers[0].classList.remove("invisible");}, 500);
-    setTimeout(e=>{main_wrappers[1].classList.remove("invisible");}, 1000);
-    setTimeout(e=>{main_wrappers[2].classList.remove("invisible");}, 1500);
-    setTimeout(e=>{main_wrappers[3].classList.remove("invisible");}, 2000);
+    setTimeout(e=>{main_wrappers[0].classList.remove("invisible");}, 3000);
+    setTimeout(e=>{main_wrappers[1].classList.remove("invisible");}, 3500);
+    setTimeout(e=>{main_wrappers[2].classList.remove("invisible");}, 4000);
+    setTimeout(e=>{main_wrappers[3].classList.remove("invisible");}, 4500);
 
 
 
@@ -471,31 +555,41 @@ setTimeout(e=>{
     setTimeout(e=>{animation_started_balance_chart = true;}, 600);
     setTimeout(e=>{animation_start_balance_chart_ticks_X = true;}, 600);
     setTimeout(e=>{animation_start_balance_chart_ticks_Y = true;}, 1000);
+    
+    setTimeout(e=>{animation_start_balance_chart_final_dot = true;}, 1500);
+    setTimeout(e=>{animation_start_balance_chart_final_ring = true;}, 2000);
+    setTimeout(e=>{animation_start_balance_chart_final_line = true;}, 2500);
+
 
     setTimeout(e=>{animation_start_balance_chart_labels_outline_X = true;}, 1000);
-    setTimeout(e=>{animation_start_balance_chart_labels_fill_X = true;}, 2500);
+    setTimeout(e=>{animation_start_balance_chart_labels_fill_X = true;}, 2000);
     setTimeout(e=>{animation_start_balance_chart_labels_outline_Y = true;}, 1400);
-    setTimeout(e=>{animation_start_balance_chart_labels_fill_Y = true;}, 2900);
+    setTimeout(e=>{animation_start_balance_chart_labels_fill_Y = true;}, 2400);
+
+    setTimeout(e=>{animation_start_balance_chart_X_axis_label = true;}, 2400);
+    setTimeout(e=>{animation_start_balance_chart_Y_axis_label = true;}, 3000);
+    
+
 
     
-    setTimeout(e=>{animation_started_accuracy[0] = true;}, 1000);
-    setTimeout(e=>{animation_started_accuracy[1] = true;}, 1200);
-    setTimeout(e=>{animation_started_accuracy[2] = true;}, 1400);
+    setTimeout(e=>{animation_started_accuracy[0] = true;}, 3500);
+    setTimeout(e=>{animation_started_accuracy[1] = true;}, 3700);
+    setTimeout(e=>{animation_started_accuracy[2] = true;}, 3900);
 
-    setTimeout(e=>{animation_started_income_portions[0] = true;}, 1600);
-    setTimeout(e=>{animation_started_income_portions[1] = true;}, 1800);
-    setTimeout(e=>{animation_started_income_portions[2] = true;}, 2000);
+    setTimeout(e=>{animation_started_income_portions[0] = true;}, 4000);
+    setTimeout(e=>{animation_started_income_portions[1] = true;}, 4200);
+    setTimeout(e=>{animation_started_income_portions[2] = true;}, 4400);
 
-    setTimeout(e=>{animation_started_solved[0] = true;}, 2200);
-    setTimeout(e=>{animation_started_solved[1] = true;}, 2400);
-    setTimeout(e=>{animation_started_solved[2] = true;}, 2600);
+    setTimeout(e=>{animation_started_solved[0] = true;}, 4500);
+    setTimeout(e=>{animation_started_solved[1] = true;}, 4700);
+    setTimeout(e=>{animation_started_solved[2] = true;}, 4900);
 
-    setTimeout(e=>{animation_started_sold[0] = true;}, 2800);
-    setTimeout(e=>{animation_started_sold[1] = true;}, 3000);
-    setTimeout(e=>{animation_started_sold[2] = true;}, 3200);
+    setTimeout(e=>{animation_started_sold[0] = true;}, 5000);
+    setTimeout(e=>{animation_started_sold[1] = true;}, 5200);
+    setTimeout(e=>{animation_started_sold[2] = true;}, 5400);
 
-    setTimeout(e=>{animation_started_apm = true;}, 3400);
-    setTimeout(e=>{animation_started_capm = true;}, 3600);
+    setTimeout(e=>{animation_started_apm = true;}, 5000);
+    setTimeout(e=>{animation_started_capm = true;}, 5200);
 
 
 

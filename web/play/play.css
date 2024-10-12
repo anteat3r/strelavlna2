@@ -1624,7 +1624,7 @@ audio {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    align-items: center;
+    align-items: left;
     border-right: 2px var(--color-secondary-dark) dashed;
     padding-top: 10px;
     padding-bottom: 10px;
