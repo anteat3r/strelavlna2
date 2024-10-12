@@ -7,6 +7,7 @@ fetch("https://strela-vlna.gchd.cz/api/contests")
     .then(data => {
         let i = 0;
         for (const competition of data) {
+            if (!competition.public) continue;
             const online_round_date =  new Date(competition.online_round).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'');
             const final_round_date = new Date(competition.final_round).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'');
             const competition_registration_start_date = new Date(competition.registration_start).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/^0/,'');

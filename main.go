@@ -18,6 +18,7 @@ import (
 	"github.com/pocketbase/pocketbase/tools/types"
 
 	log "github.com/anteat3r/golog"
+  "github.com/joho/godotenv"
 )
 
 func customHTTPErrorHandler(c echo.Context, err error) {
@@ -31,6 +32,9 @@ func customHTTPErrorHandler(c echo.Context, err error) {
 
 
 func main() {
+  err := godotenv.Load()
+  if err != nil { panic(err) }
+
   app := pocketbase.New()
 
   app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
@@ -56,12 +60,12 @@ func main() {
           return
         }
         for _, rec := range recs {
-          dt := rec.GetDateTime("updated").Time()
+          dt := rec.GetDateTime("last_sent").Time()
           if !time.Now().After(dt.Add(time.Hour * 6)) { continue }
           err = src.TeamRegisterSendEmail(rec, app.Dao(), mailerc)
           if err != nil { log.Error(err) }
           ndt, _ := types.ParseDateTime(time.Now().Add(time.Hour * 24 * 7 * 10000))
-          rec.Set("updated", ndt)
+          rec.Set("last_sent", ndt)
           err = app.Dao().SaveRecord(rec)
           if err != nil { log.Error(err) }
         }
@@ -181,6 +185,31 @@ func main() {
         return c.JSON(200, res)
       },
       apis.RequireAdminAuth(),
+    )
+
+    e.Router.GET(
+      "/local/query",
+      func(c echo.Context) error {
+
+        if os.Getenv("LOCAL_KEY") != c.Request().Header.Get("Authorization") {
+          return c.String(400, "invalid auth key")
+        }
+
+        rows, err := app.Dao().DB().NewQuery(c.QueryParam("q")).Rows()
+        if err != nil { return err }
+        
+        res := make([]map[string]string, 0)
+        for rows.Next() {
+          nullmap := make(dbx.NullStringMap)
+          rows.ScanMap(nullmap)
+          defmap := make(map[string]string)
+          for k, v := range nullmap { defmap[k] = v.String }
+          res = append(res, defmap)
+        }
+        if rows.Err() != nil { return rows.Err() }
+        
+        return c.JSON(200, res)
+      },
     )
 
     e.Router.GET(

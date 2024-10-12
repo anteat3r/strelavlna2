@@ -330,42 +330,77 @@
 
     .archive-2023_vlna .year-title{
         margin-bottom: 30px;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
     }
 
     .archive-2022_vlna .year-title{
         margin-bottom: 30px;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
     }
 
     .archive-2021_vlna .year-title{
         margin-bottom: 30px;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
     }
 
     .archive-2020_vlna .year-title{
         margin-bottom: 30px;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
     }
 
     .archive-2019_vlna .year-title{
         margin-bottom: 30px;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+
+    .archive-2018_vlna .year-title{
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+
+    .archive-2023_strela .year-title{
+        border-top: var(--color-secondary) 2px solid;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
     }
 
     .archive-2022_strela .year-title{
         border-top: var(--color-secondary) 2px solid;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
     }
 
     .archive-2021_strela .year-title{
         border-top: var(--color-secondary) 2px solid;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
     }
 
     .archive-2020_strela .year-title{
         border-top: var(--color-secondary) 2px solid;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
     }
 
     .archive-2019_strela .year-title{
         border-top: var(--color-secondary) 2px solid;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
     }
 
     .archive-2018_strela .year-title{
         border-top: var(--color-secondary) 2px solid;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+
+    .archive-2018_vlna .year-title{
+        margin-bottom: 30px;
     }
 
     .archive{
@@ -375,13 +410,17 @@
     .archive-title{
         font-size: 25px;
         padding-bottom: 20px;
-        border-bottom: var(--color-secondary) 2px solid;
+        margin-inline: 20px;
+        border: none;
     }
     .year-title{
         display: block;
         font-size: 15px;
         padding: 12px;
         border-bottom: var(--color-secondary) 2px solid;
+        margin-inline: 20px;
+        border-right: var(--color-secondary) 2px solid;
+        border-left: var(--color-secondary) 2px solid;
     }
 
     .archive-mobile {
