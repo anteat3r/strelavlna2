@@ -16,7 +16,7 @@
         let res = await fetch(
           `https://strela-vlna.gchd.cz/api/short/set?k=${ $("#key").value }&v=${ $("#value").value }`,
         );
-        alert(res.statusCode);
+        alert(`${res.status} ${await res.text()}`);
       });
     </script>
   </body>
