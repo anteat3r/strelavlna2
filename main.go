@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
@@ -18,7 +19,7 @@ import (
 	"github.com/pocketbase/pocketbase/tools/types"
 
 	log "github.com/anteat3r/golog"
-  "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 )
 
 func customHTTPErrorHandler(c echo.Context, err error) {
@@ -86,6 +87,37 @@ func main() {
       "/",
       func(c echo.Context) error {
         return c.Redirect(301, "/about_us/")
+      },
+    )
+
+    urls := make(map[string]string)
+    data, err := os.ReadFile("urls.json")
+    if err == nil {
+      err = json.Unmarshal(data, urls)
+      if err != nil { log.Error(err) }
+    } else {
+      log.Error(err)
+    }
+    e.Router.GET(
+      "/api/short/set",
+      func(c echo.Context) error {
+        key := c.QueryParam("k")
+        _, ok := urls[key]
+        if ok { return c.String(400, "already exists") }
+        urls[key] = c.QueryParam("v")
+        res, err := json.Marshal(urls)
+        if err != nil { return c.String(400, err.Error()) }
+        err = os.WriteFile("urls.json", res, 0666)
+        if err != nil { return c.String(400, err.Error()) }
+        return c.String(200, "")
+      },
+    )
+    e.Router.GET(
+      "/shrt/:name",
+      func(c echo.Context) error {
+        url, ok := urls[c.PathParam("name")]
+        if !ok { return c.String(400, "not found") }
+        return c.Redirect(301, url)
       },
     )
 
