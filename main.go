@@ -93,7 +93,7 @@ func main() {
     urls := make(map[string]string)
     data, err := os.ReadFile("urls.json")
     if err == nil {
-      err = json.Unmarshal(data, urls)
+      err = json.Unmarshal(data, &urls)
       if err != nil { log.Error(err) }
     } else {
       log.Error(err)
