@@ -27,6 +27,15 @@ func formTime() string {
   return time.Now().Format("2006-01-02 15:04:05.000000")
 }
 
+func JSONlog(id string, admin bool, inc bool, idx int, evt string) {
+  fmt.Fprintf(
+    os.Stderr,
+    `{"time":"%s","id":"%s","admin":%v,"inc":%v,"idx":%d,"evt":"%s"},` + "\n",
+    time.Now().Format("2006-01-02T15:04"),
+    id, admin, inc, idx, evt,
+  )
+}
+
 const DELIM = "\x00"
 
 func PlayerWsHandleMsg(
@@ -52,7 +61,9 @@ func PlayerWsHandleMsg(
 
   defer func(){
     if oerr != nil {
-      fmt.Printf("%s *>- %s:%d <-* %s <- %s\n", formTime(), team, idx, strings.ReplaceAll(oerr.Error(), "\x00", "|"), readmsg)
+      jerr := strings.ReplaceAll(oerr.Error(), "\x00", "|")
+      fmt.Printf("%s *>- %s:%d <-* %s <- %s\n", formTime(), team, idx, jerr, readmsg)
+      JSONlog(team, false, true, idx, jerr)
     }
   }()
 
@@ -65,14 +76,14 @@ func PlayerWsHandleMsg(
     prob := m[1]
     money, err := DBSell(team, prob)
     if err != nil { return err }
-    tchan.Send(team, "sold", prob, strconv.Itoa(money))
+    tchan.Send("sold", prob, strconv.Itoa(money))
 
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
     prob, money, name, text, img, err := DBBuy(team, diff)
     if err != nil { return err }
-    tchan.Send(team, "bought", prob, diff, strconv.Itoa(money), name, text, img)
+    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img)
 
   // case "buyold":
   //   if len(m) != 2 { return eIm(msg) }
@@ -88,7 +99,7 @@ func PlayerWsHandleMsg(
     check, _, teamname, _, csol, upd, workers, err := DBSolve(team, prob, sol)
     if err != nil { return err }
     phash := HashId(workers)
-    tchan.Send(team, "solved", prob, sol)
+    tchan.Send("solved", prob, sol)
     if upd {
       AdminSend("upgraded", check, sol, phash)
     } else {
@@ -101,11 +112,11 @@ func PlayerWsHandleMsg(
     // text, diff, name, err := DBView(team, prob)
     // if err != nil { return err }
     // perchan<- "viewed" + DELIM + diff + DELIM + name + DELIM + text
-    tchan.Send(team, "focused", prob, strconv.Itoa(idx))
+    tchan.Send("focused", prob, strconv.Itoa(idx))
 
   case "unfocus":
     if len(m) != 1 { return eIm(msg) }
-    tchan.Send(team, "unfocused", strconv.Itoa(idx))
+    tchan.Send("unfocused", strconv.Itoa(idx))
 
   case "chat":
     if len(m) != 3 { return eIm(msg) }
@@ -119,7 +130,7 @@ func PlayerWsHandleMsg(
     }
     upd, teamname, name, diff, check, workers, chat, err := DBPlayerMsg(team, prob, text)
     if err != nil { return err }
-    tchan.Send(team, "msgsent", prob, text)
+    tchan.Send("msgsent", prob, text)
     phash := HashId(workers)
     if !upd {
       AdminSend("questioned", check, team, teamname, prob, diff, name, text, phash, chat)
@@ -132,11 +143,11 @@ func PlayerWsHandleMsg(
     res, err := DBPlayerInitLoad(team, idx)
     if err != nil { return err }
     perchan<- "loaded" + DELIM + res
-    tchan.Send(team, "focuscheck")
+    tchan.Send("focuscheck")
 
   case "focuscheck":
     if len(m) != 1 { return eIm(msg) }
-    tchan.Send(team, "focuscheck")
+    tchan.Send("focuscheck")
 
   default:
     return eIm(msg)
@@ -144,6 +155,7 @@ func PlayerWsHandleMsg(
   }
 
   fmt.Printf("%s >- %s:%d <- %s\n", formTime(), team, idx, readmsg)
+  JSONlog(team, false, true, idx, readmsg)
 
   return nil
 }
@@ -157,7 +169,9 @@ func AdminWsHandleMsg(
   readmsg := strings.ReplaceAll(msg, "\x00", "|")
   defer func(){
     if oerr != nil {
-      fmt.Printf("%s *>>- %s <-* %s <- %s\n", formTime(), id, strings.ReplaceAll(oerr.Error(), "\x00", "|"), readmsg)
+      jerr := strings.ReplaceAll(oerr.Error(), "\x00", "|")
+      fmt.Printf("%s *>>- %s <-* %s <- %s\n", formTime(), id, jerr, readmsg)
+      JSONlog(id, true, true, 0, jerr)
     }
   }()
 
@@ -172,10 +186,21 @@ func AdminWsHandleMsg(
     prob := m[3]
     rcorr := m[4]
     corr := rcorr == "yes"
-    money, err := DBAdminGrade(check, team, prob, corr)
+    money, final, err := DBAdminGrade(check, team, prob, corr)
     if err != nil { return err }
     WriteTeamChan(team, "graded", prob, rcorr, strconv.Itoa(money))
     AdminSend("graded", prob, check)
+    if final {
+      if len(m) != 1 { return eIm(msg) }
+      llog, err := LoadLog()
+      if err != nil { return err }
+      teamChanMapMutex.Lock()
+      for t, c := range TeamChanMap {
+        tlog := FilterLogTeam(llog, t)
+        c.Send("gotlog", "[" + strings.TrimSuffix(strings.Join(tlog, "\n"), ",") + "]")
+      }
+      teamChanMapMutex.Unlock()
+    }
 
   case "chat":
     if len(m) != 4 { return eIm(msg) }
@@ -261,8 +286,8 @@ func AdminWsHandleMsg(
     err := DBAdminSetInfo(info)
     if err != nil { return err }
     teamChanMapMutex.Lock()
-    for id, tc := range TeamChanMap {
-      tc.Send(id, "gotinfo", info)
+    for _, tc := range TeamChanMap {
+      tc.Send("gotinfo", info)
     }
     teamChanMapMutex.Unlock()
     AdminSend("gotinfo", info)
@@ -301,26 +326,16 @@ func AdminWsHandleMsg(
     }
     AdminSend("probchngd", ndiff, nname, ntext, nsol)
 
-  case "parselog":
-    if len(m) != 1 { return eIm(msg) }
-    llog, err := LoadLog()
-    if err != nil { return err }
-    teamChanMapMutex.Lock()
-    for t, c := range TeamChanMap {
-      tlog := FilterLogTeam(llog, t)
-      c.Send(t, "gotlog", strings.Join(tlog, "\n"))
-    }
-    teamChanMapMutex.Unlock()
-
   }
 
   fmt.Printf("%s >>- %s <- %s\n", formTime(), id, readmsg)
+  JSONlog(id, true, true, 0, readmsg)
 
   return nil
 }
 
 func LoadLog() ([]string, error) {
-  bts, err := os.ReadFile("/opt/strelavlna2/sv2.log")
+  bts, err := os.ReadFile("/opt/strelavlna2/sv2j.log")
   if err != nil { return nil, err }
   lns := strings.Split(string(bts), "\n")
   flns := make([]string, 0, len(lns) / 100)

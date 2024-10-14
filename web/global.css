@@ -833,3 +833,6 @@ a:hover{
 .invisible{
     opacity: 0;
 }
+.text-invisible{
+    color: transparent !important;
+}

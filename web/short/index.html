@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Short</title>
+    <link href="css/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <input type="text" id="key" placeholder="Key">
+    <br>
+    <input type="text" id="value" placeholder="Value" style="width: 98.5%;">
+    <br>
+    <button id="set">Set</button>
+    <script>
+      function $(a) { return document.querySelector(a); }
+      $("#set").addEventListener("click", async () => {
+        let res = await fetch(
+          `https://strela-vlna.gchd.cz/api/short/set?k=${ $("#key").value }&v=${ $("#value").value }`,
+        );
+        alert(`${res.status} ${await res.text()}`);
+      });
+    </script>
+  </body>
+</html>
