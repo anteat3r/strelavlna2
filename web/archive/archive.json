@@ -1,7 +1,7 @@
 {
     "2023": [
       {
-        "type": "vlna",
+        "type": "strela",
         "id": "2023_strela",
         "title": "Pražská střela 2023",
         "placeNameOnline1": "N/A",
@@ -33,7 +33,7 @@
     ],
     "2022": [
         {
-          "type": "vlna",
+          "type": "strela",
           "id": "2022_strela",
           "title": "Pražská střela 2022",
           "placeNameOnline1": "N/A",
@@ -65,7 +65,7 @@
       ],
       "2021": [
         {
-          "type": "vlna",  
+          "type": "strela",  
           "id": "2021_strela",
           "title": "Pražská střela 2021",
           "placeNameOnline1": "N/A",
@@ -83,7 +83,7 @@
       ],
       "2020": [
         {
-          "type": "vlna",  
+          "type": "strela",  
           "id": "2020_strela",
           "title": "Pražská střela 2020",
           "placeNameOnline1": "N/A",
@@ -101,7 +101,7 @@
       ],
       "2019": [
         {
-          "type": "vlna",  
+          "type": "strela",  
           "id": "2019_strela",
           "title": "Pražská střela 2019",
           "placeNameNormal1": "N/A",
@@ -127,7 +127,7 @@
       ],
       "2018": [
         {
-          "type": "vlna",  
+          "type": "strela",  
           "id": "2018_strela",
           "title": "Pražská střela 2018",
           "placeNameNormal1": "N/A",

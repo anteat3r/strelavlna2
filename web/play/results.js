@@ -1,4 +1,5 @@
-var results_string = "asdhjawkjasdkj kajshd kdhgwa sjhd kjahwuka bsflahsd kjb"
+var results_string = "asdhjawkjasdkj kajshd kdhgwa sjhd kjahwuka bsflahsd kjb";
+let qrcode_link = "https://strela-vlna.gchd.cz/about_us/";
 
 function parseResults(){
 
@@ -89,14 +90,14 @@ let animation_start_balance_chart_final_line = false;
 const accuracy_dom = [document.getElementById("results-accuracy-correct-filler-a"), document.getElementById("results-accuracy-correct-filler-b"), document.getElementById("results-accuracy-correct-filler-c")];
 const solved_dom = [document.getElementById("results-solved-problems-a"), document.getElementById("results-solved-problems-b"), document.getElementById("results-solved-problems-c")];
 const sold_dom = [document.getElementById("results-sold-problems-a"), document.getElementById("results-sold-problems-b"), document.getElementById("results-sold-problems-c")];
-const amp_dom = document.getElementById("results-additional-stats-content-apm");
-const capm_dom = document.getElementById("results-additional-stats-content-capm");
+// const amp_dom = document.getElementById("results-additional-stats-content-apm");
+// const capm_dom = document.getElementById("results-additional-stats-content-capm");
 
 const main_wrappers = [
     document.getElementById("results-accuracy-wrapper"),
     document.getElementById("results-income-wrapper"),
     document.getElementById("results-problem-stats-wrapper"),
-    document.getElementById("results-addtional-stats-wrapper")
+    document.getElementById("results-qrcode-wrapper")
 ];
 
 function animationUpdate(){
@@ -217,10 +218,10 @@ function animationUpdate(){
 function drawResults(){
 
     //apm
-    amp_dom.innerHTML = Math.round(animation_apm_curent*100)/100;
+    // amp_dom.innerHTML = Math.round(animation_apm_curent*100)/100;
 
-    //capm
-    capm_dom.innerHTML = Math.round(animation_capm_curent*100)/100;
+    // //capm
+    // capm_dom.innerHTML = Math.round(animation_capm_curent*100)/100;
 
     //solved
     for(let i = 0; i < solved.length; i++){
@@ -550,6 +551,25 @@ function setRank(){
     }, 1000);
 }
 
+function generateQRcode(){
+    const DOM = document.getElementById("results-qrcode");
+    const qrCode = new QRCodeStyling({
+        width: 160,
+        height: 160,
+        data: qrcode_link,
+        dotsOptions: {
+          color: "#0f455a",    // Set pixel color to blue
+          type: "rounded",     // Set pixel shape to rounded
+        },
+        backgroundOptions: {
+          color: "#f2fcff"     // Set background color to yellow
+        }
+      });
+    
+    qrCode.append(DOM);
+    DOM.href = qrcode_link;
+}
+
 
 
 function resultsAnimationFrame(){
@@ -560,6 +580,7 @@ function resultsAnimationFrame(){
 }
 
 generateTicks();
+generateQRcode();
 resultsAnimationFrame();
 for(item of main_wrappers){
     item.classList.add("invisible");

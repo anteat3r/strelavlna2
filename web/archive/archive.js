@@ -17,11 +17,11 @@ fetch('../archive/archive.json')
   });
   function generateYearHTML(year, data) {
     return data.map(entry => `
-      <div class="archive-year archive-${entry.id}">
-        <div class="year-title" style="cursor: pointer;">
-          ${entry.title} <i class="fas fa-chevron-right"></i>
+      <div class="archive-year ${entry.type} archive-${entry.id}">
+        <div class="year-title">
+          <img class="logo_${entry.type}" src = "../images/${entry.type}.png"</img>${entry.title} <i class="fas fa-chevron-right"></i>
         </div>
-        <div class="archive-mobile" style="max-height: 0; overflow: hidden;">
+        <div class="archive-mobile">
           ${year === "2019" || year === "2018" ? '' : `
             <div class="online-round">
               <h1>Online kolo</h1>
@@ -167,11 +167,19 @@ function handleYearTitles() {
       const content = parent.querySelector('.archive-mobile');
       const icon = title.querySelector('i');
       if (content.style.maxHeight === "0px" || !content.style.maxHeight) {
-        content.style.maxHeight = content.scrollHeight + "px";
+        content.style.maxHeight = content.scrollHeight + "px";  
+        if (parent.classList.contains('vlna')){
+          title.style.marginBottom = "0";
+        }
         icon.style.transform = "rotate(90deg)";
       } else {
         content.style.maxHeight = "0";
         icon.style.transform = "rotate(0deg)";
+        if (parent.classList.contains('vlna')){
+          setTimeout(() => {
+            title.style.marginBottom = 30 + "px";
+          }, 500);
+        }
       }
     });
   });

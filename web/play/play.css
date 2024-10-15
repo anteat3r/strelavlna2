@@ -2007,3 +2007,25 @@ audio {
     margin-top: 7px;
     transition: color 0.5s ease-out;
 }
+#results-qrcode{
+    padding: 0px;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 160px;
+    width: 160px;
+}
+#results-qrcode-wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.3s ease-out;
+}
+#results-qrcode-text{
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+}
