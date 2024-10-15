@@ -3,182 +3,77 @@ package src
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"maps"
 	"slices"
 	"strings"
-	"sync"
 	"time"
 
 	log "github.com/anteat3r/golog"
 	"github.com/pocketbase/dbx"
-	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/daos"
-	"github.com/pocketbase/pocketbase/models"
-	"github.com/pocketbase/pocketbase/tools/security"
 	"github.com/pocketbase/pocketbase/tools/types"
 )
 
+type TeamS struct {
+  Money int
+  Bought []ProbM
+  Pending []ProbM
+  Solved []ProbM
+  Sold []ProbM
+}
+type TeamM = *RWMutexWrap[TeamS]
+
+type ProbS struct {
+  Name string
+  Diff string
+}
+type ProbM = *RWMutexWrap[ProbS]
+
+type CheckS struct {
+  Prob ProbM
+  Team TeamM
+}
+type CheckM = *RWMutexWrap[CheckS]
+
 var (
-  App *pocketbase.PocketBase
-
-  Costs = map[string]int{
-    "A": 10,
-  }
-  CostsMu = sync.RWMutex{}
-
-  ChecksColl *models.Collection
+  _Costs = RWMutexWrap[map[string]int]{v: make(map[string]int)}
+  Teams = RWMutexWrap[map[string]TeamM]{v: make(map[string]TeamM)}
+  Probs = RWMutexWrap[map[string]ProbM]{v: make(map[string]ProbM)}
 )
 
-type RWMutexWrap[T any] struct {
-  m sync.RWMutex
-  v T
+func _GetCost(diff string) (res int, ok bool) {
+  _Costs.RWith(func(v map[string]int) {
+    res, ok = v[diff]
+  })
+  return
 }
 
-func (w *RWMutexWrap[T]) With(f func(v *T)) {
-  w.m.Lock()
-  defer w.m.Unlock()
-  f(&w.v)
-}
-
-func (w *RWMutexWrap[T]) RWith(f func(v T)) {
-  w.m.RLock()
-  defer w.m.RUnlock()
-  f(w.v)
-}
-
-func HashId(work string) (res string) {
-  workersMutex.RLock()
-  log.Info(Workers)
-  for _, c := range strings.Split(work, " ") {
-    if _, ok := Workers[c]; ok { res = c }
-  }
-  workersMutex.RUnlock()
-  return res
-}
- 
-func ParseRefList(s string) []string {
-  if s == "[]" { return []string{} }
-  s = strings.TrimPrefix(s, "[")
-  s = strings.TrimSuffix(s, "]")
-  res := strings.Split(s, ",")
-  for i, s := range res {
-    res[i] = strings.Trim(s, `"`)
-  }
-  return res
-}
- 
-func StringifyRefList(l []string) string {
-  res := "["
-  for i, s := range l {
-    res += `"` + s + `"`
-    if i == len(l)-1 { break }
-    res += ","
-  }
-  res += "]"
-  return res
-}
-
-func RefListToInExpr(l []string) string {
-  res := "("
-  for i, s := range l {
-    res += `'` + s + `'`
-    if i == len(l)-1 { break }
-    res += ","
-  }
-  res += ")"
-  return res
-}
-
-func GetRandomId() string {
-  return security.RandomStringWithAlphabet(
-    models.DefaultIdLength,
-    models.DefaultIdAlphabet,
-  )
-}
-
-func GetCost(diff string) (int, bool) {
-  CostsMu.RLock()
-  res, ok := Costs[diff]
-  CostsMu.RUnlock()
-  return res, ok
-}
-
-func dbErr(args... string) error {
-  return errors.New(strings.Join(args, DELIM))
-}
-
-func dbClownErr(args... string) error {
-  return errors.New("clown" + DELIM + strings.Join(args, DELIM))
-}
-
-func SliceExclude[T comparable](s []T, v T) ([]T, bool) {
-  found := false
-  for i := range len(s) {
-    if s[i] == v {
-      found = true
-      continue
-    }
-    if !found { continue }
-    s[i-1] = s[i]
-  }
-  if found {
-    return s[:len(s)-1], true
-  } else {
-    return s, false
-  }
-}
-
-func DBSell(team string, prob string) (money int, oerr error) {
+func _DBSell(teamid string, probid string) (money int, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    teamres := struct{
-      Bought string `db:"bought"`
-      Sold string `db:"sold"`
-      Money int `db:"money"`
-    }{}
+    var teamres TeamM
+    var ok bool
+    Teams.RWith(func(v map[string]TeamM) { teamres, ok = v[teamid] })
+    if !ok { return dbErr("invalid team id") }
 
-    // err := txDao.DB().
-    //   NewQuery("SELECT bought, sold, money FROM teams WHERE id = {:team} LIMIT 1").
-    //   Bind(dbx.Params{ "team": team }).
-    //   One(&teamres)
-    // if err != nil { return err }
+    var probres ProbM
+    Probs.RWith(func(v map[string]ProbM) { probres, ok = v[probid] })
+    if !ok { return dbErr("invalid prob id") }
 
-    err := txDao.DB().
-      Select("bought", "sold", "money").
-      From("teams").
-      Where(dbx.HashExp{"id": team}).
-      Limit(1).
-      One(&teamres)
-    if err != nil { return err }
+    var diff string
+    probres.RWith(func(v ProbS) { diff = v.Diff })
+    cost, ok := GetCost("-" + diff)
+    if !ok { log.Error("invalid diff", probid, diff) }
 
-    probres := struct{
-      Diff string `db:"diff"`
-    }{}
-    // err = txDao.DB().
-    //   NewQuery("SELECT diff FROM probs WHERE id = {:prob} LIMIT 1").
-    //   Bind(dbx.Params{ "prob": prob }).
-    //   One(&probres)
-    // if err != nil { return err }
+    teamres.With(func(team *TeamS) {
 
-    err = txDao.DB().
-      Select("diff").
-      From("probs").
-      Where(dbx.HashExp{"id": prob}).
-      Limit(1).
-      One(&probres)
-    if err != nil { return err }
+      team.Bought, found := SliceExclude(team.Bought, )
+      if !found { return dbClownErr("sell", "prob not owned") }
 
-    cost, ok := GetCost("-" + probres.Diff)
-    if !ok { log.Error("invalid diff", prob, probres.Diff) }
+    })
 
-    bought := ParseRefList(teamres.Bought)
-    sold := ParseRefList(teamres.Sold)
 
-    bought, found := SliceExclude(bought, prob)
-    if !found { return dbClownErr("sell", "prob not owned") }
-
-    sold = append(sold, prob)
+    sold = append(sold, probid)
 
     money = teamres.Money + cost
 
@@ -200,7 +95,7 @@ func DBSell(team string, prob string) (money int, oerr error) {
           "bought": StringifyRefList(bought),
           "sold": StringifyRefList(sold),
         },
-        dbx.HashExp{"id": team},
+        dbx.HashExp{"id": teamid},
       ).
       Execute()
 
@@ -211,7 +106,7 @@ func DBSell(team string, prob string) (money int, oerr error) {
   return
 }
 
-func dbBuySrc(team string, diff string, srcField string) (prob string, money int, name string, text string, img string, oerr error) {
+func _dbBuySrc(team string, diff string, srcField string) (prob string, money int, name string, text string, img string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
     diffcost, ok := GetCost(diff)
     if !ok { return dbClownErr("buy", "invalid diff") }
@@ -307,15 +202,15 @@ func dbBuySrc(team string, diff string, srcField string) (prob string, money int
   return
 }
 
-func DBBuy(team string, diff string) (id string, money int, name string, text string, img string, oerr error) {
+func _DBBuy(team string, diff string) (id string, money int, name string, text string, img string, oerr error) {
   return dbBuySrc(team, diff, "free")
 }
 
-func DBBuyOld(team string, diff string) (id string, money int, name string, text string, img string, oerr error) {
+func _DBBuyOld(team string, diff string) (id string, money int, name string, text string, img string, oerr error) {
   return dbBuySrc(team, diff, "solved")
 }
 
-func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, csol string, updated bool, workers string, oerr error) {
+func _DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, csol string, updated bool, workers string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -447,7 +342,7 @@ func DBSolve(team string, prob string, sol string) (check string, diff string, t
   return
 }
 
-func DBView(team string, prob string) (text string, diff string, name string, oerr error) {
+func _DBView(team string, prob string) (text string, diff string, name string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamrec, err := txDao.FindRecordById("teams", team)
@@ -470,7 +365,7 @@ func DBView(team string, prob string) (text string, diff string, name string, oe
   return
 }
 
-func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname string, name string, diff string, check string, workers string, chat string, oerr error) {
+func _DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname string, name string, diff string, check string, workers string, chat string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -594,7 +489,7 @@ func DBPlayerMsg(team string, prob string, msg string) (upd bool, teamname strin
   return
 }
 
-type probRes struct {
+type _probRes struct {
   Name string `db:"name" json:"name"`
   Diff string `db:"diff" json:"diff"`
   Text string `db:"text" json:"text"`
@@ -602,7 +497,7 @@ type probRes struct {
   Img string `db:"img" json:"image"`
 }
 
-type teamRes struct {
+type _teamRes struct {
   Bought []probRes `json:"bought"`
   Pending []probRes `json:"pending"`
   Chat string `json:"chat"`
@@ -626,12 +521,12 @@ type teamRes struct {
   Player5 string `json:"player5"`
 }
 
-type checkRes struct{
+type _checkRes struct{
   Prob string `db:"prob" json:"probid"`
   Sol string `db:"solution" json:"solution"`
 }
 
-func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
+func _DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct {
@@ -767,7 +662,7 @@ func DBPlayerInitLoad(team string, idx int) (sres string, oerr error) {
   return
 }
 
-func DBAdminGrade(check string, team string, prob string, corr bool) (money int, final bool, oerr error) {
+func _DBAdminGrade(check string, team string, prob string, corr bool) (money int, final bool, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{
@@ -855,7 +750,7 @@ func DBAdminGrade(check string, team string, prob string, corr bool) (money int,
   return 
 }
 
-func DBAdminMsg(team string, prob string, text string) (oerr error) {
+func _DBAdminMsg(team string, prob string, text string) (oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     _, err := txDao.DB().
@@ -874,7 +769,7 @@ func DBAdminMsg(team string, prob string, text string) (oerr error) {
   return
 }
 
-func DBAdminDismiss(check string) (team string, prob string, oerr error) {
+func _DBAdminDismiss(check string) (team string, prob string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     checkres := struct{
@@ -896,7 +791,7 @@ func DBAdminDismiss(check string) (team string, prob string, oerr error) {
   return
 }
 
-func DBAdminView(team string, prob string, sprob bool, schat bool) (text string, sol string, name string, diff string, chat string, banned string, lastbanned string, img string, oerr error) {
+func _DBAdminView(team string, prob string, sprob bool, schat bool) (text string, sol string, name string, diff string, chat string, banned string, lastbanned string, img string, oerr error) {
   if !sprob && !schat { return }
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
@@ -959,7 +854,7 @@ func DBAdminView(team string, prob string, sprob bool, schat bool) (text string,
   return
 }
 
-func DBAdminBan(team string) (oerr error) {
+func _DBAdminBan(team string) (oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     _, err := txDao.DB().
@@ -977,7 +872,7 @@ func DBAdminBan(team string) (oerr error) {
   return
 }
 
-func DBAdminUnBan(team string) (oerr error) {
+func _DBAdminUnBan(team string) (oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     _, err := txDao.DB().
@@ -992,7 +887,7 @@ func DBAdminUnBan(team string) (oerr error) {
   return
 }
 
-type adminInitLoad struct {
+type _adminInitLoad struct {
   Checks []adminCheckRes `json:"checks"` 
   Id string `json:"idx"`
   OnlineRound int64 `json:"online_round"`
@@ -1002,12 +897,12 @@ type adminInitLoad struct {
   Banned []adminBannedRes `json:"banned"`
 }
 
-type adminBannedRes struct{
+type _adminBannedRes struct{
   Id string `db:"id" json:"id"`
   LastBanned string `db:"last_banned" json:"lastbanned"`
 }
 
-type adminCheckRes struct {
+type _adminCheckRes struct {
   Team string `db:"team" json:"teamid"`
   Prob string `db:"prob" json:"probid"`
   Diff string `db:"diff" json:"probdiff"`
@@ -1020,7 +915,7 @@ type adminCheckRes struct {
   Work string `db:"workers"`
 }
 
-func DBAdminInitLoad(id string) (res string, oerr error) {
+func _DBAdminInitLoad(id string) (res string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     banres := []adminBannedRes{}
@@ -1102,7 +997,7 @@ func DBAdminInitLoad(id string) (res string, oerr error) {
   return
 }
 
-func DBAdminSetInfo(info string) (oerr error) {
+func _DBAdminSetInfo(info string) (oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     ActiveContestMu.RLock()
@@ -1120,12 +1015,12 @@ func DBAdminSetInfo(info string) (oerr error) {
   return
 }
 
-type reassignRes struct {
+type _reassignRes struct {
   Id string `json:"id"`
   Assign string `json:"assign"`
 }
 
-func DBReAssign() (res string, oerr error) {
+func _DBReAssign() (res string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
     
     checkres := []struct{
@@ -1156,7 +1051,7 @@ func DBReAssign() (res string, oerr error) {
   return
 }
 
-func DBAdminEditProb(prob string, ndiff string, nname string, ntext string, nsol string) (teams []string, oerr error) {
+func _DBAdminEditProb(prob string, ndiff string, nname string, ntext string, nsol string) (teams []string, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     _, err := txDao.DB().

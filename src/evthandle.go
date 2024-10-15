@@ -326,6 +326,16 @@ func AdminWsHandleMsg(
     }
     AdminSend("probchngd", ndiff, nname, ntext, nsol)
 
+  case "parselog":
+    if len(m) != 1 { return eIm(msg) }
+    llog, err := LoadLog()
+    if err != nil { return err }
+    teamChanMapMutex.Lock()
+    for t, c := range TeamChanMap {
+      tlog := FilterLogTeam(llog, t)
+      c.Send("gotlog", "[" + strings.TrimSuffix(strings.Join(tlog, "\n"), ",") + "]")
+    }
+    teamChanMapMutex.Unlock()
   }
 
   fmt.Printf("%s >>- %s <- %s\n", formTime(), id, readmsg)
