@@ -30,6 +30,23 @@ var (
   ChecksColl *models.Collection
 )
 
+type RWMutexWrap[T any] struct {
+  m sync.RWMutex
+  v T
+}
+
+func (w *RWMutexWrap[T]) With(f func(v *T)) {
+  w.m.Lock()
+  defer w.m.Unlock()
+  f(&w.v)
+}
+
+func (w *RWMutexWrap[T]) RWith(f func(v T)) {
+  w.m.RLock()
+  defer w.m.RUnlock()
+  f(w.v)
+}
+
 func HashId(work string) (res string) {
   workersMutex.RLock()
   log.Info(Workers)
@@ -1167,4 +1184,15 @@ func DBAdminEditProb(prob string, ndiff string, nname string, ntext string, nsol
   return
 }
 
+func DBSaveLog(team string, log string) (oerr error) {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+    _, err := txDao.DB().Update(
+        "teams",
+        dbx.Params{"log": log},
+        dbx.HashExp{"id": team},
+      ).Execute()
+    return err
+  })
+  return
+}
 

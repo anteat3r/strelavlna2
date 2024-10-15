@@ -326,6 +326,16 @@ func AdminWsHandleMsg(
     }
     AdminSend("probchngd", ndiff, nname, ntext, nsol)
 
+  case "parselog":
+    if len(m) != 1 { return eIm(msg) }
+    llog, err := LoadLog()
+    if err != nil { return err }
+    teamChanMapMutex.Lock()
+    for t, c := range TeamChanMap {
+      tlog := FilterLogTeam(llog, t)
+      c.Send("gotlog", "[" + strings.TrimSuffix(strings.Join(tlog, "\n"), ",") + "]")
+    }
+    teamChanMapMutex.Unlock()
   }
 
   fmt.Printf("%s >>- %s <- %s\n", formTime(), id, readmsg)
@@ -341,6 +351,7 @@ func LoadLog() ([]string, error) {
   flns := make([]string, 0, len(lns) / 100)
   for _, l := range lns {
     if !strings.Contains(l, "bought") &&
+       !strings.Contains(l, "graded") &&
        !strings.Contains(l, "solved") { continue }
     flns = append(flns, l)
   }
@@ -353,6 +364,8 @@ func FilterLogTeam(log []string, team string) []string {
     if !strings.Contains(l, team) { continue }
     flog = append(flog, l)
   }
+  err := DBSaveLog(team, strings.Join(log, "\n"))
+  if err != nil { fmt.Println("err saving log", err.Error())}
   return flog
 }
 
