@@ -14,20 +14,7 @@ import (
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/daos"
-	"github.com/pocketbase/pocketbase/models"
-	"github.com/pocketbase/pocketbase/tools/security"
 	"github.com/pocketbase/pocketbase/tools/types"
-)
-
-var (
-  App *pocketbase.PocketBase
-
-  Costs = map[string]int{
-    "A": 10,
-  }
-  CostsMu = sync.RWMutex{}
-
-  ChecksColl *models.Collection
 )
 
 type RWMutexWrap[T any] struct {
@@ -47,164 +34,81 @@ func (w *RWMutexWrap[T]) RWith(f func(v T)) {
   f(w.v)
 }
 
-func HashId(work string) (res string) {
-  workersMutex.RLock()
-  log.Info(Workers)
-  for _, c := range strings.Split(work, " ") {
-    if _, ok := Workers[c]; ok { res = c }
-  }
-  workersMutex.RUnlock()
-  return res
+type TeamS struct {
+  Money int
+  Bought []ProbM
+  Pending []ProbM
+  Solved []ProbM
+  Sold []ProbM
 }
- 
-func ParseRefList(s string) []string {
-  if s == "[]" { return []string{} }
-  s = strings.TrimPrefix(s, "[")
-  s = strings.TrimSuffix(s, "]")
-  res := strings.Split(s, ",")
-  for i, s := range res {
-    res[i] = strings.Trim(s, `"`)
-  }
-  return res
+type TeamM = *RWMutexWrap[TeamS]
+
+type ProbS struct {
+  Name string
+  Diff string
 }
- 
-func StringifyRefList(l []string) string {
-  res := "["
-  for i, s := range l {
-    res += `"` + s + `"`
-    if i == len(l)-1 { break }
-    res += ","
-  }
-  res += "]"
-  return res
+type ProbM = *RWMutexWrap[ProbS]
+
+type CheckS struct {
+  Prob ProbM
+  Team TeamM
+}
+type CheckM = *RWMutexWrap[CheckS]
+
+var (
+  _Costs = RWMutexWrap[map[string]int]{v: make(map[string]int)}
+  Teams = RWMutexWrap[map[string]TeamM]{v: make(map[string]TeamM)}
+  Probs = RWMutexWrap[map[string]ProbM]{v: make(map[string]ProbM)}
+
+  App *pocketbase.PocketBase
+)
+
+func GetCost(diff string) (res int, ok bool) {
+  _Costs.RWith(func(v map[string]int) {
+    res, ok = v[diff]
+  })
+  return
 }
 
-func RefListToInExpr(l []string) string {
-  res := "("
-  for i, s := range l {
-    res += `'` + s + `'`
-    if i == len(l)-1 { break }
-    res += ","
-  }
-  res += ")"
-  return res
+func dbErr(args ...string) error {
+  return errors.New("err" + DELIM + strings.Join(args, DELIM))
 }
 
-func GetRandomId() string {
-  return security.RandomStringWithAlphabet(
-    models.DefaultIdLength,
-    models.DefaultIdAlphabet,
-  )
+func dbClownErr(args ...string) error {
+  return errors.New("err" + DELIM + "clown" + DELIM + strings.Join(args, DELIM))
 }
 
-func GetCost(diff string) (int, bool) {
-  CostsMu.RLock()
-  res, ok := Costs[diff]
-  CostsMu.RUnlock()
-  return res, ok
-}
-
-func dbErr(args... string) error {
-  return errors.New(strings.Join(args, DELIM))
-}
-
-func dbClownErr(args... string) error {
-  return errors.New("clown" + DELIM + strings.Join(args, DELIM))
-}
-
-func SliceExclude[T comparable](s []T, v T) ([]T, bool) {
-  found := false
-  for i := range len(s) {
-    if s[i] == v {
-      found = true
-      continue
-    }
-    if !found { continue }
-    s[i-1] = s[i]
-  }
-  if found {
-    return s[:len(s)-1], true
-  } else {
-    return s, false
-  }
-}
-
-func DBSell(team string, prob string) (money int, oerr error) {
+func DBSell(teamid string, probid string) (money int, oerr error) {
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    teamres := struct{
-      Bought string `db:"bought"`
-      Sold string `db:"sold"`
-      Money int `db:"money"`
-    }{}
+    var teamres TeamM
+    var ok bool
+    Teams.RWith(func(v map[string]TeamM) { teamres, ok = v[teamid] })
+    if !ok { return dbErr("invalid team id") }
 
-    // err := txDao.DB().
-    //   NewQuery("SELECT bought, sold, money FROM teams WHERE id = {:team} LIMIT 1").
-    //   Bind(dbx.Params{ "team": team }).
-    //   One(&teamres)
-    // if err != nil { return err }
+    var probres ProbM
+    Probs.RWith(func(v map[string]ProbM) { probres, ok = v[probid] })
+    if !ok { return dbErr("invalid prob id") }
 
-    err := txDao.DB().
-      Select("bought", "sold", "money").
-      From("teams").
-      Where(dbx.HashExp{"id": team}).
-      Limit(1).
-      One(&teamres)
-    if err != nil { return err }
+    var diff string
+    probres.RWith(func(v ProbS) { diff = v.Diff })
+    cost, ok := GetCost("-" + diff)
+    if !ok { log.Error("invalid diff", probid, diff) }
 
-    probres := struct{
-      Diff string `db:"diff"`
-    }{}
-    // err = txDao.DB().
-    //   NewQuery("SELECT diff FROM probs WHERE id = {:prob} LIMIT 1").
-    //   Bind(dbx.Params{ "prob": prob }).
-    //   One(&probres)
-    // if err != nil { return err }
+    var found bool
+    teamres.With(func(team *TeamS) {
 
-    err = txDao.DB().
-      Select("diff").
-      From("probs").
-      Where(dbx.HashExp{"id": prob}).
-      Limit(1).
-      One(&probres)
-    if err != nil { return err }
+      var newbought []ProbM
+      newbought, found = SliceExclude(team.Bought, probres)
+      if !found { return }
+      team.Bought = newbought
 
-    cost, ok := GetCost("-" + probres.Diff)
-    if !ok { log.Error("invalid diff", prob, probres.Diff) }
+      team.Sold = append(team.Sold, probres)
 
-    bought := ParseRefList(teamres.Bought)
-    sold := ParseRefList(teamres.Sold)
+      team.Money += cost
 
-    bought, found := SliceExclude(bought, prob)
+    })
     if !found { return dbClownErr("sell", "prob not owned") }
-
-    sold = append(sold, prob)
-
-    money = teamres.Money + cost
-
-    // _, err = txDao.DB().
-    //   NewQuery("UPDATE teams SET money = {:money}, bought = {:bought}, sold = {:sold} WHERE id = {:team}").
-    //   Bind(dbx.Params{
-    //     "money": money,
-    //     "bought": StringifyRefList(bought),
-    //     "sold": StringifyRefList(sold),
-    //     "team": team,
-    //   }).
-    //   Execute()
-
-    _, err = txDao.DB().
-      Update(
-        "teams",
-        dbx.Params{
-          "money": money,
-          "bought": StringifyRefList(bought),
-          "sold": StringifyRefList(sold),
-        },
-        dbx.HashExp{"id": team},
-      ).
-      Execute()
-
-    if err != nil { return err }
 
     return nil
   })
