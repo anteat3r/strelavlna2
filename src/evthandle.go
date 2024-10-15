@@ -44,6 +44,7 @@ func PlayerWsHandleMsg(
   perchan chan string,
   tchan *TeamChanMu,
   idx int,
+  teamM TeamM,
 ) (oerr error) {
   m := strings.Split(msg, DELIM)
   if len(m) == 0 { return eIm(msg) }

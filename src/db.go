@@ -1,7 +1,6 @@
 package src
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"maps"
@@ -14,6 +13,7 @@ import (
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/daos"
+	"github.com/pocketbase/pocketbase/tools/security"
 	"github.com/pocketbase/pocketbase/tools/types"
 )
 
@@ -36,16 +36,20 @@ func (w *RWMutexWrap[T]) RWith(f func(v T)) {
 
 type TeamS struct {
   Money int
-  Bought []ProbM
-  Pending []ProbM
-  Solved []ProbM
-  Sold []ProbM
+  Bought map[ProbM]struct{}
+  Pending map[ProbM]struct{}
+  Solved map[ProbM]struct{}
+  Sold map[ProbM]struct{}
 }
 type TeamM = *RWMutexWrap[TeamS]
 
 type ProbS struct {
+  Id string
   Name string
   Diff string
+  Text string
+  Img string
+  Solution string
 }
 type ProbM = *RWMutexWrap[ProbS]
 
@@ -59,9 +63,16 @@ var (
   _Costs = RWMutexWrap[map[string]int]{v: make(map[string]int)}
   Teams = RWMutexWrap[map[string]TeamM]{v: make(map[string]TeamM)}
   Probs = RWMutexWrap[map[string]ProbM]{v: make(map[string]ProbM)}
+  Checks = RWMutexWrap[map[string]CheckM]{v: make(map[string]CheckM)}
 
   App *pocketbase.PocketBase
 )
+
+func GetRandomId() string {
+  return security.RandomStringWithAlphabet(
+    // security
+  )
+}
 
 func GetCost(diff string) (res int, ok bool) {
   _Costs.RWith(func(v map[string]int) {
@@ -78,17 +89,28 @@ func dbClownErr(args ...string) error {
   return errors.New("err" + DELIM + "clown" + DELIM + strings.Join(args, DELIM))
 }
 
-func DBSell(teamid string, probid string) (money int, oerr error) {
-  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+func SliceExclude[T comparable](s []T, v T) ([]T, bool) {
+  found := false
+  for i := range len(s) {
+    if s[i] == v {
+      found = true
+      continue
+    }
+    if !found { continue }
+    s[i-1] = s[i]
+  }
+  if found {
+    return s[:len(s)-1], true
+  } else {
+    return s, false
+  }
+}
 
-    var teamres TeamM
-    var ok bool
-    Teams.RWith(func(v map[string]TeamM) { teamres, ok = v[teamid] })
-    if !ok { return dbErr("invalid team id") }
-
+func DBSell(team TeamM, probid string) (money int, oerr error) {
     var probres ProbM
+    var ok bool
     Probs.RWith(func(v map[string]ProbM) { probres, ok = v[probid] })
-    if !ok { return dbErr("invalid prob id") }
+    if !ok { oerr = dbErr("invalid prob id"); return }
 
     var diff string
     probres.RWith(func(v ProbS) { diff = v.Diff })
@@ -96,130 +118,116 @@ func DBSell(teamid string, probid string) (money int, oerr error) {
     if !ok { log.Error("invalid diff", probid, diff) }
 
     var found bool
-    teamres.With(func(team *TeamS) {
+    team.With(func(teamS *TeamS) {
 
-      var newbought []ProbM
-      newbought, found = SliceExclude(team.Bought, probres)
-      if !found { return }
-      team.Bought = newbought
+      _, ok = teamS.Bought[probres]
+      if !ok { oerr = dbErr("sell", "prob not owned") }
 
-      team.Sold = append(team.Sold, probres)
+      delete(teamS.Bought, probres)
+      teamS.Sold[probres] = struct{}{}
 
-      team.Money += cost
+      teamS.Money += cost
+      money = teamS.Money
 
     })
-    if !found { return dbClownErr("sell", "prob not owned") }
+    if !found { oerr = dbClownErr("sell", "prob not owned"); return }
 
-    return nil
+  return
+}
+
+func DBBuy(team TeamM, diff string) (prob string, money int, name string, text string, img string, oerr error) {
+  diffcost, ok := GetCost(diff)
+  if !ok { oerr = dbClownErr("buy", "invalid diff"); return }
+
+  team.With(func(teamS *TeamS) {
+    if diffcost > teamS.Money { oerr = dbErr("buy", "not enough money"); return }
+    var probM ProbM
+    Probs.RWith(func(probmap map[string]*RWMutexWrap[ProbS]) {
+      for id, probv := range probmap {
+        var valid bool
+        probv.With(func(probS *ProbS) {
+          _, bought := teamS.Bought[probv]
+          _, pending := teamS.Bought[probv]
+          _, solved := teamS.Bought[probv]
+          _, sold := teamS.Bought[probv]
+          valid = probS.Diff == diff && 
+            !bought &&
+            !pending &&
+            !solved &&
+            !sold
+          if !valid { return }
+          prob = id
+          name = probS.Name
+          text = probS.Text
+          img = probS.Img
+          probM = probv
+        })
+        if valid { break }
+      }
+      if prob == "" { oerr = dbErr("no prob found") }
+    })
+
+    teamS.Bought[probM] = struct{}{}
+
+    teamS.Money -= diffcost
+    money = teamS.Money
   })
   return
 }
 
-func dbBuySrc(team string, diff string, srcField string) (prob string, money int, name string, text string, img string, oerr error) {
-  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
-    diffcost, ok := GetCost(diff)
-    if !ok { return dbClownErr("buy", "invalid diff") }
+func DBBuyOld(team TeamM, diff string) (prob string, money int, name string, text string, img string, oerr error) {
+  diffcost, ok := GetCost(diff)
+  if !ok { oerr = dbClownErr("buy", "invalid diff"); return }
 
-    teamres := struct{
-      Money int `db:"money"`
-      Free string `db:"free"`
-      Bought string `db:"bought"`
-    }{}
-    // err := txDao.DB().
-    //   NewQuery("SELECT money, free, bought FROM teams WHERE id = {:team} LIMIT 1").
-    //   Bind(dbx.Params{ "team": team }).
-    //   One(&teamres)
-    // if err != nil { return err }
-
-    err := txDao.DB().
-      Select("money", "free", "bought").
-      From("teams").
-      Where(dbx.HashExp{"id": team}).
-      Limit(1).
-      One(&teamres)
-    if err != nil { return err }
-
-    if diffcost > teamres.Money {
-      return dbErr("buy", "not enough money")
+  team.With(func(teamS *TeamS) {
+    if diffcost > teamS.Money { oerr = dbErr("buy", "not enough money"); return }
+    var probM ProbM
+    for probv, _ := range teamS.Sold {
+      var valid bool
+      probv.With(func(probS *ProbS) {
+        valid = probS.Diff == diff 
+        if !valid { return }
+        prob = probS.Id
+        name = probS.Name
+        text = probS.Text
+        img = probS.Img
+        probM = probv
+      })
+      if valid { break }
     }
 
-    probres := struct{
-      Id string `db:"id"`
-      Name string `db:"name"`
-      Text string `db:"text"`
-      Img string `db:"img"`
-    }{}
-    // err = txDao.DB().
-    //   NewQuery("SELECT id, name, text, img FROM probs WHERE id IN " +
-    //             RefListToInExpr(ParseRefList(teamres.Free)) +
-    //             " AND diff = {:diff} LIMIT 1").
-    //     Bind(dbx.Params{ "diff": diff }).
-    //     One(&probres)
+    if prob == "" { oerr = dbErr("buyold", "no prob found"); return }
+    delete(teamS.Sold, probM)
+    teamS.Bought[probM] = struct{}{}
 
-    err = txDao.DB().
-      Select("id", "name", "text", "img").
-      From("probs").
-      Where(dbx.NewExp("id IN " + RefListToInExpr(ParseRefList(teamres.Free)))).
-      AndWhere(dbx.HashExp{"diff": diff}).
-      Limit(1).
-      One(&probres)
-
-    if err == sql.ErrNoRows { return dbErr("no prob found") }
-    if err != nil { return err }
-
-    prob = probres.Id
-
-    free := ParseRefList(teamres.Free)
-    bought := ParseRefList(teamres.Bought)
-
-    free, found := SliceExclude(free, prob)
-    if !found { log.Error("prob not free", team, prob) }
-
-    bought = append(bought, prob)
-
-    money = teamres.Money - diffcost
-    name = probres.Name
-    text = probres.Text
-    img = probres.Img
-
-    // _, err = txDao.DB().
-    //   NewQuery("UPDATE teams SET money = {:money}, free = {:free}, bought = {:bought} WHERE id = {:team}").
-    //   Bind(dbx.Params{
-    //     "money": money,
-    //     "free": StringifyRefList(free),
-    //     "bought": StringifyRefList(bought),
-    //     "team": team,
-    //   }).
-    //   Execute()
-
-    _, err = txDao.DB().
-      Update(
-        "teams",
-        dbx.Params{
-          "money": money,
-          "free": StringifyRefList(free),
-          "bought": StringifyRefList(bought),
-        },
-        dbx.HashExp{"id": team},
-      ).
-      Execute()
-
-    if err != nil { return err }
-
-    return nil
+    teamS.Money -= diffcost
+    money = teamS.Money
   })
   return
 }
 
-func DBBuy(team string, diff string) (id string, money int, name string, text string, img string, oerr error) {
-  return dbBuySrc(team, diff, "free")
-}
+func DBSolve(team TeamM, prob string, sol string) (check string, diff string, teamname string, name string, csol string, updated bool, workers string, oerr error) {
 
-func DBBuyOld(team string, diff string) (id string, money int, name string, text string, img string, oerr error) {
-  return dbBuySrc(team, diff, "solved")
-}
+  var probres ProbM
+  var ok bool
+  Probs.RWith(func(v map[string]ProbM) { probres, ok = v[prob] })
+  if !ok { oerr = dbErr("invalid prob id"); return }
 
-func DBSolve(team string, prob string, sol string) (check string, diff string, teamname string, name string, csol string, updated bool, workers string, oerr error) {
+  team.With(func(teamS *TeamS) {
+    _, ok = teamS.Bought[probres]
+    if !ok { oerr = dbErr("prob not owned") }
+    
+    delete(teamS.Bought, probres)
+    teamS.Pending[probres] = struct{}{}
+
+    Checks.With(func(checksmap *map[string]*RWMutexWrap[CheckS]) {
+      // checksmap[]
+    })
+
+  })
+
+
+
   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
     teamres := struct{

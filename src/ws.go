@@ -191,12 +191,17 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     teamchan.ch[i] = perchan
     teamchan.mu.Unlock()
 
+    var team TeamM
+    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+      team = v[teamid]
+    })
+
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
 
     fmt.Printf("%s >- %s:%d + >->\n", formTime(), teamrec.GetId(), i)
     JSONlog(teamid, false, true, i, ":connect")
-    go PlayerWsLoop(conn, teamid, perchan, teamchan, i)
+    go PlayerWsLoop(conn, teamid, perchan, teamchan, i, team)
 
     return nil
   }
@@ -219,6 +224,7 @@ func PlayerWsLoop(
   perchan chan string,
   tchan *TeamChanMu,
   idx int,
+  teamM TeamM,
 ) {
   wsrchan := make(chan string)
   go func(){
@@ -253,7 +259,7 @@ func PlayerWsLoop(
         oerr = nErr("r chan closed")
         break loop
       }
-      err := PlayerWsHandleMsg(team, m, perchan, tchan, idx)
+      err := PlayerWsHandleMsg(team, m, perchan, tchan, idx, teamM)
       if err != nil {
         perchan<- "err" + DELIM + err.Error()
       }
