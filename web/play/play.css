@@ -1781,7 +1781,7 @@ audio {
 #results-right-container{
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
 }
 #results-problem-stats-wrapper{
