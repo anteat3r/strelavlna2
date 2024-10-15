@@ -351,6 +351,7 @@ func LoadLog() ([]string, error) {
   flns := make([]string, 0, len(lns) / 100)
   for _, l := range lns {
     if !strings.Contains(l, "bought") &&
+       !strings.Contains(l, "graded") &&
        !strings.Contains(l, "solved") { continue }
     flns = append(flns, l)
   }
@@ -363,6 +364,8 @@ func FilterLogTeam(log []string, team string) []string {
     if !strings.Contains(l, team) { continue }
     flog = append(flog, l)
   }
+  err := DBSaveLog(team, strings.Join(log, "\n"))
+  if err != nil { fmt.Println("err saving log", err.Error())}
   return flog
 }
 

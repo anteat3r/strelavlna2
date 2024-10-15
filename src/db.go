@@ -1184,4 +1184,15 @@ func DBAdminEditProb(prob string, ndiff string, nname string, ntext string, nsol
   return
 }
 
+func DBSaveLog(team string, log string) (oerr error) {
+  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+    _, err := txDao.DB().Update(
+        "teams",
+        dbx.Params{"log": log},
+        dbx.HashExp{"id": team},
+      ).Execute()
+    return err
+  })
+  return
+}
 
