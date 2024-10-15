@@ -8,8 +8,8 @@
     margin-bottom: 100px;
     display: grid;
     grid-template:
-        'ma0 ma0 ma0'
-        'ma1 ma2 ma3'; 
+        'ma0 ma0 ma0 ma0'
+        'ma1 ma2 ma3 ma4'; 
         
 }
 
@@ -75,6 +75,7 @@
         'ma1'
         'ma2'
         'ma3'
+        'ma4'
     }
     .grid-main-c{
         grid-template: 
