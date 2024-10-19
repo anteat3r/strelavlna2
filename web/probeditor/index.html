@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="../images/Icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href='https://fonts.googleapis.com/css?family=Lexend' rel='stylesheet'>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="../probeditor/probeditor.css">
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+
+
+    <title>Dopplerova vlna</title>
+    <script type="text/javascript">
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$']],
+            displayMath: [['$$', '$$']]
+          }
+        };
+      </script>
+      <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+  </head>
+  <body>
+    <div class="container">
+      <header class="editor-header">
+        <div id="problem-owner-selector">
+            <button id="problem-selector-my">Moje</button>
+            <button id="problem-selector-all">Všechny</button>
+        </div>
+        <h2 id="title">Editor úloh</h2>
+        <button id="save-changes-button">Uložit změny</button>
+      </header>
+      <div id="main-content">
+        <div id="problem-selector">
+            <div id="problem-selector-wrapper">
+                <div id="problem-section-a" class="problem-section">
+                    <div class="problem-selector-item">
+                        <div class="problem-selector-problem">
+                            <h2 class="problem-selector-title"></h2>
+                            <h2 class="problem-selector-rank"></h2>
+                        </div>
+                        <div class="problme-selector-versions-wrapper">
+                            <div class="problem-selector-version">
+                                <h2 class="problem-selector-version-number">1</h2>
+                                <h2 class="problem-selector-version-number">2</h2>
+                                <h2 class="problem-selector-version-number">3</h2>
+                                <h2 class="problem-selector-version-number">4</h2>
+                                <h2 class="problem-selector-version-number">5</h2>
+                                <h2 class="problem-selector-version-number">6</h2>
+                                <h2 class="problem-selector-version-number">7</h2>
+                                <h2 class="problem-selector-version-number">8</h2>
+                                <h2 class="problem-selector-version-number">9</h2>
+                                <h2 class="problem-selector-version-number">10</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="problem-section-b" class="problem-section">
+
+                </div>
+                <div id="problem-section-c" class="problem-section">
+
+                </div>
+            </div>
+            <div id="problem-list-controlls">
+                <div id="problems-add">Přidat</div>
+                <div id="problems-delete">Odstranit</div>
+            </div>
+        </div>
+        <div id="problem-editor-left">
+            <div id="problem-editor-setup-row">
+                <input type="text" id="problem-title-input" placeholder="Název">
+                <div id="problem-rank-selector">
+                    <button id="problem-rank-selector-button">
+                        <h2 id="problem-rank-selector-rank">[A]</h2>
+                        <i class="fa-solid fa-angle-down" id="problem-rank-selector-icon"></i>
+                    </button>
+                    <div id="problem-rank-selector-dropdown">
+                        <div class="problem-rank-dropdown-item" id="problem-rank-dropdown-item-a">[A]</div>
+                        <div class="problem-rank-dropdown-item" id="problem-rank-dropdown-item-b">[B]</div>
+                        <div class="problem-rank-dropdown-item" id="problem-rank-dropdown-item-c">[C]</div>
+                    </div>
+                </div>
+                <div id="problem-version-selector">
+                    <button id="problem-version-selector-button">
+                        <h2 id="problem-version-selector-version">1</h2>
+                        <i class="fa-solid fa-angle-down" id="problem-version-selector-icon"></i>
+                    </button>
+                    <div id="problem-version-selector-dropdown">
+                        <div class="problem-version-dropdown-item" id="problem-version-dropdown-item-1">1</div>
+                        <div class="problem-version-dropdown-item" id="problem-version-dropdown-item-2">2</div>
+                        <div class="problem-version-dropdown-item" id="problem-version-dropdown-item-3">3</div>
+                        <div class="problem-version-dropdown-item" id="problem-version-dropdown-item-4">4</div>
+                        <div class="problem-version-dropdown-item" id="problem-version-dropdown-item-5">5</div>
+                        <div class="problem-version-dropdown-item" id="problem-version-dropdown-item-6">6</div>
+                        <div class="problem-version-dropdown-item" id="problem-version-dropdown-item-7">7</div>
+                        <div class="problem-version-dropdown-item" id="problem-version-dropdown-item-8">8</div>
+                        <div class="problem-version-dropdown-item" id="problem-version-dropdown-item-9">9</div>
+                        <div class="problem-version-dropdown-item" id="problem-version-dropdown-item-10">10</div>
+                </div>
+            </div>
+            <textarea id="problem-content-textarea" placeholder="Obsah"></textarea>
+            <input type="text" id="problem-correct-answer-input" placeholder="Správná odpověď">
+        </div>
+        <div id="problem-editor-right">
+            <div id="editor-type-selector">
+                <button id="editor-type-finallook">finální vzhled úlohy</button>
+                <button id="editor-type-table">tabulky</button>
+                <button id="editor-type-generationeditor">editor generace</button>
+                <button id="editor-type-table-plus-generationeditor">tabulky + editor</button>
+            </div>
+            <div id="finallook-wrapper"></div>
+            <div id="generationeditor-wrapper">
+                <input type="text" id="generationeditor-command-input" placeholder=">">
+                <canvas id="generationeditor-canvas"></canvas>
+            </div>
+            <div id="table-wrapper">
+                <table id="table">
+                    <thead>
+                        <tr>
+                            <th>Header 1</th>
+                            <th>Header 2</th>
+                            <th>Header 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Row 1, Cell 1</td>
+                            <td>Row 1, Cell 2</td>
+                            <td>Row 1, Cell 3</td>
+                        </tr>
+                        <tr>
+                            <td>Row 2, Cell 1</td>
+                            <td>Row 2, Cell 2</td>
+                            <td>Row 2, Cell 3</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="table-controlls">
+                    <button id="table-add">Přidat</button>
+                    <button id="table-edit">Upravit</button>
+                    <button id="table-delete">Odstranit</button>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="../probeditor/dynamic_height.js"></script>
+  <script src="../probeditor/loading_animation.js"></script>
+  <script src="../probeditor/probeditor.js"></script>
+    
+  
+</html>

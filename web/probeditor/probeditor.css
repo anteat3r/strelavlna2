@@ -1,0 +1,35 @@
+
+.editor-header{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    /* border-bottom: var(--color-secondary-light) dashed 2px; */
+    /* background-color: green; */
+
+}
+.editor-header::after{
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    border-bottom: 2px dashed var(--color-secondary-dark);
+    mask-image: linear-gradient(to right, black 0%, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 0%, black 80%, transparent 100%);
+}
+
+.editor-header #title{
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 35px;
+    font-family: 'Lexend';
+    color: var(--color-secondary-dark);
+    font-weight: 400;
+}
+
+.container{
+    overflow: hidden;
+}
