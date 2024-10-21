@@ -13,10 +13,10 @@
   <body class="">
     <div class="container">
 
-        <header class="color-background-main" style="padding-bottom: 50px;">
-          <div class="row-segment grid-nav" id="navbar">
+        <header class="color-background-main">
+          <div class="row-segment-wave grid-nav" id="navbar">
             <div class="nav1">
-              <a href=""><img id="logo" src="../images/Logo_withname3.png" width="446px" height="50px"></a>
+              <a href="../index.html"><img id="logo" src="../images/Logo_withname3.png" width="446px" height="50px"></a>
             </div>
             <a href="../about_us" class="nav-element nav2">O nás</a>
             <a href="../this_year" class="nav-element nav3">Aktuální ročník</a>
@@ -24,58 +24,42 @@
             <a href="../rules" class="nav-element nav5">Pravidla</a>
 
           </div>
-          <div class="grid-header">
-            <div class="header1">
-              <p>Inovativní matematické a fyzikální soutěže pro
-                8. a 9. třídu.</p>
-            </div>
-            <canvas class="header2" width="660" height="300" id="main-canvas"></canvas>
-          </div>
         </header>
+        <canvas id="this_year_canvas" width="3000" height="120"></canvas>
         <div id="main">
-          <div class="grid-main-a">
-            <div class="section-title m-a0">
-              <h1>Jak to probíhá</h1>
-            </div>
-              <p class="main-a-element blue-top m-a1">Sestavte tým ze 3 až 5 členů navštěvujících 8. a 9. třídy základní školy.</p>
-              <p class="main-a-element blue-top m-a2">Zaregistrujte se do 25. 11. na Pražskou střelu (matematika) a do 27. 11. na Dopplerovu vlnu (fyzika) a 26. 11., respektive 28. 11. soutěžte!</p>
-              <p class="main-a-element blue-top m-a3">Pokuste se dostat do nejlepších 15 týmů a postupte do prezenčního finále na naší škole (GCHD).</p>
-              <p class="main-a-element blue-top m-a4">Prezenční kolo Pražské střely se koná 3. 12., Dopplerova vlna poté 6. 12. na našem gymnáziu. Na ty nejlepší z vás čekají nejen hodnotné ceny, ale i teoretická možnost výhody při přijímacích zkouškách!</p>
+          <div class="white-section">
+            <h1>Historie soutěže</h1>
+            <ul>
+            <li>Obě soutěže (Pražská střela a Dopplerova vlna) byly založeny studenty Gymnázia Christiana Dopplera roku 1996.</li><br>
+            <li>Jejich motivací byl nedostatek soutěží určený pouze pro ZŠ v té době.</li><br>
+            <!-- <li>Jedním z organizátorů soutěží byl i XXX, který po dostudovaní na GCHD přešel na Matfyz, kde založil dnes již velmi známou soutěž MaSo.</li><br> -->
+            <li>S každou výměnou organizačního týmu soutěže (která nastávala vždy jednou za 4 roky) bylo do soutěží přidáno něco nového.</li><br>
+            <li>V roce 2016 byla do soutěží poprvé přidána měna DopplerCoin.</li><br>
+            <li>S nástupem pandemie COVID-19 v roce 2020 vzniklo také první online kolo, to však nahradilo (z pochopitelných důvodů spojených právě s pandemií) kolo prezenční.</li><br>
+            <li>Roku 2022 se pořádaly první dvoukolové soutěže, sestávající z online a prezenčního finálového kola.</li>
+            </ul>
           </div>
-          <div class="grid-main-b">
-            <h1 class="section-title m-b0">Harmonogram</h1>
-            <div class="blue-left main-b-element m-b1">
-              <h2>9:45</h2>
-              <p class="f-18">Spuštění úvodního streamu na <a href="https://www.youtube.com/@StrelaVlnkova" class="link" target="_blank">YouTube</a></p>
-            </div>
-            <div class="blue-left main-b-element m-b2">
-              <h2>10:00</h2>
-              <p class="f-18">Začátek soutěže</p>
-            </div>
-            <div class="blue-left main-b-element m-b3">
-              <h2>12:00</h2>
-              <p class="f-18">Konec soutěže</p>
-            </div>
-            <div class="blue-left main-b-element m-b4">
-              <h2>12:30</h2>
-              <p class="f-18">Vyhlášení výsledků na streamu</p>
-            </div>
+          <div class="gray-section">
+            <h1>O škole</h1>
+            <ul>
+            <li>Gymnázium Christiana Dopplera je státní střední škola nabízející osmileté a čtyřleté studium.</li><br>
+            <li>Osmileté studium nabízí zaměření na matematiku s rozšířenou výukou fyziky a informatiky nebo se zaměřením na živé jazyky.</li><br>
+            <li>Čtyřleté studium pak nabízí zaměření na matematiku s rozšířenou výukou fyziky a informatiky.</li><br>
+            <li>Škola nabízí středoškolské vzdělání na vysoké úrovni, kvalitní zázemí pro studium pro žáky i vyučující, širokou nabídku kulturních i sportovních aktivit nebo možnost získání mnoha jazykových certifikátů.</li><br>
+            <li>Pro více informací můžete navštívit <a href="https://gchd.cz/pro-uchazece/charakteristika-skoly" class="link" target="_blank">školní web</a>.</li>
+            </ul>
           </div>
-          <div class="grid-main-c">
-            <h1 class="section-title m-c0">Typy úloh</h1>
-              <div class="blue-top main-c-element m-c1">
-                <h2>Lehká úloha (A)</h2>
-                <p class="f-18">Letadlo Boeing 737 má hmotnost 75 t a kinetickou energii v danou chvíli o velikosti 24 GJ. Vypočítejte, jakou rychlostí letí. (km/h)</p>
-              </div>
-              <div class="blue-top main-c-element m-c2">
-                <h2>Střední úloha (B)</h2>
-                <p class="f-18">Mlékárna vykoupí od zemědělců mléko jedině tehdy, má-li předepsanou teplotu 4°C. Farmář při kontrolním měření zjistil, že jeho 60 litrů mléka má teplotu jen 3,6°C. Pomůže mu 10 litrů mléka o teplotě 6,5°C, které původně zamýšlel uschovat pro potřeby své rodiny? Zbude mu nějaké mléko aspoň na snídani? Anebo mu mlékárna mléko vůbec nevykoupí?</p>
-              </div>
-              <div class="blue-top main-c-element m-c3">
-                <h2>Těžká úloha (C)</h2>
-                <p class="f-18">Raketa váží 100 kg a její motor vyvíjí tah 5 kN po dobu 10 s. Určete, jak vysoko vyletí, než začne klesat (letí kolmo vzhůru). Jak dlouho bude ještě stoupat po vypnutí motoru? Gravitační zrychlení považujte za konstantní g = 9,81 m/s<sup>2</sup> a zanedbejte úbytek hmotnosti kvůli spalování paliva.</p>
-              </div>
+          <div class="white-section">
+            <h1>Současní pořadatelé</h1>
+            <ul>
+            <li>Současnými pořadateli soutěže jsou studenti matematické větve osmiletého gymnázia navštěvující sextu (tedy 6.M). </li><br>
+            <li>Soutěž mají na starosti od roku 2023 do roku 2026.</li><br>
+            <li>Jejich cílem je k soutěži přilákat co nejvíce nadšenců z řad ZŠ a poukázat tak na krásu matematiky a fyziky.</li><br>
+            <li>Mezi jejich další cíle patří optimalizace a modernizace soutěží spolu s implementováním nových herních systémů. </li>
+            </ul>
           </div>
+        </div>
+          
         </div>
       <footer class="black-section grid-footer">
          <div class="footer-element1 footer-element">
@@ -112,6 +96,5 @@
     </div>
 
   </body>
-
-  <script src="../about_us/main_canvas.js"></script>
+  <script src="this_year_canvas.js"></script>
 </html>
