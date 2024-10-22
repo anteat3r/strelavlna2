@@ -1,7 +1,7 @@
 
 .editor-header{
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     position: relative;
     /* border-bottom: var(--color-secondary-light) dashed 2px; */
@@ -32,4 +32,108 @@
 
 .container{
     overflow: hidden;
+}
+
+#problem-owner-selector{
+    width: 200px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 0px;
+    border-top: 2px solid var(--color-secondary-dark);
+    border-right: 2px solid var(--color-secondary-dark);
+    border-bottom: 2px solid var(--color-secondary-dark);
+    border-top-right-radius: 10px;
+    margin: 10px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    padding: 10px;
+    gap: 10px;
+}
+#problem-selector-my{
+    font-family: 'Lexend';
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    text-align: center;
+    padding: 5px;
+    padding-inline: 20px;
+    border: 2px solid var(--color-secondary-dark);
+    border-radius: 5px;
+    transition: all 0.3s ease-out;
+}
+#problem-selector-my:hover{
+    background-color: var(--color-secondary-dark);
+    color: white;
+    transition: all 0.0s;
+}
+#problem-selector-my.selected{
+    background-color: var(--color-secondary-dark);
+    color: white;
+}
+#problem-selector-all{
+    font-family: 'Lexend';
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    text-align: center;
+    padding: 5px;
+    padding-inline: 20px;
+    border: 2px solid var(--color-secondary-dark);
+    border-radius: 5px;
+    transition: all 0.3s ease-out;
+}
+#problem-selector-all:hover{
+    background-color: var(--color-secondary-dark);
+    color: white;
+    transition: all 0.0s;
+}
+#problem-selector-all.selected{
+    background-color: var(--color-secondary-dark);
+    color: white;
+}
+
+#save-changes-button{
+    font-family: 'Lexend';
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+    text-align: center;
+    padding: 5px;
+    padding-inline: 15px;
+    border: 2px solid var(--color-secondary-dark);
+    border-radius: 5px;
+    transition: all 0.3s ease-out;
+    margin-right: 30px;
+}
+#save-changes-button:hover{
+    background-color: white;
+    transition: all 0.0s;
+}
+#save-changes-button.unsaved{
+    background-color: var(--color-secondary-dark);
+    color: white;
+}
+#save-changes-button.unsaved:hover{
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary-light);
+}
+
+#problem-selector{
+    width: 200px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    background-color: red;
+}
+#problem-selector-wrapper{
+    overflow-y: auto;
+}
+.problem-section{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-bottom: 2px dashed var(--color-secondary-dark);
+    padding-bottom: 20px;
 }
