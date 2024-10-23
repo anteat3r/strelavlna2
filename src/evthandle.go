@@ -50,14 +50,12 @@ func PlayerWsHandleMsg(
   if len(m) == 0 { return eIm(msg) }
 
   now := time.Now()
-  ActiveContestMu.RLock()
-  if m[0] != "load" &&
-     !( now.After(ActiveContestStart) &&
-     now.Before(ActiveContestEnd) ) {
-    ActiveContestMu.RUnlock()
-    return dbErr("contest not running")
-  }
-  ActiveContestMu.RUnlock()
+  var ok bool
+  ActiveContest.RWith(func(v activeContStruct) {
+    ok = m[0] == "load" ||
+      ( now.After(v.start) && now.Before(v.end) )
+  })
+  if !ok { return dbErr("contest not running") }
   readmsg := strings.Join(m, "|")
 
   defer func(){
@@ -75,14 +73,14 @@ func PlayerWsHandleMsg(
   case "sell":
     if len(m) != 2 { return eIm(msg) }
     prob := m[1]
-    money, err := DBSell(team, prob)
+    money, err := DBSell(teamM, prob)
     if err != nil { return err }
     tchan.Send("sold", prob, strconv.Itoa(money))
 
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
-    prob, money, name, text, img, err := DBBuy(team, diff)
+    prob, money, name, text, img, err := DBBuy(teamM, diff)
     if err != nil { return err }
     tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img)
 
@@ -97,9 +95,9 @@ func PlayerWsHandleMsg(
     if len(m) != 3 { return eIm(msg) }
     prob := m[1]
     sol := m[2]
-    check, _, teamname, _, csol, upd, workers, err := DBSolve(team, prob, sol)
+    check, _, teamname, _, csol, upd, workers, err := DBSolve(teamM, prob, sol)
     if err != nil { return err }
-    phash := HashId(workers)
+    phash := GetWorker(workers)
     tchan.Send("solved", prob, sol)
     if upd {
       AdminSend("upgraded", check, sol, phash)
@@ -129,10 +127,10 @@ func PlayerWsHandleMsg(
       if c == '\x09' { return dbErr("chat", "invalid msg") }
       if c == '\x0b' { return dbErr("chat", "invalid msg") }
     }
-    upd, teamname, name, diff, check, workers, chat, err := DBPlayerMsg(team, prob, text)
+    upd, teamname, name, diff, check, workers, chat, err := DBPlayerMsg(teamM, prob, text)
     if err != nil { return err }
     tchan.Send("msgsent", prob, text)
-    phash := HashId(workers)
+    phash := GetWorker(workers)
     if !upd {
       AdminSend("questioned", check, team, teamname, prob, diff, name, text, phash, chat)
     } else {
@@ -141,7 +139,7 @@ func PlayerWsHandleMsg(
     
   case "load":
     if len(m) != 1 { return eIm(msg) }
-    res, err := DBPlayerInitLoad(team, idx)
+    res, err := DBPlayerInitLoad(teamM, idx)
     if err != nil { return err }
     perchan<- "loaded" + DELIM + res
     tchan.Send("focuscheck")
@@ -187,7 +185,7 @@ func AdminWsHandleMsg(
     prob := m[3]
     rcorr := m[4]
     corr := rcorr == "yes"
-    money, final, err := DBAdminGrade(check, team, prob, corr)
+    money, final, err := DBAdminGrade(check, corr)
     if err != nil { return err }
     WriteTeamChan(team, "graded", prob, rcorr, strconv.Itoa(money))
     AdminSend("graded", prob, check)
@@ -195,12 +193,12 @@ func AdminWsHandleMsg(
       if len(m) != 1 { return eIm(msg) }
       llog, err := LoadLog()
       if err != nil { return err }
-      teamChanMapMutex.Lock()
-      for t, c := range TeamChanMap {
-        tlog := FilterLogTeam(llog, t)
-        c.Send("gotlog", "[" + strings.TrimSuffix(strings.Join(tlog, "\n"), ",") + "]")
-      }
-      teamChanMapMutex.Unlock()
+      TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
+        for t, c := range v {
+          tlog := FilterLogTeam(llog, t)
+          c.Send("gotlog", "[" + strings.TrimSuffix(strings.Join(tlog, "\n"), ",") + "]")
+        }
+      })
     }
 
   case "chat":
@@ -286,18 +284,18 @@ func AdminWsHandleMsg(
     info := m[1]
     err := DBAdminSetInfo(info)
     if err != nil { return err }
-    teamChanMapMutex.Lock()
-    for _, tc := range TeamChanMap {
-      tc.Send("gotinfo", info)
-    }
-    teamChanMapMutex.Unlock()
+    TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
+      for _, tc := range v {
+        tc.Send("gotinfo", info)
+      }
+    })
     AdminSend("gotinfo", info)
 
   case "work":
     if len(m) != 1 { return eIm(msg) }
-    workersMutex.Lock()
-    Workers[id] = struct{}{}
-    workersMutex.Unlock()
+    Workers.With(func(v *map[string]struct{}) {
+      (*v)[id] = struct{}{}
+    })
     res, err := DBReAssign()
     if err != nil { return err }
     AdminSend("reassigned", res)
@@ -305,9 +303,9 @@ func AdminWsHandleMsg(
 
   case "unwork":
     if len(m) != 1 { return eIm(msg) }
-    workersMutex.Lock()
-    delete(Workers, id)
-    workersMutex.Unlock()
+    Workers.With(func(v *map[string]struct{}) {
+      delete(*v, id)
+    })
     res, err := DBReAssign()
     if err != nil { return err }
     AdminSend("reassigned", res)
@@ -331,12 +329,12 @@ func AdminWsHandleMsg(
     if len(m) != 1 { return eIm(msg) }
     llog, err := LoadLog()
     if err != nil { return err }
-    teamChanMapMutex.Lock()
-    for t, c := range TeamChanMap {
-      tlog := FilterLogTeam(llog, t)
-      c.Send("gotlog", "[" + strings.TrimSuffix(strings.Join(tlog, "\n"), ",") + "]")
-    }
-    teamChanMapMutex.Unlock()
+    TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
+      for t, c := range v {
+        tlog := FilterLogTeam(llog, t)
+        c.Send("gotlog", "[" + strings.TrimSuffix(strings.Join(tlog, "\n"), ",") + "]")
+      }
+    })
   }
 
   fmt.Printf("%s >>- %s <- %s\n", formTime(), id, readmsg)
