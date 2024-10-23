@@ -26,32 +26,50 @@
     <div class="container">
       <header class="editor-header">
         <div id="problem-owner-selector">
-            <button id="problem-selector-my">Moje</button>
-            <button id="problem-selector-all">Všechny</button>
+            <button id="problem-selector-my" class="selected-">Moje</button>
+            <button id="problem-selector-all" class="selected">Všechny</button>
         </div>
         <h2 id="title">Editor úloh</h2>
-        <button id="save-changes-button">Uložit změny</button>
+        <button id="save-changes-button" class="unsaved">Uložit změny</button>
       </header>
       <div id="main-content">
         <div id="problem-selector">
             <div id="problem-selector-wrapper">
                 <div id="problem-section-a" class="problem-section">
-                    <div class="problem-selector-item">
+                    <div class="problem-selector-item prob-selected">
                         <div class="problem-selector-problem">
-                            <h2 class="problem-selector-title"></h2>
-                            <h2 class="problem-selector-rank"></h2>
+                            <h2 class="problem-selector-title">Popelar</h2>
+                            <h2 class="problem-selector-rank">[A]</h2>
                         </div>
                         <div class="problme-selector-versions-wrapper">
                             <div class="problem-selector-version">
                                 <h2 class="problem-selector-version-number">1</h2>
+                            </div>
+                            <div class="problem-selector-version">
                                 <h2 class="problem-selector-version-number">2</h2>
+                            </div>
+                            <div class="problem-selector-version">
                                 <h2 class="problem-selector-version-number">3</h2>
+                            </div>
+                            <div class="problem-selector-version">
                                 <h2 class="problem-selector-version-number">4</h2>
+                            </div>
+                            <div class="problem-selector-version">
                                 <h2 class="problem-selector-version-number">5</h2>
+                            </div>
+                            <div class="problem-selector-version">
                                 <h2 class="problem-selector-version-number">6</h2>
+                            </div>
+                            <div class="problem-selector-version">
                                 <h2 class="problem-selector-version-number">7</h2>
+                            </div>
+                            <div class="problem-selector-version">
                                 <h2 class="problem-selector-version-number">8</h2>
+                            </div>
+                            <div class="problem-selector-version">
                                 <h2 class="problem-selector-version-number">9</h2>
+                            </div>
+                            <div class="problem-selector-version">
                                 <h2 class="problem-selector-version-number">10</h2>
                             </div>
                         </div>
@@ -72,7 +90,7 @@
         <div id="problem-editor-left">
             <div id="problem-editor-setup-row">
                 <input type="text" id="problem-title-input" placeholder="Název">
-                <div id="problem-rank-selector">
+                <div id="problem-rank-selector" class="oppened">
                     <button id="problem-rank-selector-button">
                         <h2 id="problem-rank-selector-rank">[A]</h2>
                         <i class="fa-solid fa-angle-down" id="problem-rank-selector-icon"></i>
