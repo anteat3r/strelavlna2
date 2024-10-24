@@ -486,9 +486,13 @@ a:hover{
 }
 
 .copyright{
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding-top: 20px;
-    padding-bottom: 50px;
+    padding-bottom: 35px;
+    text-align: center;
+    margin: auto;
 }
 
 .f-20{
@@ -497,11 +501,6 @@ a:hover{
 .f-18{
     font-size: 18px;
 }
-
-
-
-
-
 
 .big-border-left {
     border-left: 4px var(--color-main) solid;
