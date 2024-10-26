@@ -51,9 +51,9 @@ func PlayerWsHandleMsg(
 
   now := time.Now()
   var ok bool
-  ActiveContest.RWith(func(v activeContStruct) {
+  ActiveContest.RWith(func(v ActiveContStruct) {
     ok = m[0] == "load" ||
-      ( now.After(v.start) && now.Before(v.end) )
+      ( now.After(v.Start) && now.Before(v.End) )
   })
   if !ok { return dbErr("contest not running") }
   readmsg := strings.Join(m, "|")
