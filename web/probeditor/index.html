@@ -36,30 +36,9 @@
         <div id="problem-selector">
             <div id="problem-selector-wrapper">
                 <div id="problem-section-a" class="problem-section">
-                    <div class="problem-selector-item prob-selected" id="hkausdbkasjnas4d65">
-                        <div class="problem-selector-problem">
-                            <h2 class="problem-selector-title">Popelar</h2>
-                            <h2 class="problem-selector-rank">[A]</h2>
-                        </div>
-                        <div class="problme-selector-versions-wrapper">
-                            <div class="problem-selector-version">
-                                <h2 class="problem-selector-version-number">1</h2>
-                            </div>
-                            <div class="problem-selector-version">
-                                <h2 class="problem-selector-version-number">2</h2>
-                            </div>
-                            <div class="problem-selector-version">
-                                <h2 class="problem-selector-version-number">3</h2>
-                            </div>
-                            <div class="problem-selector-version">
-                                <h2 class="problem-selector-version-number">4</h2>
-                            </div>
-                            <div class="problem-selector-version-all">
-                                <i class="fa-solid fa-ellipsis"></i>
-                            </div>
-                            <input class="problem-version-count-input" value="1" type="number"></input>
-                            <button class="problem-versions-regenerate">Generovat</button>
-                        </div>
+                    <div class="problem selected">
+                        <h2 class="problem-selector-title">Popelar</h2>
+                        <h2 class="problem-selector-rank">[A]</h2>
                     </div>
                 </div>
                 <div id="problem-section-b" class="problem-section">
@@ -95,12 +74,13 @@
         </div>
         <div id="problem-editor-right">
             <div id="editor-type-selector">
-                <button id="editor-type-finallook" class="editor-type">finální vzhled úlohy</button>
+                <button id="editor-type-finallook" class="editor-type">revize</button>
                 <button id="editor-type-table" class="editor-type">tabulky</button>
                 <button id="editor-type-generationeditor" class="editor-type">grafový editor</button>
-                <button id="editor-type-table-plus-generationeditor" class="editor-type selected">tabulky + editor</button>
+                <button id="editor-type-table-plus-generationeditor" class="editor-type selected">tabulky + grafový editor</button>
             </div>
-            <div id="finallook-wrapper" class="hidden-">
+            <div id="finallook-wrapper" class="hidden">
+                <h2 id="finallook-title">Popelar</h2>
                 <p id="finallook-text">
                     kjhs aoisd uag jahsd oihhaslf hlsdgh asohfo jhgos hsodhg  a;j oi ashfl dsh fksdf ldfhtiuou sdjhfgh aoushf o
                 </p>
@@ -110,13 +90,21 @@
                         <p>Přidat obrázek</p>
                         <i class="fa-solid fa-arrow-up-from-bracket"></i>
                     </button>
+                    <button id="remove-image" class="disabled">
+                        <p>Odstranit obrázek</p>
+                        <i class="fa-solid fa-trash" id="delete-icon"></i>
+                    </button>
+                    <button id="regenerate" class="disabled">
+                        <p>Autogenerovat</p>
+                        <i class="fa-solid fa-arrow-rotate-right"></i>
+                    </button>
                 </div>
             </div>
-            <div id="generationeditor-wrapper" class="hidden">
+            <div id="generationeditor-wrapper" class="hidden-">
                 <input type="text" id="generationeditor-command-input" placeholder=">">
                 <canvas id="generationeditor-canvas"></canvas>
             </div>
-            <div id="table-wrapper" class="hidden">
+            <div id="table-wrapper" class="hidden small">
                 <table id="table">
                     <thead>
                         <tr>
