@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="../images/Icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href='https://fonts.googleapis.com/css?family=Lexend' rel='stylesheet'>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="../probeditor/probeditor.css">
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+
+
+    <title>Dopplerova vlna</title>
+    <script type="text/javascript">
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$']],
+            displayMath: [['$$', '$$']]
+          }
+        };
+      </script>
+      <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+  </head>
+  <body>
+    <div class="container">
+      <header class="editor-header">
+        <div id="problem-owner-selector">
+            <button id="problem-selector-my" class="selected-">Moje</button>
+            <button id="problem-selector-all" class="selected">Všechny</button>
+        </div>
+        <h2 id="title">Editor úloh</h2>
+        <button id="save-changes-button" class="unsaved">Uložit změny</button>
+      </header>
+      <div id="main-content">
+        <div id="problem-selector">
+            <div id="problem-selector-wrapper">
+                <div id="problem-section-a" class="problem-section">
+                    <div class="problem selected">
+                        <h2 class="problem-selector-title">Popelar</h2>
+                        <h2 class="problem-selector-rank">[A]</h2>
+                    </div>
+                </div>
+                <div id="problem-section-b" class="problem-section">
+
+                </div>
+                <div id="problem-section-c" class="problem-section">
+
+                </div>
+            </div>
+            <div id="problem-list-controlls">
+                <div id="problems-add">Přidat</div>
+                <div id="problems-delete">Odstranit</div>
+            </div>
+        </div>
+        <div id="problem-editor-left">
+            <div id="problem-editor-setup-row">
+                <input type="text" id="problem-title-input" placeholder="Název">
+                <div id="problem-rank-selector" class="oppened-">
+                    <button id="problem-rank-selector-button">
+                        <h2 id="problem-rank-selector-rank">[A]</h2>
+                        <i class="fa-solid fa-angle-down" id="problem-rank-selector-icon"></i>
+                    </button>
+                    <div id="problem-rank-selector-dropdown">
+                        <div class="problem-rank-dropdown-item" id="problem-rank-dropdown-item-a">[A]</div>
+                        <div class="problem-rank-dropdown-item" id="problem-rank-dropdown-item-b">[B]</div>
+                        <div class="problem-rank-dropdown-item" id="problem-rank-dropdown-item-c">[C]</div>
+                    </div>
+                </div>
+                
+            </div>
+            <textarea id="problem-content-textarea" placeholder="Obsah"></textarea>
+            <input type="text" id="problem-correct-answer-input" placeholder="Správná odpověď">
+        </div>
+        <div id="problem-editor-right">
+            <div id="editor-type-selector">
+                <button id="editor-type-finallook" class="editor-type selected">revize</button>
+                <button id="editor-type-table" class="editor-type">tabulky</button>
+                <button id="editor-type-generationeditor" class="editor-type">grafový editor</button>
+                <button id="editor-type-table-plus-generationeditor" class="editor-type">tabulky + grafový editor</button>
+            </div>
+            <div id="finallook-wrapper" class="">
+                <h2 id="finallook-title">Popelar</h2>
+                <p id="finallook-text">
+                    kjhs aoisd uag jahsd oihhaslf hlsdgh asohfo jhgos hsodhg  a;j oi ashfl dsh fksdf ldfhtiuou sdjhfgh aoushf o
+                </p>
+                <image id="finallook-image"></image>
+                <div id="finallook-controlls-wrapper">
+                    <button id="add-image">
+                        <p>Přidat obrázek</p>
+                        <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                    </button>
+                    <button id="remove-image" class="disabled">
+                        <p>Odstranit obrázek</p>
+                        <i class="fa-solid fa-trash" id="delete-icon"></i>
+                    </button>
+                    <button id="regenerate" class="">
+                        <p>Vygenerovat</p>
+                        <i class="fa-solid fa-arrow-rotate-right"></i>
+                    </button>
+                    <input type="file" id="image-input" accept="image/*" style="display: none;">
+                </div>
+            </div>
+            <div id="generationeditor-wrapper" class="hidden">
+                <input type="text" id="generationeditor-command-input" placeholder=">">
+                <canvas id="generationeditor-canvas"></canvas>
+            </div>
+            <div id="table-wrapper" class="hidden">
+                <table id="table">
+                    <thead>
+                        <tr>
+                            <th>Název</th>
+                            <th>Značka</th>
+                            <th>Hodnota</th>
+                            <th>Jednotka</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="selected">
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta a neco jeste k tomu treba popelarska konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                        <tr>
+                            <td>Gravitační konstanta</td>
+                            <td>g</td>
+                            <td>9.81</td>
+                            <td>m/s2</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="table-controlls">
+                    <button id="table-add">Přidat</button>
+                    <button id="table-edit">Upravit</button>
+                    <button id="table-delete">Odstranit</button>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="../probeditor/dynamic_height.js" type="module"></script>
+  <script src="../probeditor/loading_animation.js"></script>
+  <script src="../probeditor/probeditor.js"></script>
+    
+  
+</html>

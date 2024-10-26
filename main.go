@@ -84,13 +84,6 @@ func main() {
       ),
     )
 
-    e.Router.GET(
-      "/",
-      func(c echo.Context) error {
-        return c.Redirect(301, "/about_us/")
-      },
-    )
-
     urls := make(map[string]string)
     data, err := os.ReadFile("urls.json")
     if err == nil {
