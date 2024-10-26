@@ -1,6 +1,7 @@
 package src
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -185,21 +186,10 @@ func AdminWsHandleMsg(
     prob := m[3]
     rcorr := m[4]
     corr := rcorr == "yes"
-    money, final, err := DBAdminGrade(check, corr)
+    money, _, err := DBAdminGrade(check, corr)
     if err != nil { return err }
     WriteTeamChan(team, "graded", prob, rcorr, strconv.Itoa(money))
     AdminSend("graded", prob, check)
-    if final {
-      if len(m) != 1 { return eIm(msg) }
-      llog, err := LoadLog()
-      if err != nil { return err }
-      TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
-        for t, c := range v {
-          tlog := FilterLogTeam(llog, t)
-          c.Send("gotlog", "[" + strings.TrimSuffix(strings.Join(tlog, "\n"), ",") + "]")
-        }
-      })
-    }
 
   case "chat":
     if len(m) != 4 { return eIm(msg) }
@@ -311,28 +301,31 @@ func AdminWsHandleMsg(
     AdminSend("reassigned", res)
     perchan<- "unworking"
 
-  case "chngprob":
-    if len(m) != 6 { return eIm(msg) }
-    prob := m[1]
-    ndiff := m[2]
-    nname := m[3]
-    ntext := m[4]
-    nsol := m[5]
-    teams, err := DBAdminEditProb(prob, ndiff, nname, ntext, nsol)
-    if err != nil { return err }
-    for _, t := range teams {
-      WriteTeamChan(t, "probchngd", ndiff, nname, ntext, nsol)
-    }
-    AdminSend("probchngd", ndiff, nname, ntext, nsol)
+  // case "chngprob":
+  //   if len(m) != 6 { return eIm(msg) }
+  //   prob := m[1]
+  //   ndiff := m[2]
+  //   nname := m[3]
+  //   ntext := m[4]
+  //   nsol := m[5]
+  //   teams, err := DBAdminEditProb(prob, ndiff, nname, ntext, nsol)
+  //   if err != nil { return err }
+  //   for _, t := range teams {
+  //     WriteTeamChan(t, "probchngd", ndiff, nname, ntext, nsol)
+  //   }
+  //   AdminSend("probchngd", ndiff, nname, ntext, nsol)
 
-  case "parselog":
+  case "senddata":
     if len(m) != 1 { return eIm(msg) }
-    llog, err := LoadLog()
-    if err != nil { return err }
-    TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
-      for t, c := range v {
-        tlog := FilterLogTeam(llog, t)
-        c.Send("gotlog", "[" + strings.TrimSuffix(strings.Join(tlog, "\n"), ",") + "]")
+    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+      for id, tm := range v {
+        var bres []byte
+        var err error
+        tm.RWith(func(t TeamS) {
+          bres, err = json.Marshal(t.Stats)
+        })
+        if err != nil { fmt.Println(err); continue }
+        WriteTeamChan(id, "gotdata", string(bres))
       }
     })
   }
@@ -343,28 +336,28 @@ func AdminWsHandleMsg(
   return nil
 }
 
-func LoadLog() ([]string, error) {
-  bts, err := os.ReadFile("/opt/strelavlna2/sv2j.log")
-  if err != nil { return nil, err }
-  lns := strings.Split(string(bts), "\n")
-  flns := make([]string, 0, len(lns) / 100)
-  for _, l := range lns {
-    if !strings.Contains(l, "bought") &&
-       !strings.Contains(l, "graded") &&
-       !strings.Contains(l, "solved") { continue }
-    flns = append(flns, l)
-  }
-  return flns, nil
-}
-
-func FilterLogTeam(log []string, team string) []string {
-  flog := make([]string, len(log) / 100)
-  for _, l := range log {
-    if !strings.Contains(l, team) { continue }
-    flog = append(flog, l)
-  }
-  err := DBSaveLog(team, strings.Join(log, "\n"))
-  if err != nil { fmt.Println("err saving log", err.Error())}
-  return flog
-}
-
+// func LoadLog() ([]string, error) {
+//   bts, err := os.ReadFile("/opt/strelavlna2/sv2j.log")
+//   if err != nil { return nil, err }
+//   lns := strings.Split(string(bts), "\n")
+//   flns := make([]string, 0, len(lns) / 100)
+//   for _, l := range lns {
+//     if !strings.Contains(l, "bought") &&
+//        !strings.Contains(l, "graded") &&
+//        !strings.Contains(l, "solved") { continue }
+//     flns = append(flns, l)
+//   }
+//   return flns, nil
+// }
+//
+// func FilterLogTeam(log []string, team string) []string {
+//   flog := make([]string, len(log) / 100)
+//   for _, l := range log {
+//     if !strings.Contains(l, team) { continue }
+//     flog = append(flog, l)
+//   }
+//   err := DBSaveLog(team, strings.Join(log, "\n"))
+//   if err != nil { fmt.Println("err saving log", err.Error())}
+//   return flog
+// }
+//

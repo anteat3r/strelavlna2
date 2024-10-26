@@ -8,12 +8,9 @@ import (
 	"time"
 
 	log "github.com/anteat3r/golog"
-	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
-	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/tools/security"
-	"github.com/pocketbase/pocketbase/tools/types"
 )
 
 type RWMutexWrap[T any] struct {
@@ -57,8 +54,21 @@ type TeamS struct {
   LastBanned time.Time
   ChatChecksCache map[ProbM]string
   SolChecksCache map[ProbM]string
+  Players [5]string
+  Stats TeamStats
 }
 type TeamM = *RWMutexWrap[TeamS]
+
+type moneyHistRec struct {
+  Money int `json:"money"`
+  Time time.Time `json:"time"`
+}
+type TeamStats struct {
+  NumSold int `json:"numsold"`
+  NumBought int `json:"numbought"`
+  NumSolved int `json:"numsolved"`
+  MoneyHist []moneyHistRec `json:"moneyhist"`
+}
 
 type ProbS struct {
   Id string
@@ -83,11 +93,14 @@ type CheckS struct {
 type CheckM = *RWMutexWrap[CheckS]
 
 var (
-  Costs = RWMutexWrap[map[string]int]{v: make(map[string]int)}
-  Teams = RWMutexWrap[map[string]TeamM]{v: make(map[string]TeamM)}
-  Probs = RWMutexWrap[map[string]ProbM]{v: make(map[string]ProbM)}
-  Checks = RWMutexWrap[map[string]CheckM]{v: make(map[string]CheckM)}
-  Info = RWMutexWrap[string]{}
+  Costs = NewRWMutexWrap(make(map[string]int))
+  Teams = NewRWMutexWrap(make(map[string]TeamM))
+  Probs = NewRWMutexWrap(make(map[string]ProbM))
+  Checks = NewRWMutexWrap(make(map[string]CheckM))
+  ContInfo = RWMutexWrap[string]{}
+  ContName = NewRWMutexWrap("")
+  ContStart = NewRWMutexWrap(time.Time{})
+  ContEnd = NewRWMutexWrap(time.Time{})
 
   App *pocketbase.PocketBase
 )
@@ -167,6 +180,12 @@ func DBSell(team TeamM, probid string) (money int, oerr error) {
       teamS.Money += cost
       money = teamS.Money
 
+      teamS.Stats.MoneyHist = append(teamS.Stats.MoneyHist, moneyHistRec{
+        Time: time.Now(),
+        Money: money,
+      })
+      teamS.Stats.NumSold ++
+
     })
     if !found { oerr = dbClownErr("sell", "prob not owned"); return }
 
@@ -209,6 +228,11 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
 
     teamS.Money -= diffcost
     money = teamS.Money
+    teamS.Stats.MoneyHist = append(teamS.Stats.MoneyHist, moneyHistRec{
+      Time: time.Now(),
+      Money: money,
+    })
+    teamS.Stats.NumBought ++
   })
   return
 }
@@ -260,46 +284,50 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
   team.With(func(teamS *TeamS) {
     _, ok = teamS.Bought[probres]
     if !ok { oerr = dbErr("prob not owned") }
-    
-    delete(teamS.Bought, probres)
-    teamS.Pending[probres] = struct{}{}
 
     teamname = teamS.Name
 
     Checks.With(func(checksmap *map[string]*RWMutexWrap[CheckS]) {
-      exists := false
-      var exCheck CheckM
-      for _, checkM := range *checksmap {
-        checkM.RWith(func(checkS CheckS) {
-          if checkS.TeamId == teamS.Id &&
-             checkS.ProbId == prob {
-               exists = true
-             }
-        })
-        if exists { break }
-      }
+      exCheckid, exists := teamS.ChatChecksCache[probres]
       if exists {
+        exCheck, ok := (*checksmap)[exCheckid]
+        if !ok { oerr = dbErr("solve", "invalid check cache"); return }
         exCheck.With(func(checkS *CheckS) {
           checkS.Msg = false
           checkS.Sol = sol
         })
         updated = true
         csol = sol
+        delete(teamS.ChatChecksCache, probres)
+        teamS.SolChecksCache[probres] = prob
       } else {
         check := GetRandomId()
-        (*checksmap)[check] = &RWMutexWrap[CheckS]{v: CheckS{
+        _, ok = (*checksmap)[check]
+        if ok { oerr = dbErr("check id collision"); return }
+        ncheck := NewRWMutexWrap(CheckS{
           Prob: probres,
           ProbId: prob,
           Team: team,
           TeamId: teamS.Id,
           Msg: false,
           Sol: sol,
-        }}
+        })
+        (*checksmap)[check] = &ncheck
+        teamS.SolChecksCache[probres] = check
       }
     })
+    if oerr != nil { return }
+    
+    delete(teamS.Bought, probres)
+    teamS.Pending[probres] = struct{}{}
   })
   return
 }
+
+/*
+msg: +chat, -dismiss, -solve
+sol: +solve, -grade
+*/
 
 // func DBView(team string, prob string) (text string, diff string, name string, oerr error) {
 //   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
@@ -343,7 +371,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     _, pending := teamS.Pending[probres]
     if !bought && !pending { oerr = dbErr("chat", "prob not owned"); return }
     teamS.Chat = append(teamS.Chat, ChatMsg{false, probres, team, msg})
-    check, ok := teamS.ChatChecksCache[probres]
+    check, ok = teamS.ChatChecksCache[probres]
     if ok {
       var ocheck CheckM
       Checks.RWith(func(checksmap map[string]*RWMutexWrap[CheckS]) {
@@ -412,151 +440,91 @@ type checkRes struct{
 
 func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
 
-  // team.RWith(func(teamS TeamS) {
-  //   tRes := teamRes{
-  //     nil,
-  //     nil,
-  //     "",
-  //     teamS.Money,
-  //     teamS.Name,
-  //
-  //   }
-  // })
-
-
-
-  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
-
-    // teamres := struct {
-    //   Bought string `db:"bought"`
-    //   Pending string `db:"pending"`
-    //   Sold string `db:"sold"`
-    //   Solved string `db:"solved"`
-    //   Chat string `db:"chat"`
-    //   Money int `db:"money"`
-    //   Name string `db:"name"`
-    //   Banned bool `db:"banned"`
-    //   Player1 string `db:"player1"`
-    //   Player2 string `db:"player2"`
-    //   Player3 string `db:"player3"`
-    //   Player4 string `db:"player4"`
-    //   Player5 string `db:"player5"`
-    //   Contest string `db:"contest"`
-    // }{}
-    // err := txDao.DB().
-    //   NewQuery("SELECT bought, pending, sold, solved, chat, money, banned, player1, player2, player3, player4, player5, name, contest FROM teams WHERE id = {:team} LIMIT 1").
-    //   Bind(dbx.Params{ "team": team }).
-    //   One(&teamres)
-    // if err != nil { return err }
-
-    // err := txDao.DB().
-    //   Select("bought", "pending", "sold", "solved", "chat", "money", "banned", "player1", "player2", "player3", "player4", "player5", "name", "contest").
-    //   From("teams").
-    //   Where(dbx.HashExp{"id": team}).
-    //   Limit(1).
-    //   One(&teamres)
-    // if err != nil { return err }
-    //
-    // boughtprobsres := []probRes{}
-    // // err = txDao.DB().
-    // //   NewQuery("SELECT id, name, diff, text, img FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Bought))).
-    // //   All(&boughtprobsres)
-    // // if err != nil { return err }
-    //
-    // err = txDao.DB().
-    //   Select("id", "name", "diff", "text", "img").
-    //   From("probs").
-    //   Where(dbx.NewExp("id IN " + RefListToInExpr(ParseRefList(teamres.Bought)))).
-    //   All(&boughtprobsres)
-    // if err != nil { return err }
-    //
-    // pendingprobsres := []probRes{}
-    // // err = txDao.DB().
-    // //   NewQuery("SELECT id, name, diff, text, img FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Pending))).
-    // //   All(&pendingprobsres)
-    // // if err != nil { return err }
-    //
-    // err = txDao.DB().
-    //   Select("id", "name", "diff", "text", "img").
-    //   From("probs").
-    //   Where(dbx.NewExp("id IN " + RefListToInExpr(ParseRefList(teamres.Pending)))).
-    //   All(&pendingprobsres)
-    // if err != nil { return err }
-    //
-    // soldres := struct{
-    //   Cnt int `db:"count(*)"`
-    // }{}
-    // err = txDao.DB().
-    //   NewQuery("SELECT count(*) FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Sold))).
-    //   One(&soldres)
-    // if err != nil { return err }
-    //
-    // solvedres := struct{
-    //   Cnt int `db:"count(*)"`
-    // }{}
-    // err = txDao.DB().
-    //   NewQuery("SELECT count(*) FROM probs WHERE id IN " + RefListToInExpr(ParseRefList(teamres.Solved))).
-    //   One(&solvedres)
-    //
-    // if err != nil { return err }
-    //
-    // contres := struct{
-    //   Name string `db:"name"`
-    //   Info string `db:"info"`
-    //   OnlineRound types.DateTime `db:"online_round"`
-    //   OnlineRoundEnd types.DateTime `db:"online_round_end"`
-    // }{}
-    // err = txDao.DB().
-    //   NewQuery("SELECT online_round, online_round_end, name, info FROM contests WHERE id = {:contest} LIMIT 1").
-    //   Bind(dbx.Params{ "contest": teamres.Contest }).
-    //   One(&contres)
-    //
-    // if err != nil { return err }
-    //
-    // checkres := []checkRes{}
-    // err = txDao.DB().
-    //   NewQuery("SELECT prob, solution FROM checks WHERE team = {:team}").
-    //   Bind(dbx.Params{ "team": team }).
-    //   All(&checkres)
-    //
-    // if err != nil { return err }
-    //
-    // ordelta := contres.OnlineRound.Time().Sub(time.Now()).Milliseconds()
-    // oredelta := contres.OnlineRoundEnd.Time().Sub(time.Now()).Milliseconds()
-    //
-    // CostsMu.RLock()
-    // costsc := maps.Clone(Costs)
-    // CostsMu.RUnlock()
-    //
-    // res := teamRes{
-    //   Bought: boughtprobsres,
-    //   Pending: pendingprobsres,
-    //   Chat: teamres.Chat,
-    //   Money: teamres.Money,
-    //   Name: teamres.Name,
-    //   OnlineRound: ordelta,
-    //   OnlineRoundEnd: oredelta,
-    //   ContestName: contres.Name,
-    //   ContestInfo: contres.Info,
-    //   Checks: checkres,
-    //   Banned: teamres.Banned,
-    //   Player1: teamres.Player1,
-    //   Player2: teamres.Player2,
-    //   Player3: teamres.Player3,
-    //   Player4: teamres.Player4,
-    //   Player5: teamres.Player5,
-    //   Costs: costsc,
-    //   Rank: -1,
-    //   NumSold: soldres.Cnt,
-    //   NumSolved: solvedres.Cnt,
-    //   Idx: idx,
-    // }
-    //
-    // sresb, _ := json.Marshal(res)
-    // sres = string(sresb)
-    
-    return nil
+  res := teamRes{ Rank: -1 }
+  team.RWith(func(t TeamS) {
+    res.Money = t.Money
+    res.Name = t.Name
+    res.Banned = t.Banned
+    res.Player1 = t.Players[0]
+    res.Player2 = t.Players[1]
+    res.Player3 = t.Players[2]
+    res.Player4 = t.Players[3]
+    res.Player5 = t.Players[4]
+    res.NumSold = len(t.Sold)
+    res.NumSolved = len(t.Solved)
+    res.Bought = make([]probRes, 0, len(t.Bought))
+    for pr, _ := range t.Bought {
+      pr.RWith(func(v ProbS) { res.Bought = append(res.Bought, probRes{
+        Name: v.Name,
+        Id: v.Id,
+        Diff: v.Diff,
+        Text: v.Text,
+        Img: v.Img,
+      }) })
+    }
+    res.Pending = make([]probRes, 0, len(t.Pending))
+    for pr, _ := range t.Pending {
+      pr.RWith(func(v ProbS) { res.Pending = append(res.Pending, probRes{
+        Name: v.Name,
+        Id: v.Id,
+        Diff: v.Diff,
+        Text: v.Text,
+        Img: v.Img,
+      }) })
+    }
+    for _, m := range t.Chat {
+      chrole := "p"
+      if m.Admin { chrole = "a" }
+      probid := ""
+      m.Prob.RWith(func(v ProbS) { probid = v.Id })
+      res.Chat += chrole + "\x09" + probid + "\x09" + m.Text + "\x0b"
+    }
+    Checks.RWith(func(checksmap map[string]*RWMutexWrap[CheckS]) {
+      res.Checks = make([]checkRes, 0, len(t.ChatChecksCache) + len(t.SolChecksCache))
+      for p, c := range t.ChatChecksCache {
+        probid := ""
+        p.RWith(func(v ProbS) { probid = v.Id })
+        sol := ""
+        checksmap[c].RWith(func(v CheckS) { sol = v.Sol })
+        res.Checks = append(res.Checks, checkRes{
+          Prob: probid,
+          Sol: sol,
+        })
+      }
+      for p, c := range t.SolChecksCache {
+        probid := ""
+        p.RWith(func(v ProbS) { probid = v.Id })
+        sol := ""
+        checksmap[c].RWith(func(v CheckS) { sol = v.Sol })
+        res.Checks = append(res.Checks, checkRes{
+          Prob: probid,
+          Sol: sol,
+        })
+      }
+    })
   })
+
+  res.Costs = make(map[string]int)
+  Costs.RWith(func(vm map[string]int) {
+    for k, v := range vm { res.Costs[k] = v }
+  })
+
+  ContName.RWith(func(v string) { res.ContestName = v })
+  ContInfo.RWith(func(v string) { res.ContestInfo = v })
+  ContStart.RWith(func(v time.Time) {
+    res.OnlineRound = int64(v.Sub(time.Now()).Milliseconds())
+  })
+  ContEnd.RWith(func(v time.Time) {
+    res.OnlineRoundEnd = int64(v.Sub(time.Now()).Milliseconds())
+  })
+
+  res.Idx = idx
+
+  bres, err := json.Marshal(res)
+  if err != nil { oerr = err; return }
+
+  sres = string(bres)
+
   return
 }
 
@@ -590,6 +558,11 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
       if corr {
         money = v.Money + cost
         v.Money = money
+        v.Stats.MoneyHist = append(v.Stats.MoneyHist, moneyHistRec{
+          Time: time.Now(),
+          Money: money,
+        })
+        v.Stats.NumSolved ++
       }
     })
     if oerr != nil { return }
@@ -625,8 +598,13 @@ func DBAdminMsg(teamid string, probid string, text string) (oerr error) {
 
 func DBAdminDismiss(checkid string) (team string, prob string, oerr error) {
   Checks.With(func(v *map[string]*RWMutexWrap[CheckS]) {
-    _, ok := (*v)[checkid]
+    ch, ok := (*v)[checkid]
     if !ok { oerr = dbErr("dismiss", "invalid check id"); return }
+    ch.RWith(func(v CheckS) {
+      if !v.Msg { oerr = dbErr("dismiss", "cannot dismiss solution check"); return }
+      v.Team.With(func(t *TeamS) { delete(t.ChatChecksCache, v.Prob) })
+    })
+    if oerr != nil { return }
     delete(*v, checkid)
   })
   return
@@ -730,89 +708,64 @@ type adminCheckRes struct {
 }
 
 func DBAdminInitLoad(id string) (res string, oerr error) {
-  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 
-    banres := []adminBannedRes{}
-    err := txDao.DB().
-      NewQuery("SELECT id, last_banned FROM teams WHERE banned = TRUE").
-      All(&banres)
-    if err != nil { return err }
+  ares := adminInitLoad{ Id: id }
+  ContStart.RWith(func(v time.Time) {
+    ares.OnlineRound = v.Sub(time.Now()).Milliseconds()
+  })
+  ContEnd.RWith(func(v time.Time) {
+    ares.OnlineRoundEnd = v.Sub(time.Now()).Milliseconds()
+  })
+  ContInfo.RWith(func(v string) { ares.ContestInfo = v })
+  ContName.RWith(func(v string) { ares.ContestName = v })
 
-    checkres := []adminCheckRes{}
-    err = txDao.DB().
-      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name AS teamname, probs.diff, probs.name, probs.workers FROM checks INNER JOIN teams ON teams.id = checks.team INNER JOIN probs ON probs.id = checks.prob").
-      All(&checkres)
-    if err != nil { return err }
-
-    gcheckres := []struct{
-      Team string `db:"team"`
-      Id string `db:"id"`
-      Assign string `json:"assign"`
-      TeamName string `db:"teamname"`
-      Type string `db:"type"`
-      Solution string `db:"solution"`
-    }{}
-    err = txDao.DB().
-      NewQuery("SELECT checks.team, checks.prob, checks.id, checks.type, checks.solution, teams.name AS teamname FROM checks INNER JOIN teams ON teams.id = checks.team WHERE checks.prob = ''").
-      All(&gcheckres)
-    if err != nil { return err }
-
-    for _, c := range gcheckres {
-      checkres = append(checkres, adminCheckRes{
-        Team: c.Team,
-        Id: c.Id,
-        Assign: c.Assign,
-        TeamName: c.TeamName,
-        Type: c.Type,
-        Solution: c.Solution,
+  ares.Banned = make([]adminBannedRes, 0)
+  Teams.RWith(func(teammap map[string]*RWMutexWrap[TeamS]) {
+    for _, t := range teammap {
+      t.RWith(func(v TeamS) {
+        if !v.Banned { return }
+        ares.Banned = append(ares.Banned, adminBannedRes{
+          Id: v.Id,
+          LastBanned: v.LastBanned.Format("2006-01-02 15:04:05.000Z"),
+        })
       })
     }
-
-    // for i, c := range checkres {
-    //   if c.Work == "" { continue }
-    //   checkres[i].Assign = GetWorker(c.Work)
-    // }
-
-    ActiveContestMu.RLock()
-    ac := ActiveContest
-    ActiveContestMu.RUnlock()
-
-    contres := struct{
-      OnlineRound types.DateTime `db:"online_round"`
-      OnlineRoundEnd types.DateTime `db:"online_round_end"`
-      Name string `db:"name"`
-      Info string `db:"info"`
-    }{}
-    err = txDao.DB().
-      NewQuery("SELECT online_round, online_round_end, name, info FROM contests WHERE id = {:contest} LIMIT 1").
-      Bind(dbx.Params{ "contest": ac }).
-      One(&contres)
-
-    ordelta := contres.OnlineRound.Time().Sub(time.Now()).Milliseconds()
-    oredelta := contres.OnlineRoundEnd.Time().Sub(time.Now()).Milliseconds()
-
-    resr := adminInitLoad{
-      Checks: checkres,
-      Id: id,
-      OnlineRound: ordelta,
-      OnlineRoundEnd: oredelta,
-      Banned: banres,
-      ContestName: contres.Name,
-      ContestInfo: contres.Info,
-    }
-
-    resb, err := json.Marshal(resr)
-    if err != nil { return err }
-
-    res = string(resb)
-
-    return nil
   })
+  Checks.RWith(func(checkmap map[string]*RWMutexWrap[CheckS]) {
+    ares.Checks = make([]adminCheckRes, 0, len(checkmap))
+    for _, ch := range checkmap {
+      ch.RWith(func(v CheckS) {
+        v.Team.RWith(func(t TeamS) {
+          v.Prob.RWith(func(p ProbS) {
+            ts := "sol"
+            if v.Msg { ts = "msg" }
+            ares.Checks = append(ares.Checks, adminCheckRes{
+              Team: t.Id,
+              Prob: p.Id,
+              Diff: p.Diff,
+              ProbName: p.Name,
+              Id: v.Id,
+              Assign: GetWorker(p.Workers),
+              TeamName: t.Name,
+              Type: ts,
+              Solution: v.Sol,
+              Work: strings.Join(p.Workers, " "),
+            })
+          })
+        })
+      })
+    }
+  })
+
+  bres, err := json.Marshal(ares)
+  if err != nil { oerr = err; return }
+
+  res = string(bres)
   return
 }
 
 func DBAdminSetInfo(info string) (oerr error) {
-  Info.With(func(v *string) { *v = info })
+  ContInfo.With(func(v *string) { *v = info })
   return
 }
 
@@ -822,73 +775,68 @@ type reassignRes struct {
 }
 
 func DBReAssign() (res string, oerr error) {
-  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
-    
-    checkres := []struct{
-      Id string `db:"id"`
-      Work string `db:"workers"`
-    }{}
-    err := txDao.DB().
-      NewQuery("SELECT checks.id, probs.workers FROM checks INNER JOIN probs ON probs.id = checks.prob").
-      All(&checkres)
-    if err != nil { return err }
 
-    resl := make([]reassignRes, len(checkres))
-    for i, c := range checkres {
-      resl[i] = reassignRes{
-        Id: c.Id,
-        // Assign: HashId(c.Work),
-      }
+  var reasres []reassignRes
+  Checks.RWith(func(checksmap map[string]*RWMutexWrap[CheckS]) {
+    reasres = make([]reassignRes, len(checksmap))
+    i := 0
+    for id, ch := range checksmap {
+      ch.RWith(func(v CheckS) {
+        v.Prob.RWith(func(p ProbS) {
+          reasres[i] = reassignRes{
+            Id: id,
+            Assign: GetWorker(p.Workers),
+          }
+        })
+      })
+      i++
     }
-
-    resb, err := json.Marshal(resl)
-    if err != nil { return err }
-
-    res = string(resb)
-
-    return nil
-
   })
+
+  resb, err := json.Marshal(reasres)
+  if err != nil { oerr = err; return }
+
+  res = string(resb)
   return
 }
 
-func DBAdminEditProb(prob string, ndiff string, nname string, ntext string, nsol string) (teams []string, oerr error) {
-  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+// func DBAdminEditProb(prob string, ndiff string, nname string, ntext string, nsol string) (teams []string, oerr error) {
+//   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+//
+//     _, err := txDao.DB().
+//       NewQuery("UPDATE probs SET diff = {:diff}, name = {:name}, text = {:text}, solution = {:sol} WHERE id = {:id}").
+//       Bind(dbx.Params{
+//         "diff": ndiff,
+//         "name": nname,
+//         "text": ntext,
+//         "solution": nsol,
+//         "id": prob,
+//       }).Execute()
+//     if err != nil { return err }
+//
+//     teamres := []string{}
+//     err = txDao.DB().
+//       NewQuery("SELECT id FROM teams WHERE bought LIKE {:prob} OR pending LIKE {:prob}").
+//       Bind(dbx.Params{ "prob": prob }).
+//       All(&teamres)
+//     if err != nil { return nil }
+//
+//     teams = teamres
+//
+//     return nil
+//   })
+//   return
+// }
 
-    _, err := txDao.DB().
-      NewQuery("UPDATE probs SET diff = {:diff}, name = {:name}, text = {:text}, solution = {:sol} WHERE id = {:id}").
-      Bind(dbx.Params{
-        "diff": ndiff,
-        "name": nname,
-        "text": ntext,
-        "solution": nsol,
-        "id": prob,
-      }).Execute()
-    if err != nil { return err }
-
-    teamres := []string{}
-    err = txDao.DB().
-      NewQuery("SELECT id FROM teams WHERE bought LIKE {:prob} OR pending LIKE {:prob}").
-      Bind(dbx.Params{ "prob": prob }).
-      All(&teamres)
-    if err != nil { return nil }
-
-    teams = teamres
-
-    return nil
-  })
-  return
-}
-
-func DBSaveLog(team string, log string) (oerr error) {
-  oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
-    _, err := txDao.DB().Update(
-        "teams",
-        dbx.Params{"log": log},
-        dbx.HashExp{"id": team},
-      ).Execute()
-    return err
-  })
-  return
-}
-
+// func DBSaveLog(team string, log string) (oerr error) {
+//   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
+//     _, err := txDao.DB().Update(
+//         "teams",
+//         dbx.Params{"log": log},
+//         dbx.HashExp{"id": team},
+//       ).Execute()
+//     return err
+//   })
+//   return
+// }
+//
