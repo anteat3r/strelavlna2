@@ -166,31 +166,56 @@ function handleYearTitles() {
       const parent = title.parentElement;
       const content = parent.querySelector('.archive-mobile');
       const icon = title.querySelector('i');
-      if (content.style.maxHeight === "0px" || !content.style.maxHeight) {
+      const normalRound = content.querySelector('.normal-round')
+      if (content.style.maxHeight ===  "30px" || content.style.maxHeight ===  "0px" || !content.style.maxHeight) {
         content.style.maxHeight = content.scrollHeight + "px";  
-        if (parent.classList.contains('vlna')){
-          title.style.marginBottom = "0";
-        }
         icon.style.transform = "rotate(90deg)";
-      } else {
-        content.style.maxHeight = "0";
-        icon.style.transform = "rotate(0deg)";
-        if (parent.classList.contains('vlna')){
-          setTimeout(() => {
-            title.style.marginBottom = 30 + "px";
-          }, 500);
+        if (mediaQuery.matches){
+          if (parent.classList.contains('archive-2018_vlna') || parent.classList.contains('archive-2019_vlna')){
+            normalRound.style.marginTop = "0";
+            normalRound.style.paddingTop = 30 + "px";
+          }
+          if (parent.classList.contains('archive-2018_strela') || parent.classList.contains('archive-2019_strela')){
+            title.style.marginBottom = "0";
+          }
         }
+      } 
+      else {
+        if (parent.classList.contains('archive-2018_strela') || parent.classList.contains('archive-2019_strela') && mediaQuery.matches){
+          setTimeout(() => {
+            title.style.marginBottom = -2 + "px";
+          },500)
+        }
+        if (parent.classList.contains('vlna') && mediaQuery.matches){
+          content.style.maxHeight = 30 + "px";
+          if (parent.classList.contains('archive-2018_vlna') || parent.classList.contains('archive-2019_vlna')){
+            setTimeout(() => {
+              normalRound.style.marginTop = 30 + "px";
+              normalRound.style.paddingTop = 2 + "px";
+            },500)
+          }
+        }
+        else {
+          content.style.maxHeight = "0";
+        };
+        icon.style.transform = "rotate(0deg)";
       }
     });
   });
 }
+
 
 function hideAllYears() {
   const yearDivs = document.querySelectorAll(".archive-year");
   yearDivs.forEach(function(div) {
     const content = div.querySelector('.archive-mobile');
     const icon = div.querySelector('.year-title i');
-    content.style.maxHeight = "0"; // Collapse the content
+    if (mediaQuery.matches && yearDivs.classList.contains('vlna')){
+      content.style.maxHeight = 30 + "px";
+    }
+    else{
+    content.style.maxHeight = "0";
+    } // Collapse the content
     icon.style.transform = "rotate(0deg)"; // Reset the arrow to its original position
   });
 }

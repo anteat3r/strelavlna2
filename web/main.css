@@ -1,7 +1,6 @@
 
-
 .grid-main-a{
-    margin-left: 20%;
+    margin-left: 15%;
     margin-right: 5%;
     background-color: white;
     margin-top: 40px;
@@ -20,7 +19,7 @@
 }
 
 .grid-main-b{
-    padding-left: 20%;
+    padding-left: 15%;
     max-width: 100vw;
     padding-right: 5%;
     background-color: var(--color-main-white);
@@ -35,7 +34,7 @@
 }
 
 .grid-main-c{
-    margin-left: 20%;
+    margin-left: 15%;
     margin-right: 5%;
     background-color: white;
     margin-top: 40px;

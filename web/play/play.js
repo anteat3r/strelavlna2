@@ -594,10 +594,6 @@ function update(){
 
 }
 
-setTimeout(e=>{
-    results_ready = true;
-}, 5000);
-
 update();
 
 /** @type {WebSocket} */
@@ -676,6 +672,10 @@ function connectWS() {
       case "gotinfo":
         if (msg.length != 2) { cLe() }
         gotinfo(msg[1]);
+      break;
+      case "gotlog":
+        if (msg.length != 2) { cLe() }
+        gotLog(msg[1]);
       break;
       case "err":
         console.log(msg)

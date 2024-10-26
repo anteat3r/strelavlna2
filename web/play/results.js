@@ -1,9 +1,7 @@
 var results_string = "asdhjawkjasdkj kajshd kdhgwa sjhd kjahwuka bsflahsd kjb";
 let qrcode_link = "https://strela-vlna.gchd.cz/about_us/";
 
-function parseResults(){
 
-}
 
 const balance_chart_canvas = document.getElementById("results-graph-canvas");
 const income_portions_canvas = document.getElementById("results-income-canvas");
@@ -30,6 +28,13 @@ let income_portions = [0.3, 0.1, 0.6];
 let balance_chart = [{x:0, y: 50}, {x:15*60000, y: 100}, {x:22*60000, y: 40}, {x:50*60000, y: 250}, {x:75*60000, y: 220}, {x:120*60000, y: 245}];
 let balance = 245;
 let rank = 5;
+
+function gotLog(data){
+    results_ready = true;
+
+
+    startLoadingAnimation();
+}
 
 //animation variables
 
@@ -586,7 +591,7 @@ for(item of main_wrappers){
     item.classList.add("invisible");
 }
 
-setTimeout(e=>{
+function startLoadingAnimation(){
     setTimeout(e=>{main_wrappers[0].classList.remove("invisible");}, 3000);
     setTimeout(e=>{main_wrappers[1].classList.remove("invisible");}, 3500);
     setTimeout(e=>{main_wrappers[2].classList.remove("invisible");}, 4000);
@@ -637,14 +642,7 @@ setTimeout(e=>{
 
     setTimeout(e=>{animation_started_apm = true;}, 5000);
     setTimeout(e=>{animation_started_capm = true;}, 5200);
-
-
-
-    //animation_started_solved
-
-    // animation_started_accuracy[0] = true;
-}, 6500);
-
+}
 
 for(let i = 0; i < document.getElementsByClassName("results-accuracy-value-wrapper").length; i++){
     const item = document.getElementsByClassName("results-accuracy-value-wrapper")[i];
