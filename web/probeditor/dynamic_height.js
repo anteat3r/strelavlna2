@@ -14,3 +14,13 @@ function adjustDivHeight() {
   window.addEventListener('load', adjustDivHeight);
   window.addEventListener('resize', adjustDivHeight);
   
+  const canvas = document.getElementById('generationeditor-canvas');
+
+  function resizeCanvas() {
+      canvas.window = `${canvas.clientWidth}px`;
+      canvas.height = `${canvas.clientHeight}px`;
+  }
+  
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  

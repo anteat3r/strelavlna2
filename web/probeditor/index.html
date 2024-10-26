@@ -74,12 +74,12 @@
         </div>
         <div id="problem-editor-right">
             <div id="editor-type-selector">
-                <button id="editor-type-finallook" class="editor-type">revize</button>
+                <button id="editor-type-finallook" class="editor-type selected">revize</button>
                 <button id="editor-type-table" class="editor-type">tabulky</button>
                 <button id="editor-type-generationeditor" class="editor-type">grafový editor</button>
-                <button id="editor-type-table-plus-generationeditor" class="editor-type selected">tabulky + grafový editor</button>
+                <button id="editor-type-table-plus-generationeditor" class="editor-type">tabulky + grafový editor</button>
             </div>
-            <div id="finallook-wrapper" class="hidden">
+            <div id="finallook-wrapper" class="">
                 <h2 id="finallook-title">Popelar</h2>
                 <p id="finallook-text">
                     kjhs aoisd uag jahsd oihhaslf hlsdgh asohfo jhgos hsodhg  a;j oi ashfl dsh fksdf ldfhtiuou sdjhfgh aoushf o
@@ -94,17 +94,18 @@
                         <p>Odstranit obrázek</p>
                         <i class="fa-solid fa-trash" id="delete-icon"></i>
                     </button>
-                    <button id="regenerate" class="disabled">
-                        <p>Autogenerovat</p>
+                    <button id="regenerate" class="">
+                        <p>Vygenerovat</p>
                         <i class="fa-solid fa-arrow-rotate-right"></i>
                     </button>
+                    <input type="file" id="image-input" accept="image/*" style="display: none;">
                 </div>
             </div>
-            <div id="generationeditor-wrapper" class="hidden-">
+            <div id="generationeditor-wrapper" class="hidden">
                 <input type="text" id="generationeditor-command-input" placeholder=">">
                 <canvas id="generationeditor-canvas"></canvas>
             </div>
-            <div id="table-wrapper" class="hidden small">
+            <div id="table-wrapper" class="hidden">
                 <table id="table">
                     <thead>
                         <tr>
@@ -217,7 +218,7 @@
       </div>
     </div>
   </body>
-  <script src="../probeditor/dynamic_height.js"></script>
+  <script src="../probeditor/dynamic_height.js" type="module"></script>
   <script src="../probeditor/loading_animation.js"></script>
   <script src="../probeditor/probeditor.js"></script>
     
