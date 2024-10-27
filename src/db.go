@@ -3,6 +3,8 @@ package src
 import (
 	"encoding/json"
 	"errors"
+	"io/fs"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -32,6 +34,22 @@ func (w *RWMutexWrap[T]) RWith(f func(v T)) {
   w.m.RLock()
   defer w.m.RUnlock()
   f(w.v)
+}
+
+func (w *RWMutexWrap[T]) MarshalJSON() ([]byte, error) {
+  w.m.RLock()
+  defer w.m.RUnlock()
+  return json.Marshal(struct{v T}{v: w.v})
+}
+
+func (w *RWMutexWrap[T]) UnmarshalJSON(b []byte) error {
+  w.m.Lock()
+  defer w.m.Unlock()
+  var res struct{v T}
+  err := json.Unmarshal(b, &res)
+  if err != nil { return err }
+  w.v = res.v
+  return nil
 }
 
 type ChatMsg struct {
@@ -101,6 +119,17 @@ var (
   ContName = NewRWMutexWrap("")
   ContStart = NewRWMutexWrap(time.Time{})
   ContEnd = NewRWMutexWrap(time.Time{})
+
+  DBData = map[string]any{
+    "costs": &Costs,
+    "teams": &Teams,
+    "probs": &Probs,
+    "checks": &Checks,
+    "continfo": &ContInfo,
+    "contname": &ContName,
+    "contstart": &ContStart,
+    "contend": &ContEnd,
+  }
 
   App *pocketbase.PocketBase
 )
@@ -800,6 +829,33 @@ func DBReAssign() (res string, oerr error) {
   return
 }
 
+func DBDump() error {
+  resb, err := json.Marshal(DBData)
+  if err != nil { return err }
+
+  err = os.WriteFile(
+    "/opt/strelavlna2/dist/svdata.json", 
+    resb, fs.FileMode(os.O_WRONLY),
+  )
+  return err
+}
+
+func DBLoadFromDump() error {
+  resb, err := os.ReadFile("/opt/strelavlna2/dist/svdata.json")
+  if err != nil { return err }
+
+  err = json.Unmarshal(resb, &DBData)
+  return err
+}
+
+func DBLoadFromPB() error {
+  return nil
+}
+
+func DBGenProbWorkers(map[string]ProbM) error {
+  return nil
+}
+
 // func DBAdminEditProb(prob string, ndiff string, nname string, ntext string, nsol string) (teams []string, oerr error) {
 //   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
 //
@@ -840,3 +896,4 @@ func DBReAssign() (res string, oerr error) {
 //   return
 // }
 //
+
