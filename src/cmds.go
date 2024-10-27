@@ -1,6 +1,7 @@
 package src
 
 import (
+	"encoding/json"
 	"math/rand"
 	"os"
 	"strconv"
@@ -72,6 +73,51 @@ func LoadSchoolsEndp(dao *daos.Dao) echo.HandlerFunc {
 			t, _ := time.Parse("2.1.2006", l[35])
 			dt, _ := types.ParseDateTime(t)
 			rec.Set("datum_zahajeni_cinnosti", dt)
+			dao.SaveRecord(rec)
+		}
+		return nil
+	}
+}
+
+func LoadProbEndpJson(dao *daos.Dao) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		f, _ := os.ReadFile("/home/strelavlna/probs_o.json")
+    res := []struct{
+      Model string `json:"model"`
+      Id int `json:"pk"`
+      Fields struct{
+        Type string `json:"typ"`
+        State int `json:"stav"`
+        Auto int `json:"vyhodnoceni"`
+        Diff string `json:"obtiznost"`
+        Text string `json:"zadani"`
+        Sol string `json:"reseni"`
+        Img string `json:"obrazek"`
+      } `json:"fields"`
+    }{}
+    err := json.Unmarshal(f, res)
+    if err != nil { return err }
+		coll, _ := dao.FindCollectionByNameOrId("probs_old")
+		for _, l := range res {
+			rec := models.NewRecord(coll)
+      tp := "math"
+      if l.Fields.Type == "F" {
+        tp = "physics"
+      }
+      st := "new"
+      if l.Fields.State == 1 { st = "ok" }
+      if l.Fields.State == 2 { st = "wrong" }
+			rec.Set("type", tp)
+			rec.Set("name", l.Fields.Type + "-" + strconv.Itoa(l.Id))
+			rec.Set("solution", l.Fields.Sol)
+			rec.Set("diff", l.Fields.Diff)
+			rec.Set("text", l.Fields.Text)
+      rec.Set("state", st)
+      rec.Set("auto", l.Fields.Auto == 0)
+      rec.Set("img", l.Fields.Img)
+      rec.Set("id_otazky", l.Id)
+      rec.Set("author", "")
+      rec.Set("workers", "")
 			dao.SaveRecord(rec)
 		}
 		return nil

@@ -57,36 +57,41 @@ func (c *TeamChanMu) Count() int {
   return i
 }
 
+type ActiveContStruct struct {
+  Id string
+  Start time.Time
+  End time.Time
+}
+
 var (
-  ActiveContest = ""
-  ActiveContestStart time.Time
-  ActiveContestEnd time.Time
-  ActiveContestMu = sync.RWMutex{}
+  ActiveContest = NewRWMutexWrap(ActiveContStruct{})
 
   nErr = errors.New
 
-  TeamChanMap = make(map[string]*TeamChanMu)
-  teamChanMapMutex = sync.Mutex{}
+  TeamChanMap = NewRWMutexWrap(make(map[string]*TeamChanMu))
+  // TeamChanMap = make(map[string]*TeamChanMu)
+  // teamChanMapMutex = sync.Mutex{}
 
-  AdminsChans = make(map[string]chan string)
-  adminsMutex = sync.RWMutex{}
+  AdminsChans = NewRWMutexWrap(make(map[string]chan string))
+  // AdminsChans = make(map[string]chan string)
+  // adminsMutex = sync.RWMutex{}
 
-  Workers = make(map[string]struct{})
-  workersMutex = sync.RWMutex{}
+  // Workers = make(map[string]struct{})
+  // workersMutex = sync.RWMutex{}
+  Workers = NewRWMutexWrap(make(map[string]struct{}))
 
-  AdminCnt = 0
-  adminCntMu = sync.RWMutex{}
+  // AdminCnt = NewRWMutexWrap(0)
 )
 
 func AdminSend(msg... string) {
   resmsg := strings.Join(msg, DELIM)
   readmsg := strings.Join(msg, "|")
-  adminsMutex.RLock()
-  for _, ch := range AdminsChans {
-    if ch == nil { continue }
-    ch<- resmsg
-  }
-  adminsMutex.RUnlock()
+  AdminsChans.RWith(func(v map[string]chan string) {
+    for _, ch := range v {
+      if ch == nil { continue }
+      ch<- resmsg
+    }
+  })
   fmt.Printf("%s >>- -> %s\n", formTime(), readmsg)
   JSONlog("", true, false, 0, readmsg)
 }
@@ -132,16 +137,14 @@ func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
     }
     cont := team.GetString("contest")
 
-    ActiveContestMu.RLock()
-    if cont != ActiveContest { 
-      ActiveContestMu.RUnlock()
-      return c.String(400, "not ready")
-    }
-    ActiveContestMu.RUnlock()
+    var ok bool
+    ActiveContest.RWith(func(v ActiveContStruct) { ok = cont == v.Id })
+    if !ok { return c.String(400, "not ready") }
 
-    teamChanMapMutex.Lock()
-    players, ok := TeamChanMap[teamid]
-    teamChanMapMutex.Unlock()
+    var players *TeamChanMu
+    TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
+      players, ok = v[teamid]
+    })
 
     if !ok { return c.String(200, "free") }
 
@@ -166,13 +169,15 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     // if cont != ActiveContest { return nErr("contest not active") }
     // ActiveContestMu.RUnlock()
 
-    teamChanMapMutex.Lock()
-    teamchan, ok := TeamChanMap[teamid]
-    if !ok {
-      teamchan = &TeamChanMu{sync.RWMutex{}, make([]chan string, 5, 5), teamid}
-      TeamChanMap[teamid] = teamchan
-    }
-    teamChanMapMutex.Unlock()
+    var teamchan *TeamChanMu
+    var ok bool
+    TeamChanMap.With(func(v *map[string]*TeamChanMu) {
+      teamchan, ok = (*v)[teamid]
+      if !ok {
+        teamchan = &TeamChanMu{sync.RWMutex{}, make([]chan string, 5, 5), teamid}
+        (*v)[teamid] = teamchan
+      }
+    })
 
     i := -1
 
@@ -191,25 +196,28 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     teamchan.ch[i] = perchan
     teamchan.mu.Unlock()
 
+    var team TeamM
+    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+      team = v[teamid]
+    })
+
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
 
     fmt.Printf("%s >- %s:%d + >->\n", formTime(), teamrec.GetId(), i)
     JSONlog(teamid, false, true, i, ":connect")
-    go PlayerWsLoop(conn, teamid, perchan, teamchan, i)
+    go PlayerWsLoop(conn, teamid, perchan, teamchan, i, team)
 
     return nil
   }
 }
 
 func WriteTeamChan(teamid string, msg... string) {
-  teamChanMapMutex.Lock()
-  res := TeamChanMap[teamid]
-  if res == nil {
-    teamChanMapMutex.Unlock()
-    return
-  }
-  teamChanMapMutex.Unlock()
+  var res *TeamChanMu
+  TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
+    res = v[teamid]
+  })
+  if res == nil { return }
   res.Send(msg...)
 }
 
@@ -219,6 +227,7 @@ func PlayerWsLoop(
   perchan chan string,
   tchan *TeamChanMu,
   idx int,
+  teamM TeamM,
 ) {
   wsrchan := make(chan string)
   go func(){
@@ -253,7 +262,7 @@ func PlayerWsLoop(
         oerr = nErr("r chan closed")
         break loop
       }
-      err := PlayerWsHandleMsg(team, m, perchan, tchan, idx)
+      err := PlayerWsHandleMsg(team, m, perchan, tchan, idx, teamM)
       if err != nil {
         perchan<- "err" + DELIM + err.Error()
       }
@@ -277,17 +286,15 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     adminrec, err := dao.FindAdminById(adminid)
     if err != nil { return err }
 
-    adminsMutex.RLock()
-    _, ok := AdminsChans[adminid]
-    if ok {
-      adminsMutex.RUnlock()
-      return nErr("admin already connected")
-    }
-    adminsMutex.RUnlock()
+    var ok bool
+    AdminsChans.RWith(func(v map[string]chan string) {
+      _, ok = v[adminid]
+    })
+    if ok { return nErr("admin already connected") }
     perchan := make(chan string, 10)
-    adminsMutex.Lock()
-    AdminsChans[adminid] = perchan
-    adminsMutex.Unlock()
+    AdminsChans.With(func(v *map[string]chan string) {
+      (*v)[adminid] = perchan
+    })
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
@@ -306,9 +313,9 @@ func AdminWsLoop(
   perchan chan string,
   id string,
 ) {
-  adminCntMu.Lock()
-  AdminCnt += 1
-  adminCntMu.Unlock()
+  // adminCntMu.Lock()
+  // AdminCnt += 1
+  // adminCntMu.Unlock()
   wsrchan := make(chan string)
   go func(){
     wsrloop: for {
@@ -355,12 +362,12 @@ func AdminWsLoop(
   err := AdminWsHandleMsg(email, perchan, "unwork", id)
   if err != nil { log.Error(err) }
 
-  adminsMutex.Lock()
-  delete(AdminsChans, id)
-  adminsMutex.Unlock()
+  AdminsChans.With(func(v *map[string]chan string) {
+    delete(*v, id)
+  })
 
-  adminCntMu.Lock()
-  AdminCnt -= 1
-  adminCntMu.Unlock()
+  // adminCntMu.Lock()
+  // AdminCnt -= 1
+  // adminCntMu.Unlock()
   AdminSend("unfocused", id)
 }

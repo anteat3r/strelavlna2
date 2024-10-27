@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -34,7 +35,7 @@ func customHTTPErrorHandler(c echo.Context, err error) {
 
 func main() {
   err := godotenv.Load()
-  if err != nil { panic(err) }
+  if err != nil { fmt.Println(err) }
 
   app := pocketbase.New()
 
@@ -240,9 +241,10 @@ func main() {
     e.Router.GET(
       "/api/admin/loadactivec",
       func(c echo.Context) error {
-        src.ActiveContestMu.RLock()
-        res := src.ActiveContest
-        src.ActiveContestMu.RUnlock()
+        var res string
+        src.ActiveContest.RWith(func(v src.ActiveContStruct) {
+          res = v.Id
+        })
         return c.String(200, res)
       },
       apis.RequireAdminAuth(),
@@ -251,9 +253,10 @@ func main() {
     e.Router.GET(
       "/api/admin/loadactivecstart",
       func(c echo.Context) error {
-        src.ActiveContestMu.RLock()
-        res := src.ActiveContestStart
-        src.ActiveContestMu.RUnlock()
+        var res time.Time
+        src.ActiveContest.RWith(func(v src.ActiveContStruct) {
+          res = v.Start
+        })
         return c.String(200, res.Format("2006-01-02T15:04"))
       },
       apis.RequireAdminAuth(),
@@ -262,9 +265,10 @@ func main() {
     e.Router.GET(
       "/api/admin/loadactivecend",
       func(c echo.Context) error {
-        src.ActiveContestMu.RLock()
-        res := src.ActiveContestEnd
-        src.ActiveContestMu.RUnlock()
+        var res time.Time
+        src.ActiveContest.RWith(func(v src.ActiveContStruct) {
+          res = v.End
+        })
         return c.String(200, res.Format("2006-01-02T15:04"))
       },
       apis.RequireAdminAuth(),
@@ -278,9 +282,9 @@ func main() {
         }
         t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
         if err != nil { return err }
-        src.ActiveContestMu.Lock()
-        src.ActiveContestStart = t
-        src.ActiveContestMu.Unlock()
+        src.ActiveContest.With(func(v *src.ActiveContStruct) {
+          v.Start = t
+        })
         app.Logger().Info(`ActiveContestStart set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
         return c.String(200, "")
       },
@@ -295,9 +299,9 @@ func main() {
         }
         t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
         if err != nil { return err }
-        src.ActiveContestMu.Lock()
-        src.ActiveContestEnd = t
-        src.ActiveContestMu.Unlock()
+        src.ActiveContest.With(func(v *src.ActiveContStruct) {
+          v.End = t
+        })
         app.Logger().Info(`ActiveContestEnd set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
         return c.String(200, "")
       },
@@ -310,9 +314,9 @@ func main() {
         if c.QueryParam("i") == "" {
           return c.String(400, "invalid param")
         }
-        src.ActiveContestMu.Lock()
-        src.ActiveContest = c.QueryParam("i")
-        src.ActiveContestMu.Unlock()
+        src.ActiveContest.With(func(v *src.ActiveContStruct) {
+          v.Id = c.QueryParam("i")
+        })
         app.Logger().Info(`ActiveContest set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
         return c.String(200, "")
       },
@@ -322,9 +326,9 @@ func main() {
     e.Router.GET(
       "/api/admin/setactivecem",
       func(c echo.Context) error {
-        src.ActiveContestMu.Lock()
-        src.ActiveContest = ""
-        src.ActiveContestMu.Unlock()
+        src.ActiveContest.With(func(v *src.ActiveContStruct) {
+          v.Id = ""
+        })
         app.Logger().Info(`ActiveContest set to "" by ` + apis.RequestInfo(c).Admin.Email)
         return c.String(200, "")
       },
@@ -335,11 +339,11 @@ func main() {
       "/api/admin/loadcosts",
       func(c echo.Context) error {
         res := ""
-        src.CostsMu.RLock()
-        for k, v := range src.Costs {
-          res += k + " -> " + strconv.Itoa(v) + "<br>"
-        }
-        src.CostsMu.RUnlock()
+        src.Costs.RWith(func(v map[string]int) {
+          for k, v := range v {
+            res += k + " -> " + strconv.Itoa(v) + "<br>"
+          }
+        })
         return c.String(200, res)
       },
       apis.RequireAdminAuth(),
@@ -354,10 +358,9 @@ func main() {
         if v == "" { return c.String(400, "invalid param") }
         vint, err := strconv.Atoi(v)
         if err != nil { return c.String(400, err.Error()) }
-        src.CostsMu.Lock()
-        src.Costs[k] = vint
-        src.CostsMu.Unlock()  
-        app.Logger().Info(`Costs "` + k + `" set to "` + v + `" by ` + apis.RequestInfo(c).Admin.Email)
+        src.Costs.With(func(v *map[string]int) {
+          (*v)[k] = vint
+        })
         return c.String(200, "ok")
       },
       apis.RequireAdminAuth(),
@@ -368,9 +371,9 @@ func main() {
       func(c echo.Context) error {
         k := c.QueryParam("k")
         if k == "" { return c.String(400, "invalid param") }
-        src.CostsMu.Lock()
-        delete(src.Costs, k)
-        src.CostsMu.Unlock()
+        src.Costs.With(func(v *map[string]int) {
+          delete(*v, k)
+        })
         app.Logger().Info(`Costs "` + k + `" removed by ` + apis.RequestInfo(c).Admin.Email)
         return c.String(200, "ok")
       },
@@ -394,7 +397,9 @@ func main() {
     text_ = strings.TrimPrefix(text_, "<p>")
     text_ = strings.TrimSuffix(text_, "</p>")
 
-    src.ActiveContest = text_
+    src.ActiveContest.With(func(v *src.ActiveContStruct) {
+      v.Id = text_
+    })
 
     initcontstrt, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecontstart")
     if err != nil { return err }
@@ -405,7 +410,9 @@ func main() {
     t, err := time.Parse("2006-01-02T15:04 -0700", text_2)
     if err != nil { panic(err) }
 
-    src.ActiveContestStart = t
+    src.ActiveContest.With(func(v *src.ActiveContStruct) {
+      v.Start = t
+    })
 
     initcontend, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecontend")
     if err != nil { return err }
@@ -416,7 +423,9 @@ func main() {
     t2, err := time.Parse("2006-01-02T15:04 -0700", text_3)
     if err != nil { panic(err) }
 
-    src.ActiveContestEnd = t2
+    src.ActiveContest.With(func(v *src.ActiveContStruct) {
+      v.End = t2
+    })
 
     initcosts, err := app.Dao().FindFirstRecordByData("texts", "name", "def_costs")
     if err != nil { return err }
@@ -430,12 +439,10 @@ func main() {
       if len(vals) != 2 { return errors.New("invalid costs") }
       val, err := strconv.Atoi(vals[1])
       if err != nil { return err }
-      src.Costs[vals[0]] = val
+      src.Costs.With(func(v *map[string]int) {
+        (*v)[vals[0]] = val
+      })
     }
-
-    cll, err := app.Dao().FindCollectionByNameOrId("checks")
-    if err != nil { panic(err) }
-    src.ChecksColl = cll
 
     return nil
   })
