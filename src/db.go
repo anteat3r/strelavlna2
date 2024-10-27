@@ -124,8 +124,6 @@ var (
   Checks = NewRWMutexWrap(make(map[string]CheckM))
   ContInfo = RWMutexWrap[string]{}
   ContName = NewRWMutexWrap("")
-  ContStart = NewRWMutexWrap(time.Time{})
-  ContEnd = NewRWMutexWrap(time.Time{})
 
   DBData = map[string]any{
     "costs": &Costs,
@@ -134,8 +132,6 @@ var (
     "checks": &Checks,
     "continfo": &ContInfo,
     "contname": &ContName,
-    "contstart": &ContStart,
-    "contend": &ContEnd,
   }
 
   App *pocketbase.PocketBase
@@ -547,11 +543,9 @@ func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
 
   ContName.RWith(func(v string) { res.ContestName = v })
   ContInfo.RWith(func(v string) { res.ContestInfo = v })
-  ContStart.RWith(func(v time.Time) {
-    res.OnlineRound = int64(v.Sub(time.Now()).Milliseconds())
-  })
-  ContEnd.RWith(func(v time.Time) {
-    res.OnlineRoundEnd = int64(v.Sub(time.Now()).Milliseconds())
+  ActiveContest.RWith(func(v ActiveContStruct) {
+    res.OnlineRound = int64(v.Start.Sub(time.Now()).Milliseconds())
+    res.OnlineRoundEnd = int64(v.End.Sub(time.Now()).Milliseconds())
   })
 
   res.Idx = idx
@@ -746,11 +740,9 @@ type adminCheckRes struct {
 func DBAdminInitLoad(id string) (res string, oerr error) {
 
   ares := adminInitLoad{ Id: id }
-  ContStart.RWith(func(v time.Time) {
-    ares.OnlineRound = v.Sub(time.Now()).Milliseconds()
-  })
-  ContEnd.RWith(func(v time.Time) {
-    ares.OnlineRoundEnd = v.Sub(time.Now()).Milliseconds()
+  ActiveContest.RWith(func(v ActiveContStruct) {
+    ares.OnlineRound = v.Start.Sub(time.Now()).Milliseconds()
+    ares.OnlineRoundEnd = v.End.Sub(time.Now()).Milliseconds()
   })
   ContInfo.RWith(func(v string) { ares.ContestInfo = v })
   ContName.RWith(func(v string) { ares.ContestName = v })
@@ -859,13 +851,16 @@ func DBLoadFromDump() error {
 }
 
 func DBLoadFromPB() error {
-  ac := ActiveContest.GetPrimitiveVal().Id
-  teams, err := App.Dao().FindRecordsByFilter(
-    "teams",
-    `contest = "` + ac + `"`,
-    "updated", 0, 0,
-  )
-  if err != nil { return err }
+  // ac := ActiveContest.GetPrimitiveVal().Id
+  // teams, err := App.Dao().FindRecordsByFilter(
+  //   "teams",
+  //   `contest = "` + ac + `"`,
+  //   "updated", 0, 0,
+  // )
+  // if err != nil { return err }
+  // for _, tm := range teams {
+  //   
+  // }
   return nil
 }
 
