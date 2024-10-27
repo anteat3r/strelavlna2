@@ -251,6 +251,13 @@
     color: white;
     transition: all 0.0s;
 }
+.disabled#problems-delete{
+    color: black;
+    border-color: lightgrey;
+    cursor: not-allowed;
+    background-color: white;
+    opacity: 0.5;
+}
 
 #problem-editor-left{
     display: flex;
@@ -387,6 +394,10 @@
     background-color: var(--color-secondary-dark);
     transition: all 0.0s;
 }
+.selected.problem-rank-dropdown-item{
+    color: white;
+    background-color: var(--color-secondary-dark);
+}
 #problem-content-textarea{
     flex-grow: 1;
     resize: none;
@@ -417,7 +428,7 @@
     color: #9dbcc5;
 }
 
-#problem-correct-answer-input{
+#problem-solution-input{
     font-family: 'Lexend';
     font-size: 14px;
     font-weight: 700;
@@ -431,17 +442,17 @@
     transition: all 0.1s ease-out;
     outline: none;
 }
-#problem-correct-answer-input::placeholder{
+#problem-solution-input::placeholder{
     color: #a6a9aa;
     font-weight: 500;
     transition: color 0.1s ease-out;
 }
-#problem-correct-answer-input:focus{
+#problem-solution-input:focus{
     border-color: var(--color-secondary);
     background-color: var(--color-secondary-white);
     transition: all 0.0s;
 }
-#problem-correct-answer-input:focus::placeholder{
+#problem-solution-input:focus::placeholder{
     color: #9dbcc5;
 }
 

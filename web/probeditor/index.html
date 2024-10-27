@@ -56,9 +56,9 @@
         <div id="problem-editor-left">
             <div id="problem-editor-setup-row">
                 <input type="text" id="problem-title-input" placeholder="Název">
-                <div id="problem-rank-selector" class="oppened-">
+                <div id="problem-rank-selector" class="">
                     <button id="problem-rank-selector-button">
-                        <h2 id="problem-rank-selector-rank">[A]</h2>
+                        <h2 id="problem-rank-selector-rank">[-]</h2>
                         <i class="fa-solid fa-angle-down" id="problem-rank-selector-icon"></i>
                     </button>
                     <div id="problem-rank-selector-dropdown">
@@ -70,7 +70,7 @@
                 
             </div>
             <textarea id="problem-content-textarea" placeholder="Obsah"></textarea>
-            <input type="text" id="problem-correct-answer-input" placeholder="Správná odpověď">
+            <input type="text" id="problem-solution-input" placeholder="Správná odpověď">
         </div>
         <div id="problem-editor-right">
             <div id="editor-type-selector">
@@ -220,7 +220,7 @@
   </body>
   <script src="../probeditor/dynamic_height.js" type="module"></script>
   <script src="../probeditor/loading_animation.js"></script>
-  <script src="../probeditor/probeditor.js"></script>
+  <script src="../probeditor/probeditor.js" type="module"></script>
     
   
 </html>
