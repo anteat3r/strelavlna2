@@ -95,7 +95,7 @@ func LoadProbEndpJson(dao *daos.Dao) echo.HandlerFunc {
         Img string `json:"obrazek"`
       } `json:"fields"`
     }{}
-    err := json.Unmarshal(f, res)
+    err := json.Unmarshal(f, &res)
     if err != nil { return err }
 		coll, _ := dao.FindCollectionByNameOrId("probs_old")
 		for _, l := range res {
