@@ -390,6 +390,11 @@ func main() {
       src.SetupContEndp(app.Dao()),
     )
 
+    e.Router.GET(
+      "/laod",
+      src.LoadProbEndpJson(app.Dao()),
+    )
+
     initcont, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecont")
     if err != nil { return err }
 
