@@ -283,6 +283,7 @@ func main() {
         t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
         if err != nil { return err }
         src.ActiveContest.With(func(v *src.ActiveContStruct) {
+          log.Info("hihihiha")
           v.Start = t
         })
         app.Logger().Info(`ActiveContestStart set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
@@ -300,6 +301,7 @@ func main() {
         t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
         if err != nil { return err }
         src.ActiveContest.With(func(v *src.ActiveContStruct) {
+          log.Info("hihihiha")
           v.End = t
         })
         app.Logger().Info(`ActiveContestEnd set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
@@ -315,6 +317,7 @@ func main() {
           return c.String(400, "invalid param")
         }
         src.ActiveContest.With(func(v *src.ActiveContStruct) {
+          log.Info("hihihiha")
           v.Id = c.QueryParam("i")
         })
         app.Logger().Info(`ActiveContest set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
@@ -327,6 +330,7 @@ func main() {
       "/api/admin/setactivecem",
       func(c echo.Context) error {
         src.ActiveContest.With(func(v *src.ActiveContStruct) {
+          log.Info("hihihiha")
           v.Id = ""
         })
         app.Logger().Info(`ActiveContest set to "" by ` + apis.RequestInfo(c).Admin.Email)
@@ -403,6 +407,7 @@ func main() {
     text_ = strings.TrimSuffix(text_, "</p>")
 
     src.ActiveContest.With(func(v *src.ActiveContStruct) {
+      log.Info("hihihiha")
       v.Id = text_
     })
 
@@ -416,6 +421,7 @@ func main() {
     if err != nil { panic(err) }
 
     src.ActiveContest.With(func(v *src.ActiveContStruct) {
+      log.Info("hihihiha")
       v.Start = t
     })
 
@@ -429,6 +435,7 @@ func main() {
     if err != nil { panic(err) }
 
     src.ActiveContest.With(func(v *src.ActiveContStruct) {
+      log.Info("hihihiha")
       v.End = t2
     })
 
