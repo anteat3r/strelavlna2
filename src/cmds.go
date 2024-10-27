@@ -107,11 +107,19 @@ func LoadProbEndpJson(dao *daos.Dao) echo.HandlerFunc {
       st := "new"
       if l.Fields.State == 1 { st = "ok" }
       if l.Fields.State == 2 { st = "wrong" }
+      diff := l.Fields.Diff
+      if diff == "B" { diff = "A" }
+      if diff == "C" { diff = "B" }
+      if diff == "D" { diff = "B" }
+      if diff == "E" { diff = "C" }
+      if diff == "F" { diff = "C" }
+      text := strings.ReplaceAll(l.Fields.Text, "\\$$", "\\$")
+      text = strings.ReplaceAll(text, "\\$", "$")
 			rec.Set("type", tp)
 			rec.Set("name", l.Fields.Type + "-" + strconv.Itoa(l.Id))
 			rec.Set("solution", l.Fields.Sol)
-			rec.Set("diff", l.Fields.Diff)
-			rec.Set("text", l.Fields.Text)
+			rec.Set("diff", diff)
+			rec.Set("text", text)
       rec.Set("state", st)
       rec.Set("auto", l.Fields.Auto == 0)
       rec.Set("img", l.Fields.Img)
