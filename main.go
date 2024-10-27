@@ -456,6 +456,19 @@ func main() {
       })
     }
 
+    src.Teams.With(func(v *map[string]*src.RWMutexWrap[src.TeamS]) {
+      ntm := src.NewRWMutexWrap(src.TeamS{
+        Id: "j9zq7xjej6pyi53",
+        Chat: make([]src.ChatMsg, 0),
+        ChatChecksCache: make(map[*src.RWMutexWrap[src.ProbS]]string),
+        Bought: make(map[*src.RWMutexWrap[src.ProbS]]struct{}),
+        Pending: make(map[*src.RWMutexWrap[src.ProbS]]struct{}),
+        Solved: make(map[*src.RWMutexWrap[src.ProbS]]struct{}),
+        Sold: make(map[*src.RWMutexWrap[src.ProbS]]struct{}),
+      })
+      (*v)["j9zq7xjej6pyi53"] = &ntm
+    })
+
     return nil
   })
 

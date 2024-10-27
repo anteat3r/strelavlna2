@@ -198,8 +198,12 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     var team TeamM
     Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
-      team = v[teamid]
+      team, ok = v[teamid]
     })
+    if !ok {
+      log.Error("invalid teamid", teamid)
+      return dbErr("invalid teamid", teamid)
+    }
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
