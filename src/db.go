@@ -52,6 +52,13 @@ func (w *RWMutexWrap[T]) UnmarshalJSON(b []byte) error {
   return nil
 }
 
+func (w *RWMutexWrap[T]) GetPrimitiveVal() (v T) {
+  w.m.RLock()
+  defer w.m.RUnlock()
+  v = w.v
+  return
+}
+
 type ChatMsg struct {
   Admin bool
   Prob ProbM
@@ -833,15 +840,18 @@ func DBDump() error {
   resb, err := json.Marshal(DBData)
   if err != nil { return err }
 
+  ac := ActiveContest.GetPrimitiveVal().Id
+
   err = os.WriteFile(
-    "/opt/strelavlna2/dist/svdata.json", 
+    "/opt/strelavlna2/dist/svdata_" + ac + ".json", 
     resb, fs.FileMode(os.O_WRONLY),
   )
   return err
 }
 
 func DBLoadFromDump() error {
-  resb, err := os.ReadFile("/opt/strelavlna2/dist/svdata.json")
+  ac := ActiveContest.GetPrimitiveVal().Id
+  resb, err := os.ReadFile("/opt/strelavlna2/dist/svdata_" + ac + ".json")
   if err != nil { return err }
 
   err = json.Unmarshal(resb, &DBData)
@@ -849,6 +859,13 @@ func DBLoadFromDump() error {
 }
 
 func DBLoadFromPB() error {
+  ac := ActiveContest.GetPrimitiveVal().Id
+  teams, err := App.Dao().FindRecordsByFilter(
+    "teams",
+    `contest = "` + ac + `"`,
+    "updated", 0, 0,
+  )
+  if err != nil { return err }
   return nil
 }
 

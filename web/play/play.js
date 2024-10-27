@@ -364,6 +364,14 @@ function updateChat(){
     if(focused_check == "" || !problems.some(prob => prob.id == focused_check)){
         focused_check = "";
         for(const message of global_chat){
+            let match = message.content.match(/!gif (.+)/)
+            if (match !== null) {
+                conversation_wrapper.innerHTML += 
+                `<div class="conversation-row ${message.author == "team" ? "message-my" : "message-their"}">
+                    <img class="conversation-message" src="https://media.tenor.com/${match[1]}/hhgf.gif" />
+                </div>`;
+                continue;
+            }
             conversation_wrapper.innerHTML += 
             `<div class="conversation-row ${message.author == "team" ? "message-my" : "message-their"}">
                 <p class="conversation-message">${message.content}</p>
@@ -372,6 +380,14 @@ function updateChat(){
         return;
     }
     for(const message of problems.find(prob => prob.id == focused_check).chat){
+        let match = message.content.match(/!gif (.+)/)
+        if (match !== null) {
+            conversation_wrapper.innerHTML += 
+            `<div class="conversation-row ${message.author == "team" ? "message-my" : "message-their"}">
+                <img class="conversation-message" src="https://media.tenor.com/${match[1]}/hhgf.gif" />
+            </div>`;
+            continue;
+        }
         conversation_wrapper.innerHTML += 
         `<div class="conversation-row ${message.author == "team" ? "message-my" : "message-their"}">
             <p class="conversation-message">${message.content}</p>
