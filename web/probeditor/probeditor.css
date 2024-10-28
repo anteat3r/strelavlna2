@@ -472,6 +472,7 @@
     justify-content: space-around;
     align-items: center;
     padding: 20px;
+    user-select: none;
 }
 .editor-type{
     font-family: 'Lexend';
@@ -845,7 +846,7 @@ th:last-child, td:last-child{
     opacity: 0.5;
 }
 
-.MJX-TEX{
+.latex-styled .MJX-TEX{
     font-size: 25px;
     background-color: #e3f8ff;
     padding: 10px;

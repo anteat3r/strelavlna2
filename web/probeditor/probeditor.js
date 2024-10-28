@@ -125,20 +125,91 @@ function updateFinallook(){
     const finallook_text_DOM = document.getElementById("finallook-text");
     const finallook_image_DOM = document.getElementById("finallook-image");
 
+    const add_image_button = document.getElementById("add-image");
+    const remove_image_button = document.getElementById("remove-image");
+
+
     finallook_title_DOM.innerHTML = prob.title;
-    finallook_text_DOM.innerHTML = prob.content;
-    finallook_image_DOM.src = prob.image;
+    finallook_text_DOM.innerHTML = parseContentForLatex(prob.content);
+    if(prob.image != ""){
+        finallook_image_DOM.src = `https://strela-vlna.gchd.cz/api/files/probs/${prob.id}/${prob.image}`;
+    }else{
+        finallook_image_DOM.src = "";
+    }
+
+    if(prob.image == ""){
+        add_image_button.classList.remove("disabled");
+        remove_image_button.classList.add("disabled");
+    }else{
+        add_image_button.classList.add("disabled");
+        remove_image_button.classList.remove("disabled");
+    }
 
     MathJax.typeset();
+}
+
+function parseContentForLatex(txt){
+    let newtxt = "";
+    let current_state = 0;
+    let i = 0;
+    for(;i < txt.length - 1; i++){
+        if(txt[i] == "$" && txt[i + 1] == "$"){
+            if(current_state == 0){
+                current_state = 2;
+                newtxt += `<span class="latex-styled">$`;
+            }else if(current_state == 1){
+                newtxt += "$$";
+            }else if(current_state == 2){
+                current_state = 0;
+                newtxt += `$</span>`;
+            }
+            i++;
+        }else if(txt[i] == "$" && txt[i + 1] != "$"){
+            if(current_state == 0){
+                current_state = 1;
+                newtxt += "$";
+            }else if(current_state == 1){
+                newtxt += "$";
+                current_state = 0;
+            }else if(current_state == 2){
+                console.log("parsing error");
+            }
+        }else{
+            newtxt += txt[i];
+        }
+    }
+    if(i == txt.length - 1){
+        newtxt += txt[txt.length - 1];
+    }
+    console.log(newtxt);
+    return newtxt;
 }
 
 document.getElementById('add-image').addEventListener('click', function() {
     document.getElementById('image-input').click();
 });
+document.getElementById("image-input").addEventListener("change", async function(){
+    if(this.classList.contains("disabled")) return;
+    const form_data = new FormData();
+    const file = this.files[0];
+    form_data.append("img", file);
+    const response = await pb.collection('probs').update(focused_prob, {img: file});
+    probs.find(prob => prob.id == focused_prob).image = response.img;
+    console.log(file.name);
+    updateFinallook();
+});
+
+document.getElementById("remove-image").addEventListener("click", async function(){
+    if(this.classList.contains("disabled")) return;
+    const prob = probs.find(prob => prob.id == focused_prob);
+    const response = await pb.collection('probs').update(focused_prob, {img: ""});
+    probs.find(prob => prob.id == focused_prob).image = "";
+    updateFinallook();
+});
 
 document.getElementById("regenerate").addEventListener("click", function(){
     updateFinallook();
-})
+});
 
 
 //left editor
@@ -147,6 +218,10 @@ const rank_A_DOOM = document.getElementById("problem-rank-dropdown-item-a");
 const rank_B_DOOM = document.getElementById("problem-rank-dropdown-item-b");
 const rank_C_DOOM = document.getElementById("problem-rank-dropdown-item-c");
 const rank_txt_DOM = document.getElementById("problem-rank-selector-rank");
+
+const title_DOM = document.getElementById("problem-title-input");
+const content_DOM = document.getElementById("problem-content-textarea");
+const solution_DOM = document.getElementById("problem-solution-input");
 
 
 rank_DOM.addEventListener("click", function(){
@@ -177,6 +252,27 @@ rank_C_DOOM.addEventListener("click", function(){
     updateProbList();
     rank_DOM.parentElement.classList.toggle("oppened");
 });
+
+title_DOM.addEventListener("blur", function(){
+    if(focused_prob == "") return;
+    const prob = probs.find(prob => prob.id == focused_prob);
+    const prob_DOM = document.getElementById(prob.id);
+    prob.title = title_DOM.value;
+    prob_DOM.querySelector(".problem-selector-title").innerHTML = prob.title;
+});
+
+content_DOM.addEventListener("blur", function(){
+    if(focused_prob == "") return;
+    const prob = probs.find(prob => prob.id == focused_prob);
+    prob.content = content_DOM.value;
+});
+
+solution_DOM.addEventListener("blur", function(){
+    if(focused_prob == "") return;
+    const prob = probs.find(prob => prob.id == focused_prob);
+    prob.solution = solution_DOM.value;
+});
+
 
 function updateRankSelector(){
     const prob = probs.find(prob => prob.id == focused_prob);
