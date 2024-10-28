@@ -128,6 +128,7 @@
 
 #problem-selector{
     width: 220px;
+    min-width: 220px;
     padding: 10px;
     padding-inline: 0px;
     display: flex;
