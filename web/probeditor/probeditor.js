@@ -4,9 +4,12 @@ await login();
 
 //globals
 
+const max_image_width = 700;
+const max_image_height = 400;
 
 let focused_prob = "";
-let my_id = pb.authStore.model.id;
+let focused_const = "";
+let my_id = pb.authStore.model ? pb.authStore.model.id : "";
 let editor_types = ["finallook", "table", "generationeditor", "table-plus-generationeditor"];
 let editor_type = "finallook";
 let prob_filter = "all";
@@ -51,7 +54,8 @@ async function load(){
             content: item.text,
             solution: item.solution,
             image: item.img,
-            workers: item.workers.split(" ")
+            workers: item.workers.split(" "),
+            author: item.author
         });
     }
 
@@ -59,7 +63,7 @@ async function load(){
         table.push({
             id: item.id,
             name: item.name,
-            symmbol: item.symbol,
+            symbol: item.symbol,
             value: item.value,
             unit: item.unit,
             description: item.desc
@@ -132,9 +136,31 @@ function updateFinallook(){
     finallook_title_DOM.innerHTML = prob.title;
     finallook_text_DOM.innerHTML = parseContentForLatex(prob.content);
     if(prob.image != ""){
+        const img = new Image();
         finallook_image_DOM.src = `https://strela-vlna.gchd.cz/api/files/probs/${prob.id}/${prob.image}`;
+        img.onload = function(){
+            let width = img.width;
+            let height = img.height;
+            let shrink = 1;
+            if(width / max_image_width > shrink){
+                shrink = width / max_image_width;
+            }
+            if(height / max_image_height > shrink){
+                shrink = height / max_image_height;
+            }
+            if(shrink > 1){
+                width = width / shrink;
+                height = height / shrink;
+            }
+            finallook_image_DOM.style.width = `${width}px`;
+            finallook_image_DOM.style.height = `${height}px`;
+
+        };
+        img.src = finallook_image_DOM.src;
     }else{
         finallook_image_DOM.src = "";
+        finallook_image_DOM.style.width = `0px`;
+        finallook_image_DOM.style.height = `0px`;
     }
 
     if(prob.image == ""){
@@ -211,6 +237,31 @@ document.getElementById("regenerate").addEventListener("click", function(){
     updateFinallook();
 });
 
+function updateTable(){
+    const table_DOM = document.getElementById("table-body");
+
+    table_DOM.innerHTML = "";
+
+    for(let item of table){
+        table_DOM.innerHTML += `
+            <tr id=${item.id} class="${focused_const == item.id ? "selected" : ""}">
+                <td>${item.name}</td>
+                <td>${item.symbol}</td>
+                <td>${item.value}</td>
+                <td>${item.unit}</td>
+            </tr>
+            `
+    }
+    for(let item of table_DOM.children){
+        item.addEventListener("click", function(){
+            focused_const = this.id;
+            updateTable();
+        })
+    }
+
+    MathJax.typeset();
+}
+
 
 //left editor
 const rank_DOM = document.getElementById("problem-rank-selector-button");
@@ -258,7 +309,7 @@ title_DOM.addEventListener("blur", function(){
     const prob = probs.find(prob => prob.id == focused_prob);
     const prob_DOM = document.getElementById(prob.id);
     prob.title = title_DOM.value;
-    prob_DOM.querySelector(".problem-selector-title").innerHTML = prob.title;
+    if(prob_DOM) prob_DOM.querySelector(".problem-selector-title").innerHTML = prob.title;
 });
 
 content_DOM.addEventListener("blur", function(){
@@ -325,9 +376,15 @@ function updateProbList(){
     const prob_list_b = document.getElementById("problem-section-b");
     const prob_list_c = document.getElementById("problem-section-c");
 
-    const probs_a = probs.filter(prob => prob.rank == "A" && (prob.workers[0] == my_id || prob_filter == "all"));
-    const probs_b = probs.filter(prob => prob.rank == "B" && (prob.workers[0] == my_id || prob_filter == "all"));
-    const probs_c = probs.filter(prob => prob.rank == "C" && (prob.workers[0] == my_id || prob_filter == "all"));
+    const probs_a = probs.filter(prob => prob.rank == "A" && (prob_filter == "all" || prob.author == my_id));
+    const probs_b = probs.filter(prob => prob.rank == "B" && (prob_filter == "all" || prob.author == my_id));
+    const probs_c = probs.filter(prob => prob.rank == "C" && (prob_filter == "all" || prob.author == my_id));
+
+    if(prob_filter != "all"){
+        for(let item of probs){
+            console.log(item.author);
+        }
+    }
 
     prob_list_a.innerHTML = "";
     prob_list_b.innerHTML = "";
@@ -361,22 +418,22 @@ function updateProbList(){
     for(let item of document.getElementsByClassName("problem")){
         item.addEventListener("click", function(){
             if(focused_prob == this.id) return;
-            if(focused_prob != ""){
+            if(focused_prob != "" && document.getElementById(focused_prob)){
                 document.getElementById(focused_prob).classList.remove("selected");
             }
             focused_prob = this.id;
             this.classList.add("selected");
+            document.getElementById("problems-delete").classList.remove("disabled");
             updateRankSelector();
             // updateRightEditor();
             updateFinallook();
             updateLeftEditor();
+
         });
     }
 
     if(focused_prob == ""){
         document.getElementById("problems-delete").classList.add("disabled");
-    }else{
-        document.getElementById("problems-delete").classList.remove("disabled");
     }
 }
 
@@ -387,17 +444,30 @@ function deleteFocusedProb(){
     updateProbList();
 }
 
-function addProb(){
-    const newId = getFreeProbId();
+async function addProb(){
+    const response = await pb.collection('probs').create({
+        name: "Nová úloha",
+        diff: "A",
+        text: "",
+        solution: "",
+        img: "",
+        workers: "",
+        author: my_id
+    });
     probs.push({
-        id: newId,
+        id: response.id,
         title: "Nová úloha",
-        rank: "A",
         content: "",
         solution: "",
-    });
-    focused_prob = newId;
+        rank: "A",
+        workers: [],
+        author: my_id
+    })
+    focused_prob = response.id;
+
     updateProbList();
+    updateLeftEditor();
+    updateFinallook();
 }
 
 function getFreeProbId() {
@@ -411,8 +481,26 @@ function getFreeProbId() {
 document.getElementById("problems-add").addEventListener("click", addProb);
 document.getElementById("problems-delete").addEventListener("click", deleteFocusedProb);
 
+const prob_selector_all = document.getElementById("problem-selector-all");
+const prob_selector_my = document.getElementById("problem-selector-my");
+
+prob_selector_all.addEventListener("click", function(){
+    prob_filter = "all";
+    prob_selector_all.classList.add("selected");
+    prob_selector_my.classList.remove("selected");
+    updateProbList();
+})
+prob_selector_my.addEventListener("click", function(){
+    prob_filter = "my";
+    prob_selector_my.classList.add("selected");
+    prob_selector_all.classList.remove("selected");
+    updateProbList();
+})
+
+
 
 
 
 await load();
 updateProbList();
+updateTable();
