@@ -2,6 +2,198 @@ import PocketBase from '../pocketbase.es.mjs';
 const pb = new PocketBase("https://strela-vlna.gchd.cz");
 await login();
 
+
+//classes
+
+class TableRow {
+    constructor(id, name, symbol, value, unit, description) {
+      this._id = id;
+      this._name = name;
+      this._symbol = symbol;
+      this._value = value;
+      this._unit = unit;
+      this._description = description;
+
+      this._name_modified = false;
+      this._symbol_modified = false;
+      this._value_modified = false;
+      this._unit_modified = false;
+      this._description_modified = false;
+    }
+  
+    // Getters and setters
+    get id() {
+      return this._id;
+    }
+  
+    set id(newId) {
+      console.log("setting id is forbiden");
+    }
+  
+    get name() {
+      return this._name;
+    }
+  
+    set name(newName) {
+      this._name_modified = true;
+      this._name = newName;
+    }
+  
+    get symbol() {
+      return this._symbol;
+    }
+  
+    set symbol(newSymbol) {
+      this._symbol_modified = true;
+      this._symbol = newSymbol;
+    }
+  
+    get value() {
+      return this._value;
+    }
+  
+    set value(newValue) {
+      this._value_modified = true;
+      this._value = newValue;
+    }
+  
+    get unit() {
+      return this._unit;
+    }
+  
+    set unit(newUnit) {
+      this._unit_modified = true;
+      this._unit = newUnit;
+    }
+  
+    get description() {
+      return this._description;
+    }
+  
+    set description(newDescription) {
+      this._description_modified = true;
+      this._description = newDescription;
+    }
+
+    pushChanges() {
+      if (!(this._name_modified || this._symbol_modified || this._value_modified || this._unit_modified || this._description_modified)) return;
+
+      const update_data = {};
+
+      if (this._name_modified) update_data.name = this._name;
+      if (this._symbol_modified) update_data.symbol = this._symbol;
+      if (this._value_modified) update_data.value = this._value;
+      if (this._unit_modified) update_data.unit = this._unit;
+      if (this._description_modified) update_data.desc = this._description;
+
+      console.log(update_data);
+
+      pb.collection('consts').update(this.id, update_data);
+    }
+}
+
+
+class Prob {
+    constructor(id, title, rank, content, solution, image, author) {
+      this._id = id;
+      this._title = title;
+      this._rank = rank;
+      this._content = content;
+      this._solution = solution;
+      this._image = image;
+      this._author = author;
+
+      this._title_modified = false;
+      this._rank_modified = false;
+      this._content_modified = false;
+      this._solution_modified = false;
+      this._image_modified = false;
+      this._author_modified = false;
+    }
+  
+    // Getters and setters
+    get id() {
+      return this._id;
+    }
+  
+    set id(newId) {
+      console.log("setting id is forbiden");
+    }
+  
+    get title() {
+      return this._title;
+    }
+  
+    set title(newTitle) {
+      this._title_modified = true;
+      this._title = newTitle;
+    }
+  
+    get rank() {
+      return this._rank;
+    }
+  
+    set rank(newRank) {
+      this._rank_modified = true;
+      this._rank = newRank;
+    }
+  
+    get content() {
+      return this._content;
+    }
+  
+    set content(newContent) {
+      this._content_modified = true;
+      this._content = newContent;
+    }
+  
+    get solution() {
+      return this._solution;
+    }
+  
+    set solution(newSolution) {
+      this._solution_modified = true;
+      this._solution = newSolution;
+    }
+  
+    get image() {
+      return this._image;
+    }
+  
+    set image(newImage) {
+      this._image_modified = true;
+      this._image = newImage;
+    }
+
+    get author() {
+        return this._author;
+    }
+
+    set author(newAuthor) {
+        this._author_modified = true;
+        this._author = newAuthor;
+    }
+
+    pushChanges() {
+        // console.log("pushing changes");
+      if (!(this._title_modified || this._rank_modified || this._content_modified || this._solution_modified || this._image_modified || this._author_modified)) return;
+
+      const update_data = {};
+
+      if (this._title_modified) update_data.name = this._title;
+      if (this._rank_modified) update_data.diff = this._rank;
+      if (this._content_modified) update_data.text = this._content;
+      if (this._solution_modified) update_data.solution = this._solution;
+      if (this._image_modified) update_data.img = this._image;
+      if (this._author_modified) update_data.author = this._author;
+
+      console.log(update_data);
+
+      pb.collection('probs').update(this.id, update_data);
+    }
+}
+
+
 //globals
 
 const max_image_width = 700;
@@ -47,27 +239,26 @@ async function load(){
     const result_items = result_probs.items;
     const consts_items = consts_probs.items;
     for(let item of result_items){
-        probs.push({
-            id: item.id,
-            title: item.name,
-            rank: item.diff,
-            content: item.text,
-            solution: item.solution,
-            image: item.img,
-            workers: item.workers.split(" "),
-            author: item.author
-        });
+        probs.push(new Prob(
+            item.id,
+            item.name,
+            item.diff,
+            item.text,
+            item.solution,
+            item.img,
+            item.author
+        ));
     }
 
     for(let item of consts_items){
-        table.push({
-            id: item.id,
-            name: item.name,
-            symbol: item.symbol,
-            value: item.value,
-            unit: item.unit,
-            description: item.desc
-        });
+        table.push(new TableRow(
+            item.id,
+            item.name,
+            item.symbol,
+            item.value,
+            item.unit,
+            item.desc
+        ));
     }
 }
 
@@ -497,10 +688,20 @@ prob_selector_my.addEventListener("click", function(){
     updateProbList();
 })
 
-
+document.getElementById("save-changes-button").addEventListener("click", async function(){
+    for(let prob of probs){
+        // console.log(prob);
+        prob.pushChanges();
+    }
+    for(let row of table){
+        row.pushChanges();
+    }
+})
 
 
 
 await load();
 updateProbList();
 updateTable();
+
+

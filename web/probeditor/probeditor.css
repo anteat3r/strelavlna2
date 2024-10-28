@@ -149,14 +149,14 @@
     padding-inline: 10px;
 }
 #problem-section-a{
-    background: linear-gradient(to top, #24cb8033 0%, transparent 50%);
+    background: linear-gradient(to top, #24cb8033 0%, transparent 100%);
 }
 #problem-section-b{
     background: linear-gradient(to bottom, #3eb1df33 0%, transparent 50%),
                 linear-gradient(to top, #3eb1df33 0%, transparent 50%);
 }
 #problem-section-c{
-    background: linear-gradient(to bottom, #e12f6a33 0%, transparent 50%);
+    background: linear-gradient(to bottom, #e12f6a33 0%, transparent 100%);
 }
 .problem-selector-item{
     padding-top: 5px;
