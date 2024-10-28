@@ -844,3 +844,11 @@ th:last-child, td:last-child{
     background-color: white;
     opacity: 0.5;
 }
+
+.MJX-TEX{
+    font-size: 25px;
+    background-color: #e3f8ff;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 10px;
+}

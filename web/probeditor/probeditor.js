@@ -1,4 +1,4 @@
-import PocketBase from '../../node_modules/pocketbase/dist/pocketbase.es.mjs'
+import PocketBase from '../pocketbase.es.mjs';
 const pb = new PocketBase("https://strela-vlna.gchd.cz");
 await login();
 
@@ -11,13 +11,14 @@ let editor_types = ["finallook", "table", "generationeditor", "table-plus-genera
 let editor_type = "finallook";
 let prob_filter = "all";
 let table = [
-    {
-        id: "hkajs2das65d1a3",
-        name: "Gravitační konstanta",
-        symmbol: "g",
-        value: "9.81",
-        unit: "m/s2"
-    }
+    // {
+    //     id: "hkajs2das65d1a3",
+    //     name: "Gravitační konstanta",
+    //     symmbol: "g",
+    //     value: "9.81",
+    //     unit: "m/s2",
+    //     description: "Gravitační konstanta"
+    // }
 ];
 let probs = [
     // {
@@ -33,14 +34,16 @@ let probs = [
 
 async function login(){
     if(pb.authStore.isValid) return;
-    setCookie("logging_from", window.location.href, 1);
+    localStorage.setItem("logging_from", window.location.href);
     window.location.href = "../adlogin";
 }
 
 async function load(){
-    const result = await pb.collection("probs").getList(1, 100000000);
-    const items = result.items;
-    for(let item of items){
+    const result_probs = await pb.collection("probs").getList(1, 100000000);
+    const consts_probs = await pb.collection("consts").getList(1, 100000000);
+    const result_items = result_probs.items;
+    const consts_items = consts_probs.items;
+    for(let item of result_items){
         probs.push({
             id: item.id,
             title: item.name,
@@ -49,6 +52,17 @@ async function load(){
             solution: item.solution,
             image: item.img,
             workers: item.workers.split(" ")
+        });
+    }
+
+    for(let item of consts_items){
+        table.push({
+            id: item.id,
+            name: item.name,
+            symmbol: item.symbol,
+            value: item.value,
+            unit: item.unit,
+            description: item.desc
         });
     }
 }
@@ -104,9 +118,27 @@ function updateRightEditor(){
     }
 }
 
+function updateFinallook(){
+    if(focused_prob == "") return;
+    const prob = probs.find(prob => prob.id == focused_prob);
+    const finallook_title_DOM = document.getElementById("finallook-title");
+    const finallook_text_DOM = document.getElementById("finallook-text");
+    const finallook_image_DOM = document.getElementById("finallook-image");
+
+    finallook_title_DOM.innerHTML = prob.title;
+    finallook_text_DOM.innerHTML = prob.content;
+    finallook_image_DOM.src = prob.image;
+
+    MathJax.typeset();
+}
+
 document.getElementById('add-image').addEventListener('click', function() {
     document.getElementById('image-input').click();
 });
+
+document.getElementById("regenerate").addEventListener("click", function(){
+    updateFinallook();
+})
 
 
 //left editor
@@ -240,6 +272,7 @@ function updateProbList(){
             this.classList.add("selected");
             updateRankSelector();
             // updateRightEditor();
+            updateFinallook();
             updateLeftEditor();
         });
     }

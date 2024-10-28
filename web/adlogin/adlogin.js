@@ -1,4 +1,4 @@
-import PocketBase from '../../node_modules/pocketbase/dist/pocketbase.es.mjs'
+import PocketBase from '../pocketbase.es.mjs';
 const pb = new PocketBase("https://strela-vlna.gchd.cz");
 
 const username_DOM = document.getElementById("username");
@@ -22,9 +22,9 @@ async function login(username, password){
         return;
     }
     if(pb.authStore.isValid){
-        if(getCookie("logging_from")){
-            window.location.href = getCookie("logging_from");
-            deleteCookie("logging_from");
+        if(localStorage.getItem("logging_from")){
+            window.location.href = localStorage.getItem("logging_from");
+            localStorage.removeItem("logging_from");
         }else{
             logout_button.classList.remove("hidden");
         }
@@ -43,9 +43,9 @@ logout_button.addEventListener("click", logout);
 
 function checkAlreadyLoggedIn(){
     if(pb.authStore.isValid){
-        if(getCookie("logging_from")){
-            window.location.href = getCookie("logging_from");
-            deleteCookie("logging_from");
+        if(localStorage.getItem("logging_from")){
+            window.location.href = localStorage.getItem("logging_from");
+            localStorage.removeItem("logging_from");
             return true;
         }else{
             login_message.innerHTML = "Jste již přihlášen.";
