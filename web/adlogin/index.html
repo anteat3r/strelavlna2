@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="../images/Icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href='https://fonts.googleapis.com/css?family=Lexend' rel='stylesheet'>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="../adlogin/adlogin.css">
+    <title>Dopplerova vlna</title>
+  </head>
+  <body class="">
+    <div class="container">
+      <header>
+        <div class="row-segment grid-nav navbar-play">
+          <div class="nav1">
+            <a href="../"><img id="logo" src="../images/Logo_withname3.png" width="446px" height="50px"></a>
+          </div>
+        </div>
+      </header>
+      <div id="main">
+        <div class="form-wrapper">
+          <form class="form-default form-play">
+            <h2>Admin - přihlášení</h2>
+            <p class="lexend font-15 color-play" style="margin-bottom:5px;">Zadejte jméno a heslo:</p>
+            <div class="flex-row wrap space-between">
+              <div class="flex-culumn space-between">
+                <input type="text" id="username" placeholder="email/jméno" class="text-input input-play" style="margin-bottom: 10px">
+                <input type="text" id="password" placeholder="heslo" class="text-input input-play" style="margin-bottom: 0px">
+                <p id="login-message" class="lexend font-12" style="margin-top:5px; margin-bottom: 30px;"></p>
+                <div id="button-wrapper">
+                  <button type="button" class="submit-button-play" id="login">Přihlásit</button>
+                  <button type="button" class="submit-button-main" id="logout">Odhlásit</button>
+                </div>
+              </div>
+              <canvas id="loading-animation-canvas" width="90" height="90" class="margin-20"></canvas>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="../adlogin/loading_animation.js"></script>
+  <script src="../adlogin/adlogin.js" type="module"></script>
+  <script src="../adlogin/cookies.js"></script>
+</html>

@@ -1,6 +1,6 @@
 import PocketBase from '../../node_modules/pocketbase/dist/pocketbase.es.mjs'
 const pb = new PocketBase("https://strela-vlna.gchd.cz");
-// await login();
+await login();
 
 //globals
 
@@ -9,7 +9,7 @@ let focused_prob = "";
 let my_id = pb.authStore.model.id;
 let editor_types = ["finallook", "table", "generationeditor", "table-plus-generationeditor"];
 let editor_type = "finallook";
-let prob_filter = "my";
+let prob_filter = "all";
 let table = [
     {
         id: "hkajs2das65d1a3",
@@ -32,8 +32,9 @@ let probs = [
 
 
 async function login(){
-    const userData = await pb.collection('correctors').authWithPassword('ifyouareabotscrapingthis', 'youarenoobatik');
-    console.log(userData);
+    if(pb.authStore.isValid) return;
+    setCookie("logging_from", window.location.href, 1);
+    window.location.href = "../adlogin";
 }
 
 async function load(){
@@ -96,7 +97,6 @@ function updateRightEditor(){
         right_editor_elements[1].classList.remove("small");
     }else if(editor_type == "generationeditor"){
         right_editor_elements[2].classList.remove("hidden");
-        console.log("heheheha");
     }else{
         right_editor_elements[1].classList.remove("hidden");
         right_editor_elements[2].classList.remove("hidden");

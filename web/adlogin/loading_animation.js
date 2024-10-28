@@ -66,13 +66,13 @@ function hexToRgb(hex) {
     } : null;
 }
 
-function AnimationFrame(){
-    requestAnimationFrame(AnimationFrame);
+function frame(){
+    requestAnimationFrame(frame);
     updateAccualPositions(0.3);
     draw();
 }
-console.log("heheheha");
-AnimationFrame();
+
+frame();
 
 setInterval(updateTargetPositions, 100);
 
