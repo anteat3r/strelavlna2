@@ -820,12 +820,19 @@ prob_selector_all.addEventListener("click", function(){
     prob_selector_all.classList.add("selected");
     prob_selector_my.classList.remove("selected");
     updateProbList();
+    scrollToFocusedProb();
 })
 prob_selector_my.addEventListener("click", function(){
     prob_filter = "my";
     prob_selector_my.classList.add("selected");
     prob_selector_all.classList.remove("selected");
+    
+    if(focused_prob != "" && !probs.some(prob => prob.id == focused_prob && prob.author == my_id)){
+        focused_prob = "";
+    }
+    
     updateProbList();
+    scrollToFocusedProb();
 })
 
 
