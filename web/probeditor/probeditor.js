@@ -457,6 +457,7 @@ function parseContentForLatex(txt){
 }
 
 document.getElementById('add-image').addEventListener('click', function() {
+    if(focused_prob == "") return;
     document.getElementById('image-input').click();
 });
 document.getElementById("image-input").addEventListener("change", async function(){
@@ -471,6 +472,7 @@ document.getElementById("image-input").addEventListener("change", async function
 });
 
 document.getElementById("remove-image").addEventListener("click", async function(){
+    if(focused_prob == "") return;
     if(this.classList.contains("disabled")) return;
     const prob = probs.find(prob => prob.id == focused_prob);
     const response = await pb.collection('probs').update(focused_prob, {img: ""});
@@ -479,6 +481,7 @@ document.getElementById("remove-image").addEventListener("click", async function
 });
 
 document.getElementById("regenerate").addEventListener("click", function(){
+    if(focused_prob == "") return;
     updateFinallook();
 });
 
@@ -616,6 +619,7 @@ rank_A_DOOM.addEventListener("click", function(){
     prob.rank = "A";
     updateRankSelector();
     updateProbList();
+    scrollToFocusedProb();
     rank_DOM.parentElement.classList.toggle("oppened");
 });
 rank_B_DOOM.addEventListener("click", function(){
@@ -623,6 +627,7 @@ rank_B_DOOM.addEventListener("click", function(){
     prob.rank = "B";
     updateRankSelector();
     updateProbList();
+    scrollToFocusedProb();
     rank_DOM.parentElement.classList.toggle("oppened");
 });
 rank_C_DOOM.addEventListener("click", function(){
@@ -630,6 +635,7 @@ rank_C_DOOM.addEventListener("click", function(){
     prob.rank = "C";
     updateRankSelector();
     updateProbList();
+    scrollToFocusedProb();
     rank_DOM.parentElement.classList.toggle("oppened");
 });
 
