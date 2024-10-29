@@ -35,6 +35,7 @@ class TableRow {
     }
   
     set name(newName) {
+      changesUnsaved();
       this._name_modified = true;
       this._name = newName;
     }
@@ -44,6 +45,7 @@ class TableRow {
     }
   
     set symbol(newSymbol) {
+      changesUnsaved();
       this._symbol_modified = true;
       this._symbol = newSymbol;
     }
@@ -53,6 +55,7 @@ class TableRow {
     }
   
     set value(newValue) {
+      changesUnsaved();
       this._value_modified = true;
       this._value = newValue;
     }
@@ -62,6 +65,7 @@ class TableRow {
     }
   
     set unit(newUnit) {
+      changesUnsaved();
       this._unit_modified = true;
       this._unit = newUnit;
     }
@@ -71,6 +75,7 @@ class TableRow {
     }
   
     set description(newDescription) {
+      changesUnsaved();
       this._description_modified = true;
       this._description = newDescription;
     }
@@ -89,6 +94,16 @@ class TableRow {
       console.log(update_data);
 
       pb.collection('consts').update(this.id, update_data);
+
+      this._name_modified = false;
+      this._symbol_modified = false;
+      this._value_modified = false;
+      this._unit_modified = false;
+      this._description_modified = false;
+    }
+
+    isChanged() {
+        return this._name_modified || this._symbol_modified || this._value_modified || this._unit_modified || this._description_modified;
     }
 }
 
@@ -125,6 +140,7 @@ class Prob {
     }
   
     set title(newTitle) {
+      changesUnsaved();
       this._title_modified = true;
       this._title = newTitle;
     }
@@ -134,6 +150,7 @@ class Prob {
     }
   
     set rank(newRank) {
+      changesUnsaved();
       this._rank_modified = true;
       this._rank = newRank;
     }
@@ -143,6 +160,7 @@ class Prob {
     }
   
     set content(newContent) {
+      changesUnsaved();
       this._content_modified = true;
       this._content = newContent;
     }
@@ -152,6 +170,7 @@ class Prob {
     }
   
     set solution(newSolution) {
+      changesUnsaved();
       this._solution_modified = true;
       this._solution = newSolution;
     }
@@ -161,6 +180,7 @@ class Prob {
     }
   
     set image(newImage) {
+      changesUnsaved();
       this._image_modified = true;
       this._image = newImage;
     }
@@ -170,8 +190,9 @@ class Prob {
     }
 
     set author(newAuthor) {
-        this._author_modified = true;
-        this._author = newAuthor;
+      changesUnsaved();
+      this._author_modified = true;
+      this._author = newAuthor;
     }
 
     pushChanges() {
@@ -190,6 +211,17 @@ class Prob {
       console.log(update_data);
 
       pb.collection('probs').update(this.id, update_data);
+
+      this._title_modified = false;
+      this._rank_modified = false;
+      this._content_modified = false;
+      this._solution_modified = false;
+      this._image_modified = false;
+      this._author_modified = false;
+    }
+
+    isChanged() {
+        return this._title_modified || this._rank_modified || this._content_modified || this._solution_modified || this._image_modified || this._author_modified;
     }
 }
 
@@ -259,6 +291,28 @@ async function load(){
             item.unit,
             item.desc
         ));
+    }
+}
+
+document.getElementById("save-changes-button").addEventListener("click", async function(){
+    for(let prob of probs){
+        // console.log(prob);
+        prob.pushChanges();
+    }
+    for(let row of table){
+        row.pushChanges();
+    }
+
+    document.getElementById("save-changes-button").classList.remove("unsaved");
+});
+
+function changesUnsaved(){
+    document.getElementById("save-changes-button").classList.add("unsaved");
+}
+
+window.onbeforeunload = function() {
+    if (document.getElementById("save-changes-button").classList.contains("unsaved")) {
+        return "Máte neuložené změny";
     }
 }
 
@@ -445,6 +499,7 @@ function updateTable(){
     }
     for(let item of table_DOM.children){
         item.addEventListener("click", function(){
+            if(document.querySelector(".editing")) return;
             focused_const = this.id;
             updateTable();
         })
@@ -452,6 +507,89 @@ function updateTable(){
 
     MathJax.typeset();
 }
+
+document.getElementById("table-add").addEventListener("click",  async function(){
+    if(document.querySelector(".editing")) return;
+
+    const response = await pb.collection('consts').create({
+        name: "Nová konstanta",
+        symbol: "",
+        value: 0,
+        unit: "",
+        desc: ""
+    });
+
+    table.push(new TableRow(
+        response.id,
+        "Nová konstanta",
+        "",
+        0,
+        "",
+        ""
+    ));
+
+    focused_const = response.id;
+    updateTable();
+    document.getElementById("table-edit").click();
+});
+
+document.getElementById("table-edit").addEventListener("click", function(){
+    if(focused_const == "") return;
+
+    if(document.querySelector(".editing")){
+        document.querySelector(".editing").classList.remove("editing");
+
+        this.innerHTML = "Upravit";
+        document.getElementById("table-add").classList.remove("disabled");
+        document.getElementById("table-edit").classList.remove("active");
+        document.getElementById("table-delete").classList.remove("disabled");
+
+        updateTable();
+        return;
+    }
+
+
+    const row = table.find(row => row.id == focused_const);
+    const row_DOM = document.getElementById(focused_const);
+
+    row_DOM.classList.add("editing");
+    row_DOM.innerHTML = `
+        <td><input placeholder="Název" value="${row.name}" id="name"></td>
+        <td><input placeholder="Symbol" value="${row.symbol}" id="symbol"></td>
+        <td><input placeholder="Hodnota" value="${row.value}" id="value"></td>
+        <td><input placeholder="Jednotka" value="${row.unit}" id="unit"></td>
+        `;
+    
+    this.innerHTML = "Hotovo";
+    document.getElementById("table-add").classList.add("disabled");
+    document.getElementById("table-edit").classList.add("active");
+    document.getElementById("table-delete").classList.add("disabled");
+
+    const inputs = row_DOM.querySelectorAll("input");
+    for(let input of inputs){
+        input.addEventListener("input", function(){
+            const id = input.id;
+            const row = table.find(row => row.id == focused_const);
+
+            if(id == "name") row.name = input.value;
+            if(id == "symbol") row.symbol = input.value;
+            if(id == "value") row.value = input.value;
+            if(id == "unit") row.unit = input.value;
+        })
+    }
+});
+
+document.getElementById("table-delete").addEventListener("click", async function(){
+    if(focused_const == "") return;
+    if(document.querySelector(".editing")) return;
+
+    await pb.collection('consts').delete(focused_const);
+    table = table.filter(row => row.id != focused_const);
+    
+    focused_const = "";
+    
+    updateTable();
+});
 
 
 //left editor
@@ -628,9 +766,10 @@ function updateProbList(){
     }
 }
 
-function deleteFocusedProb(){
+async function deleteFocusedProb(){
     if(focused_prob == "") return;
     probs = probs.filter(prob => prob.id != focused_prob);
+    await pb.collection('probs').delete(focused_prob);
     focused_prob = "";
     updateProbList();
 }
@@ -645,18 +784,19 @@ async function addProb(){
         workers: "",
         author: my_id
     });
-    probs.push({
-        id: response.id,
-        title: "Nová úloha",
-        content: "",
-        solution: "",
-        rank: "A",
-        workers: [],
-        author: my_id
-    })
+    probs.push(new Prob(
+        response.id,
+        "Nová úloha",
+        "A",
+        "",
+        "",
+        "",
+        my_id
+    ));
     focused_prob = response.id;
-
+    
     updateProbList();
+    scrollToFocusedProb();
     updateLeftEditor();
     updateFinallook();
 }
@@ -688,15 +828,12 @@ prob_selector_my.addEventListener("click", function(){
     updateProbList();
 })
 
-document.getElementById("save-changes-button").addEventListener("click", async function(){
-    for(let prob of probs){
-        // console.log(prob);
-        prob.pushChanges();
-    }
-    for(let row of table){
-        row.pushChanges();
-    }
-})
+
+
+function scrollToFocusedProb(){
+    if(focused_prob == "") return;
+    document.getElementById(focused_prob).scrollIntoView({block: "center", behavior: "smooth"});
+}
 
 
 

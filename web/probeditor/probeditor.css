@@ -108,7 +108,7 @@
     text-align: center;
     padding: 5px;
     padding-inline: 15px;
-    border: 2px solid var(--color-secondary-dark);
+    border: 2px solid #c0d5dd;
     border-radius: 5px;
     transition: all 0.3s ease-out;
     margin-right: 30px;
@@ -119,6 +119,7 @@
 }
 #save-changes-button.unsaved{
     background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
     color: white;
 }
 #save-changes-button.unsaved:hover{
@@ -683,6 +684,13 @@ th:last-child, td:last-child{
     border-color: var(--color-secondary-light);
     transition: all 0.0s;
 }
+.disabled#table-add{
+    color: #c0d5dd;
+    background-color: white;
+    border-color: #c0d5dd;
+    transition: all 0.0s;
+    cursor: not-allowed;
+}
 #table-edit{
     font-family: 'Lexend';
     font-size: 12px;
@@ -703,6 +711,26 @@ th:last-child, td:last-child{
     border-color: var(--color-secondary-dark);
     transition: all 0.0s;
 }
+.disabled#table-edit{
+    color: #c0d5dd;
+    background-color: white;
+    border-color: #c0d5dd;
+    transition: all 0.0s;
+    cursor: not-allowed;
+}
+.active#table-edit{
+    color: white;
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
+    transition: all 0.3s;
+}
+.active#table-edit:hover{
+    color: white;
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary-light);
+    transition: all 0.0s;
+}
+
 #table-delete{
     font-family: 'Lexend';
     font-size: 12px;
@@ -722,6 +750,13 @@ th:last-child, td:last-child{
     background-color: #e12f56;
     border-color: #ee4980;
     transition: all 0.0s;
+}
+.disabled#table-delete{
+    color: #c0d5dd;
+    background-color: white;
+    border-color: #c0d5dd;
+    transition: all 0.0s;
+    cursor: not-allowed;
 }
 
 #finallook-wrapper{
@@ -861,4 +896,30 @@ th:last-child, td:last-child{
     padding: 10px;
     border-radius: 10px;
     margin: 10px;
+}
+/* 
+.editing td{
+    display: flex;
+    flex-direction: row;
+} */
+
+.editing input{
+    font-size: 12px;
+    background-color: var(--color-black-white);
+    padding: 5px;
+    padding-inline: 10px;
+    border-radius: 5px;
+    border: 2px solid #c0d5dd;
+    width: calc(100% - 40px);
+    flex-grow: 1;
+    font-family: 'Lexend';
+    color: var(--color-secondary-dark);
+    transition: all 0.1s ease-out;
+}
+
+.editing input:focus{
+    border-color: var(--color-secondary-dark);
+    outline: none;
+    background-color: var(--color-secondary-white);
+    transition: all 0.0s;
 }
