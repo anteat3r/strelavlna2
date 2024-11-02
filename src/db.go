@@ -409,7 +409,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
       }
       check = GetRandomId()
       ncheck := &RWMutexWrap[CheckS]{
-        v: CheckS{check, nil, prob, team, teamS.Id, false, msg},
+        v: CheckS{check, nil, prob, team, teamS.Id, true, msg},
       }
       Checks.With(func(checksmap *map[string]*RWMutexWrap[CheckS]) {
         (*checksmap)[check] = ncheck
@@ -862,7 +862,13 @@ func DBReAssign() (res string, oerr error) {
     i := 0
     for id, ch := range checksmap {
       ch.RWith(func(v CheckS) {
-        if v.Prob == nil { return }
+        if v.Prob == nil {
+          reasres[i] = reassignRes{
+            Id: id,
+            Assign: "",
+          }
+          return
+        }
         v.Prob.RWith(func(p ProbS) {
           reasres[i] = reassignRes{
             Id: id,
