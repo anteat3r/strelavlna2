@@ -424,6 +424,11 @@ func main() {
       src.SetupContEndp(app.Dao()),
     )
 
+    e.Router.GET(
+      "/api/admin/sendspam",
+      src.SendSpam(app.Dao(), mailerc),
+    )
+
     // e.Router.GET(
     //   "/laod",
     //   src.LoadProbEndpJson(app.Dao()),

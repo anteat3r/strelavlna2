@@ -389,7 +389,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
   var probres ProbM
   var ok bool
   Probs.RWith(func(v map[string]ProbM) { probres, ok = v[prob] })
-  if !ok { oerr = dbErr("invalid prob id"); return }
+  if !ok && prob != "" { oerr = dbErr("invalid prob id"); return }
 
   probres.RWith(func(probS ProbS) {
     diff = probS.Diff
@@ -764,6 +764,24 @@ func DBAdminInitLoad(id string) (res string, oerr error) {
     for _, ch := range checkmap {
       ch.RWith(func(v CheckS) {
         v.Team.RWith(func(t TeamS) {
+          if v.Prob == nil {
+            if !v.Msg {
+              log.Error("prob is nil", v.Id)
+              return
+            }
+            ares.Checks = append(ares.Checks, adminCheckRes{
+              Team: t.Id,
+              Prob: "",
+              Diff: "",
+              ProbName: "",
+              Id: v.Id,
+              Assign: "",
+              TeamName: t.Name,
+              Type: "msg",
+              Solution: v.Sol,
+              Work: "",
+            })
+          }
           v.Prob.RWith(func(p ProbS) {
             ts := "sol"
             if v.Msg { ts = "msg" }
@@ -810,6 +828,7 @@ func DBReAssign() (res string, oerr error) {
     i := 0
     for id, ch := range checksmap {
       ch.RWith(func(v CheckS) {
+        if v.Prob == nil { return }
         v.Prob.RWith(func(p ProbS) {
           reasres[i] = reassignRes{
             Id: id,
