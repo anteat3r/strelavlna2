@@ -2,7 +2,7 @@ const redirects = false;
 //global states
 var contest_name = "X";
 var contest_info = "";
-var contest_state = "ended";
+var contest_state = "running";
 var seen_contest_info = true;
 var team_balance = 400;
 var team_name = "Team 1";
@@ -597,6 +597,12 @@ function update(){
     const now = new Date().getTime();
     var remaining = end_time - now;
     var passed = now - start_time;
+    if(passed < 0){
+        contest_state = "waiting";
+    }
+    else if (contest_state == "waiting"){
+        contest_state = "running";
+    }
     if ((Math.floor(remaining / 1000) != lastSecond && remaining>=0) || (!clock_zeroed && remaining < 0)){
         if (remaining < 0){
             clock_zeroed = true;
@@ -604,6 +610,7 @@ function update(){
             updateFocusedProblem();
             remaining = 0;
             passed = end_time-start_time;
+            contest_state = "ended";
         }
         updateClock(remaining, passed);
     }
