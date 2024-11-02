@@ -138,7 +138,7 @@ $("#query-set").addEventListener("click", async () => {clown();
   }
   $("#query-p").innerHTML = pres;
   for (const r of JSON.parse(sres)) {
-    for (const [_, value] of Object.entries(r)) {
+    for (const [key, value] of Object.entries(r)) {
       if (value.length > 20) {
         $(`#dots-${r.id}-${key}`).addEventListener("click", () => {
           if ($(`#dots-${r.id}-${key}`).innerText == "...") {
