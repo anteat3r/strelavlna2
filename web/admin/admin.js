@@ -129,7 +129,7 @@ $("#query-set").addEventListener("click", async () => {clown();
     }
     for (const [key, value] of Object.entries(r)) {
       if (value.length > 20) {
-        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: yellow;">${key}:</span>&nbsp;<span id="dots-${r.id}">...</span><br>`
+        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: yellow;">${key}:</span>&nbsp;<span id="dots-${r.id}-${key}">...</span><br>`
       } else {
         pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: yellow;">${key}:</span>&nbsp;${value}<br>`
       }
@@ -140,11 +140,11 @@ $("#query-set").addEventListener("click", async () => {clown();
   for (const r of JSON.parse(sres)) {
     for (const [_, value] of Object.entries(r)) {
       if (value.length > 20) {
-        $(`#dots-${r.id}`).addEventListener("click", () => {
-          if ($(`#dots-${r.id}`).innerText == "...") {
-            $(`#dots-${r.id}`).innerText = value;
+        $(`#dots-${r.id}-${key}`).addEventListener("click", () => {
+          if ($(`#dots-${r.id}-${key}`).innerText == "...") {
+            $(`#dots-${r.id}-${key}`).innerText = value;
           } else {
-            $(`#dots-${r.id}`).innerText = "...";
+            $(`#dots-${r.id}-${key}`).innerText = "...";
           }
         })
       }
