@@ -640,6 +640,23 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
 
 func DBAdminMsg(teamid string, probid string, text string) (oerr error) {
 
+  if probid == "" {
+    var team TeamM
+    var ok bool
+    Teams.RWith(func(v map[string]TeamM) { team, ok = v[teamid] })
+    if !ok { oerr = dbErr("invalid team id"); return }
+
+    team.With(func(v *TeamS) {
+      v.Chat = append(v.Chat, ChatMsg{
+        true,
+        nil,
+        team,
+        text,
+      })
+    })
+    return
+  }
+
   var team TeamM
   var ok bool
   Teams.RWith(func(v map[string]TeamM) { team, ok = v[teamid] })
