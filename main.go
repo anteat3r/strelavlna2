@@ -236,6 +236,7 @@ func main() {
         
         return c.JSON(200, res)
       },
+      apis.RequireAdminAuth(),
     )
 
     e.Router.GET(
@@ -416,16 +417,19 @@ func main() {
     e.Router.GET(
       "/api/admin/probhash",
       src.ProbWorkEndp(app.Dao()),
+      apis.RequireAdminAuth(),
     )
 
     e.Router.GET(
       "/api/admin/contsetup",
       src.SetupContEndp(app.Dao()),
+      apis.RequireAdminAuth(),
     )
 
     e.Router.GET(
       "/api/admin/sendspam",
       src.SendSpam(app.Dao(), mailerc),
+      apis.RequireAdminAuth(),
     )
 
     // e.Router.GET(
