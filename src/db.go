@@ -386,19 +386,51 @@ sol: +solve, -grade
 
 func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string, name string, diff string, check string, workers []string, chat string, oerr error) {
 
+  if prob == "" {
+    team.With(func(teamS *TeamS) {
+      teamS.Chat = append(teamS.Chat, ChatMsg{false, nil, team, msg})
+      var ok bool
+      check, ok = teamS.ChatChecksCache[nil]
+      if ok {
+        var ocheck CheckM
+        Checks.RWith(func(checksmap map[string]*RWMutexWrap[CheckS]) {
+          for id, chck := range checksmap {
+            if id == check {
+              ocheck = chck
+              break
+            }
+          }
+        })
+        upd = true
+        ocheck.With(func(checkS *CheckS) {
+          checkS.Sol = msg
+        })
+        return
+      }
+      check = GetRandomId()
+      ncheck := &RWMutexWrap[CheckS]{
+        v: CheckS{check, nil, prob, team, teamS.Id, false, msg},
+      }
+      Checks.With(func(checksmap *map[string]*RWMutexWrap[CheckS]) {
+        (*checksmap)[check] = ncheck
+      })
+      teamS.ChatChecksCache[nil] = check
+    })
+
+    return
+  }
+
   var probres ProbM
   var ok bool
   Probs.RWith(func(v map[string]ProbM) { probres, ok = v[prob] })
-  if !ok && prob != "" { oerr = dbErr("invalid prob id"); return }
+  if !ok { oerr = dbErr("invalid prob id"); return }
 
-  if ok {
-    probres.RWith(func(probS ProbS) {
-      diff = probS.Diff
-      name = probS.Name
-      workers = make([]string, len(probS.Workers))
-      copy(workers, probS.Workers)
-    })
-  }
+  probres.RWith(func(probS ProbS) {
+    diff = probS.Diff
+    name = probS.Name
+    workers = make([]string, len(probS.Workers))
+    copy(workers, probS.Workers)
+  })
 
   team.With(func(teamS *TeamS) {
     _, bought := teamS.Bought[probres]
