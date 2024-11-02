@@ -342,7 +342,6 @@ func main() {
       "/api/admin/setactivecem",
       func(c echo.Context) error {
         src.ActiveContest.With(func(v *src.ActiveContStruct) {
-          log.Info("hihihiha")
           v.Id = ""
         })
         _, err = app.Dao().DB().Update(
@@ -442,7 +441,6 @@ func main() {
     text_ = strings.TrimSuffix(text_, "</p>")
 
     src.ActiveContest.With(func(v *src.ActiveContStruct) {
-      log.Info("hihihiha")
       v.Id = text_
     })
 
@@ -456,7 +454,6 @@ func main() {
     if err != nil { panic(err) }
 
     src.ActiveContest.With(func(v *src.ActiveContStruct) {
-      log.Info("hihihiha")
       v.Start = t
     })
 
@@ -470,7 +467,6 @@ func main() {
     if err != nil { panic(err) }
 
     src.ActiveContest.With(func(v *src.ActiveContStruct) {
-      log.Info("hihihiha")
       v.End = t2
     })
 
