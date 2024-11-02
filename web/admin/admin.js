@@ -179,7 +179,7 @@ $("#activecstrt-load").addEventListener("click", async () => {clown();
   $("#activecstrt-inp").value = sres;
 });
 
-$("#activecend-load").addEventlistener("click", async () => {clown();
+$("#activecend-load").addEventListener("click", async () => {clown();
   const res = await fetch(
     "/api/admin/loadactivecend",
     {headers: {"authorization": pb.authStore.token},
@@ -188,7 +188,7 @@ $("#activecend-load").addEventlistener("click", async () => {clown();
   $("#activecend-inp").value = sres;
 });
 
-$("#mail-set").addEventlistener("click", async () => {clown();
+$("#mail-set").addEventListener("click", async () => {clown();
   if (!confirm("Vááážně?")) return;
   const res = await fetch(
     "/api/admin/sendspam",
