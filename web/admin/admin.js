@@ -128,10 +128,10 @@ $("#query-set").addEventListener("click", async () => {clown();
       if (key.length > mklen) { mklen = key.length }
     }
     for (const [key, value] of Object.entries(r)) {
-      if (value.length > 20) {
-        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: yellow;">${key}:</span>&nbsp;<span id="dots-${r.id}-${key}">...</span><br>`
+      if (value.length > 50) {
+        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: green;">${key}:</span>&nbsp;<span id="dots-${r.id}-${key}">...</span><br>`
       } else {
-        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: yellow;">${key}:</span>&nbsp;${value}<br>`
+        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: green;">${key}:</span>&nbsp;${value}<br>`
       }
     }
     pres += "<br>"
@@ -139,7 +139,7 @@ $("#query-set").addEventListener("click", async () => {clown();
   $("#query-p").innerHTML = pres;
   for (const r of JSON.parse(sres)) {
     for (const [key, value] of Object.entries(r)) {
-      if (value.length > 20) {
+      if (value.length > 50) {
         $(`#dots-${r.id}-${key}`).addEventListener("click", () => {
           if ($(`#dots-${r.id}-${key}`).innerText == "...") {
             $(`#dots-${r.id}-${key}`).innerText = value;
