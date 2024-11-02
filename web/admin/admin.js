@@ -130,7 +130,7 @@ $("#query-set").addEventListener("click", async () => {clown();
     for (const [key, value] of Object.entries(r)) {
       if (value.length > 20) {
         pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: yellow;">${key}:</span>&nbsp;<span onclick="
-        if ($(\"dots-${r.id}\") == \"...\") { $(\"dots-${r.id}\").innerHTML = \"${value}\"; } else { $(\"dots-${r.id}\").innerHTML = \"...\"; }
+        if ($(\\"dots-${r.id}\\") == \\"...\\") { $(\\"dots-${r.id}\\").innerHTML = \\"${value}\\"; } else { $(\\"dots-${r.id}\\").innerHTML = \\"...\\"; }
         " id="dots-${r.id}">...</span><br>`
       } else {
         pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: yellow;">${key}:</span>&nbsp;${value}<br>`
