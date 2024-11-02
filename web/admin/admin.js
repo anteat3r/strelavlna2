@@ -166,11 +166,20 @@ $("#activecstrt-load").addEventListener("click", async () => {clown();
   $("#activecstrt-inp").value = sres;
 });
 
-$("#activecend-load").addEventListener("click", async () => {clown();
+$("#activecend-load").addeventlistener("click", async () => {clown();
   const res = await fetch(
     "/api/admin/loadactivecend",
-    {headers: {"Authorization": pb.authStore.token},
+    {headers: {"authorization": pb.authStore.token},
   })
   let sres = await res.text();
   $("#activecend-inp").value = sres;
+});
+
+$("#mail-set").addeventlistener("click", async () => {clown();
+  const res = await fetch(
+    "/api/admin/sendspam",
+    {headers: {"authorization": pb.authStore.token},
+  })
+  let sres = await res.text();
+  alert(`${res.status}: ${sres}`)
 });
