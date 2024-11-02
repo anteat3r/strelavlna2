@@ -283,10 +283,14 @@ func main() {
         t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
         if err != nil { return err }
         src.ActiveContest.With(func(v *src.ActiveContStruct) {
-          log.Info("hihihiha")
           v.Start = t
         })
-        app.Logger().Info(`ActiveContestStart set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
+        _, err = app.Dao().DB().Update(
+          "texts",
+          dbx.Params{"text": "<p>" + c.QueryParam("i") + " +0200</p>"},
+          dbx.HashExp{"name": "def_activecontstart"},
+        ).Execute()
+        if err != nil { return err }
         return c.String(200, "")
       },
       apis.RequireAdminAuth(),
@@ -301,10 +305,14 @@ func main() {
         t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
         if err != nil { return err }
         src.ActiveContest.With(func(v *src.ActiveContStruct) {
-          log.Info("hihihiha")
           v.End = t
         })
-        app.Logger().Info(`ActiveContestEnd set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
+        _, err = app.Dao().DB().Update(
+          "texts",
+          dbx.Params{"text": "<p>" + c.QueryParam("i") + " +0200</p>"},
+          dbx.HashExp{"name": "def_activecontend"},
+        ).Execute()
+        if err != nil { return err }
         return c.String(200, "")
       },
       apis.RequireAdminAuth(),
@@ -317,10 +325,14 @@ func main() {
           return c.String(400, "invalid param")
         }
         src.ActiveContest.With(func(v *src.ActiveContStruct) {
-          log.Info("hihihiha")
           v.Id = c.QueryParam("i")
         })
-        app.Logger().Info(`ActiveContest set to "` + c.QueryParam("i") + `" by ` + apis.RequestInfo(c).Admin.Email)
+        _, err = app.Dao().DB().Update(
+          "texts",
+          dbx.Params{"text": "<p>" + c.QueryParam("i") + "</p>"},
+          dbx.HashExp{"name": "def_activecont"},
+        ).Execute()
+        if err != nil { return err }
         return c.String(200, "")
       },
       apis.RequireAdminAuth(),
@@ -333,7 +345,12 @@ func main() {
           log.Info("hihihiha")
           v.Id = ""
         })
-        app.Logger().Info(`ActiveContest set to "" by ` + apis.RequestInfo(c).Admin.Email)
+        _, err = app.Dao().DB().Update(
+          "texts",
+          dbx.Params{"text": "<p></p>"},
+          dbx.HashExp{"name": "def_activecont"},
+        ).Execute()
+        if err != nil { return err }
         return c.String(200, "")
       },
       apis.RequireAdminAuth(),
@@ -365,6 +382,13 @@ func main() {
         src.Costs.With(func(v *map[string]int) {
           (*v)[k] = vint
         })
+        sres := ""
+        src.Costs.RWith(func(vmap map[string]int) {
+          for k, v := range vmap {
+            sres += k + " = " + strconv.Itoa(v) + "; "
+          }
+        })
+        sres = strings.TrimSuffix(sres, "; ")
         return c.String(200, "ok")
       },
       apis.RequireAdminAuth(),
@@ -378,7 +402,13 @@ func main() {
         src.Costs.With(func(v *map[string]int) {
           delete(*v, k)
         })
-        app.Logger().Info(`Costs "` + k + `" removed by ` + apis.RequestInfo(c).Admin.Email)
+        sres := ""
+        src.Costs.RWith(func(vmap map[string]int) {
+          for k, v := range vmap {
+            sres += k + " = " + strconv.Itoa(v) + "; "
+          }
+        })
+        sres = strings.TrimSuffix(sres, "; ")
         return c.String(200, "ok")
       },
       apis.RequireAdminAuth(),
