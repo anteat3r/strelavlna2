@@ -189,6 +189,7 @@ $("#activecend-load").addEventlistener("click", async () => {clown();
 });
 
 $("#mail-set").addEventlistener("click", async () => {clown();
+  if (!confirm("Vááážně?")) return;
   const res = await fetch(
     "/api/admin/sendspam",
     {headers: {"authorization": pb.authStore.token},
