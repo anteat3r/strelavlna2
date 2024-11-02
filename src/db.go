@@ -815,6 +815,7 @@ func DBAdminInitLoad(id string) (res string, oerr error) {
               Solution: v.Sol,
               Work: "",
             })
+            return
           }
           v.Prob.RWith(func(p ProbS) {
             ts := "sol"
