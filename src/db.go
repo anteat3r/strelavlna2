@@ -542,14 +542,14 @@ func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
       chrole := "p"
       if m.Admin { chrole = "a" }
       probid := ""
-      m.Prob.RWith(func(v ProbS) { probid = v.Id })
+      if m.Prob != nil { m.Prob.RWith(func(v ProbS) { probid = v.Id }) }
       res.Chat += chrole + "\x09" + probid + "\x09" + m.Text + "\x0b"
     }
     Checks.RWith(func(checksmap map[string]*RWMutexWrap[CheckS]) {
       res.Checks = make([]checkRes, 0, len(t.ChatChecksCache) + len(t.SolChecksCache))
       for p, c := range t.ChatChecksCache {
         probid := ""
-        p.RWith(func(v ProbS) { probid = v.Id })
+        if p != nil { p.RWith(func(v ProbS) { probid = v.Id }) }
         sol := ""
         checksmap[c].RWith(func(v CheckS) { sol = v.Sol })
         res.Checks = append(res.Checks, checkRes{
