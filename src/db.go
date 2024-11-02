@@ -391,12 +391,14 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
   Probs.RWith(func(v map[string]ProbM) { probres, ok = v[prob] })
   if !ok && prob != "" { oerr = dbErr("invalid prob id"); return }
 
-  probres.RWith(func(probS ProbS) {
-    diff = probS.Diff
-    name = probS.Name
-    workers = make([]string, len(probS.Workers))
-    copy(workers, probS.Workers)
-  })
+  if ok {
+    probres.RWith(func(probS ProbS) {
+      diff = probS.Diff
+      name = probS.Name
+      workers = make([]string, len(probS.Workers))
+      copy(workers, probS.Workers)
+    })
+  }
 
   team.With(func(teamS *TeamS) {
     _, bought := teamS.Bought[probres]
