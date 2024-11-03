@@ -978,6 +978,12 @@ document.getElementById("problem-filter-input").addEventListener("blur", functio
     updateProbList();
     scrollToFocusedProb();
 })
+document.getElementById("problem-filter-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        this.blur();
+    }
+});
 
 
 
