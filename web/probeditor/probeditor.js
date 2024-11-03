@@ -272,6 +272,8 @@ let probs = [
     //     image: "popelar.png"
     // },
 ];
+let filtered_probs = [];
+let show_filtered = false;
 
 
 async function login(){
@@ -778,9 +780,19 @@ function updateProbList(){
     const prob_list_b = document.getElementById("problem-section-b");
     const prob_list_c = document.getElementById("problem-section-c");
 
-    const probs_a = probs.filter(prob => prob.rank == "A" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
-    const probs_b = probs.filter(prob => prob.rank == "B" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
-    const probs_c = probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+    let probs_a;
+    let probs_b;
+    let probs_c;
+
+    if(show_filtered){
+        probs_a = filtered_probs.filter(prob => prob.rank == "A" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_b = filtered_probs.filter(prob => prob.rank == "B" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_c = filtered_probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+    }else{
+        probs_a = probs.filter(prob => prob.rank == "A" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_b = probs.filter(prob => prob.rank == "B" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_c = probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+    }
 
     if(author_filter != "all"){
         for(let item of probs){
@@ -945,6 +957,29 @@ prob_selector_my.addEventListener("click", function(){
     updateProbList();
     scrollToFocusedProb();
 })
+
+function filterSearch(){
+    const search = document.getElementById("problem-filter-input").value.toLowerCase();
+    return probs.filter(prob => 
+        (prob.title.toLowerCase().includes(search) || 
+        prob.id.toLowerCase().includes(search) || 
+        prob.solution.toLowerCase().includes(search) || 
+        prob.content.toLowerCase().includes(search))
+    );
+}
+document.getElementById("problem-filter-input").addEventListener("blur", function(){
+    const search = document.getElementById("problem-filter-input").value;
+    if(search.length >= 3){
+        filtered_probs = filterSearch();
+        show_filtered = true;
+    }else{
+        show_filtered = false;
+    }
+    updateProbList();
+    scrollToFocusedProb();
+})
+
+
 
 
 
