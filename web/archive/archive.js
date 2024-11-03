@@ -110,12 +110,7 @@ fetch('../archive/archive.json')
 
 function initialize() {
   renderArchiveContent();
-  handleYearButtons();
   handleYearTitles();
-  if (!mediaQuery.matches) {
-    hideAllTitlesExcept('2023'); // Show only 2023 titles on desktop after initial load
-  }
-
 }
 
 function handleYearButtons() {
@@ -170,7 +165,6 @@ function handleYearTitles() {
       if (content.style.maxHeight ===  "30px" || content.style.maxHeight ===  "0px" || !content.style.maxHeight) {
         content.style.maxHeight = content.scrollHeight + "px";  
         icon.style.transform = "rotate(90deg)";
-        if (mediaQuery.matches){
           if (parent.classList.contains('archive-2018_vlna') || parent.classList.contains('archive-2019_vlna')){
             normalRound.style.marginTop = "0";
             normalRound.style.paddingTop = 30 + "px";
@@ -178,15 +172,14 @@ function handleYearTitles() {
           if (parent.classList.contains('archive-2018_strela') || parent.classList.contains('archive-2019_strela')){
             title.style.marginBottom = "0";
           }
-        }
       } 
       else {
-        if (parent.classList.contains('archive-2018_strela') || parent.classList.contains('archive-2019_strela') && mediaQuery.matches){
+        if (parent.classList.contains('archive-2018_strela') || parent.classList.contains('archive-2019_strela')){
           setTimeout(() => {
             title.style.marginBottom = -2 + "px";
           },500)
         }
-        if (parent.classList.contains('vlna') && mediaQuery.matches){
+        if (parent.classList.contains('vlna')){
           content.style.maxHeight = 30 + "px";
           if (parent.classList.contains('archive-2018_vlna') || parent.classList.contains('archive-2019_vlna')){
             setTimeout(() => {
@@ -210,7 +203,7 @@ function hideAllYears() {
   yearDivs.forEach(function(div) {
     const content = div.querySelector('.archive-mobile');
     const icon = div.querySelector('.year-title i');
-    if (mediaQuery.matches && yearDivs.classList.contains('vlna')){
+    if (yearDivs.classList.contains('vlna')){
       content.style.maxHeight = 30 + "px";
     }
     else{
@@ -250,6 +243,6 @@ function handleResize() {
 }
 
 // Listen for window resize events
-window.addEventListener('resize', handleResize);
+//window.addEventListener('resize', handleResize);
 });
 
