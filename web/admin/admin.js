@@ -128,15 +128,28 @@ $("#query-set").addEventListener("click", async () => {clown();
       if (key.length > mklen) { mklen = key.length }
     }
     for (const [key, value] of Object.entries(r)) {
-      if (value.length > 20) {
-        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: yellow;">${key}:</span>&nbsp;<span onclick="">...</span><br>`
+      if (value.length > 50) {
+        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: green;">${key}:</span>&nbsp;<span id="dots-${r.id}-${key}">...</span><br>`
       } else {
-        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: yellow;">${key}:</span>&nbsp;${value}<br>`
+        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: green;">${key}:</span>&nbsp;${value}<br>`
       }
     }
     pres += "<br>"
   }
   $("#query-p").innerHTML = pres;
+  for (const r of JSON.parse(sres)) {
+    for (const [key, value] of Object.entries(r)) {
+      if (value.length > 50) {
+        $(`#dots-${r.id}-${key}`).addEventListener("click", () => {
+          if ($(`#dots-${r.id}-${key}`).innerText == "...") {
+            $(`#dots-${r.id}-${key}`).innerText = value;
+          } else {
+            $(`#dots-${r.id}-${key}`).innerText = "...";
+          }
+        })
+      }
+    }
+  }
 });
 
 $("#activecstrt-set").addEventListener("click", async () => {clown();
@@ -166,7 +179,7 @@ $("#activecstrt-load").addEventListener("click", async () => {clown();
   $("#activecstrt-inp").value = sres;
 });
 
-$("#activecend-load").addeventlistener("click", async () => {clown();
+$("#activecend-load").addEventListener("click", async () => {clown();
   const res = await fetch(
     "/api/admin/loadactivecend",
     {headers: {"authorization": pb.authStore.token},
@@ -175,7 +188,8 @@ $("#activecend-load").addeventlistener("click", async () => {clown();
   $("#activecend-inp").value = sres;
 });
 
-$("#mail-set").addeventlistener("click", async () => {clown();
+$("#mail-set").addEventListener("click", async () => {clown();
+  if (!confirm("Vááážně?")) return;
   const res = await fetch(
     "/api/admin/sendspam",
     {headers: {"authorization": pb.authStore.token},
