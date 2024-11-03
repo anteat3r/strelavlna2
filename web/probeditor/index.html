@@ -34,12 +34,17 @@
       </header>
       <div id="main-content">
         <div id="problem-selector">
+            <div id="problem-filter-wrapper">
+                <div id="problem-filter-type-wrapper">
+                    <button class="problem-filter-type-button" id="filter-math">Mat.</button>
+                    <button class="problem-filter-type-button" id="filter-physics">Fyz.</button>
+                    <button class="problem-filter-type-button selected" id="filter-all">Vše.</button>
+                </div>
+                <input type="text" id="problem-filter-input" placeholder="Hledat">
+            </div>
             <div id="problem-selector-wrapper">
                 <div id="problem-section-a" class="problem-section">
-                    <div class="problem selected">
-                        <h2 class="problem-selector-title">Popelar</h2>
-                        <h2 class="problem-selector-rank">[A]</h2>
-                    </div>
+                    
                 </div>
                 <div id="problem-section-b" class="problem-section">
 
@@ -65,6 +70,16 @@
                         <div class="problem-rank-dropdown-item" id="problem-rank-dropdown-item-a">[A]</div>
                         <div class="problem-rank-dropdown-item" id="problem-rank-dropdown-item-b">[B]</div>
                         <div class="problem-rank-dropdown-item" id="problem-rank-dropdown-item-c">[C]</div>
+                    </div>
+                </div>
+                <div id="problem-type-selector" class="">
+                    <button id="problem-type-selector-button">
+                        <h2 id="problem-type-selector-type">[-]</h2>
+                        <i class="fa-solid fa-angle-down" id="problem-type-selector-icon"></i>
+                    </button>
+                    <div id="problem-type-selector-dropdown">
+                        <div class="problem-type-dropdown-item" id="problem-type-dropdown-item-math">Mat.</div>
+                        <div class="problem-type-dropdown-item" id="problem-type-dropdown-item-physics">Fyz.</div>
                     </div>
                 </div>
                 
