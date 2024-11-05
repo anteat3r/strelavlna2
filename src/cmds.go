@@ -291,6 +291,8 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     tmpls, err := dao.FindFirstRecordByData("texts", "name", "spam_mail")
     if err != nil { return err }
 
+    if tmpls.GetString("text") == "" { return dbErr("empty tmpls") }
+
     // var renbuf bytes.Buffer
     // tmpl, err := template.New("spam_mail").Parse(tmpls.GetString("text"))
     // if err != nil { return err }
