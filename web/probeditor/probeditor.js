@@ -109,10 +109,11 @@ class TableRow {
 
 
 class Prob {
-    constructor(id, title, rank, content, solution, image, author) {
+    constructor(id, title, rank, type, content, solution, image, author) {
       this._id = id;
       this._title = title;
       this._rank = rank;
+      this._type = type;
       this._content = content;
       this._solution = solution;
       this._image = image;
@@ -120,6 +121,7 @@ class Prob {
 
       this._title_modified = false;
       this._rank_modified = false;
+      this._type_modified = false;
       this._content_modified = false;
       this._solution_modified = false;
       this._image_modified = false;
@@ -153,6 +155,16 @@ class Prob {
       changesUnsaved();
       this._rank_modified = true;
       this._rank = newRank;
+    }
+
+    get type() {
+      return this._type;
+    }
+  
+    set type(newType) {
+      changesUnsaved();
+      this._type_modified = true;
+      this._type = newType;
     }
   
     get content() {
@@ -197,12 +209,13 @@ class Prob {
 
     pushChanges() {
         // console.log("pushing changes");
-      if (!(this._title_modified || this._rank_modified || this._content_modified || this._solution_modified || this._image_modified || this._author_modified)) return;
+      if (!(this._title_modified || this._rank_modified || this._type_modified || this._content_modified || this._solution_modified || this._image_modified || this._author_modified)) return;
 
       const update_data = {};
 
       if (this._title_modified) update_data.name = this._title;
       if (this._rank_modified) update_data.diff = this._rank;
+      if (this._type_modified) update_data.type = this._type;
       if (this._content_modified) update_data.text = this._content;
       if (this._solution_modified) update_data.solution = this._solution;
       if (this._image_modified) update_data.img = this._image;
@@ -214,6 +227,7 @@ class Prob {
 
       this._title_modified = false;
       this._rank_modified = false;
+      this._type_modified = false;
       this._content_modified = false;
       this._solution_modified = false;
       this._image_modified = false;
@@ -221,7 +235,7 @@ class Prob {
     }
 
     isChanged() {
-        return this._title_modified || this._rank_modified || this._content_modified || this._solution_modified || this._image_modified || this._author_modified;
+        return this._title_modified || this._rank_modified || this._type_modified || this._content_modified || this._solution_modified || this._image_modified || this._author_modified;
     }
 }
 
@@ -236,7 +250,8 @@ let focused_const = "";
 let my_id = pb.authStore.model ? pb.authStore.model.id : "";
 let editor_types = ["finallook", "table", "generationeditor", "table-plus-generationeditor"];
 let editor_type = "finallook";
-let prob_filter = "all";
+let author_filter = "all";
+let type_filter = "all";
 let table = [
     // {
     //     id: "hkajs2das65d1a3",
@@ -257,6 +272,8 @@ let probs = [
     //     image: "popelar.png"
     // },
 ];
+let filtered_probs = [];
+let show_filtered = false;
 
 
 async function login(){
@@ -275,6 +292,7 @@ async function load(){
             item.id,
             item.name,
             item.diff,
+            item.type,
             item.text,
             item.solution,
             item.img,
@@ -597,10 +615,15 @@ document.getElementById("table-delete").addEventListener("click", async function
 
 //left editor
 const rank_DOM = document.getElementById("problem-rank-selector-button");
-const rank_A_DOOM = document.getElementById("problem-rank-dropdown-item-a");
-const rank_B_DOOM = document.getElementById("problem-rank-dropdown-item-b");
-const rank_C_DOOM = document.getElementById("problem-rank-dropdown-item-c");
+const rank_A_DOM = document.getElementById("problem-rank-dropdown-item-a");
+const rank_B_DOM = document.getElementById("problem-rank-dropdown-item-b");
+const rank_C_DOM = document.getElementById("problem-rank-dropdown-item-c");
 const rank_txt_DOM = document.getElementById("problem-rank-selector-rank");
+
+const type_DOM = document.getElementById("problem-type-selector-button");
+const type_math_DOM = document.getElementById("problem-type-dropdown-item-math");
+const type_physics_DOM = document.getElementById("problem-type-dropdown-item-physics");
+const type_txt_DOM = document.getElementById("problem-type-selector-type");
 
 const title_DOM = document.getElementById("problem-title-input");
 const content_DOM = document.getElementById("problem-content-textarea");
@@ -614,7 +637,7 @@ rank_DOM.addEventListener("click", function(){
     rank_DOM.parentElement.classList.toggle("oppened");
 });
 
-rank_A_DOOM.addEventListener("click", function(){
+rank_A_DOM.addEventListener("click", function(){
     const prob = probs.find(prob => prob.id == focused_prob);
     prob.rank = "A";
     updateRankSelector();
@@ -622,7 +645,7 @@ rank_A_DOOM.addEventListener("click", function(){
     scrollToFocusedProb();
     rank_DOM.parentElement.classList.toggle("oppened");
 });
-rank_B_DOOM.addEventListener("click", function(){
+rank_B_DOM.addEventListener("click", function(){
     const prob = probs.find(prob => prob.id == focused_prob);
     prob.rank = "B";
     updateRankSelector();
@@ -630,13 +653,43 @@ rank_B_DOOM.addEventListener("click", function(){
     scrollToFocusedProb();
     rank_DOM.parentElement.classList.toggle("oppened");
 });
-rank_C_DOOM.addEventListener("click", function(){
+rank_C_DOM.addEventListener("click", function(){
     const prob = probs.find(prob => prob.id == focused_prob);
     prob.rank = "C";
     updateRankSelector();
     updateProbList();
     scrollToFocusedProb();
     rank_DOM.parentElement.classList.toggle("oppened");
+});
+
+type_DOM.addEventListener("click", function(){
+    if(focused_prob == "") return;
+    updateTypeSelector();
+
+    type_DOM.parentElement.classList.toggle("oppened");
+});
+
+type_math_DOM.addEventListener("click", function(){
+    const prob = probs.find(prob => prob.id == focused_prob);
+    prob.type = "math";
+    if (type_filter != "all"){
+        document.getElementById("filter-math").click();
+    }
+    updateTypeSelector();
+    updateProbList();
+    scrollToFocusedProb();
+    type_DOM.parentElement.classList.toggle("oppened");
+});
+type_physics_DOM.addEventListener("click", function(){
+    const prob = probs.find(prob => prob.id == focused_prob);
+    prob.type = "physics";
+    if (type_filter != "all"){
+        document.getElementById("filter-physics").click();
+    }
+    updateTypeSelector();
+    updateProbList();
+    scrollToFocusedProb();
+    type_DOM.parentElement.classList.toggle("oppened");
 });
 
 title_DOM.addEventListener("blur", function(){
@@ -663,21 +716,36 @@ solution_DOM.addEventListener("blur", function(){
 function updateRankSelector(){
     const prob = probs.find(prob => prob.id == focused_prob);
 
-    rank_A_DOOM.classList.remove("selected");
-    rank_B_DOOM.classList.remove("selected");
-    rank_C_DOOM.classList.remove("selected");
+    rank_A_DOM.classList.remove("selected");
+    rank_B_DOM.classList.remove("selected");
+    rank_C_DOM.classList.remove("selected");
 
     if(prob.rank == "A"){
-        rank_A_DOOM.classList.add("selected");
+        rank_A_DOM.classList.add("selected");
     }else if(prob.rank == "B"){
-        rank_B_DOOM.classList.add("selected");
+        rank_B_DOM.classList.add("selected");
     }else{
-        rank_C_DOOM.classList.add("selected");
+        rank_C_DOM.classList.add("selected");
     }
 
     rank_txt_DOM.innerHTML = `[${prob.rank}]`;
 }
 
+
+function updateTypeSelector(){
+    const prob = probs.find(prob => prob.id == focused_prob);
+
+    type_math_DOM.classList.remove("selected");
+    type_physics_DOM.classList.remove("selected");
+
+    if(prob.type == "math"){
+        type_math_DOM.classList.add("selected");
+    }else{
+        type_physics_DOM.classList.add("selected");
+    }
+
+    type_txt_DOM.innerHTML = `${prob.type == "math" ? "Mat." : "Fyz."}`;
+}
 
 function updateLeftEditor(){
     const title_DOM = document.getElementById("problem-title-input");
@@ -698,6 +766,7 @@ function updateLeftEditor(){
         content_DOM.value = prob.content;
         solution_DOM.value = prob.solution;
         rank_txt_DOM.innerHTML = `[${prob.rank}]`;
+        type_txt_DOM.innerHTML = `${prob.type == "math" ? "Mat." : "Fyz."}`;
     }
 
     
@@ -711,11 +780,21 @@ function updateProbList(){
     const prob_list_b = document.getElementById("problem-section-b");
     const prob_list_c = document.getElementById("problem-section-c");
 
-    const probs_a = probs.filter(prob => prob.rank == "A" && (prob_filter == "all" || prob.author == my_id));
-    const probs_b = probs.filter(prob => prob.rank == "B" && (prob_filter == "all" || prob.author == my_id));
-    const probs_c = probs.filter(prob => prob.rank == "C" && (prob_filter == "all" || prob.author == my_id));
+    let probs_a;
+    let probs_b;
+    let probs_c;
 
-    if(prob_filter != "all"){
+    if(show_filtered){
+        probs_a = filtered_probs.filter(prob => prob.rank == "A" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_b = filtered_probs.filter(prob => prob.rank == "B" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_c = filtered_probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+    }else{
+        probs_a = probs.filter(prob => prob.rank == "A" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_b = probs.filter(prob => prob.rank == "B" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_c = probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+    }
+
+    if(author_filter != "all"){
         for(let item of probs){
             console.log(item.author);
         }
@@ -748,6 +827,10 @@ function updateProbList(){
                 <h2 class="problem-selector-rank">[C]</h2>
             </div>  
         `;
+    }
+
+    if(!document.getElementById(focused_prob)){
+        focused_prob = "";
     }
 
     for(let item of document.getElementsByClassName("problem")){
@@ -784,6 +867,7 @@ async function addProb(){
     const response = await pb.collection('probs').create({
         name: "Nová úloha",
         diff: "A",
+        type: type_filter == "all" ? "math" : type_filter,
         text: "",
         solution: "",
         img: "",
@@ -794,6 +878,7 @@ async function addProb(){
         response.id,
         "Nová úloha",
         "A",
+        response.type,
         "",
         "",
         "",
@@ -807,13 +892,45 @@ async function addProb(){
     updateFinallook();
 }
 
-function getFreeProbId() {
-    let newId;
-    do {
-        newId = Math.random().toString(36).substr(2, 9);
-    } while (probs.some(prob => prob.id === newId));
-    return newId;
-}
+const type_filter_buttons = [
+    document.getElementById("filter-math"),
+    document.getElementById("filter-physics"),
+    document.getElementById("filter-all"),
+]
+
+type_filter_buttons[0].addEventListener("click", function(){
+    if(type_filter == "math") return;
+
+    type_filter = "math";
+    updateProbList();
+    scrollToFocusedProb();
+
+    type_filter_buttons[0].classList.add("selected");
+    type_filter_buttons[1].classList.remove("selected");
+    type_filter_buttons[2].classList.remove("selected");
+});
+type_filter_buttons[1].addEventListener("click", function(){
+    if(type_filter == "physics") return;
+
+    type_filter = "physics";
+    updateProbList();
+    scrollToFocusedProb();
+
+    type_filter_buttons[0].classList.remove("selected");
+    type_filter_buttons[1].classList.add("selected");
+    type_filter_buttons[2].classList.remove("selected");
+});
+type_filter_buttons[2].addEventListener("click", function(){
+    if(type_filter == "all") return;
+
+    type_filter = "all";
+    updateProbList();
+    scrollToFocusedProb();
+
+    type_filter_buttons[0].classList.remove("selected");
+    type_filter_buttons[1].classList.remove("selected");
+    type_filter_buttons[2].classList.add("selected");
+});
 
 document.getElementById("problems-add").addEventListener("click", addProb);
 document.getElementById("problems-delete").addEventListener("click", deleteFocusedProb);
@@ -822,14 +939,14 @@ const prob_selector_all = document.getElementById("problem-selector-all");
 const prob_selector_my = document.getElementById("problem-selector-my");
 
 prob_selector_all.addEventListener("click", function(){
-    prob_filter = "all";
+    author_filter = "all";
     prob_selector_all.classList.add("selected");
     prob_selector_my.classList.remove("selected");
     updateProbList();
     scrollToFocusedProb();
 })
 prob_selector_my.addEventListener("click", function(){
-    prob_filter = "my";
+    author_filter = "my";
     prob_selector_my.classList.add("selected");
     prob_selector_all.classList.remove("selected");
     
@@ -840,6 +957,35 @@ prob_selector_my.addEventListener("click", function(){
     updateProbList();
     scrollToFocusedProb();
 })
+
+function filterSearch(){
+    const search = document.getElementById("problem-filter-input").value.toLowerCase();
+    return probs.filter(prob => 
+        (prob.title.toLowerCase().includes(search) || 
+        prob.id.toLowerCase().includes(search) || 
+        prob.solution.toLowerCase().includes(search) || 
+        prob.content.toLowerCase().includes(search))
+    );
+}
+document.getElementById("problem-filter-input").addEventListener("blur", function(){
+    const search = document.getElementById("problem-filter-input").value;
+    if(search.length >= 3){
+        filtered_probs = filterSearch();
+        show_filtered = true;
+    }else{
+        show_filtered = false;
+    }
+    updateProbList();
+    scrollToFocusedProb();
+})
+document.getElementById("problem-filter-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        this.blur();
+    }
+});
+
+
 
 
 

@@ -411,6 +411,103 @@
     color: white;
     background-color: var(--color-secondary-dark);
 }
+
+#problem-type-selector{
+    position: relative;
+}
+#problem-type-selector-button{
+    border: 2px solid #9dbcc5;
+    border-radius: 5px;
+    padding: 2px;
+    padding-inline: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--color-black-white);
+    cursor: pointer;
+    transition: all 0.3s ease-out;
+    user-select: none;
+}
+#problem-type-selector-button:hover{
+    background-color: var(--color-secondary-white);
+    border-color: var(--color-secondary-light);
+    transition: all 0.0s;
+}
+.oppened #problem-type-selector-button{
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
+}
+#problem-type-selector-type{
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+    transform: translateY(-2px);
+}
+.oppened #problem-type-selector-type{
+    color: white;
+}
+#problem-type-selector-icon{
+    font-size: 25px;
+    color: var(--color-secondary-dark);
+    transform: rotate(180deg);
+    transition: all 0.3s ease-out;
+}
+.oppened #problem-type-selector-icon{
+    color: white;
+    transform: rotate(0deg);
+    transition: all 0.3s ease-out;
+}
+#problem-type-selector-dropdown{
+    position: absolute;
+    left: 5px;
+    top: 32.5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    background-color: #bacfd8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    width: calc(100% - 20px - 10px);
+    max-height: 0px;
+    padding: 0px;
+    padding-inline: 10px;
+    transition: all 0.3s ease-out;
+    overflow: hidden;
+}
+.oppened #problem-type-selector-dropdown{
+    max-height: 100px;
+    padding: 5px;
+    padding-inline: 10px;
+}
+.problem-type-dropdown-item{
+    font-family: 'Lexend';
+    font-size: 17px;
+    width: 100%;
+    text-align: center;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+    padding-top: 0px;
+    padding-bottom: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease-out;
+}
+.problem-type-dropdown-item:hover{
+    color: white;
+    background-color: var(--color-secondary-dark);
+    transition: all 0.0s;
+}
+.selected.problem-type-dropdown-item{
+    color: white;
+    background-color: var(--color-secondary-dark);
+}
+
 #problem-content-textarea{
     flex-grow: 1;
     resize: none;
@@ -921,5 +1018,72 @@ th:last-child, td:last-child{
     border-color: var(--color-secondary-dark);
     outline: none;
     background-color: var(--color-secondary-white);
+    transition: all 0.0s;
+}
+
+#problem-filter-wrapper{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 2px dashed #a0b5bd;
+}
+#problem-filter-type-wrapper{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: 10px;
+}
+.problem-filter-type-button{
+    font-family: 'Lexend';
+    font-size: 13px;
+    font-weight: 500;
+    color: #99b7c4;
+    border-radius: 0px;
+    padding: 3px;
+    padding-inline: 10px;
+    margin: 0px;
+    transition: all 0.3s ease-out;
+    outline: none;
+}
+.problem-filter-type-button:hover{
+    color: var(--color-secondary-dark);
+    transition: all 0.0s;
+}
+.selected.problem-filter-type-button{
+    color: var(--color-secondary-dark);
+    font-weight: 700;
+    border-bottom: 2px solid var(--color-secondary-dark);
+}
+#problem-filter-input{
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    border: 2px solid #a1bfca;
+    border-radius: 5px;
+    padding: 5px;
+    padding-inline: 10px;
+    margin: 0px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease-out;
+    outline: none;
+    width: calc(100% - 40px);
+}
+#problem-filter-input::placeholder{
+    font-weight: 700;
+    font-size: 12px;
+    color: #a6a9aa;
+    transition: all 0.3s ease-out;
+}
+#problem-filter-input:focus{
+    border-color: var(--color-secondary);
+    background-color: var(--color-secondary-white);
+    transition: all 0.0s;
+}
+#problem-filter-input:focus::placeholder{
+    color: #9dbcc5;
     transition: all 0.0s;
 }

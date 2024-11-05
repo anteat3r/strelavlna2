@@ -11,97 +11,6 @@
 .archive-wrapper{
     display: flex;
 }
-.year-selector{
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    padding-inline: 20px;
-    background-color: #e6f9ff;
-    flex-grow: 20;
-    width: 20vw; 
-    box-sizing: border-box; 
-    min-width: 300px;
-}
-
-.year-button{
-    font-family: 'Lexend';
-    color: white;
-    font-size: 25px;
-    font-weight: 600;
-    padding-inline: 50px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    text-align: center;
-    margin: 20px;
-    border: var(--color-main) solid 3px;
-    background-color: var(--color-main);
-    border-radius: 10px;
-    cursor: pointer;
-
-}
-
-.year-button-covid{
-    font-family: 'Lexend';
-    color: gray;
-    font-size: 30px;
-    font-weight: 600;
-    padding-inline: 50px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    text-align: center;
-    margin: 20px;
-    border: gray solid 3px;
-    background-color: lightgray;
-    border-radius: 10px;
-    cursor: not-allowed;
-}
-
-.year-button:hover{
-    font-family: 'Lexend';
-    font-size: 25px;
-    font-weight: 600;
-    padding-inline: 50px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    text-align: center;
-    margin: 20px;
-    border: var(--color-main-light) solid 3px;
-    background-color: var(--color-main-light);
-    border-radius: 10px;
-}
-.year-button i{
-    transform: rotate(0deg);
-    transition: transform 0.3s ease-in-out;
-}
-
-.current-year-button{
-    font-family: 'Lexend';
-    font-size: 25px;
-    font-weight: 600;
-    padding-inline: 50px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    text-align: center;
-    background-color: #2600ff;
-    margin: 20px;
-    border: #2600ff solid 3px;
-    border-radius: 10px;
-}
-
-.current-year-button:hover{
-    font-family: 'Lexend';
-    font-size: 25px;
-    font-weight: 600;
-    padding-inline: 50px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    text-align: center;
-    background-color: #2600ff;
-    margin: 20px;
-    border: #2600ff solid 3px;
-    border-radius: 10px;
-    cursor: default;
-}
 
 .current-year-button i{
     transform: rotate(180deg);
@@ -118,60 +27,34 @@
     border-left: var(--color-main) solid 5px;
     font-family: 'Lexend';
     flex-grow: 80;
-    width: 80vw;
+    width: 100%;
 }
 
-.archive-mobile {
-    transition: max-height 0.5s ease-out; /* Smooth transition for max-height */
-    overflow: hidden; 
-    max-height: 0;
+.vlna .year-title{
+    margin-bottom: 0px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-top: var(--color-secondary) 2px solid;
+    
 }
 
-.year-title{
-    padding: 30px;
-    font-size: 35px;
-    font-weight: 600;
-    text-align: center;
-    background-color: #d5f5ff;
-    width: auto;
-    box-sizing: border-box;
-    cursor: pointer;
+.strela .year-title{
+    border-top: var(--color-secondary) 2px solid;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    margin-bottom: -2px;
+}
+.logo_vlna{
+    width: 40px;
+    height: auto;
+    margin-right: 30px;
 }
 
-.year-title i {
-    transition: transform 0.2s ease-in-out; 
-    margin-left: 10px; /* Adjust spacing as needed */
-}
-
-.online-round{
-    margin: 0;
-}
-
-.online-round h1{
-    margin-left: 7vw;
-    font-size: 30px;
-}
-
-.online-round-covid{
-    margin: 0;
-    padding-top: 25px;
-    padding-bottom: 400px;
-}
-
-.online-round-covid h1{
-    margin-left: 7vw;
-    font-size: 35px;
-}
-
-.normal-round{
-    margin: 0;
-    background-color: var(--color-main-white);
-}
-
-.normal-round h1{
-    margin-left: 7vw;
-    font-size: 30px;
-    padding-top: 20px;
+.logo_strela{
+    width: 40px;
+    height: auto;
+    margin-right: 30px;
+    margin-bottom: 2px;
 }
 
 .placement-wrapper{
@@ -224,6 +107,73 @@
     margin: 10px;
     padding-top: 15px;
     font-weight: 600;
+}
+
+.online-round h1{
+    margin-left: 7vw;
+    font-size: 30px;
+}
+
+.normal-round h1{
+    margin-left: 7vw;
+    font-size: 30px;
+    padding-top: 20px;
+}
+
+.images{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    gap: 2vw;
+    padding-top: 30px;
+    padding-bottom: 50px;
+    margin-inline: 5vw;
+    max-width: 70vw;
+}
+
+.images img{
+    border: #d5f5ff solid 2px;
+    border-radius: 3px;
+    width: 20vw;
+    max-width: 400px;
+    aspect-ratio: 1/1;
+    min-width: 200px;
+}
+
+.year-title{
+    padding: 30px;
+    font-size: 35px;
+    font-weight: 600;
+    text-align: center;
+    background-color: #d5f5ff;
+    width: auto;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.year-title i {
+    transition: transform 0.2s ease-in-out; 
+    margin-left: 10px; /* Adjust spacing as needed */
+}
+
+.online-round{
+    margin: 0;
+}
+
+.online-round-covid{
+    margin: 0;
+    padding-top: 25px;
+    padding-bottom: 400px;
+}
+
+.online-round-covid h1{
+    margin-left: 7vw;
+    font-size: 35px;
+}
+
+.normal-round{
+    margin: 0;
+    background-color: var(--color-main-white);
 }
 
 .image-gallery{
@@ -288,168 +238,283 @@
     margin-bottom: 5px;
 }
 
+.year-selector {
+    display: none;
+}
 
-@media (min-width: 1000px){
-    .strela .year-title{
-        border-bottom: var(--color-main-light) 2px solid;
+.online-round h1{
+    font-size: 25px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.online-round-covid h1{
+    font-size: 25px;
+}
+
+.online-round{
+    padding: 0;
+    padding-top: 20px;
+}
+
+.online-round-covid{
+    padding: 0;
+    border-bottom: var(--color-main) 2px solid;
+}
+
+.normal-round h1{
+    font-size: 25px;
+    margin-top: 0;
+    padding-top: 16.75px;
+}
+
+.archive-2018_vlna .normal-round h1, .archive-2019_vlna .normal-round h1{
+    margin-top: 0px;
+    padding-top: 0;
+}
+
+.normal-round{
+    padding: 0;
+}
+
+.archive-2018_vlna .normal-round, .archive-2019_vlna .normal-round {
+    margin-top: 30px;
+}
+
+.placement-wrapper{
+    gap: 15vw;
+    max-width: 80vw;
+}
+
+.first-place{
+    font-size: 25px;
+}
+
+.second-place{
+    font-size: 20px;
+    margin-top: 30px;
+}
+
+.third-place{
+    font-size: 15px;
+    margin-top: 35px;
+}
+
+.place-name{
+    font-size: 15px;
+}
+.archive-year{
+    max-height: none;
+}
+
+.vlna .year-title{
+    margin-bottom: 0px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top: var(--color-secondary) 2px solid;
+    
+}
+
+.strela .year-title{
+    border-top: var(--color-secondary) 2px solid;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    margin-bottom: -2px;
+}
+
+
+.logo_vlna, .logo_strela {
+width: 30px;
+height: auto;
+margin-right: 15px;
+margin-top: 5px;
+margin-bottom: 0;
+}
+
+.logo_strela{
+    margin-bottom: 1px;
+}
+
+.archive{
+    border: none;
+}
+
+.archive-title{
+    font-size: 25px;
+    padding-bottom: 20px;
+    margin-inline: 20px;
+    padding-inline: auto;
+    border: none;
+}
+.year-title{
+    display: block;
+    font-size: 15px;
+    padding: 12px;
+    border-bottom: var(--color-secondary) 2px solid;
+    margin-inline: 20px;
+    border-right: var(--color-secondary) 2px solid;
+    border-left: var(--color-secondary) 2px solid;
+}
+
+.archive-mobile {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out; 
+}
+
+.vlna .archive-mobile{
+    max-height: 30px;
+}
+
+.images{
+    gap: 8vw;
+    padding-top: 0;
+    padding-bottom: 30px;
+    margin: auto;
+}
+
+.image-gallery{
+    padding: 0;
+}
+
+.archive-2018_vlna .image-gallery h1, .archive-2019_vlna .image-gallery h1 {
+    padding-top: 16.75px;
+}
+
+
+.more-button a{
+    width: 60vw;
+}
+
+.more-button{
+    padding-bottom: 30px;  
+}
+
+@media (max-width: 500px) {
+    .images{
+        max-width: none;
     }
 }
 
-@media (max-width: 1000px){
-    .year-selector {
-      display: none;
-    }
+@media (min-width: 1000px){
 
-    .online-round h1{
+    .year-title{
         font-size: 25px;
-        margin-top: 5px;
-        margin-bottom: 10px;
+        padding: 20px;
     }
 
-    .online-round-covid h1{
-        font-size: 25px;
-    }
-
-    .online-round{
-        padding: 0;
-        padding-top: 20px;
-    }
-
-    .online-round-covid{
-        padding: 0;
-        border-bottom: var(--color-main) 2px solid;
-    }
-
-    .normal-round h1{
-        font-size: 25px;
-        margin-top: 0;
-        padding-top: 16.75px;
-    }
-
-    .archive-2018_vlna .normal-round h1, .archive-2019_vlna .normal-round h1{
-        margin-top: 0px;
-        padding-top: 0;
-    }
-
-    .normal-round{
-        padding: 0;
-    }
-
-    .archive-2018_vlna .normal-round, .archive-2019_vlna .normal-round {
-        margin-top: 30px;
-    }
-
-    .placement-wrapper{
-        gap: 15vw;
-        max-width: 80vw;
-    }
-
-    .first-place{
-        font-size: 25px;
-    }
-
-    .second-place{
-        font-size: 20px;
-        margin-top: 30px;
-    }
-
-    .third-place{
-        font-size: 15px;
-        margin-top: 35px;
-    }
-
-    .place-name{
-        font-size: 15px;
-    }
-    .archive-year{
-        max-height: none;
+    .archive-title{
+        font-size: 35px;
     }
 
     .vlna .year-title{
         margin-bottom: 0px;
-        border-bottom-left-radius: 5px;
-        border-bottom-right-radius: 5px;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
         border-top: var(--color-secondary) 2px solid;
         
     }
-
+    
     .strela .year-title{
         border-top: var(--color-secondary) 2px solid;
-        border-top-left-radius: 5px;
-        border-top-right-radius: 5px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
         margin-bottom: -2px;
     }
-
+    .logo_vlna{
+        width: 40px;
+        height: auto;
+        margin-right: 30px;
+    }
     
-    .logo_vlna, .logo_strela {
-    width: 30px;
-    height: auto;
-    margin-right: 15px;
-    margin-top: 5px;
-    margin-bottom: 0;
-    }
-
     .logo_strela{
-        margin-bottom: 1px;
+        width: 40px;
+        height: auto;
+        margin-right: 30px;
+        margin-bottom: 2px;
     }
 
-    .archive{
-        border: none;
-    }
-
-    .archive-title{
-        font-size: 25px;
-        padding-bottom: 20px;
-        margin-inline: 20px;
-        border: none;
-    }
-    .year-title{
-        display: block;
-        font-size: 15px;
-        padding: 12px;
-        border-bottom: var(--color-secondary) 2px solid;
-        margin-inline: 20px;
-        border-right: var(--color-secondary) 2px solid;
-        border-left: var(--color-secondary) 2px solid;
-    }
-
-    .archive-mobile {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.5s ease-out; 
-    }
-
-    .vlna .archive-mobile{
-        max-height: 30px;
-    }
-
-    .images{
-        gap: 8vw;
-        padding-top: 0;
-        padding-bottom: 30px;
+    .placement-wrapper{
+        display: flex;
+        flex-flow: row wrap;
         margin: auto;
+        gap: 10vw;
+        max-width: 70vw;
+        font-size: 20px;
+        text-align: center;
+        justify-content: space-evenly;
+        padding-bottom: 35px;
+    }
+    
+    .first-place{
+        /* border-top: gold solid 3px; */
+        /* border-radius: 3px; */
+        color: gold;
+        font-size: 30px;
+        font-weight: 600;
+        /* padding-top: 15px; */
+        margin-bottom: 15px;
+    }
+    
+    .second-place{
+        /* border-top: silver solid 3px; */
+        /* border-radius: 3px; */
+        color: silver;
+        font-size: 25px;
+        font-weight: 600;
+        /* padding-top: 15px; */
+        margin-bottom: 15px;
+        margin-top: 40px;
+    }
+    
+    .third-place{
+        /* border-top: brown solid 3px; */
+        /* border-radius: 3px; */
+        color: brown;
+        font-size: 20px;
+        font-weight: 600;
+        /* padding-top: 15px; */
+        margin-bottom: 15px;
+        margin-top: 45px;
+    }
+    
+    .place-name{
+        font-size: 20px;
+        border-top: #d5f5ff 2px solid;
+        margin: 10px;
+        padding-top: 15px;
+        font-weight: 600;
     }
 
-    .image-gallery{
-        padding: 0;
+    .online-round h1{
+        margin-left: 7vw;
+        font-size: 30px;
     }
 
-    .archive-2018_vlna .image-gallery h1, .archive-2019_vlna .image-gallery h1 {
-        padding-top: 16.75px;
+    .normal-round h1{
+        margin-left: 7vw;
+        font-size: 30px;
+        padding-top: 20px;
     }
 
-
-    .more-button a{
-        width: 60vw;
-    }
-
-    .more-button{
-        padding-bottom: 30px;  
-    }
-}
-@media (max-width: 500px) {
     .images{
-        max-width: none;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        gap: 2vw;
+        padding-top: 30px;
+        padding-bottom: 50px;
+        margin:auto;
+        max-width: 70vw;
+    }
+    
+    .images img{
+        border: #d5f5ff solid 2px;
+        border-radius: 3px;
+        width: 20vw;
+        max-width: 400px;
+        aspect-ratio: 1/1;
+        min-width: 200px;
     }
 }
 
