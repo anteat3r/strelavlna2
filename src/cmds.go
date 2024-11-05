@@ -350,7 +350,7 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       Subject: "Pražská střela a Dopplerova vlna 2024",
       HTML: tmpls.GetString("text"),
     })
-    if err != nil { log.Error(err) }
+    if err != nil { return err }
     return c.String(200, "")
   }
 }
