@@ -342,13 +342,13 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       }
       adrs = append(adrs, *addr)
     }
-    var _chunks = make([][]mail.Address, 0, (len(adrs)/400)+1)
-    for 400 < len(adrs) {
-      adrs, _chunks = adrs[400:], append(_chunks, adrs[0:400:400])
+    var _chunks = make([][]mail.Address, 0, (len(adrs)/200)+1)
+    for 200 < len(adrs) {
+      adrs, _chunks = adrs[200:], append(_chunks, adrs[0:200:200])
     }
     fadrs := append(_chunks, adrs)
     for _, chnk := range fadrs {
-      log.Info(chnk, len(chnk))
+      log.Info(chnk, len(chnk[1:]))
       err = mailerc.Send(&mailer.Message{
         From: mail.Address{
           Address: "strela-vlna@gchd.cz",
