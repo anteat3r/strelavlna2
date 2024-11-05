@@ -1,9 +1,7 @@
 package src
 
 import (
-	"bytes"
 	"encoding/json"
-	"html/template"
 	"math/rand"
 	"net/mail"
 	"os"
