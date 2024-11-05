@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/mail"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -342,6 +343,11 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       }
       adrs = append(adrs, *addr)
     }
+    idx := slices.IndexFunc(adrs, func(v mail.Address) bool {
+      return v.Address == "zs.tisa@volny.cz"
+    })
+    if idx == -1 { return dbErr("index -1") }
+    adrs = adrs[idx+1:]
     var _chunks = make([][]mail.Address, 0, (len(adrs)/20)+1)
     for 200 < len(adrs) {
       adrs, _chunks = adrs[20:], append(_chunks, adrs[0:20:20])
