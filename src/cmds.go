@@ -343,17 +343,25 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       }
       adrs = append(adrs, *addr)
     }
-    err = mailerc.Send(&mailer.Message{
-      From: mail.Address{
-        Address: "strela-vlna@gchd.cz",
-        Name: "Střela Vlna",
-      },
-      To: adrs[:1],
-      Bcc: adrs[1:],
-      Subject: "Pražská střela a Dopplerova vlna 2024",
-      HTML: tmpls.GetString("text"),
-    })
-    if err != nil { return err }
+    var _chunks = make([][]mail.Address, 0, (len(adrs)/400)+1)
+    for 400 < len(adrs) {
+      adrs, _chunks = adrs[400:], append(_chunks, adrs[0:400:400])
+    }
+    fadrs := append(_chunks, adrs)
+    for _, chnk := range fadrs {
+      err = mailerc.Send(&mailer.Message{
+        From: mail.Address{
+          Address: "strela-vlna@gchd.cz",
+          Name: "Střela Vlna",
+        },
+        To: chnk[:1],
+        Bcc: chnk[1:],
+        Subject: "Pražská střela a Dopplerova vlna 2024",
+        HTML: tmpls.GetString("text"),
+      })
+      if err != nil { return err }
+      log.Info(chnk)
+    }
     return c.String(200, "")
   }
 }
