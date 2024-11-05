@@ -287,46 +287,51 @@ func SendTeams(dao *daos.Dao, mailerc mailer.Mailer, timeout time.Duration) echo
 
 func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
   return func(c echo.Context) error {
-    comp, err := dao.FindRecordById("contests", c.QueryParam("id"))
-    if err != nil { return err }
+    // comp, err := dao.FindRecordById("contests", c.QueryParam("id"))
+    // if err != nil { return err }
 
     tmpls, err := dao.FindFirstRecordByData("texts", "name", "spam_mail")
     if err != nil { return err }
 
-    var renbuf bytes.Buffer
-    tmpl, err := template.New("spam_mail").Parse(tmpls.GetString("text"))
-    if err != nil { return err }
-
-    err = tmpl.Execute(&renbuf, struct{
-      CompSubject,
-      CompName,
-      OnlineRound,
-      FinalRound,
-      RegistrationStart,
-      RegistrationEnd string
-    }{
-      comp.GetString("subject"),
-      comp.GetString("name"),
-      comp.GetDateTime("online_round").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("final_round").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("registration_start").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("registration_end").Time().Format("1.2.2006 15:04:05"),
-    })
-    if err != nil { return err }
-
-    msg := renbuf.String()
+    // var renbuf bytes.Buffer
+    // tmpl, err := template.New("spam_mail").Parse(tmpls.GetString("text"))
+    // if err != nil { return err }
+    //
+    // err = tmpl.Execute(&renbuf, struct{
+    //   CompSubject,
+    //   CompName,
+    //   OnlineRound,
+    //   FinalRound,
+    //   RegistrationStart,
+    //   RegistrationEnd string
+    // }{
+    //   comp.GetString("subject"),
+    //   comp.GetString("name"),
+    //   comp.GetDateTime("online_round").Time().Format("1.2.2006 15:04:05"),
+    //   comp.GetDateTime("final_round").Time().Format("1.2.2006 15:04:05"),
+    //   comp.GetDateTime("registration_start").Time().Format("1.2.2006 15:04:05"),
+    //   comp.GetDateTime("registration_end").Time().Format("1.2.2006 15:04:05"),
+    // })
+    // if err != nil { return err }
+    //
+    // msg := renbuf.String()
 
     res := []struct{
       Email1 string `db:"email_1"`
       Email2 string `db:"email_2"`
     }{}
-    err = dao.DB().NewQuery("SELECT email_1, email_2 FROM skoly WHERE email_1 != '' OR email_2 != ''").
+    err = dao.DB().NewQuery("SELECT email_1, email_2 FROM skoly").
       All(&res)
     if err != nil { return err }
     for _, s := range res {
-      var e string
-      if s.Email1 != "" { e = s.Email1 } else if s.Email2 != "" { e = s.Email2 }
+      e := ""
+      if s.Email1 != "" {
+        e = s.Email1
+      } else if s.Email2 != "" {
+        e = s.Email2
+      }
       if e == "" { continue }
+      log.Info(e)
       err := mailerc.Send(&mailer.Message{
         From: mail.Address{
           Address: "strela-vlna@gchd.cz",
@@ -334,7 +339,7 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
         },
         To: []mail.Address{{Address: e}},
         Subject: "",
-        HTML: msg,
+        HTML: tmpls.GetString("text"),
       })
       if err != nil { log.Error(err) }
     }
