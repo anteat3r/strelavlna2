@@ -344,7 +344,7 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       adrs = append(adrs, *addr)
     }
     idx := slices.IndexFunc(adrs, func(v mail.Address) bool {
-      return v.Address == "zs.tisa@volny.cz"
+      return v.Address == "zs-zelatovska@zs-zelatovska.cz"
     })
     if idx == -1 { return dbErr("index -1") }
     adrs = adrs[idx+1:]
@@ -365,7 +365,10 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
         Subject: "Pražská střela a Dopplerova vlna 2024",
         HTML: tmpls.GetString("text"),
       })
-      if err != nil { return err }
+      if err != nil {
+        log.Error(err)
+        return err
+      }
     }
     return c.String(200, "")
   }
