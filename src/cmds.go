@@ -323,6 +323,7 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     err = dao.DB().NewQuery("SELECT email_1, email_2 FROM skoly").
       All(&res)
     if err != nil { return err }
+    adrs := make([]mail.Address, 0)
     for _, s := range res {
       e := ""
       if s.Email1 != "" {
@@ -332,17 +333,21 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       }
       if e == "" { continue }
       log.Info(e)
-      err := mailerc.Send(&mailer.Message{
-        From: mail.Address{
-          Address: "strela-vlna@gchd.cz",
-          Name: "Střela Vlna",
-        },
-        To: []mail.Address{{Address: e}},
-        Subject: "Pražská střela a Dopplerova vlna 2024",
-        HTML: tmpls.GetString("text"),
+      adrs = append(adrs, mail.Address{
+        Address: e,
       })
-      if err != nil { log.Error(err) }
     }
+    err = mailerc.Send(&mailer.Message{
+      From: mail.Address{
+        Address: "strela-vlna@gchd.cz",
+        Name: "Střela Vlna",
+      },
+      To: adrs[:1],
+      Bcc: adrs[1:],
+      Subject: "Pražská střela a Dopplerova vlna 2024",
+      HTML: tmpls.GetString("text"),
+    })
+    if err != nil { log.Error(err) }
     return c.String(200, "")
   }
 }
