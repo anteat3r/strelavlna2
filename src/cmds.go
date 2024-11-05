@@ -332,7 +332,6 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
         e = s.Email2
       }
       if e == "" { continue }
-      log.Info(e)
       if strings.Contains(e, ";") {
         e = strings.Split(e, ";")[0]
       }
@@ -349,6 +348,7 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
     }
     fadrs := append(_chunks, adrs)
     for _, chnk := range fadrs {
+      log.Info(chnk, len(chnk))
       err = mailerc.Send(&mailer.Message{
         From: mail.Address{
           Address: "strela-vlna@gchd.cz",
@@ -360,7 +360,6 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
         HTML: tmpls.GetString("text"),
       })
       if err != nil { return err }
-      log.Info(chnk)
     }
     return c.String(200, "")
   }
