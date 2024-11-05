@@ -342,9 +342,9 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       }
       adrs = append(adrs, *addr)
     }
-    var _chunks = make([][]mail.Address, 0, (len(adrs)/200)+1)
+    var _chunks = make([][]mail.Address, 0, (len(adrs)/20)+1)
     for 200 < len(adrs) {
-      adrs, _chunks = adrs[200:], append(_chunks, adrs[0:200:200])
+      adrs, _chunks = adrs[20:], append(_chunks, adrs[0:20:20])
     }
     fadrs := append(_chunks, adrs)
     for _, chnk := range fadrs {
