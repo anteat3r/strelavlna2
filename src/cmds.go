@@ -338,7 +338,7 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
           Name: "Střela Vlna",
         },
         To: []mail.Address{{Address: e}},
-        Subject: "",
+        Subject: "Pražská střela a Dopplerova vlna 2024",
         HTML: tmpls.GetString("text"),
       })
       if err != nil { log.Error(err) }

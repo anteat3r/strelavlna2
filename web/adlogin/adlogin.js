@@ -5,6 +5,7 @@ const username_DOM = document.getElementById("username");
 const password_DOM = document.getElementById("password");
 const login_message = document.getElementById("login-message");
 const login_button = document.getElementById("login");
+const login_disc_button = document.getElementById("login-disc");
 const logout_button = document.getElementById("logout");
 
 logout_button.classList.add("hidden");
@@ -34,6 +35,21 @@ async function login(username, password){
     setTimeout(e=>{is_loading_running = false;}, 1000);
 }
 
+async function disc_login() {
+  await pb.collection("correctors").authWithOAuth2({ prvider: "discord" })
+  if(pb.authStore.isValid){
+      if(localStorage.getItem("logging_from")){
+          window.location.href = localStorage.getItem("logging_from");
+          localStorage.removeItem("logging_from");
+      }else{
+          logout_button.classList.remove("hidden");
+      }
+      login_message.innerHTML = "Přihlášení bylo uspěsné.";
+  }
+
+  setTimeout(e=>{is_loading_running = false;}, 1000);
+}
+
 function logout(){
     pb.authStore.clear();
     logout_button.classList.add("hidden");
@@ -56,7 +72,7 @@ function checkAlreadyLoggedIn(){
 }
 
 checkAlreadyLoggedIn();
-await login_button.addEventListener("click", validateButton);
+login_button.addEventListener("click", validateButton);
 
 async function validateButton(){
     if(!username_DOM.value == "" && !password_DOM.value == ""){
