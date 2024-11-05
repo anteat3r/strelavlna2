@@ -337,7 +337,10 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
         e = strings.Split(e, ";")[0]
       }
       addr, err := mail.ParseAddress(e)
-      if err != nil { return err }
+      if err != nil {
+        log.Error(err)
+        continue
+      }
       adrs = append(adrs, *addr)
     }
     err = mailerc.Send(&mailer.Message{
