@@ -49,6 +49,7 @@ async function disc_login() {
 
   setTimeout(e=>{is_loading_running = false;}, 1000);
 }
+login_disc_button.addEventListener("click", disc_login);
 
 function logout(){
     pb.authStore.clear();
