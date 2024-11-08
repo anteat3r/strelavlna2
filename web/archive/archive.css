@@ -61,7 +61,7 @@
     display: flex;
     flex-flow: row wrap;
     margin: auto;
-    gap: 10vw;
+    column-gap: 10vw;
     max-width: 60vw;
     font-size: 20px;
     text-align: center;
@@ -282,7 +282,6 @@
 }
 
 .placement-wrapper{
-    gap: 15vw;
     max-width: 80vw;
 }
 
@@ -438,7 +437,7 @@ margin-bottom: 0;
         display: flex;
         flex-flow: row wrap;
         margin: auto;
-        gap: 10vw;
+        column-gap: 10vw;
         max-width: 70vw;
         font-size: 20px;
         text-align: center;
