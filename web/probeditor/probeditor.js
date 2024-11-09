@@ -286,7 +286,7 @@ class PFnode { //path finding node
 
         //sort nodes into quadrants
         for(let i = 0; i < node_list.length; i++){
-            if((node_list[i].x - this.x) * (node_list[i].x - target.x) < 0 && (node_list[i].y - this.y) * (node_list[i].y - target.y) < 0){
+            if((node_list[i].x - this.x) * (node_list[i].x - target.x) <= 0 && (node_list[i].y - this.y) * (node_list[i].y - target.y) <= 0){
                 nodesInCenter.push(node_list[i]);
             }else{
                 nodesOutCenter.push(node_list[i]);
@@ -1123,31 +1123,31 @@ let graph = {
             type: "addition",
             x: 200,
             y: 100,
-            inputs: [-1, -1],
+            inputs: [1, 2],
             defautltInputs: [1, 1]
         },
         {
-            id: 0,
+            id: 1,
             type: "addition",
             x: 150,
             y: 150,
-            inputs: [-1, -1],
+            inputs: [2, 3],
             defautltInputs: [3, 3]
         },
         {
-            id: 0,
+            id: 2,
             type: "addition",
             x: 200,
             y: 260,
-            inputs: [-1, -1],
+            inputs: [3, -1],
             defautltInputs: [6, 6]
         },
         {
-            id: 0,
+            id: 3,
             type: "addition",
             x: 200,
             y: 200,
-            inputs: [-1, -1],
+            inputs: [0, 1],
             defautltInputs: [1, 9]
         }
     ]
@@ -1192,10 +1192,11 @@ function renderGraph(graph){
         for(let i = 0; i < node.inputs.length; i++){
             graph_ctx.strokeStyle = "#c0d5dd";
             graph_ctx.strokeWidth = rules.connectionWidth;
-            if(node.inputs[i] == -1) {
-                const x = node.x;
-                const y = node.y + rules.inputSeparation * (i + 1);
 
+            const x = node.x;
+            const y = node.y + rules.inputSeparation * (i + 1);
+            
+            if(node.inputs[i] == -1) {
                 const extendX = rules.defaultInputExtendX * Math.min(i, node.inputs.length - i - 1);
                 const extendY = rules.defaultInputExtendY * (i - (node.inputs.length - 1)/2);
                 const maxExtendX = rules.defaultInputExtendX * Math.ceil(node.inputs.length/2);
@@ -1225,9 +1226,22 @@ function renderGraph(graph){
                 graph_ctx.fillStyle = "#c0d5dd";
                 graph_ctx.fillText(node.defautltInputs[i], x - rules.defaultInputSize/2 - maxExtendX - rules.defaultInputOffset, y + extendY);
 
+            }else{
+                let target_node = graph.nodes.find(nd => nd.id == node.inputs[i]);
+                const target_rules = editor_render_ruleset.nodes[target_node.type];
+                const target = {x: target_node.x + target_rules.width, y: target_node.y + target_rules.height/2};
+                const points = [{x: x, y: y}, ...findPath(graph, {x: x - 10, y: y}, {x:target.x + 10 , y:target.y}, 5), target];
+                // graph_ctx.fillStyle = "#000";
+                // for(const point of points) {
+                //     graph_ctx.beginPath();
+                //     graph_ctx.arc(point.x, point.y, 2, 0, 2*Math.PI);
+                //     graph_ctx.fill();
+                // }
+
+                // console.log(points);
+                drawRoundedPath(graph_ctx, points, 5);
             }
         }
-
     }
 
     drawRoundedPath(graph_ctx, findPath(graph, {x: 50, y: 80}, {x:mouse_position.x - 300, y:mouse_position.y - 300}, 5), 5);
@@ -1382,6 +1396,14 @@ function findPath(graph, start, end, radius){
     }
 
     path_points.push({x: path[path.length - 1].x, y: path[path.length - 1].y});
+
+    //chek for 3 points in a row
+    //and delete the middle one
+    for(let i = 0; i < path_points.length - 2; i++){
+        if((path_points[i].x == path_points[i + 1].x && path_points[i + 1].x == path_points[i + 2].x) || (path_points[i].y == path_points[i + 1].y && path_points[i + 1].y == path_points[i + 2].y)){
+            path_points.splice(i + 1, 1);
+        }
+    }
 
     return path_points;
 }
