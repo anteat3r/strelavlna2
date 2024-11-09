@@ -10,17 +10,20 @@ function adjustDivHeight() {
     div.style.height = `${remainingHeight_div}px`;
 }
   
-  // Adjust the div height on page load and when the window is resized
-  window.addEventListener('load', adjustDivHeight);
-  window.addEventListener('resize', adjustDivHeight);
-  
-  const canvas = document.getElementById('generationeditor-canvas');
+// Adjust the div height on page load and when the window is resized
+window.addEventListener('load', adjustDivHeight);
+window.addEventListener('resize', adjustDivHeight);
 
-  function resizeCanvas() {
-      canvas.window = `${canvas.clientWidth}px`;
-      canvas.height = `${canvas.clientHeight}px`;
-  }
-  
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-  
+const canvas = document.getElementById('generationeditor-canvas');
+
+function resizeCanvas() {
+    console.log(canvas.clientWidth, canvas.width);
+
+
+
+    // canvas.width = canvas.clientWidth;
+    // canvas.height = canvas.clientHeight - 4;
+}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);

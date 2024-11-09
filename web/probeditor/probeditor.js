@@ -14,11 +14,11 @@ class TableRow {
       this._unit = unit;
       this._description = description;
 
-      this._name_modified = false;
-      this._symbol_modified = false;
-      this._value_modified = false;
-      this._unit_modified = false;
-      this._description_modified = false;
+      this.name_modified = false;
+      this.symbol_modified = false;
+      this.value_modified = false;
+      this.unit_modified = false;
+      this.description_modified = false;
     }
   
     // Getters and setters
@@ -36,7 +36,7 @@ class TableRow {
   
     set name(newName) {
       changesUnsaved();
-      this._name_modified = true;
+      this.name_modified = true;
       this._name = newName;
     }
   
@@ -46,7 +46,7 @@ class TableRow {
   
     set symbol(newSymbol) {
       changesUnsaved();
-      this._symbol_modified = true;
+      this.symbol_modified = true;
       this._symbol = newSymbol;
     }
   
@@ -56,7 +56,7 @@ class TableRow {
   
     set value(newValue) {
       changesUnsaved();
-      this._value_modified = true;
+      this.value_modified = true;
       this._value = newValue;
     }
   
@@ -66,7 +66,7 @@ class TableRow {
   
     set unit(newUnit) {
       changesUnsaved();
-      this._unit_modified = true;
+      this.unit_modified = true;
       this._unit = newUnit;
     }
   
@@ -76,34 +76,32 @@ class TableRow {
   
     set description(newDescription) {
       changesUnsaved();
-      this._description_modified = true;
+      this.description_modified = true;
       this._description = newDescription;
     }
 
     pushChanges() {
-      if (!(this._name_modified || this._symbol_modified || this._value_modified || this._unit_modified || this._description_modified)) return;
+      if (!(this.name_modified || this.symbol_modified || this.value_modified || this.unit_modified || this.description_modified)) return;
 
       const update_data = {};
 
-      if (this._name_modified) update_data.name = this._name;
-      if (this._symbol_modified) update_data.symbol = this._symbol;
-      if (this._value_modified) update_data.value = this._value;
-      if (this._unit_modified) update_data.unit = this._unit;
-      if (this._description_modified) update_data.desc = this._description;
-
-      console.log(update_data);
+      if (this.name_modified) update_data.name = this._name;
+      if (this.symbol_modified) update_data.symbol = this._symbol;
+      if (this.value_modified) update_data.value = this._value;
+      if (this.unit_modified) update_data.unit = this._unit;
+      if (this.description_modified) update_data.desc = this._description;
 
       pb.collection('consts').update(this.id, update_data);
 
-      this._name_modified = false;
-      this._symbol_modified = false;
-      this._value_modified = false;
-      this._unit_modified = false;
-      this._description_modified = false;
+      this.name_modified = false;
+      this.symbol_modified = false;
+      this.value_modified = false;
+      this.unit_modified = false;
+      this.description_modified = false;
     }
 
     isChanged() {
-        return this._name_modified || this._symbol_modified || this._value_modified || this._unit_modified || this._description_modified;
+        return this.name_modified || this.symbol_modified || this.value_modified || this.unit_modified || this.description_modified;
     }
 }
 
@@ -119,13 +117,13 @@ class Prob {
       this._image = image;
       this._author = author;
 
-      this._title_modified = false;
-      this._rank_modified = false;
-      this._type_modified = false;
-      this._content_modified = false;
-      this._solution_modified = false;
-      this._image_modified = false;
-      this._author_modified = false;
+      this.title_modified = false;
+      this.rank_modified = false;
+      this.type_modified = false;
+      this.content_modified = false;
+      this.solution_modified = false;
+      this.image_modified = false;
+      this.author_modified = false;
     }
   
     // Getters and setters
@@ -143,7 +141,7 @@ class Prob {
   
     set title(newTitle) {
       changesUnsaved();
-      this._title_modified = true;
+      this.title_modified = true;
       this._title = newTitle;
     }
   
@@ -153,7 +151,7 @@ class Prob {
   
     set rank(newRank) {
       changesUnsaved();
-      this._rank_modified = true;
+      this.rank_modified = true;
       this._rank = newRank;
     }
 
@@ -163,7 +161,7 @@ class Prob {
   
     set type(newType) {
       changesUnsaved();
-      this._type_modified = true;
+      this.type_modified = true;
       this._type = newType;
     }
   
@@ -173,7 +171,7 @@ class Prob {
   
     set content(newContent) {
       changesUnsaved();
-      this._content_modified = true;
+      this.content_modified = true;
       this._content = newContent;
     }
   
@@ -183,7 +181,7 @@ class Prob {
   
     set solution(newSolution) {
       changesUnsaved();
-      this._solution_modified = true;
+      this.solution_modified = true;
       this._solution = newSolution;
     }
   
@@ -193,7 +191,7 @@ class Prob {
   
     set image(newImage) {
       changesUnsaved();
-      this._image_modified = true;
+      this.image_modified = true;
       this._image = newImage;
     }
 
@@ -203,39 +201,142 @@ class Prob {
 
     set author(newAuthor) {
       changesUnsaved();
-      this._author_modified = true;
+      this.author_modified = true;
       this._author = newAuthor;
     }
 
     pushChanges() {
-        // console.log("pushing changes");
-      if (!(this._title_modified || this._rank_modified || this._type_modified || this._content_modified || this._solution_modified || this._image_modified || this._author_modified)) return;
+      if (!(this.title_modified || this.rank_modified || this.type_modified || this.content_modified || this.solution_modified || this.image_modified || this.author_modified)) return;
 
       const update_data = {};
 
-      if (this._title_modified) update_data.name = this._title;
-      if (this._rank_modified) update_data.diff = this._rank;
-      if (this._type_modified) update_data.type = this._type;
-      if (this._content_modified) update_data.text = this._content;
-      if (this._solution_modified) update_data.solution = this._solution;
-      if (this._image_modified) update_data.img = this._image;
-      if (this._author_modified) update_data.author = this._author;
-
-      console.log(update_data);
+      if (this.title_modified) update_data.name = this._title;
+      if (this.rank_modified) update_data.diff = this._rank;
+      if (this.type_modified) update_data.type = this._type;
+      if (this.content_modified) update_data.text = this._content;
+      if (this.solution_modified) update_data.solution = this._solution;
+      if (this.image_modified) update_data.img = this._image;
+      if (this.author_modified) update_data.author = this._author;
 
       pb.collection('probs').update(this.id, update_data);
 
-      this._title_modified = false;
-      this._rank_modified = false;
-      this._type_modified = false;
-      this._content_modified = false;
-      this._solution_modified = false;
-      this._image_modified = false;
-      this._author_modified = false;
+      this.title_modified = false;
+      this.rank_modified = false;
+      this.type_modified = false;
+      this.content_modified = false;
+      this.solution_modified = false;
+      this.image_modified = false;
+      this.author_modified = false;
     }
 
     isChanged() {
-        return this._title_modified || this._rank_modified || this._type_modified || this._content_modified || this._solution_modified || this._image_modified || this._author_modified;
+        return this.title_modified || this.rank_modified || this.type_modified || this.content_modified || this.solution_modified || this.image_modified || this.author_modified;
+    }
+}
+
+class Obstacle {
+    constructor(faces) {
+        this.faces = faces;
+    }
+
+    passesThrough(p1, p2){
+        if(p1.x != p2.x && p1.y != p2.y) return false;
+
+        if(p1.x == p2.x){
+            return p1.x > this.faces[3] && p1.x < this.faces[1] && ((p1.y - this.faces[0]) * (p2.y - this.faces[0]) < 0 || (p1.y - this.faces[2]) * (p2.y - this.faces[2]) < 0);
+        }else{
+            return p1.y < this.faces[0] && p1.y > this.faces[2] && ((p1.x - this.faces[3]) * (p2.x - this.faces[3]) < 0 || (p1.x - this.faces[1]) * (p2.x - this.faces[1]) < 0);
+        }
+    }
+
+    get vertices(){
+        return [
+            {x: this.faces[3], y: this.faces[0]},
+            {x: this.faces[1], y: this.faces[0]},
+            {x: this.faces[1], y: this.faces[2]},
+            {x: this.faces[3], y: this.faces[2]}
+        ];
+    }
+}
+
+
+class PFnode { //path finding node
+    constructor(x, y, id) {
+        this.x = x;
+        this.y = y;
+        this.id = id;
+        this.connection = -1;
+    }
+
+    trace(node_list){
+        if (this.connection == -1 || this.id == -2) {
+            return [this];
+        }
+
+        let list = node_list.find(node => node.id == this.connection).trace(node_list)
+        list.push(this);
+        return list;
+    }
+
+    connect(node_list, obstacles, target){
+        let new_connections = [];
+
+        let nodesInCenter = [];
+        let nodesOutCenter = [];
+
+        //sort nodes into quadrants
+        for(let i = 0; i < node_list.length; i++){
+            if((node_list[i].x - this.x) * (node_list[i].x - target.x) < 0 && (node_list[i].y - this.y) * (node_list[i].y - target.y) < 0){
+                nodesInCenter.push(node_list[i]);
+            }else{
+                nodesOutCenter.push(node_list[i]);
+            }
+        }
+
+        let nodesToCheck = [];
+        nodesToCheck.push(...nodesInCenter);
+        nodesToCheck.push(...nodesOutCenter);
+
+        for(let i = 0; i < nodesToCheck.length; i++){
+            if(nodesToCheck[i].connection != -1) continue;
+            if(nodesToCheck[i].id == this.id) continue;
+
+            //first x, then y
+            let midX = nodesToCheck[i].x;
+            let midY = this.y;
+
+            let possible = true;
+            if(nodesToCheck[i].connection == -1){
+                for(let j = 0; j < obstacles.length; j++){
+                    if(obstacles[j].passesThrough({x: midX, y: midY}, {x: this.x, y: this.y}) || obstacles[j].passesThrough({x: midX, y: midY}, {x: nodesToCheck[i].x, y: nodesToCheck[i].y})){
+                        possible = false;
+                    }
+                }
+                if(possible){
+                    nodesToCheck[i].connection = this.id;
+                    new_connections.push(nodesToCheck[i]);
+                }
+            }
+
+
+            //first y, then x
+            midX = this.x;
+            midY = nodesToCheck[i].y;
+
+            possible = true;
+            if(nodesToCheck[i].connection == -1){
+                for(let j = 0; j < obstacles.length; j++){
+                    if(obstacles[j].passesThrough({x: midX, y: midY}, {x: this.x, y: this.y}) || obstacles[j].passesThrough({x: midX, y: midY}, {x: nodesToCheck[i].x, y: nodesToCheck[i].y})){
+                        possible = false;
+                    }
+                }
+                if(possible){
+                    nodesToCheck[i].connection = this.id;
+                    new_connections.push(nodesToCheck[i]);
+                }
+            }
+        }
+        return new_connections;
     }
 }
 
@@ -244,6 +345,13 @@ class Prob {
 
 const max_image_width = 700;
 const max_image_height = 400;
+
+const graph_canvas = document.getElementById("generationeditor-canvas");
+const graph_ctx = graph_canvas.getContext('2d');
+
+let editor_render_ruleset = null;
+
+let mouse_position = {x: 0, y: 0};
 
 let focused_prob = "";
 let focused_const = "";
@@ -314,7 +422,6 @@ async function load(){
 
 document.getElementById("save-changes-button").addEventListener("click", async function(){
     for(let prob of probs){
-        // console.log(prob);
         prob.pushChanges();
     }
     for(let row of table){
@@ -333,6 +440,10 @@ window.onbeforeunload = function() {
         return "Máte neuložené změny";
     }
 }
+
+document.addEventListener("mousemove", function(e) {
+    mouse_position = {x: e.clientX, y: e.clientY};
+});
 
 // right editor
 
@@ -383,6 +494,9 @@ function updateRightEditor(){
         right_editor_elements[2].classList.remove("hidden");
         right_editor_elements[1].classList.add("small");
     }
+
+    // graph_canvas.width = graph_canvas.clientWidth;
+    // graph_canvas.height = graph_canvas.clientHeight - 10;
 }
 
 function updateFinallook(){
@@ -439,29 +553,29 @@ function updateFinallook(){
 
 function parseContentForLatex(txt){
     let newtxt = "";
-    let current_state = 0;
+    let curent_state = 0;
     let i = 0;
     for(;i < txt.length - 1; i++){
         if(txt[i] == "$" && txt[i + 1] == "$"){
-            if(current_state == 0){
-                current_state = 2;
+            if(curent_state == 0){
+                curent_state = 2;
                 newtxt += `<span class="latex-styled">$`;
-            }else if(current_state == 1){
+            }else if(curent_state == 1){
                 newtxt += "$$";
-            }else if(current_state == 2){
-                current_state = 0;
+            }else if(curent_state == 2){
+                curent_state = 0;
                 newtxt += `$</span>`;
             }
             i++;
         }else if(txt[i] == "$" && txt[i + 1] != "$"){
-            if(current_state == 0){
-                current_state = 1;
+            if(curent_state == 0){
+                curent_state = 1;
                 newtxt += "$";
-            }else if(current_state == 1){
+            }else if(curent_state == 1){
                 newtxt += "$";
-                current_state = 0;
-            }else if(current_state == 2){
-                console.log("parsing error");
+                curent_state = 0;
+            }else if(curent_state == 2){
+                console.error("parsing error");
             }
         }else{
             newtxt += txt[i];
@@ -470,7 +584,6 @@ function parseContentForLatex(txt){
     if(i == txt.length - 1){
         newtxt += txt[txt.length - 1];
     }
-    console.log(newtxt);
     return newtxt;
 }
 
@@ -485,7 +598,6 @@ document.getElementById("image-input").addEventListener("change", async function
     form_data.append("img", file);
     const response = await pb.collection('probs').update(focused_prob, {img: file});
     probs.find(prob => prob.id == focused_prob).image = response.img;
-    console.log(file.name);
     updateFinallook();
 });
 
@@ -794,12 +906,6 @@ function updateProbList(){
         probs_c = probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
     }
 
-    if(author_filter != "all"){
-        for(let item of probs){
-            console.log(item.author);
-        }
-    }
-
     prob_list_a.innerHTML = "";
     prob_list_b.innerHTML = "";
     prob_list_c.innerHTML = "";
@@ -985,19 +1091,311 @@ document.getElementById("problem-filter-input").addEventListener("keydown", func
     }
 });
 
-
-
-
-
 function scrollToFocusedProb(){
     if(focused_prob == "") return;
     document.getElementById(focused_prob).scrollIntoView({block: "center", behavior: "smooth"});
 }
 
 
+//grpah editor
+
+function initializeCanvasWhenVisible() {
+    const interval = setInterval(() => {
+        if (graph_canvas.clientWidth > 0 && graph_canvas.clientHeight > 0) {
+            graph_canvas.height = graph_canvas.clientHeight - 68;
+            graph_canvas.width = graph_canvas.clientWidth;
+
+            // Start the animation loop
+            graphEditorLoop();
+
+            // Stop checking once it's set
+            clearInterval(interval);
+        }
+    }, 100); // Check every 100ms
+}
+
+initializeCanvasWhenVisible()
+
+let graph = {
+    nodes: [
+        {
+            id: 0,
+            type: "addition",
+            x: 200,
+            y: 100,
+            inputs: [-1, -1],
+            defautltInputs: [1, 1]
+        },
+        {
+            id: 0,
+            type: "addition",
+            x: 150,
+            y: 150,
+            inputs: [-1, -1],
+            defautltInputs: [3, 3]
+        },
+        {
+            id: 0,
+            type: "addition",
+            x: 200,
+            y: 260,
+            inputs: [-1, -1],
+            defautltInputs: [6, 6]
+        },
+        {
+            id: 0,
+            type: "addition",
+            x: 200,
+            y: 200,
+            inputs: [-1, -1],
+            defautltInputs: [1, 9]
+        }
+    ]
+}
+
+function graphEditorLoop(){
+    requestAnimationFrame(graphEditorLoop);
+
+    graph_ctx.clearRect(0, 0, graph_canvas.width, graph_canvas.height);
+
+    renderGraph(graph);
+
+    // graph_ctx.strokeStyle = "#0f455a";
+    // graph_ctx.beginPath();
+    // graph_ctx.lineWidth = 10;
+    // graph_ctx.moveTo(0, 100);
+    // graph_ctx.lineTo(100, 100);
+    // graph_ctx.stroke();
+}
+
+function renderGraph(graph){
+    const rules = editor_render_ruleset;
+    graph_ctx.moveTo(100, 100);           // Start point
+    // graph_ctx.lineTo(150, 50);          // Draw horizontal line
+    graph_ctx.arcTo(100, 100, 150, 150, 80); // Rounded corner from horizontal to vertical
+    // graph_ctx.lineTo(200, 150);         // Continue downwards
+    graph_ctx.stroke();
+    for(let node of graph.nodes){
+        graph_ctx.fillStyle = "#0f455a";
+        const node_rules = editor_render_ruleset.nodes[node.type];
+
+        graph_ctx.beginPath();
+        graph_ctx.roundRect(node.x, node.y, node_rules.width, node_rules.height, 5);
+        graph_ctx.fill();
+
+        graph_ctx.font = `${rules.nodeFontSize}px Lexend`;
+        graph_ctx.fillStyle = "#ffffff";
+        graph_ctx.textAlign = "center";
+        graph_ctx.textBaseline = "middle";
+        graph_ctx.fillText(node_rules.text, node.x + node_rules.width/2, node.y + node_rules.height/2);
+
+        for(let i = 0; i < node.inputs.length; i++){
+            graph_ctx.strokeStyle = "#c0d5dd";
+            graph_ctx.strokeWidth = rules.connectionWidth;
+            if(node.inputs[i] == -1) {
+                const x = node.x;
+                const y = node.y + rules.inputSeparation * (i + 1);
+
+                const extendX = rules.defaultInputExtendX * Math.min(i, node.inputs.length - i - 1);
+                const extendY = rules.defaultInputExtendY * (i - (node.inputs.length - 1)/2);
+                const maxExtendX = rules.defaultInputExtendX * Math.ceil(node.inputs.length/2);
+
+
+                drawRoundedPath(graph_ctx, [
+                    {x: x, y: y},
+                    {x: x - extendX - rules.defaultInputOffset/2, y: y},
+                    {x: x - extendX - rules.defaultInputOffset/2, y: y + extendY},
+                    {x: x - maxExtendX - rules.defaultInputOffset, y: y + extendY},
+                ], 5);
+                
+                
+                
+                
+                
+                // graph_ctx.beginPath();
+                // graph_ctx.moveTo(node.x, y);
+                // graph_ctx.lineTo(x, y);
+                // graph_ctx.stroke();
+
+                graph_ctx.beginPath();
+                graph_ctx.roundRect(x - rules.defaultInputSize - maxExtendX - rules.defaultInputOffset, y - rules.defaultInputSize/2 + extendY, rules.defaultInputSize, rules.defaultInputSize, 5);
+                graph_ctx.stroke();
+
+                graph_ctx.font = `${rules.defaultInputFontSize}px Lexend`;
+                graph_ctx.fillStyle = "#c0d5dd";
+                graph_ctx.fillText(node.defautltInputs[i], x - rules.defaultInputSize/2 - maxExtendX - rules.defaultInputOffset, y + extendY);
+
+            }
+        }
+
+    }
+
+    drawRoundedPath(graph_ctx, findPath(graph, {x: 50, y: 80}, {x:mouse_position.x - 300, y:mouse_position.y - 300}, 5), 5);
+
+}
+
+function drawRoundedPath(ctx, points, radius) {
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+
+    let mids = [];
+
+    for (let i = 0; i < points.length - 1; i++) {
+        mids.push({x: (points[i].x + points[i + 1].x) / 2, y: (points[i].y + points[i + 1].y) / 2});
+    }
+
+    mids[0] = points[0];
+    mids[mids.length - 1] = points[points.length - 1];
+
+    for (let i = 1; i < points.length - 1; i++) {
+        const begin = mids[i - 1];
+        const corner = points[i];
+        const end = mids[i];
+
+        // Determine the direction of the line (horizontal or vertical)
+        const isHorizontal = begin.y === corner.y;
+        
+        if (isHorizontal) {
+            const begCut = Math.abs(begin.x - corner.x) < radius;
+            const endCut = Math.abs(end.y - corner.y) < radius;
+
+            if (begCut && endCut) {
+                console.error("Error: controll points too close to each other");
+                return;
+            }
+
+            if (begCut) {
+                let dX = Math.abs(begin.x - corner.x);
+                let dY = (Math.tan(Math.PI / 2 - Math.acos(1 - dX / radius))) * dX;
+
+                ctx.arcTo(corner.x, corner.y + dY * (end.y > corner.y ? 1 : -1), corner.x, corner.y + radius * (end.y > corner.y ? 1 : -1), radius);
+                ctx.lineTo(end.x, end.y);
+
+            } else if (endCut) {
+                let dY = Math.abs(end.y - corner.y);
+                let dX = (Math.tan(Math.PI / 2 - Math.acos(1 - dY / radius))) * dY;
+
+                ctx.lineTo(corner.x + radius * (begin.x > corner.x ? 1 : -1), corner.y);
+                ctx.arcTo(corner.x + dX * (begin.x > corner.x ? 1 : -1), corner.y, end.x, end.y, radius);
+            } else {
+                ctx.lineTo(corner.x + radius * (begin.x > corner.x ? 1 : -1), corner.y);
+                ctx.arcTo(corner.x, corner.y, corner.x, corner.y + radius * (end.y > corner.y ? 1 : -1), radius);
+                ctx.lineTo(end.x, end.y);
+            }
+
+        } else {
+            const begCut = Math.abs(begin.y - corner.y) < radius;
+            const endCut = Math.abs(end.x - corner.x) < radius;
+
+            if (begCut && endCut) {
+                console.error("Error: controll points too close to each other");
+                return;
+            }
+
+            if (begCut) {
+                let dY = Math.abs(begin.y - corner.y);
+                let dX = (Math.tan(Math.PI / 2 - Math.acos(1 - dY / radius))) * dY;
+
+                ctx.arcTo(corner.x + dX * (end.x > corner.x ? 1 : -1), corner.y, corner.x + radius * (end.x > corner.x ? 1 : -1), corner.y, radius);
+                ctx.lineTo(end.x, end.y);
+
+            } else if (endCut) {
+                let dX = Math.abs(end.x - corner.x);
+                let dY = (Math.tan(Math.PI / 2 - Math.acos(1 - dX / radius))) * dX;
+
+                ctx.lineTo(corner.x, corner.y + radius * (begin.y > corner.y ? 1 : -1));
+                ctx.arcTo(corner.x, corner.y + dY * (begin.y > corner.y ? 1 : -1), end.x, end.y, radius);
+            } else {
+                ctx.lineTo(corner.x, corner.y + radius * (begin.y > corner.y ? 1 : -1));
+                ctx.arcTo(corner.x, corner.y, corner.x + radius * (end.x > corner.x ? 1 : -1), corner.y, radius);
+                ctx.lineTo(end.x, end.y);
+            }
+        }
+    }
+
+    ctx.stroke();
+
+}
+
+function findPath(graph, start, end, radius){
+
+    const nodes = graph.nodes;
+    let obstacles = [];
+    let PFnodes = [];
+
+    PFnodes.push(new PFnode(start.x, start.y, -2));
+    PFnodes.push(new PFnode(end.x, end.y, 1));
+
+    for(let i = 0; i < nodes.length; i++){
+        let node = nodes[i];
+        const node_rules = editor_render_ruleset.nodes[node.type];
+        obstacles.push(new Obstacle([
+            node.y + node_rules.height + radius,
+            node.x + node_rules.width + radius,
+            node.y - radius,
+            node.x - radius
+        ]));
+
+        PFnodes.push(new PFnode(node.x - radius, node.y + node_rules.height + radius, i*4 + 2));
+        PFnodes.push(new PFnode(node.x + node_rules.width + radius, node.y + node_rules.height + radius, i*4 + 3));
+        PFnodes.push(new PFnode(node.x + node_rules.width + radius, node.y - radius, i*4 + 4));
+        PFnodes.push(new PFnode(node.x - radius, node.y - radius, i*4 + 5));
+    }
+
+    
+    let queue = [PFnodes[0]];
+
+    while(queue.length > 0){
+        const curent = queue.shift();
+
+        queue.push(...curent.connect(PFnodes, obstacles, end));
+    }
+
+
+    const path = PFnodes[1].trace(PFnodes);
+    let path_points = [];
+
+    for(let i = 0; i < path.length - 1; i++){
+        path_points.push({x: path[i].x, y: path[i].y});
+
+        // first x, then y
+        let x = path[i + 1].x;
+        let y = path[i].y;
+
+        let possible = true;
+        for(let j = 0; j < obstacles.length; j++){
+            const obs = obstacles[j];
+            if(obs.passesThrough({x: x, y: y}, {x: path[i].x, y: path[i].y}) || obs.passesThrough({x: x, y: y}, {x: path[i + 1].x, y: path[i + 1].y})){
+                possible = false;
+            }
+        }
+
+        if(possible){
+            path_points.push({x: x, y: y});
+        }else{
+
+            // first y, then x
+            x = path[i].x;
+            y = path[i + 1].y;
+            path_points.push({x: x, y: y});
+        }
+    }
+
+    path_points.push({x: path[path.length - 1].x, y: path[path.length - 1].y});
+
+    return path_points;
+}
+
 
 await load();
+fetch('editor_render_ruleset.json')
+  .then(response => response.json())
+  .then(data => {
+    editor_render_ruleset = data;
+})
+  .catch(error => console.error('Error fetching JSON:', error));
 updateProbList();
 updateTable();
+// graphEditorLoop();
 
 

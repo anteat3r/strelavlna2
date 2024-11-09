@@ -1,0 +1,19 @@
+{
+    "nodeFontSize": 24,
+    "connectionWidth": 2,
+    "inputSeparation": 15,
+    "defaultInputOffset": 20,
+    "defaultInputSize": 15,
+    "defaultInputFontSize": 11,
+    "defaultInputExtendX": 4,
+    "defaultInputExtendY": 10,
+
+    "nodes": {
+        "addition" :{
+            "width": 30,
+            "height": 45,
+            "text": "+",
+            "inputs": 2
+        }
+    }
+}
