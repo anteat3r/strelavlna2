@@ -1,12 +1,11 @@
 package src
 
 import (
-	"bytes"
 	"encoding/json"
-	"html/template"
 	"math/rand"
 	"net/mail"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -287,56 +286,89 @@ func SendTeams(dao *daos.Dao, mailerc mailer.Mailer, timeout time.Duration) echo
 
 func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
   return func(c echo.Context) error {
-    comp, err := dao.FindRecordById("contests", c.QueryParam("id"))
-    if err != nil { return err }
+    // comp, err := dao.FindRecordById("contests", c.QueryParam("id"))
+    // if err != nil { return err }
 
     tmpls, err := dao.FindFirstRecordByData("texts", "name", "spam_mail")
     if err != nil { return err }
 
-    var renbuf bytes.Buffer
-    tmpl, err := template.New("spam_mail").Parse(tmpls.GetString("text"))
-    if err != nil { return err }
+    if tmpls.GetString("text") == "" { return dbErr("empty tmpls") }
 
-    err = tmpl.Execute(&renbuf, struct{
-      CompSubject,
-      CompName,
-      OnlineRound,
-      FinalRound,
-      RegistrationStart,
-      RegistrationEnd string
-    }{
-      comp.GetString("subject"),
-      comp.GetString("name"),
-      comp.GetDateTime("online_round").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("final_round").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("registration_start").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("registration_end").Time().Format("1.2.2006 15:04:05"),
-    })
-    if err != nil { return err }
-
-    msg := renbuf.String()
+    // var renbuf bytes.Buffer
+    // tmpl, err := template.New("spam_mail").Parse(tmpls.GetString("text"))
+    // if err != nil { return err }
+    //
+    // err = tmpl.Execute(&renbuf, struct{
+    //   CompSubject,
+    //   CompName,
+    //   OnlineRound,
+    //   FinalRound,
+    //   RegistrationStart,
+    //   RegistrationEnd string
+    // }{
+    //   comp.GetString("subject"),
+    //   comp.GetString("name"),
+    //   comp.GetDateTime("online_round").Time().Format("1.2.2006 15:04:05"),
+    //   comp.GetDateTime("final_round").Time().Format("1.2.2006 15:04:05"),
+    //   comp.GetDateTime("registration_start").Time().Format("1.2.2006 15:04:05"),
+    //   comp.GetDateTime("registration_end").Time().Format("1.2.2006 15:04:05"),
+    // })
+    // if err != nil { return err }
+    //
+    // msg := renbuf.String()
 
     res := []struct{
       Email1 string `db:"email_1"`
       Email2 string `db:"email_2"`
     }{}
-    err = dao.DB().NewQuery("SELECT email_1, email_2 FROM skoly WHERE email_1 != '' OR email_2 != ''").
+    err = dao.DB().NewQuery("SELECT email_1, email_2 FROM skoly").
       All(&res)
     if err != nil { return err }
+    adrs := make([]mail.Address, 0)
     for _, s := range res {
-      var e string
-      if s.Email1 != "" { e = s.Email1 } else if s.Email2 != "" { e = s.Email2 }
+      e := ""
+      if s.Email1 != "" {
+        e = s.Email1
+      } else if s.Email2 != "" {
+        e = s.Email2
+      }
       if e == "" { continue }
-      err := mailerc.Send(&mailer.Message{
+      if strings.Contains(e, ";") {
+        e = strings.Split(e, ";")[0]
+      }
+      addr, err := mail.ParseAddress(e)
+      if err != nil {
+        log.Error(err)
+        continue
+      }
+      adrs = append(adrs, *addr)
+    }
+    idx := slices.IndexFunc(adrs, func(v mail.Address) bool {
+      return v.Address == "info@skolanaradosti.cz"
+    })
+    if idx == -1 { return dbErr("index -1") }
+    adrs = adrs[idx+1:]
+    var _chunks = make([][]mail.Address, 0, (len(adrs)/20)+1)
+    for 20 < len(adrs) {
+      adrs, _chunks = adrs[20:], append(_chunks, adrs[0:20:20])
+    }
+    fadrs := append(_chunks, adrs)
+    for _, chnk := range fadrs {
+      log.Info(chnk, len(chnk[1:]))
+      err = mailerc.Send(&mailer.Message{
         From: mail.Address{
           Address: "strela-vlna@gchd.cz",
           Name: "Střela Vlna",
         },
-        To: []mail.Address{{Address: e}},
-        Subject: "",
-        HTML: msg,
+        To: chnk[:1],
+        Bcc: chnk[1:],
+        Subject: "Pražská střela a Dopplerova vlna 2024",
+        HTML: tmpls.GetString("text"),
       })
-      if err != nil { log.Error(err) }
+      if err != nil {
+        log.Error(err)
+        return err
+      }
     }
     return c.String(200, "")
   }

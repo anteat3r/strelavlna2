@@ -1,9 +1,7 @@
 //https://docs.google.com/spreadsheets/d/1KPlhODXQD08uxGzW3EeDqy0YM-MSqdEPGbkCX594-Yc/edit?pli=1&gid=0#gid=0;
 //https://eu.zonerama.com/Strela-Vlna/1416376
 document.addEventListener("DOMContentLoaded", function() {
-const mediaQuery = window.matchMedia("(max-width: 1000px)");
 let yearData;
-
 fetch('../archive/archive.json')
   .then(response => {
     return response.json();
@@ -29,14 +27,17 @@ fetch('../archive/archive.json')
                 <div>
                   <p class="first-place">1. místo</p>
                   <p class="place-name">${entry.placeNameOnline1}</p>
+                  <p class="place-name">${entry.schoolOnline1}</p>
                 </div>
                 <div>
                   <p class="second-place">2. místo</p>
                   <p class="place-name">${entry.placeNameOnline2}</p>
+                  <p class="place-name">${entry.schoolOnline2}</p>
                 </div>
                 <div>
                   <p class="third-place">3. místo</p>
                   <p class="place-name">${entry.placeNameOnline3}</p>
+                  <p class="place-name">${entry.schoolOnline3}</p>
                 </div>
               </div>
             </div>
@@ -48,14 +49,17 @@ fetch('../archive/archive.json')
                 <div>
                   <p class="first-place">1. místo</p>
                   <p class="place-name">${entry.placeNameNormal1}</p>
+                  <p class="place-name">${entry.schoolNormal1}</p>
                 </div>
                 <div>
                   <p class="second-place">2. místo</p>
                   <p class="place-name">${entry.placeNameNormal2}</p>
+                  <p class="place-name">${entry.schoolNormal2}</p>
                 </div>
                 <div>
                   <p class="third-place">3. místo</p>
                   <p class="place-name">${entry.placeNameNormal3}</p>
+                  <p class="place-name">${entry.schoolNormal3}</p>
                 </div>
               </div>
               <div class="image-gallery">
@@ -74,95 +78,39 @@ fetch('../archive/archive.json')
         </div>
       </div>      
     `).join('');
-    
   }
 
   // Add logic for mobile devices to display the titles in the specified order
   function renderArchiveContent() {
   const archiveContainer = document.createElement('div');
-  archiveContainer.classList.add('archive');
+  archiveContainer.classList.add('.archive-title');
   let archiveHTML = ''; // Define the archiveHTML variable
 
   // Sort the yearData keys in descending order
   const sortedYears = Object.keys(yearData).sort((a, b) => parseInt(b) - parseInt(a));
     
-  if (mediaQuery.matches) {
-    // On mobile devices, show all titles at once
-    sortedYears.forEach(year => {
-      archiveHTML += generateYearHTML(year, yearData[year]);
-    });
-  } else {
-    // On desktop devices, keep the existing behavior
-    sortedYears.forEach((year, index) => {
-      if (index === 0) {
-        archiveHTML += generateYearHTML(year, yearData[year]);
-      } else {
-        archiveHTML += generateYearHTML(year, yearData[year]);
-      }
-    });
-  }
+  sortedYears.forEach(year => {
+    archiveHTML += generateYearHTML(year, yearData[year]);
+  });
 
   archiveContainer.innerHTML = archiveHTML;
-  const yearSelector = document.querySelector('.year-selector');
+  const yearSelector = document.querySelector('.archive-title');
   yearSelector.insertAdjacentElement('afterend', archiveContainer);
 }
 
 
 function initialize() {
   renderArchiveContent();
-  handleYearButtons();
   handleYearTitles();
-  if (!mediaQuery.matches) {
-    hideAllTitlesExcept('2023'); // Show only 2023 titles on desktop after initial load
-  }
-
-}
-
-function handleYearButtons() {
-  const yearButtons = document.querySelectorAll(".year-button");
-  let activeButton = yearButtons[0];
-  activeButton.classList.add("current-year-button");
-
-  yearButtons.forEach(function(button) {
-    button.addEventListener("click", function() {
-      const year = button.textContent.trim();
-      if (button === activeButton) return;
-
-      activeButton.classList.remove("current-year-button");
-
-      // Fade out all year titles
-      const allTitles = document.querySelectorAll('.archive-year');
-      allTitles.forEach(function(title) {
-        title.style.transition = "opacity 0.3s ease-out"; // Set transition for disappearing
-        title.style.opacity = "0"; // Fade out
-      });
-
-      // Wait for the transition to finish before hiding titles and showing new ones
-      setTimeout(() => {
-        hideAllYears();
-        button.classList.add("current-year-button");
-        activeButton = button;
-
-        // Fade in titles for the selected year
-        hideAllTitlesExcept(year);
-        const newTitles = document.querySelectorAll(`.archive-${year}_strela, .archive-${year}_vlna`);
-        newTitles.forEach(function(title) {
-          title.style.transition = "opacity 0.3s ease-out"; // Set transition for appearing
-          title.style.opacity = "0"; // Start from transparent
-          setTimeout(() => {
-            title.style.opacity = "1"; // Fade in
-          }, 10); // Small delay to allow for transition effect
-        });
-
-      }, 300); // Match the timeout to the transition duration
-    });
-  });
 }
 
 function handleYearTitles() {
   const yearTitles = document.querySelectorAll('.year-title');
   yearTitles.forEach(title => {
+    let canClick = true;
     title.addEventListener("click", function() {
+      if (!canClick) return;
+      canClick = false;
       const parent = title.parentElement;
       const content = parent.querySelector('.archive-mobile');
       const icon = title.querySelector('i');
@@ -170,7 +118,6 @@ function handleYearTitles() {
       if (content.style.maxHeight ===  "30px" || content.style.maxHeight ===  "0px" || !content.style.maxHeight) {
         content.style.maxHeight = content.scrollHeight + "px";  
         icon.style.transform = "rotate(90deg)";
-        if (mediaQuery.matches){
           if (parent.classList.contains('archive-2018_vlna') || parent.classList.contains('archive-2019_vlna')){
             normalRound.style.marginTop = "0";
             normalRound.style.paddingTop = 30 + "px";
@@ -178,15 +125,14 @@ function handleYearTitles() {
           if (parent.classList.contains('archive-2018_strela') || parent.classList.contains('archive-2019_strela')){
             title.style.marginBottom = "0";
           }
-        }
       } 
       else {
-        if (parent.classList.contains('archive-2018_strela') || parent.classList.contains('archive-2019_strela') && mediaQuery.matches){
+        if (parent.classList.contains('archive-2018_strela') || parent.classList.contains('archive-2019_strela')){
           setTimeout(() => {
             title.style.marginBottom = -2 + "px";
           },500)
         }
-        if (parent.classList.contains('vlna') && mediaQuery.matches){
+        if (parent.classList.contains('vlna')){
           content.style.maxHeight = 30 + "px";
           if (parent.classList.contains('archive-2018_vlna') || parent.classList.contains('archive-2019_vlna')){
             setTimeout(() => {
@@ -200,56 +146,11 @@ function handleYearTitles() {
         };
         icon.style.transform = "rotate(0deg)";
       }
+      setTimeout(() => {
+        canClick = true;
+      }, 500);
     });
   });
 }
-
-
-function hideAllYears() {
-  const yearDivs = document.querySelectorAll(".archive-year");
-  yearDivs.forEach(function(div) {
-    const content = div.querySelector('.archive-mobile');
-    const icon = div.querySelector('.year-title i');
-    if (mediaQuery.matches && yearDivs.classList.contains('vlna')){
-      content.style.maxHeight = 30 + "px";
-    }
-    else{
-    content.style.maxHeight = "0";
-    } // Collapse the content
-    icon.style.transform = "rotate(0deg)"; // Reset the arrow to its original position
-  });
-}
-
-function hideAllTitlesExcept(year) {
-  const allTitles = document.querySelectorAll('.archive-year');
-  allTitles.forEach(function(title) {
-    if (!title.classList.contains(`archive-${year}_strela`) && !title.classList.contains(`archive-${year}_vlna`)) {
-      title.style.display = 'none'; // Hide the titles
-      title.style.opacity = '0'; // Ensure titles are hidden
-    } else {
-      title.style.display = 'block'; // Show the titles
-      title.style.opacity = '0'; // Start from transparent for fade-in
-      title.style.transition = "opacity 0.3s ease-out"; // Set transition for appearing
-      setTimeout(() => {
-        title.style.opacity = "1"; // Fade in
-      }, 10); // Small delay to allow for transition effect
-    }
-  });
-}
-
-let lastWidth = window.innerWidth; // Store the last width
-function handleResize() {
-  const currentWidth = window.innerWidth;
-  if (currentWidth < 1000 && lastWidth >= 1000) {
-    window.location.reload(); // Reload if crossing to mobile
-  } else if (currentWidth >= 1000 && lastWidth < 1000) {
-    const activeYear = document.querySelector('.current-year-button').textContent.trim();
-    hideAllTitlesExcept(activeYear);
-  }
-  lastWidth = currentWidth; // Update the last width
-}
-
-// Listen for window resize events
-window.addEventListener('resize', handleResize);
 });
 

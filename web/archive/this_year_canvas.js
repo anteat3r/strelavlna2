@@ -98,7 +98,7 @@ generateFluid();
 
 function animate() {
     requestAnimationFrame(animate);
-    updateFluid(1, 1);
+    updateFluid(0.4, 0.4);
     renderFluid();
 }
 
