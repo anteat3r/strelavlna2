@@ -1,1 +1,33 @@
-/*nothing here yet*/
+.rules-button{
+    cursor: pointer;
+    font-family: 'Lexend';
+    font-size: 23px;
+    font-weight: 500;
+    padding: 13px;  
+    padding-inline: 15px;
+    border-radius: 10px;
+    color: white;
+    background-color: var(--color-main);
+    padding-top: 10px;
+    width: 330px;
+    margin: auto;
+    transition: all 0.3s ease-out;
+}
+
+.buttons{
+    display: flex;
+    justify-content: start;
+    gap: 7vw;
+    padding-bottom: 30px;
+    padding-top: 50px;
+}
+
+.button-block{
+    width: 38%;
+    max-width: 530px;
+}
+.rules-button:hover{
+    background-color: #3c1fe2;
+    box-shadow: 0px 0px 20px 0px #907cff7e;
+    transition: all 0s;
+}
