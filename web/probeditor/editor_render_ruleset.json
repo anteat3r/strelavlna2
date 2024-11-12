@@ -1,19 +1,28 @@
 {
+    "gridResolution": 5,
     "nodeFontSize": 24,
     "connectionWidth": 2,
-    "inputSeparation": 15,
+    "inputSeparation": 10,
     "defaultInputOffset": 20,
     "defaultInputSize": 15,
     "defaultInputFontSize": 11,
-    "defaultInputExtendX": 4,
+    "defaultInputExtendX": 5,
     "defaultInputExtendY": 10,
+    "defaultInputPadding": 5,
+
+    "typeColors": {
+        "number": "#3e93a2",
+        "string": "#8b67cc"
+    },
 
     "nodes": {
         "addition" :{
             "width": 30,
-            "height": 45,
+            "height": 30,
             "text": "+",
-            "inputs": 2
+            "inputs": 2,
+            "inputTypes": ["number", "number"],
+            "outputType": "number"
         }
     }
 }

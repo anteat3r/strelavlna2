@@ -107,7 +107,7 @@ class TableRow {
 
 
 class Prob {
-    constructor(id, title, rank, type, content, solution, image, author) {
+    constructor(id, title, rank, type, content, solution, image, authorId, authorName) {
       this._id = id;
       this._title = title;
       this._rank = rank;
@@ -115,7 +115,8 @@ class Prob {
       this._content = content;
       this._solution = solution;
       this._image = image;
-      this._author = author;
+      this._authorId = authorId
+      this._authorName = authorName;
 
       this.title_modified = false;
       this.rank_modified = false;
@@ -195,14 +196,22 @@ class Prob {
       this._image = newImage;
     }
 
-    get author() {
-        return this._author;
+    get authorId() {
+        return this._authorId;
     }
 
-    set author(newAuthor) {
+    set authorId(newAuthor) {
       changesUnsaved();
       this.author_modified = true;
-      this._author = newAuthor;
+      this._authorId = newAuthor;
+    }
+
+    get authorName(){
+        return this._authorName;
+    }
+
+    set authorName(newName){
+        this._authorName = newName;
     }
 
     pushChanges() {
@@ -216,7 +225,7 @@ class Prob {
       if (this.content_modified) update_data.text = this._content;
       if (this.solution_modified) update_data.solution = this._solution;
       if (this.image_modified) update_data.img = this._image;
-      if (this.author_modified) update_data.author = this._author;
+      if (this.author_modified) update_data.author = this._authorId;
 
       pb.collection('probs').update(this.id, update_data);
 
@@ -247,6 +256,10 @@ class Obstacle {
         }else{
             return p1.y < this.faces[0] && p1.y > this.faces[2] && ((p1.x - this.faces[3]) * (p2.x - this.faces[3]) < 0 || (p1.x - this.faces[1]) * (p2.x - this.faces[1]) < 0);
         }
+    }
+
+    inside(p){
+        return p.x > this.faces[3] && p.x < this.faces[1] && p.y < this.faces[0] && p.y > this.faces[2];
     }
 
     get vertices(){
@@ -338,7 +351,220 @@ class PFnode { //path finding node
         }
         return new_connections;
     }
+
+    clearConnection(){
+        this.connection = -1;
+    }
 }
+
+class PFgrid {
+    constructor(resolution) {
+        this.resolution = resolution;
+        this.grid = new Map();
+        this.grid.set("0,0", [0, 0, 0, 0]);
+        this.bounds = [0, 0, 0, 0]; //up, right, down, left
+    }
+
+    // if point p is inside the grid
+    inBounds(p){
+        p = {x: Math.floor(p.x / this.resolution), y: Math.floor(p.y / this.resolution)}
+
+        // console.log("bounds: ", this.bounds, p);
+        return p.x >= this.bounds[3] && p.x <= this.bounds[1] && p.y <= this.bounds[0] && p.y >= this.bounds[2];
+    }
+
+    //extends the grid to accomode point p
+    accomodate(p){
+        // console.log("noobatik: ", X, Y, " : ", this.bounds);
+        if (this.inBounds(p)) return;
+        const X = Math.floor(p.x / this.resolution);
+        const Y = Math.floor(p.y / this.resolution);
+        
+
+        if (X > this.bounds[1]){
+            for (let x = this.bounds[1] + 1; x <= X; x++){
+                for (let y = this.bounds[2]; y <= this.bounds[0]; y++){
+                    // console.log("adding", x, y, "to", this.grid.get(`${x},${y}`));
+                    this.grid.set(`${x},${y}`, [0, 0, 0, 0]);
+                }
+            }
+            this.bounds[1] = X;
+        } else if (X < this.bounds[3]){
+            for (let x = X; x < this.bounds[3]; x++){
+                for (let y = this.bounds[2]; y <= this.bounds[0]; y++){
+                    // console.log("adding", x, y, "to", this.grid.get(`${x},${y}`));
+                    this.grid.set(`${x},${y}`, [0, 0, 0, 0]);
+                }
+            }
+            this.bounds[3] = X;
+        }
+
+        if (Y > this.bounds[0]){
+            for (let y = this.bounds[0] + 1; y <= Y; y++){
+                for (let x = this.bounds[3]; x <= this.bounds[1]; x++){
+                    // console.log("adding", x, y, "to", this.grid.get(`${x},${y}`));
+                    this.grid.set(`${x},${y}`, [0, 0, 0, 0]);
+                }
+            }
+            this.bounds[0] = Y;
+        } else if (Y < this.bounds[2]){
+            for (let y = Y; y < this.bounds[2]; y++){
+                for (let x = this.bounds[3]; x <= this.bounds[1]; x++){
+                    // console.log("adding", x, y, "to", this.grid.get(`${x},${y}`));
+                    this.grid.set(`${x},${y}`, [0, 0, 0, 0]);
+                }
+            }
+            this.bounds[2] = Y;
+        }
+    }
+
+    //gets the satate of the grid at point p
+    get(p){
+        p = {x: Math.floor(p.x / this.resolution), y: Math.floor(p.y / this.resolution)};
+        return this.grid.get(`${p.x},${p.y}`);
+    }
+
+    //places an obstacle into the grid
+    addObstacle(p, width, height){
+        let p1 = {x: Math.floor(p.x / this.resolution), y: Math.floor(p.y / this.resolution)};
+        let p2 = {x: Math.floor((p.x + width) / this.resolution), y: Math.floor((p.y + height) / this.resolution)};
+
+        //accomodate the abstacle
+        this.accomodate({x: p1.x * this.resolution, y: p1.y * this.resolution});
+        this.accomodate({x: p2.x * this.resolution, y: p2.y * this.resolution});
+
+        // console.log(p1, p2);
+
+        //set the obstacle
+        for (let x = p1.x; x <= p2.x; x++){
+            for (let y = p1.y; y <= p2.y; y++){
+                // console.log("adding obstacle", x, y, "to", this.grid.get(`${x},${y}`));
+                this.grid.set(`${x},${y}`, -1);
+            }
+        }
+    }
+
+    //tidies up the grid from the temporary pathfinding data
+    tidy(){
+        this.grid.forEach((value, key) => {
+            if (value !== -1){
+                for (let i = 0; i < 4; i++){
+                    if (value[i] !== -1){
+                        value[i] = 0;
+                    }
+                }
+                this.grid.set(key, value);
+            }
+        });
+    }
+
+    //clears the grid from obstacles and paths
+    clear(){
+        this.grid.forEach((value, key) => {
+            this.grid.set(key, [0, 0, 0, 0]);
+        });
+    }
+
+    //resets the grid
+    reset(){
+        this.clear();
+        this.set("0,0", [0, 0, 0, 0]);
+        this.bounds = [0, 0, 0, 0];
+    }
+
+    //adds padding arround curent grid
+    addPadding(padding){
+        this.accomodate({x: (this.bounds[3] - padding) * this.resolution, y: (this.bounds[2] - padding) * this.resolution});
+        this.accomodate({x: (this.bounds[1] + padding) * this.resolution, y: (this.bounds[0] + padding) * this.resolution});
+    }
+
+    //finds shortest path from start to end
+    findPath(start, end){
+        this.accomodate(start);
+        this.accomodate(end);
+
+        start = {x: Math.floor(start.x / this.resolution), y: Math.floor(start.y / this.resolution)};
+        end = {x: Math.floor(end.x / this.resolution), y: Math.floor(end.y / this.resolution)};
+
+        let queue = [`${end.x},${end.y}`];
+        let visited = new Set();
+
+        while (queue.length > 0){
+            let curent = queue.shift();
+            if (curent === `${start.x},${start.y}`){
+                let path = [];
+
+                while (curent !== `${end.x},${end.y}`){
+                    path.push({x: curent.split(",").map(Number)[0] * this.resolution, y: curent.split(",").map(Number)[1] * this.resolution});
+
+                    let cTile = this.grid.get(curent);
+                    let next = cTile.filter(x => x !== -1 && x !== 0)[0];
+                    let nTile = this.grid.get(next);
+
+                    let [cx, cy] = curent.split(",").map(Number);
+                    let [nx, ny] = next.split(",").map(Number);
+                    let dx = nx - cx;
+                    let dy = ny - cy;
+
+                    const cSide = [[0, 1], [1, 0], [0, -1], [-1, 0]].findIndex(pair => pair[0] === dx && pair[1] === dy);
+                    const nSide = (cSide + 2) % 4;
+
+                    cTile[cSide] = -1;
+                    nTile[nSide] = -1;
+
+                    this.grid.set(curent, cTile);
+                    this.grid.set(next, nTile);
+
+                    curent = next;
+                }
+
+                path.push({x: end.x * this.resolution, y: end.y * this.resolution});
+                this.tidy();
+
+                return path;
+            }
+            let [x, y] = curent.split(",").map(Number);
+            for (let dx = -1; dx <= 1; dx++){
+                for (let dy = -1; dy <= 1; dy++){
+                    if (Math.abs(dx) === Math.abs(dy)) continue; //do nothing in corners and in the middle
+                    let nx = x + dx;
+                    let ny = y + dy;
+
+                    if (!this.inBounds({x: nx * this.resolution, y: ny * this.resolution})) continue; 
+
+                    let cTile = this.grid.get(`${x},${y}`);
+                    let nTile = this.grid.get(`${nx},${ny}`);
+                    const cSide = [[0, 1], [1, 0], [0, -1], [-1, 0]].findIndex(pair => pair[0] === dx && pair[1] === dy);
+                    const nSide = (cSide + 2) % 4;
+                    // console.log(nTile, nTile !== -1);
+                    if (nTile !== -1 && (nTile[nSide] === 0 || nx === start.x && ny === start.y) && !visited.has(`${nx},${ny}`)){
+                        let free = false;
+                        for (let i = 0; i < 4; i++){
+                            if (nTile[i] === 0){
+                                nTile[i] = `${x},${y}`
+                                free = true;
+                            }
+                        }
+                        
+                        if (free){
+                            this.grid.set(`${nx},${ny}`, nTile);
+                            queue.push(`${nx},${ny}`);
+                        }
+                    }
+                }
+            }
+        }
+
+        this.tidy();
+    }
+}
+
+let my_grid = new PFgrid(5);
+
+// console.log(my_grid.findPath({x: 0, y: 0}, {x: 100, y: 100}));
+// // my_grid.addPadding(2);
+// // console.log(my_grid);
+// console.log(my_grid.findPath({x: -10, y: 50}, {x: 50, y: 50}));
 
 
 //globals
@@ -356,6 +582,7 @@ let mouse_position = {x: 0, y: 0};
 let focused_prob = "";
 let focused_const = "";
 let my_id = pb.authStore.model ? pb.authStore.model.id : "";
+let my_name = pb.authStore.model ? pb.authStore.model.username : "";
 let editor_types = ["finallook", "table", "generationeditor", "table-plus-generationeditor"];
 let editor_type = "finallook";
 let author_filter = "all";
@@ -391,11 +618,11 @@ async function login(){
 }
 
 async function load(){
-    const result_probs = await pb.collection("probs").getList(1, 100000000);
-    const consts_probs = await pb.collection("consts").getList(1, 100000000);
-    const result_items = result_probs.items;
-    const consts_items = consts_probs.items;
-    for(let item of result_items){
+    const resultProbs = await pb.collection("probs").getList(1, 100000000, { expand: "author" });
+    const resultConsts = await pb.collection("consts").getList(1, 100000000);
+    const probtItems = resultProbs.items;
+    const constsItems = resultConsts.items;
+    for(let item of probtItems){
         probs.push(new Prob(
             item.id,
             item.name,
@@ -404,11 +631,12 @@ async function load(){
             item.text,
             item.solution,
             item.img,
-            item.author
+            item.author,
+            item.author == "" ? "" : item.expand.author.username
         ));
     }
 
-    for(let item of consts_items){
+    for(let item of constsItems){
         table.push(new TableRow(
             item.id,
             item.name,
@@ -859,10 +1087,27 @@ function updateTypeSelector(){
     type_txt_DOM.innerHTML = `${prob.type == "math" ? "Mat." : "Fyz."}`;
 }
 
+document.getElementById("change-author-button").addEventListener("click", function(){
+    const prob = probs.find(prob => prob.id == focused_prob);
+    if(prob.authorId == my_id){
+        prob.authorId = "";
+        prob.authorName = "";
+        updateLeftEditor();
+        updateProbList();
+    }else{
+        prob.authorId = my_id;
+        prob.authorName = my_name;
+        updateLeftEditor();
+        updateProbList();
+    }
+});
+
 function updateLeftEditor(){
     const title_DOM = document.getElementById("problem-title-input");
     const content_DOM = document.getElementById("problem-content-textarea");
     const solution_DOM = document.getElementById("problem-solution-input");
+    const author_DOM = document.getElementById("author-name");
+    const change_author_DOM = document.getElementById("change-author-button");
 
     
 
@@ -872,6 +1117,8 @@ function updateLeftEditor(){
         solution_DOM.value = "";
         rank_DOM.classList.remove("oppened");
         rank_txt_DOM.innerHTML = "[-]";
+        author_DOM.innerHTML = `<span style="opacity: 0.5">Autor:</span> nikdo`;
+        change_author_DOM.innerHTML = "-";
     }else{
         const prob = probs.find(prob => prob.id == focused_prob);
         title_DOM.value = prob.title;
@@ -879,6 +1126,18 @@ function updateLeftEditor(){
         solution_DOM.value = prob.solution;
         rank_txt_DOM.innerHTML = `[${prob.rank}]`;
         type_txt_DOM.innerHTML = `${prob.type == "math" ? "Mat." : "Fyz."}`;
+        if(prob.authorId != ""){
+            author_DOM.innerHTML = `<span style="opacity: 0.5">Autor:</span> ${prob.authorName}`;
+            if(prob.authorId == my_id){
+                change_author_DOM.innerHTML = "Znárodnit";
+            }else{
+                change_author_DOM.innerHTML = "Přivlastnit";
+            }
+        }else{
+            author_DOM.innerHTML = `<span style="opacity: 0.5">Autor:</span> nikdo`;
+            change_author_DOM.innerHTML = "Přivlastnit";
+        }
+
     }
 
     
@@ -897,13 +1156,13 @@ function updateProbList(){
     let probs_c;
 
     if(show_filtered){
-        probs_a = filtered_probs.filter(prob => prob.rank == "A" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
-        probs_b = filtered_probs.filter(prob => prob.rank == "B" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
-        probs_c = filtered_probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_a = filtered_probs.filter(prob => prob.rank == "A" && (author_filter == "all" || prob.authorId == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_b = filtered_probs.filter(prob => prob.rank == "B" && (author_filter == "all" || prob.authorId == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_c = filtered_probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.authorId == my_id) && (prob.type == type_filter || type_filter == "all"));
     }else{
-        probs_a = probs.filter(prob => prob.rank == "A" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
-        probs_b = probs.filter(prob => prob.rank == "B" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
-        probs_c = probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.author == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_a = probs.filter(prob => prob.rank == "A" && (author_filter == "all" || prob.authorId == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_b = probs.filter(prob => prob.rank == "B" && (author_filter == "all" || prob.authorId == my_id) && (prob.type == type_filter || type_filter == "all"));
+        probs_c = probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.authorId == my_id) && (prob.type == type_filter || type_filter == "all"));
     }
 
     prob_list_a.innerHTML = "";
@@ -912,7 +1171,7 @@ function updateProbList(){
 
     for(let item of probs_a){
         prob_list_a.innerHTML += `
-            <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}">
+            <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}${author_filter == "all" ? (item.authorId == my_id ? " my" : item.authorId == "" ? " free" : " another") : ""}">
                 <h2 class="problem-selector-title">${item.title}</h2>
                 <h2 class="problem-selector-rank">[A]</h2>
             </div>  
@@ -920,7 +1179,7 @@ function updateProbList(){
     }
     for(let item of probs_b){
         prob_list_b.innerHTML += `
-            <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}">
+            <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}${author_filter == "all" ? (item.authorId == my_id ? " my" : item.authorId == "" ? " free" : " another") : ""}">
                 <h2 class="problem-selector-title">${item.title}</h2>
                 <h2 class="problem-selector-rank">[B]</h2>
             </div>  
@@ -928,7 +1187,7 @@ function updateProbList(){
     }
     for(let item of probs_c){
         prob_list_c.innerHTML += `
-            <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}">
+            <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}${author_filter == "all" ? (item.authorId == my_id ? " my" : item.authorId == "" ? " free" : " another") : ""}">
                 <h2 class="problem-selector-title">${item.title}</h2>
                 <h2 class="problem-selector-rank">[C]</h2>
             </div>  
@@ -1056,7 +1315,7 @@ prob_selector_my.addEventListener("click", function(){
     prob_selector_my.classList.add("selected");
     prob_selector_all.classList.remove("selected");
     
-    if(focused_prob != "" && !probs.some(prob => prob.id == focused_prob && prob.author == my_id)){
+    if(focused_prob != "" && !probs.some(prob => prob.id == focused_prob && prob.authorId == my_id)){
         focused_prob = "";
     }
     
@@ -1102,9 +1361,6 @@ function scrollToFocusedProb(){
 function initializeCanvasWhenVisible() {
     const interval = setInterval(() => {
         if (graph_canvas.clientWidth > 0 && graph_canvas.clientHeight > 0) {
-            graph_canvas.height = graph_canvas.clientHeight - 68;
-            graph_canvas.width = graph_canvas.clientWidth;
-
             // Start the animation loop
             graphEditorLoop();
 
@@ -1121,64 +1377,111 @@ let graph = {
         {
             id: 0,
             type: "addition",
-            x: 200,
+            x: 100,
             y: 100,
-            inputs: [1, 2],
-            defautltInputs: [1, 1]
+            targetX: 100,
+            targetY: 100,
+            inputs: [-1, -1],
+            defautltInputs: [185, 4]
         },
         {
             id: 1,
             type: "addition",
-            x: 150,
-            y: 150,
-            inputs: [2, 3],
-            defautltInputs: [3, 3]
+            x: 200,
+            y: 230,
+            targetX: 200,
+            targetY: 230,
+            inputs: [-1, 0],
+            defautltInputs: [25, 3]
         },
         {
             id: 2,
             type: "addition",
-            x: 200,
+            x: 270,
             y: 260,
-            inputs: [3, -1],
+            targetX: 270,
+            targetY: 260,
+            inputs: [1, 0],
             defautltInputs: [6, 6]
         },
         {
             id: 3,
             type: "addition",
-            x: 200,
+            x: 350,
             y: 200,
-            inputs: [0, 1],
-            defautltInputs: [1, 9]
+            targetX: 350,
+            targetY: 200,
+            inputs: [2, -1],
+            defautltInputs: [185, 9]
         }
-    ]
+    ],
 }
+
+let graphMouse = {x: 0, y: 0, hover: -1, grab: -1, grabX: 0, grabY: 0};
+
+graph_canvas.addEventListener("mousemove", function(e){
+    graphMouse.x = e.offsetX;
+    graphMouse.y = e.offsetY;
+    let found = false;
+    for(let node of graph.nodes){
+        const node_rules = editor_render_ruleset.nodes[node.type];
+        if(node.x <= graphMouse.x && node.x + node_rules.width >= graphMouse.x && node.y <= graphMouse.y && node.y + node_rules.height >= graphMouse.y){
+            graphMouse.hover = node.id;
+            found = true;
+            break;
+        }
+    }
+    if(!found) graphMouse.hover = -1;
+
+    if(graphMouse.grab != -1){
+        const node = graph.nodes.find(node => node.id == graphMouse.grab);
+        node.targetX += graphMouse.x - graphMouse.grabX;
+        node.targetY += graphMouse.y - graphMouse.grabY;
+        graphMouse.grabX = graphMouse.x;
+        graphMouse.grabY = graphMouse.y;
+
+        if(Math.abs(node.targetX - node.x) >= 10){
+            node.x += 10 * Math.sign(node.targetX - node.x);
+            refreshCanvas();
+        }
+        if(Math.abs(node.targetY - node.y) >= 10){
+            node.y += 10 * Math.sign(node.targetY - node.y);
+            refreshCanvas();
+        }
+
+    }
+
+});
+graph_canvas.addEventListener("mousedown", function(e){
+    graphMouse.grab = graphMouse.hover;
+    graphMouse.grabX = graphMouse.x;
+    graphMouse.grabY = graphMouse.y;
+});
+graph_canvas.addEventListener("mouseup", function(e){
+    graphMouse.grab = -1;
+});
+
 
 function graphEditorLoop(){
-    requestAnimationFrame(graphEditorLoop);
-
-    graph_ctx.clearRect(0, 0, graph_canvas.width, graph_canvas.height);
-
-    renderGraph(graph);
-
-    // graph_ctx.strokeStyle = "#0f455a";
-    // graph_ctx.beginPath();
-    // graph_ctx.lineWidth = 10;
-    // graph_ctx.moveTo(0, 100);
-    // graph_ctx.lineTo(100, 100);
-    // graph_ctx.stroke();
+    // requestAnimationFrame(graphEditorLoop);
+    refreshCanvas(false);
+    
 }
 
-function renderGraph(graph){
+function refreshCanvas(pathRepaint = false){
+    graph_ctx.clearRect(0, 0, graph_canvas.width, graph_canvas.height);
+    my_grid.clear();
+    renderGraph(graph, pathRepaint);
+    
+}
+
+function renderGraph(graph, pathRepaint = false){
     const rules = editor_render_ruleset;
-    graph_ctx.moveTo(100, 100);           // Start point
-    // graph_ctx.lineTo(150, 50);          // Draw horizontal line
-    graph_ctx.arcTo(100, 100, 150, 150, 80); // Rounded corner from horizontal to vertical
-    // graph_ctx.lineTo(200, 150);         // Continue downwards
-    graph_ctx.stroke();
+    let grid = new PFgrid(5);
     for(let node of graph.nodes){
-        graph_ctx.fillStyle = "#0f455a";
         const node_rules = editor_render_ruleset.nodes[node.type];
 
+        graph_ctx.fillStyle = "#0f455a";
         graph_ctx.beginPath();
         graph_ctx.roundRect(node.x, node.y, node_rules.width, node_rules.height, 5);
         graph_ctx.fill();
@@ -1189,13 +1492,32 @@ function renderGraph(graph){
         graph_ctx.textBaseline = "middle";
         graph_ctx.fillText(node_rules.text, node.x + node_rules.width/2, node.y + node_rules.height/2);
 
+        graph_ctx.fillStyle = rules.typeColors[node_rules.outputType];
+        graph_ctx.beginPath();
+        graph_ctx.arc(node.x + node_rules.width, node.y + node_rules.height / 2, 4, -0.5 * Math.PI, 0.5 * Math.PI);
+        graph_ctx.fill();
+
+        if(pathRepaint){
+            grid.addObstacle({x: node.x, y: node.y}, node_rules.width, node_rules.height);
+            console.log("obstacle added");
+        }
+
+
+    }
+    grid.addPadding(5);
+    
+
+    for(let node of graph.nodes){
+        const node_rules = editor_render_ruleset.nodes[node.type];
         for(let i = 0; i < node.inputs.length; i++){
             graph_ctx.strokeStyle = "#c0d5dd";
             graph_ctx.strokeWidth = rules.connectionWidth;
 
             const x = node.x;
             const y = node.y + rules.inputSeparation * (i + 1);
-            
+
+            graph_ctx.strokeStyle = rules.typeColors[node_rules.inputTypes[i]];
+
             if(node.inputs[i] == -1) {
                 const extendX = rules.defaultInputExtendX * Math.min(i, node.inputs.length - i - 1);
                 const extendY = rules.defaultInputExtendY * (i - (node.inputs.length - 1)/2);
@@ -1208,47 +1530,57 @@ function renderGraph(graph){
                     {x: x - extendX - rules.defaultInputOffset/2, y: y + extendY},
                     {x: x - maxExtendX - rules.defaultInputOffset, y: y + extendY},
                 ], 5);
-                
-                
-                
-                
-                
-                // graph_ctx.beginPath();
-                // graph_ctx.moveTo(node.x, y);
-                // graph_ctx.lineTo(x, y);
-                // graph_ctx.stroke();
-
-                graph_ctx.beginPath();
-                graph_ctx.roundRect(x - rules.defaultInputSize - maxExtendX - rules.defaultInputOffset, y - rules.defaultInputSize/2 + extendY, rules.defaultInputSize, rules.defaultInputSize, 5);
-                graph_ctx.stroke();
 
                 graph_ctx.font = `${rules.defaultInputFontSize}px Lexend`;
-                graph_ctx.fillStyle = "#c0d5dd";
-                graph_ctx.fillText(node.defautltInputs[i], x - rules.defaultInputSize/2 - maxExtendX - rules.defaultInputOffset, y + extendY);
+                const textWidth = graph_ctx.measureText(node.defautltInputs[i]).width;
+
+                graph_ctx.fillStyle = "#0f455a";
+                graph_ctx.beginPath();
+                graph_ctx.roundRect(x - textWidth - rules.defaultInputPadding - maxExtendX - rules.defaultInputOffset, y - rules.defaultInputSize/2 + extendY, textWidth + rules.defaultInputPadding*2, rules.defaultInputSize, 5);
+                graph_ctx.fill();
+                
+                graph_ctx.fillStyle = "#fff";
+                graph_ctx.fillText(node.defautltInputs[i], x - textWidth/2 - maxExtendX - rules.defaultInputOffset, y + extendY);
 
             }else{
-                let target_node = graph.nodes.find(nd => nd.id == node.inputs[i]);
+                const target_node = graph.nodes.find(nd => nd.id == node.inputs[i]);
                 const target_rules = editor_render_ruleset.nodes[target_node.type];
                 const target = {x: target_node.x + target_rules.width, y: target_node.y + target_rules.height/2};
-                const points = [{x: x, y: y}, ...findPath(graph, {x: x - 10, y: y}, {x:target.x + 10 , y:target.y}, 5), target];
-                // graph_ctx.fillStyle = "#000";
-                // for(const point of points) {
-                //     graph_ctx.beginPath();
-                //     graph_ctx.arc(point.x, point.y, 2, 0, 2*Math.PI);
-                //     graph_ctx.fill();
-                // }
-
-                // console.log(points);
-                drawRoundedPath(graph_ctx, points, 5);
+                
+                if(pathRepaint){
+    
+                    const path = grid.findPath({x: x - 5, y: y}, {x: target.x + 5, y: target.y}, 5);
+                    const pathToDraw = [{x: x, y: y}, ...path, {x: target.x, y: target.y},];
+    
+                    drawRoundedPath(graph_ctx, pathToDraw, 5);
+                }else{
+                    graph_ctx.beginPath();
+                    graph_ctx.moveTo(x, y);
+                    const dx = Math.max(x - target.x, 50);
+                    graph_ctx.bezierCurveTo(x - Math.min(dx/2, 50), y, target.x + Math.min(dx/2, 50), target.y, target.x, target.y);
+                    // graph_ctx.lineTo(target.x, target.y);
+                    graph_ctx.stroke();
+                }
             }
+
+            graph_ctx.fillStyle = rules.typeColors[node_rules.inputTypes[i]];
+
+            graph_ctx.beginPath();
+            graph_ctx.arc(x, y, 4, 0.5 * Math.PI, -0.5 * Math.PI);
+            graph_ctx.fill();
+
         }
     }
-
-    drawRoundedPath(graph_ctx, findPath(graph, {x: 50, y: 80}, {x:mouse_position.x - 300, y:mouse_position.y - 300}, 5), 5);
-
 }
 
 function drawRoundedPath(ctx, points, radius) {
+    for (let i = 1; i < points.length - 1; i++) {
+        if((points[i - 1].x === points[i].x && points[i].x === points[i + 1].x) || (points[i - 1].y === points[i].y && points[i].y === points[i + 1].y)){
+            points.splice(i, 1);
+            i--;
+        }
+    }
+
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
 
@@ -1274,8 +1606,7 @@ function drawRoundedPath(ctx, points, radius) {
             const endCut = Math.abs(end.y - corner.y) < radius;
 
             if (begCut && endCut) {
-                console.error("Error: controll points too close to each other");
-                return;
+                ctx.lineTo(end.x, end.y);
             }
 
             if (begCut) {
@@ -1302,8 +1633,7 @@ function drawRoundedPath(ctx, points, radius) {
             const endCut = Math.abs(end.x - corner.x) < radius;
 
             if (begCut && endCut) {
-                console.error("Error: controll points too close to each other");
-                return;
+                ctx.lineTo(end.x, end.y);
             }
 
             if (begCut) {
@@ -1328,84 +1658,6 @@ function drawRoundedPath(ctx, points, radius) {
     }
 
     ctx.stroke();
-
-}
-
-function findPath(graph, start, end, radius){
-
-    const nodes = graph.nodes;
-    let obstacles = [];
-    let PFnodes = [];
-
-    PFnodes.push(new PFnode(start.x, start.y, -2));
-    PFnodes.push(new PFnode(end.x, end.y, 1));
-
-    for(let i = 0; i < nodes.length; i++){
-        let node = nodes[i];
-        const node_rules = editor_render_ruleset.nodes[node.type];
-        obstacles.push(new Obstacle([
-            node.y + node_rules.height + radius,
-            node.x + node_rules.width + radius,
-            node.y - radius,
-            node.x - radius
-        ]));
-
-        PFnodes.push(new PFnode(node.x - radius, node.y + node_rules.height + radius, i*4 + 2));
-        PFnodes.push(new PFnode(node.x + node_rules.width + radius, node.y + node_rules.height + radius, i*4 + 3));
-        PFnodes.push(new PFnode(node.x + node_rules.width + radius, node.y - radius, i*4 + 4));
-        PFnodes.push(new PFnode(node.x - radius, node.y - radius, i*4 + 5));
-    }
-
-    
-    let queue = [PFnodes[0]];
-
-    while(queue.length > 0){
-        const curent = queue.shift();
-
-        queue.push(...curent.connect(PFnodes, obstacles, end));
-    }
-
-
-    const path = PFnodes[1].trace(PFnodes);
-    let path_points = [];
-
-    for(let i = 0; i < path.length - 1; i++){
-        path_points.push({x: path[i].x, y: path[i].y});
-
-        // first x, then y
-        let x = path[i + 1].x;
-        let y = path[i].y;
-
-        let possible = true;
-        for(let j = 0; j < obstacles.length; j++){
-            const obs = obstacles[j];
-            if(obs.passesThrough({x: x, y: y}, {x: path[i].x, y: path[i].y}) || obs.passesThrough({x: x, y: y}, {x: path[i + 1].x, y: path[i + 1].y})){
-                possible = false;
-            }
-        }
-
-        if(possible){
-            path_points.push({x: x, y: y});
-        }else{
-
-            // first y, then x
-            x = path[i].x;
-            y = path[i + 1].y;
-            path_points.push({x: x, y: y});
-        }
-    }
-
-    path_points.push({x: path[path.length - 1].x, y: path[path.length - 1].y});
-
-    //chek for 3 points in a row
-    //and delete the middle one
-    for(let i = 0; i < path_points.length - 2; i++){
-        if((path_points[i].x == path_points[i + 1].x && path_points[i + 1].x == path_points[i + 2].x) || (path_points[i].y == path_points[i + 1].y && path_points[i + 1].y == path_points[i + 2].y)){
-            path_points.splice(i + 1, 1);
-        }
-    }
-
-    return path_points;
 }
 
 
