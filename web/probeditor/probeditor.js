@@ -1410,7 +1410,7 @@ function findPath(graph, start, end, radius){
 
 
 await load();
-fetch('editor_render_ruleset.json')
+fetch('https://strela-vlna.gchd.cz/probeditor/editor_render_ruleset.json')
   .then(response => response.json())
   .then(data => {
     editor_render_ruleset = data;
