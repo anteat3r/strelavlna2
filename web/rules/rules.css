@@ -1,15 +1,15 @@
 .rules-button{
     cursor: pointer;
     font-family: 'Lexend';
-    font-size: 23px;
+    font-size: 20px;
     font-weight: 500;
-    padding: 13px;  
-    padding-inline: 15px;
+    padding: 10px;  
+    padding-inline: 12px;
     border-radius: 10px;
     color: white;
     background-color: var(--color-main);
-    padding-top: 10px;
-    width: 330px;
+    padding-top: 7px;
+    width: 250px;
     margin: auto;
     transition: all 0.3s ease-out;
 }
@@ -17,17 +17,38 @@
 .buttons{
     display: flex;
     justify-content: start;
-    gap: 7vw;
-    padding-bottom: 30px;
-    padding-top: 50px;
+    gap: 2vw;
+    padding-bottom: 20px;
+    padding-top: 10px;
 }
 
-.button-block{
-    width: 38%;
-    max-width: 530px;
-}
 .rules-button:hover{
     background-color: #3c1fe2;
     box-shadow: 0px 0px 20px 0px #907cff7e;
     transition: all 0s;
+}
+
+.rules-list p, .rules-list div{
+    margin-left: 50px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+.rules-list h2{
+    font-size: 30px;
+}
+
+.rules-title{
+    margin-left: -5%;
+}
+
+@media (max-width: 700px){
+    .rules-list p, .rules-list div, .rules-title{
+        margin-left: 0;
+    }
+    .buttons{
+        flex-direction: column;
+        gap: 30px;
+    }
 }
