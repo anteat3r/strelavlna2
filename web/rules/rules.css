@@ -42,3 +42,13 @@
 .rules-title{
     margin-left: -5%;
 }
+
+@media (max-width: 700px){
+    .rules-list p, .rules-list div, .rules-title{
+        margin-left: 0;
+    }
+    .buttons{
+        flex-direction: column;
+        gap: 30px;
+    }
+}
