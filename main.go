@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -422,7 +421,7 @@ func main() {
 
     e.Router.GET(
       "/api/admin/contsetup",
-      src.SetupContEndp(app.Dao()),
+      src.SetupContEndp(),
       apis.RequireAdminAuth(),
     )
 
@@ -432,77 +431,14 @@ func main() {
       apis.RequireAdminAuth(),
     )
 
-    // e.Router.GET(
-    //   "/laod",
-    //   src.LoadProbEndpJson(app.Dao()),
-    // )
+    e.Router.GET(
+      "/api/admin/getdump",
+      src.GetDump(),
+      apis.RequireAdminAuth(),
+    )
 
-    initcont, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecont")
+    err = src.SetupInitLoadData(app.Dao())
     if err != nil { return err }
-
-    text_ := initcont.GetString("text")
-    text_ = strings.TrimPrefix(text_, "<p>")
-    text_ = strings.TrimSuffix(text_, "</p>")
-
-    src.ActiveContest.With(func(v *src.ActiveContStruct) {
-      v.Id = text_
-    })
-
-    initcontstrt, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecontstart")
-    if err != nil { return err }
-
-    text_2 := initcontstrt.GetString("text")
-    text_2 = strings.TrimPrefix(text_2, "<p>")
-    text_2 = strings.TrimSuffix(text_2, "</p>")
-    t, err := time.Parse("2006-01-02T15:04 -0700", text_2)
-    if err != nil { panic(err) }
-
-    src.ActiveContest.With(func(v *src.ActiveContStruct) {
-      v.Start = t
-    })
-
-    initcontend, err := app.Dao().FindFirstRecordByData("texts", "name", "def_activecontend")
-    if err != nil { return err }
-
-    text_3 := initcontend.GetString("text")
-    text_3 = strings.TrimPrefix(text_3, "<p>")
-    text_3 = strings.TrimSuffix(text_3, "</p>")
-    t2, err := time.Parse("2006-01-02T15:04 -0700", text_3)
-    if err != nil { panic(err) }
-
-    src.ActiveContest.With(func(v *src.ActiveContStruct) {
-      v.End = t2
-    })
-
-    initcosts, err := app.Dao().FindFirstRecordByData("texts", "name", "def_costs")
-    if err != nil { return err }
-
-    text := initcosts.GetString("text")
-    text = strings.TrimPrefix(text, "<p>")
-    text = strings.TrimSuffix(text, "</p>")
-
-    for _, l := range strings.Split(text, "; ") {
-      vals := strings.Split(l, " = ")
-      if len(vals) != 2 { return errors.New("invalid costs") }
-      val, err := strconv.Atoi(vals[1])
-      if err != nil { return err }
-      src.Costs.With(func(v *map[string]int) {
-        (*v)[vals[0]] = val
-      })
-    }
-
-    src.Teams.With(func(v *map[string]*src.RWMutexWrap[src.TeamS]) {
-      ntm := src.NewRWMutexWrap(src.TeamS{
-        Id: "j9zq7xjej6pyi53",
-        Chat: make([]src.ChatMsg, 0),
-        ChatChecksCache: make(map[*src.RWMutexWrap[src.ProbS]]string),
-        Bought: make(map[*src.RWMutexWrap[src.ProbS]]struct{}),
-        Pending: make(map[*src.RWMutexWrap[src.ProbS]]struct{}),
-        Solved: make(map[*src.RWMutexWrap[src.ProbS]]struct{}),
-        Sold: make(map[*src.RWMutexWrap[src.ProbS]]struct{}),
-      })
-      (*v)["j9zq7xjej6pyi53"] = &ntm
-    })
 
     return nil
   })

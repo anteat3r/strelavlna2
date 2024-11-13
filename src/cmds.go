@@ -202,25 +202,23 @@ func ProbWorkEndp(dao *daos.Dao) echo.HandlerFunc {
 	}
 }
 
-func SetupContEndp(dao *daos.Dao) echo.HandlerFunc {
+func SetupContEndp() echo.HandlerFunc {
 	return func(c echo.Context) error {
+    if c.QueryParam("id") == "" { return nErr("empty id") }
 
-    cont := c.QueryParam("id")
-    if cont == "" { return nErr("invalid param") }
-
-    contres := struct{
-      Probs string `db:"probs"`
-    }{}
-    err := dao.DB().NewQuery("SELECT probs FROM contests WHERE id = {:id} LIMIT 1").
-      Bind(dbx.Params{ "id": cont }).One(&contres)
+    err := DBLoadFromPB(c.QueryParam("id"))
     if err != nil { return err }
 
-    _, err = dao.DB().
-    NewQuery("UPDATE teams SET chat = '', banned = FALSE, last_banned = '', free = {:probs}, bought = '[]', pending = '[]', solved = '[]', sold = '[]', money = 100 WHERE contest = {:id}").Bind(dbx.Params{ "probs": contres.Probs, "id": cont }).Execute()
-    if err != nil { return err }
-
-		return nil
+		return c.String(200, "")
 	}
+}
+
+func GetDump() echo.HandlerFunc {
+  return func(c echo.Context) error {
+    res, err := json.Marshal(DBData)
+    if err != nil { return err }
+    return c.String(200, string(res))
+  }
 }
 
 func CashBuyEndp(dao *daos.Dao) echo.HandlerFunc {
@@ -374,4 +372,59 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
   }
 }
 
+func SetupInitLoadData(dao *daos.Dao) error {
+  initcont, err := dao.FindFirstRecordByData("texts", "name", "def_activecont")
+  if err != nil { return err }
 
+  text_ := initcont.GetString("text")
+  text_ = strings.TrimPrefix(text_, "<p>")
+  text_ = strings.TrimSuffix(text_, "</p>")
+
+  ActiveContest.With(func(v *ActiveContStruct) {
+    v.Id = text_
+  })
+
+  initcontstrt, err := dao.FindFirstRecordByData("texts", "name", "def_activecontstart")
+  if err != nil { return err }
+
+  text_2 := initcontstrt.GetString("text")
+  text_2 = strings.TrimPrefix(text_2, "<p>")
+  text_2 = strings.TrimSuffix(text_2, "</p>")
+  t, err := time.Parse("2006-01-02T15:04 -0700", text_2)
+  if err != nil { panic(err) }
+
+  ActiveContest.With(func(v *ActiveContStruct) {
+    v.Start = t
+  })
+
+  initcontend, err := dao.FindFirstRecordByData("texts", "name", "def_activecontend")
+  if err != nil { return err }
+
+  text_3 := initcontend.GetString("text")
+  text_3 = strings.TrimPrefix(text_3, "<p>")
+  text_3 = strings.TrimSuffix(text_3, "</p>")
+  t2, err := time.Parse("2006-01-02T15:04 -0700", text_3)
+  if err != nil { panic(err) }
+
+  ActiveContest.With(func(v *ActiveContStruct) {
+    v.End = t2
+  })
+
+  initcosts, err := dao.FindFirstRecordByData("texts", "name", "def_costs")
+  if err != nil { return err }
+
+  text := initcosts.GetString("text")
+  text = strings.TrimPrefix(text, "<p>")
+  text = strings.TrimSuffix(text, "</p>")
+
+  for _, l := range strings.Split(text, "; ") {
+    vals := strings.Split(l, " = ")
+    if len(vals) != 2 { return nErr("invalid costs") }
+    val, err := strconv.Atoi(vals[1])
+    if err != nil { return err }
+    Costs.With(func(v *map[string]int) {
+      (*v)[vals[0]] = val
+    })
+  }
+  return nil
+}

@@ -378,10 +378,10 @@ func TeamRegisterConfirmEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerF
       rec.GetString("player3"),
       rec.GetString("player4"),
       rec.GetString("player5"),
-      comp.GetDateTime("online_round").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("final_round").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("registration_start").Time().Format("1.2.2006 15:04:05"),
-      comp.GetDateTime("registration_end").Time().Format("1.2.2006 15:04:05"),
+      comp.GetDateTime("online_round").Time().Format("2. 1. 2006 15:04:05"),
+      comp.GetDateTime("final_round").Time().Format("2. 1. 2006 15:04:05"),
+      comp.GetDateTime("registration_start").Time().Format("2. 1. 2006 15:04:05"),
+      comp.GetDateTime("registration_end").Time().Format("2. 1. 2006 15:04:05"),
     })
     if err != nil { return err }
 
