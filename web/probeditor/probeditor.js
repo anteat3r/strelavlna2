@@ -648,7 +648,9 @@ async function load(){
     }
 }
 
-document.getElementById("save-changes-button").addEventListener("click", async function(){
+document.getElementById("save-changes-button").addEventListener("click", saveChanges);
+
+function saveChanges(){
     for(let prob of probs){
         prob.pushChanges();
     }
@@ -656,8 +658,14 @@ document.getElementById("save-changes-button").addEventListener("click", async f
         row.pushChanges();
     }
 
+    console.log("saving changes");
+
     document.getElementById("save-changes-button").classList.remove("unsaved");
-});
+}
+
+setInterval(saveChanges, 10000);
+
+
 
 function changesUnsaved(){
     document.getElementById("save-changes-button").classList.add("unsaved");
@@ -1413,11 +1421,33 @@ let graph = {
             targetY: 200,
             inputs: [2, -1],
             defautltInputs: [185, 9]
+        },
+        {
+            id: 4,
+            type: "tostring",
+            x: 400,
+            y: 300,
+            targetX: 400,
+            targetY: 300,
+            inputs: [3],
+            defautltInputs: [0]
+        },
+        {
+            id: 5,
+            type: "fromstring",
+            x: 500,
+            y: 300,
+            targetX: 500,
+            targetY: 300,
+            inputs: [4],
+            defautltInputs: [0]
         }
     ],
 }
 
-let graphMouse = {x: 0, y: 0, hover: -1, grab: -1, grabX: 0, grabY: 0};
+let graphMouse = {x: 0, y: 0, hover: -1, grab: -1, grabX: 0, grabY: 0, connect: -1};
+let graphCam = {x: 0, y: 0, zoom: 1};
+const grabRadius = 8;
 
 graph_canvas.addEventListener("mousemove", function(e){
     graphMouse.x = e.offsetX;
@@ -1425,7 +1455,7 @@ graph_canvas.addEventListener("mousemove", function(e){
     let found = false;
     for(let node of graph.nodes){
         const node_rules = editor_render_ruleset.nodes[node.type];
-        if(node.x <= graphMouse.x && node.x + node_rules.width >= graphMouse.x && node.y <= graphMouse.y && node.y + node_rules.height >= graphMouse.y){
+        if(node.x - grabRadius <= graphMouse.x - graphCam.x && node.x + node_rules.width + grabRadius >= graphMouse.x - graphCam.x && node.y - grabRadius <= graphMouse.y - graphCam.y && node.y + node_rules.height + grabRadius >= graphMouse.y - graphCam.y){
             graphMouse.hover = node.id;
             found = true;
             break;
@@ -1434,31 +1464,108 @@ graph_canvas.addEventListener("mousemove", function(e){
     if(!found) graphMouse.hover = -1;
 
     if(graphMouse.grab != -1){
-        const node = graph.nodes.find(node => node.id == graphMouse.grab);
-        node.targetX += graphMouse.x - graphMouse.grabX;
-        node.targetY += graphMouse.y - graphMouse.grabY;
-        graphMouse.grabX = graphMouse.x;
-        graphMouse.grabY = graphMouse.y;
-
-        if(Math.abs(node.targetX - node.x) >= 10){
-            node.x += 10 * Math.sign(node.targetX - node.x);
+        if(graphMouse.grab == -2){
+            graphCam.x += graphMouse.x - graphMouse.grabX;
+            graphCam.y += graphMouse.y - graphMouse.grabY;
+            graphMouse.grabX = graphMouse.x;
+            graphMouse.grabY = graphMouse.y;
             refreshCanvas();
-        }
-        if(Math.abs(node.targetY - node.y) >= 10){
-            node.y += 10 * Math.sign(node.targetY - node.y);
-            refreshCanvas();
+
+        }else{
+            const node = graph.nodes.find(node => node.id == graphMouse.grab);
+            node.targetX += graphMouse.x - graphMouse.grabX;
+            node.targetY += graphMouse.y - graphMouse.grabY;
+            graphMouse.grabX = graphMouse.x;
+            graphMouse.grabY = graphMouse.y;
+    
+            while(Math.abs(node.targetX - node.x) >= 10){
+                node.x += 10 * Math.sign(node.targetX - node.x);
+                refreshCanvas();
+            }
+            while(Math.abs(node.targetY - node.y) >= 10){
+                node.y += 10 * Math.sign(node.targetY - node.y);
+                refreshCanvas();
+            }
         }
 
+    } else if (graphMouse.connect != -1){
+        refreshCanvas(false);
     }
 
 });
 graph_canvas.addEventListener("mousedown", function(e){
-    graphMouse.grab = graphMouse.hover;
-    graphMouse.grabX = graphMouse.x;
-    graphMouse.grabY = graphMouse.y;
+    if(e.button == 0){
+        if(graphMouse.hover == -1) return;
+        const node = graph.nodes.find(node => node.id == graphMouse.hover);
+        const rules = editor_render_ruleset;
+        const node_rules = rules.nodes[node.type];
+        const output = {x: node.x + node_rules.width, y: node.y + node_rules.height / 2};
+        let inputs = [];
+        for(let i = 0; i < node.inputs.length; i++){
+            inputs.push({x: node.x, y: node.y + (i + 1) * rules.inputSeparation});
+        }
+
+        let closest = -1;
+        let closestDist = Infinity;
+        for(let i = 0; i < inputs.length; i++){
+            const dist = Math.abs(inputs[i].x - (graphMouse.x - graphCam.x)) + Math.abs(inputs[i].y - (graphMouse.y - graphCam.y));
+            if(dist < closestDist){
+                closestDist = dist;
+                closest = i;
+            }
+        }
+
+        if(closestDist <= grabRadius || Math.abs(output.x - (graphMouse.x - graphCam.x)) + Math.abs(output.y - (graphMouse.y - graphCam.y)) < grabRadius){
+            if(Math.abs(output.x - (graphMouse.x - graphCam.x)) + Math.abs(output.y - (graphMouse.y - graphCam.y)) < closestDist){
+                graphMouse.connect = node.id;
+            } else {
+                graphMouse.connect = node.inputs[closest];
+                node.inputs[closest] = -1;
+            }
+        } else {
+            graphMouse.grab = graphMouse.hover;
+            graphMouse.grabX = graphMouse.x;
+            graphMouse.grabY = graphMouse.y;
+        }
+
+    } else if (e.button == 1) {
+        graphMouse.grab = -2;
+        graphMouse.grabX = graphMouse.x;
+        graphMouse.grabY = graphMouse.y;
+    }
 });
 graph_canvas.addEventListener("mouseup", function(e){
     graphMouse.grab = -1;
+
+    if (graphMouse.connect != -1 && graphMouse.hover != -1){
+        const node = graph.nodes.find(node => node.id == graphMouse.hover);
+        const rules = editor_render_ruleset;
+        const node_rules = rules.nodes[node.type];
+        let inputs = [];
+        for(let i = 0; i < node.inputs.length; i++){
+            inputs.push({x: node.x, y: node.y + (i + 1) * rules.inputSeparation});
+        }
+
+        let closest = -1;
+        let closestDist = Infinity;
+        for(let i = 0; i < inputs.length; i++){
+            const dist = Math.abs(inputs[i].x - (graphMouse.x - graphCam.x)) + Math.abs(inputs[i].y - (graphMouse.y - graphCam.y));
+            if(dist < closestDist){
+                closestDist = dist;
+                closest = i;
+            }
+        }
+
+        const connectNode = graph.nodes.find(node => node.id == graphMouse.connect);
+        const connectNodeRules = rules.nodes[connectNode.type];
+        if(closestDist <= grabRadius && node.inputs[closest] == -1 && node_rules.inputTypes[closest] == connectNodeRules.outputType){
+            node.inputs[closest] = graphMouse.connect;
+        }
+        
+        
+    }
+    graphMouse.connect = -1;
+    refreshCanvas(false);
 });
 
 
@@ -1478,6 +1585,7 @@ function refreshCanvas(pathRepaint = false){
 function renderGraph(graph, pathRepaint = false){
     const rules = editor_render_ruleset;
     let grid = new PFgrid(5);
+    graph_ctx.translate(graphCam.x, graphCam.y);
     for(let node of graph.nodes){
         const node_rules = editor_render_ruleset.nodes[node.type];
 
@@ -1486,7 +1594,7 @@ function renderGraph(graph, pathRepaint = false){
         graph_ctx.roundRect(node.x, node.y, node_rules.width, node_rules.height, 5);
         graph_ctx.fill();
 
-        graph_ctx.font = `${rules.nodeFontSize}px Lexend`;
+        graph_ctx.font = `${node_rules.fontSize}px Lexend`;
         graph_ctx.fillStyle = "#ffffff";
         graph_ctx.textAlign = "center";
         graph_ctx.textBaseline = "middle";
@@ -1518,31 +1626,7 @@ function renderGraph(graph, pathRepaint = false){
 
             graph_ctx.strokeStyle = rules.typeColors[node_rules.inputTypes[i]];
 
-            if(node.inputs[i] == -1) {
-                const extendX = rules.defaultInputExtendX * Math.min(i, node.inputs.length - i - 1);
-                const extendY = rules.defaultInputExtendY * (i - (node.inputs.length - 1)/2);
-                const maxExtendX = rules.defaultInputExtendX * Math.ceil(node.inputs.length/2);
-
-
-                drawRoundedPath(graph_ctx, [
-                    {x: x, y: y},
-                    {x: x - extendX - rules.defaultInputOffset/2, y: y},
-                    {x: x - extendX - rules.defaultInputOffset/2, y: y + extendY},
-                    {x: x - maxExtendX - rules.defaultInputOffset, y: y + extendY},
-                ], 5);
-
-                graph_ctx.font = `${rules.defaultInputFontSize}px Lexend`;
-                const textWidth = graph_ctx.measureText(node.defautltInputs[i]).width;
-
-                graph_ctx.fillStyle = "#0f455a";
-                graph_ctx.beginPath();
-                graph_ctx.roundRect(x - textWidth - rules.defaultInputPadding - maxExtendX - rules.defaultInputOffset, y - rules.defaultInputSize/2 + extendY, textWidth + rules.defaultInputPadding*2, rules.defaultInputSize, 5);
-                graph_ctx.fill();
-                
-                graph_ctx.fillStyle = "#fff";
-                graph_ctx.fillText(node.defautltInputs[i], x - textWidth/2 - maxExtendX - rules.defaultInputOffset, y + extendY);
-
-            }else{
+            if(node.inputs[i] != -1) {
                 const target_node = graph.nodes.find(nd => nd.id == node.inputs[i]);
                 const target_rules = editor_render_ruleset.nodes[target_node.type];
                 const target = {x: target_node.x + target_rules.width, y: target_node.y + target_rules.height/2};
@@ -1570,7 +1654,24 @@ function renderGraph(graph, pathRepaint = false){
             graph_ctx.fill();
 
         }
+
+        if (graphMouse.connect == node.id) {
+            const node_rules = rules.nodes[node.type];
+            graph_ctx.strokeStyle = rules.typeColors[node_rules.outputType];
+            const x = graphMouse.x - graphCam.x;
+            const y = graphMouse.y - graphCam.y;
+
+            const target = {x: node.x + node_rules.width, y: node.y + node_rules.height/2};
+
+            graph_ctx.beginPath();
+            graph_ctx.moveTo(x, y);
+            const dx = Math.max(x - target.x, 50);
+            graph_ctx.bezierCurveTo(x - Math.min(dx/2, 50), y, target.x + Math.min(dx/2, 50), target.y, target.x, target.y);
+            // graph_ctx.lineTo(target.x, target.y);
+            graph_ctx.stroke();
+        }
     }
+    graph_ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
 function drawRoundedPath(ctx, points, radius) {
@@ -1662,7 +1763,7 @@ function drawRoundedPath(ctx, points, radius) {
 
 
 await load();
-fetch('https://strela-vlna.gchd.cz/probeditor/editor_render_ruleset.json')
+fetch('editor_render_ruleset.json') //https://strela-vlna.gchd.cz/probeditor/editor_render_ruleset.json
   .then(response => response.json())
   .then(data => {
     editor_render_ruleset = data;
