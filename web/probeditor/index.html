@@ -41,6 +41,20 @@
                     <button class="problem-filter-type-button selected" id="filter-all">Vše.</button>
                 </div>
                 <input type="text" id="problem-filter-input" placeholder="Hledat">
+                <div id="problem-color-legend-wrapper">
+                    <div class="problem-color-legend-item">
+                        <div id="problem-color-legend-my"></div>
+                        <p>Moje</p>
+                    </div>
+                    <div class="problem-color-legend-item">
+                        <div id="problem-color-legend-another"></div>
+                        <p>Ostatních</p>
+                    </div>
+                    <div class="problem-color-legend-item">
+                        <div id="problem-color-legend-free"></div>
+                        <p>Volné</p>
+                    </div>
+                </div>
             </div>
             <div id="problem-selector-wrapper">
                 <div id="problem-section-a" class="problem-section">
@@ -59,6 +73,10 @@
             </div>
         </div>
         <div id="problem-editor-left">
+            <div id="author-row">
+                <p id="author-name"><span style="opacity: 0.5">Autor:</span> nikdo</p>
+                <button id="change-author-button">Přivlastnit</button>
+            </div>
             <div id="problem-editor-setup-row">
                 <input type="text" id="problem-title-input" placeholder="Název">
                 <div id="problem-rank-selector" class="">
@@ -118,7 +136,7 @@
             </div>
             <div id="generationeditor-wrapper" class="hidden">
                 <input type="text" id="generationeditor-command-input" placeholder=">">
-                <canvas id="generationeditor-canvas"></canvas>
+                <canvas id="generationeditor-canvas" height="800" width="800"></canvas>
             </div>
             <div id="table-wrapper" class="hidden">
                 <table id="table">

@@ -1,0 +1,26 @@
+.org-list, .org-timetable{
+    margin-left: 50px;
+    margin-top: 30px;
+}
+
+.org-list p, .org-list-bottom p{
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+.org-timetable div{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 30px;
+}
+
+.org-list-bottom{
+    margin: 0;
+}
+
+@media (max-width: 700px){
+    .org-list, .org-timetable{
+        margin-left: 0;
+    }
+}
