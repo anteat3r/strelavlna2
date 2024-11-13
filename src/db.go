@@ -927,17 +927,80 @@ func DBLoadFromDump() error {
   return err
 }
 
-func DBLoadFromPB() error {
+func DBLoadFromPB(ac string) error {
   // ac := ActiveContest.GetPrimitiveVal().Id
-  // teams, err := App.Dao().FindRecordsByFilter(
-  //   "teams",
-  //   `contest = "` + ac + `"`,
-  //   "updated", 0, 0,
-  // )
-  // if err != nil { return err }
-  // for _, tm := range teams {
-  //   
-  // }
+  Teams = NewRWMutexWrap(make(map[string]TeamM))
+  Probs = NewRWMutexWrap(make(map[string]ProbM))
+  Checks = NewRWMutexWrap(make(map[string]CheckM))
+  ContInfo = NewRWMutexWrap("")
+  ContName = NewRWMutexWrap("")
+  teams, err := App.Dao().FindRecordsByFilter(
+    "teams",
+    `contest = "` + ac + `"`,
+    "updated", 0, 0,
+  )
+  if err != nil { return err }
+  Teams.With(func(v *map[string]*RWMutexWrap[TeamS]) {
+    for _, tm := range teams {
+      newteam := NewRWMutexWrap(TeamS{
+        Id: tm.Id,
+        Name: tm.GetString("name"),
+        Money: 0,
+        Bought: make(map[ProbM]struct{}),
+        Pending: make(map[ProbM]struct{}),
+        Solved: make(map[ProbM]struct{}),
+        Sold: make(map[ProbM]struct{}),
+        Chat: make([]ChatMsg, 0),
+        Banned: false,
+        LastBanned: time.Time{},
+        ChatChecksCache: make(map[ProbM]string),
+        SolChecksCache: make(map[ProbM]string),
+        Players: [5]string{
+          tm.GetString("player1"),
+          tm.GetString("player2"),
+          tm.GetString("player3"),
+          tm.GetString("player4"),
+          tm.GetString("player5"),
+        },
+        Stats: TeamStats{
+          NumBought: 0,
+          NumSold: 0,
+          NumSolved: 0,
+          MoneyHist: make([]moneyHistRec, 0),
+        },
+      })
+      (*v)[tm.Id] = &newteam
+    }
+  })
+  probs, err := App.Dao().FindRecordsByFilter(
+    "probs",
+    `contest = "` + ac + `"`,
+    "updated", 0, 0,
+  )
+  if err != nil { return err }
+  Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
+    for _, pr := range probs {
+      newprob := NewRWMutexWrap(ProbS{
+        Id: pr.Id,
+        Name: pr.GetString("name"),
+        Diff: pr.GetString("diff"),
+        Text: pr.GetString("text"),
+        Img: pr.GetString("img"),
+        Solution: pr.GetString("solution"),
+        Workers: make([]string, 0),
+      })
+      (*v)[pr.Id] = &newprob
+    }
+  })
+  contest, err := App.Dao().FindRecordById("contests", ac)
+  if err != nil { return err }
+  ContInfo.With(func(v *string) {
+    *v = contest.GetString("info")
+  })
+  ContName.With(func(v *string) {
+    *v = contest.GetString("name")
+  })
+
   return nil
 }
 
