@@ -121,10 +121,13 @@ if (querySavesStr == null) {
 let querySaves = querySavesStr.split(";");
 let nQuerySavesHtml = "";
 for (let k of querySaves) {
+  if (k == "") continue;
   nQuerySavesHtml += `<button id="query-savebtn-${k}">${k}</button>`;
 }
 $("#query-saves").innerHTML = nQuerySavesHtml;
 for (let k of querySaves) {
+  if (k == "") continue;
+  nQuerySavesHtml += `<button id="query-savebtn-${k}">${k}</button>`;
   $(`#query-savebtn-${k}`).addEventListener("click", () => {
     $("#query-inp").value = localStorage.getItem(`query-save-${k}`);
   })
