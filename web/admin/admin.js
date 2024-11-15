@@ -113,6 +113,32 @@ $("#migrate-set").addEventListener("click", async () => {clown();
   console.log(sres);
 });
 
+let querySavesStr = localStorage.getItem("admin-query-saves");
+if (querySavesStr == null) {
+  localStorage.setItem("admin-query-saves", "");
+  querySavesStr = "";
+}
+let querySaves = querySavesStr.split(";");
+let nQuerySavesHtml = "";
+for (let k of querySaves) {
+  nQuerySavesHtml += `<button id="query-savebtn-${k}">${k}</button>`;
+}
+$("query-saves").innerHTML = nQuerySavesHtml;
+for (let k of querySaves) {
+  $(`#query-savebtn-${k}`).addEventListener("click", () => {
+    $("#query-inp").value = localStorage.getItem(`query-save-${k}`);
+  })
+}
+
+$("#query-save-add").addEventListener("click", () => {
+  localStorage.setItem(
+    "admin-query-saves",
+    $("#query-savename-inp").value + ";" +
+      localStorage.getItem("admin-query-saves")
+  );
+  localStorage.setItem($("#query-savename-inp").value, $("#query-inp").value);
+})
+
 $("#query-set").addEventListener("click", async () => {clown();
   const res = await fetch(
     `/api/admin/query?q=${encodeURIComponent( $("#query-inp").value )}`,
