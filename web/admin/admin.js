@@ -123,7 +123,7 @@ let nQuerySavesHtml = "";
 for (let k of querySaves) {
   nQuerySavesHtml += `<button id="query-savebtn-${k}">${k}</button>`;
 }
-$("query-saves").innerHTML = nQuerySavesHtml;
+$("#query-saves").innerHTML = nQuerySavesHtml;
 for (let k of querySaves) {
   $(`#query-savebtn-${k}`).addEventListener("click", () => {
     $("#query-inp").value = localStorage.getItem(`query-save-${k}`);
