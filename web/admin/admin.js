@@ -134,11 +134,13 @@ for (let k of querySaves) {
 }
 
 $("#query-save-add").addEventListener("click", () => {
-  localStorage.setItem(
-    "admin-query-saves",
-    $("#query-savename-inp").value + ";" +
-      localStorage.getItem("admin-query-saves")
-  );
+  if (!localStorage.getItem("admin-query-saves").includes($("#query-savename-inp").value)) {
+    localStorage.setItem(
+      "admin-query-saves",
+      $("#query-savename-inp").value + ";" +
+        localStorage.getItem("admin-query-saves")
+    );
+  }
   localStorage.setItem("query-save-" + $("#query-savename-inp").value, $("#query-inp").value);
 })
 
