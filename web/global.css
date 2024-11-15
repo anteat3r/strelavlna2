@@ -465,15 +465,15 @@ a:hover{
 .gray-section{
     padding-left: 20%;
     background-color: var(--color-main-white);
-    padding-top: 40px;
-    padding-bottom: 100px;
+    padding-top: 20px;
+    padding-bottom: 40px;
     padding-right: 15%;
 }
 .white-section{
     padding-left: 20%;
     background-color: white;
-    padding-top: 40px;
-    padding-bottom: 100px;
+    padding-top: 20px;
+    padding-bottom: 40px;
     padding-right: 15%;
 }
 .black-section{
