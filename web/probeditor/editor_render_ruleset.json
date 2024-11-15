@@ -16,12 +16,40 @@
     },
 
     "nodes": {
-        "addition" :{
+        "addition": {
             "width": 30,
             "height": 30,
             "text": "+",
+            "fontSize": 24,
             "inputs": 2,
             "inputTypes": ["number", "number"],
+            "outputType": "number"
+        },
+        "subtraction": {
+            "width": 30,
+            "height": 30,
+            "text": "-",
+            "fontSize": 24,
+            "inputs": 2,
+            "inputTypes": ["number", "number"],
+            "outputType": "number"
+        },
+        "tostring": {
+            "width": 60,
+            "height": 20,
+            "text": "toStr()",
+            "fontSize": 16,
+            "inputs": 1,
+            "inputTypes": ["number"],
+            "outputType": "string"
+        },
+        "fromstring": {
+            "width": 60,
+            "height": 20,
+            "text": "frStr()",
+            "fontSize": 16,
+            "inputs": 1,
+            "inputTypes": ["string"],
             "outputType": "number"
         }
     }
