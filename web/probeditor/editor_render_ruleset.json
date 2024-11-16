@@ -192,8 +192,8 @@
               "height": 80,
               "text": "?",
               "fontSize": 24,
-              "inputs": 2,
-              "inputTypes": ["number", "number"],
+              "inputs": 3,
+              "inputTypes": ["bool", "number", "number"],
               "outputType": "number"
             },
             "stringif": {
