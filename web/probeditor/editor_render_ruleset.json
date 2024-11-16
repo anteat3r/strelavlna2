@@ -439,7 +439,7 @@
               "fontSize": 16,
               "inputs": 1,
               "inputTypes": ["number"],
-              "outputType": "boolean"
+              "outputType": "bool"
             },
             "isFinite": {
               "width": 50,
@@ -448,7 +448,7 @@
               "fontSize": 16,
               "inputs": 1,
               "inputTypes": ["number"],
-              "outputType": "boolean"
+              "outputType": "bool"
             },
             "not": {
               "width": 40,
@@ -456,8 +456,8 @@
               "text": "not",
               "fontSize": 18,
               "inputs": 1,
-              "inputTypes": ["boolean"],
-              "outputType": "boolean"
+              "inputTypes": ["bool"],
+              "outputType": "bool"
             },
             "and": {
               "width": 40,
@@ -465,8 +465,8 @@
               "text": "and",
               "fontSize": 18,
               "inputs": 2,
-              "inputTypes": ["boolean", "boolean"],
-              "outputType": "boolean"
+              "inputTypes": ["bool", "bool"],
+              "outputType": "bool"
             },
             "or": {
               "width": 40,
@@ -474,8 +474,8 @@
               "text": "or",
               "fontSize": 18,
               "inputs": 2,
-              "inputTypes": ["boolean", "boolean"],
-              "outputType": "boolean"
+              "inputTypes": ["bool", "bool"],
+              "outputType": "bool"
             },
             "sin": {
               "width": 60,
