@@ -535,8 +535,8 @@
               "outputType": "number"
             },
             "fractiontonumber": {
-              "width": 80,
-              "height": 30,
+              "width": 60,
+              "height": 20,
               "text": "÷ -> n",
               "fontSize": 16,
               "inputs": 1,
