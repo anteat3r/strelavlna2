@@ -7,9 +7,7 @@ class Fraction {
   simplify() {
     let a = this.x;
     let b = this.y;
-    while (b) {
-      [a, b] = [b, a % b]
-    }
+    while (b) { [a, b] = [b, a % b]; }
     this.x /= a
     this.y /= a
   }
@@ -64,5 +62,5 @@ export default {
     "numerator": (i, _, __) => {
       console.log(typeof i);
     },
-    "denominator": (i, _, __) => i.den(),
+    "denominator": (i, _, __) => i.x,
 }
