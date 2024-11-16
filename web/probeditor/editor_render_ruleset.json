@@ -452,9 +452,9 @@
             },
             "not": {
               "width": 40,
-              "height": 30,
+              "height": 20,
               "text": "not",
-              "fontSize": 18,
+              "fontSize": 15,
               "inputs": 1,
               "inputTypes": ["bool"],
               "outputType": "bool"
@@ -469,7 +469,7 @@
               "outputType": "bool"
             },
             "or": {
-              "width": 40,
+              "width": 30,
               "height": 30,
               "text": "or",
               "fontSize": 18,
@@ -478,55 +478,55 @@
               "outputType": "bool"
             },
             "sin": {
-              "width": 60,
-              "height": 30,
+              "width": 50,
+              "height": 20,
               "text": "sin()",
-              "fontSize": 18,
+              "fontSize": 15,
               "inputs": 1,
               "inputTypes": ["number"],
               "outputType": "number"
             },
             "cos": {
-              "width": 60,
-              "height": 30,
+              "width": 50,
+              "height": 20,
               "text": "cos()",
-              "fontSize": 18,
+              "fontSize": 15,
               "inputs": 1,
               "inputTypes": ["number"],
               "outputType": "number"
             },
             "tan": {
-              "width": 60,
-              "height": 30,
+              "width": 50,
+              "height": 20,
               "text": "tan()",
-              "fontSize": 18,
+              "fontSize": 15,
               "inputs": 1,
               "inputTypes": ["number"],
               "outputType": "number"
             },
             "asin": {
               "width": 60,
-              "height": 30,
+              "height": 20,
               "text": "asin()",
-              "fontSize": 18,
+              "fontSize": 15,
               "inputs": 1,
               "inputTypes": ["number"],
               "outputType": "number"
             },
             "acos": {
               "width": 60,
-              "height": 30,
+              "height": 20,
               "text": "acos()",
-              "fontSize": 18,
+              "fontSize": 15,
               "inputs": 1,
               "inputTypes": ["number"],
               "outputType": "number"
             },
             "atan": {
               "width": 60,
-              "height": 30,
+              "height": 20,
               "text": "atan()",
-              "fontSize": 18,
+              "fontSize": 15,
               "inputs": 1,
               "inputTypes": ["number"],
               "outputType": "number"
