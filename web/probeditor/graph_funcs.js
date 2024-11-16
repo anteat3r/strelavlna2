@@ -91,4 +91,5 @@ export default {
     "fractiondivision": (i, _, __) => i[0].div(i[1]),
     "overone": (i, _, __) => new Fraction(i[0], 1),
     "underone": (i, _, __) => new Fraction(1, i[0]),
+    "redo": (i, _, __) => i[0],
 }

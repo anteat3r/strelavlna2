@@ -123,7 +123,9 @@
         "fdiv": "fractiondivision",
         "f/": "fractiondivision",
         "overone": "overone",
-        "underone": "underone"
+        "underone": "underone",
+
+        "redo": "redo"
     },
 
     "nodes": {
@@ -383,21 +385,18 @@
         },
         "get": {
             "number": {
-                "text": "number",
                 "height": 30,
                 "value": 1,
                 "fontSize": 18,
                 "outputType": "number"
             },
             "string": {
-                "text": "string",
                 "height": 30,
                 "value": "a",
                 "fontSize": 18,
                 "outputType": "string"
             },
             "constant": {
-                "text": "constant",
                 "height": 30,
                 "value": "const()",
                 "fontSize": 15,
@@ -406,19 +405,24 @@
         },
         "set": {
             "setstring": {
-                "text": "sestring",
                 "height": 30,
                 "value": "set()",
                 "fontSize": 18,
                 "inputType": "string"
             },
             "setnumber": {
-                "text": "setnumber",
                 "height": 30,
                 "value": "set()",
                 "fontSize": 18,
                 "inputType": "number"
+            },
+            "redo": {
+                "height": 30,
+                "value": "redo()",
+                "fontSize": 18,
+                "inputType": "bool"
             }
+
         }
     }
 }
