@@ -26,4 +26,5 @@ export default {
 
     "power": (i, _, __) => Math.pow(i[0], i[1]),
     "square": (i, _, __) => i[0] * i[1],
+    "sqrt": (i, _, __) => Math.sqrt(i[0]),
 }
