@@ -87,7 +87,12 @@
         
         "power": "power",
         "pwr": "power",
-        "^": "power"
+        "^": "power",
+
+        "square": "square",
+        "sq": "square",
+
+        "sqrt": "sqrt"
     },
 
     "nodes": {
