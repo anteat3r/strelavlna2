@@ -232,3 +232,16 @@ $("#mail-set").addEventListener("click", async () => {clown();
   let sres = await res.text();
   alert(`${res.status}: ${sres}`)
 });
+
+$("#query-set").addEventListener("click", async () => {clown();
+  const res = await fetch(
+    `/api/admin/getdump`,
+    {headers: {"Authorization": pb.authStore.token},
+  })
+  let sres = await res.text();
+  if (!res.ok) {
+    alert(sres);
+    return;
+  }
+  $("#dump-p").innerHTML = sres;
+});
