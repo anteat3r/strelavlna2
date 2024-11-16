@@ -16,7 +16,7 @@ type GraphId = int
 type InvalidGraphErr struct { msg string }
 func (e InvalidGraphErr) Error() string { return e.msg }
 
-func ParseNode(graphs string) (Graph, error) {
+func ParseGraph(graphs string) (Graph, error) {
   graphinp := make(map[int]map[string]any, 0)
   err := json.Unmarshal([]byte(graphs), graphinp)
   if err != nil { return nil, err }

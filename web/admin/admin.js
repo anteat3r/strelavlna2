@@ -113,25 +113,60 @@ $("#migrate-set").addEventListener("click", async () => {clown();
   console.log(sres);
 });
 
+let querySavesStr = localStorage.getItem("admin-query-saves");
+if (querySavesStr == null) {
+  localStorage.setItem("admin-query-saves", "");
+  querySavesStr = "";
+}
+let querySaves = querySavesStr.split(";");
+let nQuerySavesHtml = "";
+for (let k of querySaves) {
+  if (k == "") continue;
+  nQuerySavesHtml += `<button id="query-savebtn-${k}">${k}</button>`;
+}
+$("#query-saves").innerHTML = nQuerySavesHtml;
+for (let k of querySaves) {
+  if (k == "") continue;
+  nQuerySavesHtml += `<button id="query-savebtn-${k}">${k}</button>`;
+  $(`#query-savebtn-${k}`).addEventListener("click", () => {
+    $("#query-inp").value = localStorage.getItem(`query-save-${k}`);
+  })
+}
+
+$("#query-save-add").addEventListener("click", () => {
+  if (!localStorage.getItem("admin-query-saves").includes($("#query-savename-inp").value)) {
+    localStorage.setItem(
+      "admin-query-saves",
+      $("#query-savename-inp").value + ";" +
+        localStorage.getItem("admin-query-saves")
+    );
+  }
+  localStorage.setItem("query-save-" + $("#query-savename-inp").value, $("#query-inp").value);
+})
+
 $("#query-set").addEventListener("click", async () => {clown();
   const res = await fetch(
     `/api/admin/query?q=${encodeURIComponent( $("#query-inp").value )}`,
     {headers: {"Authorization": pb.authStore.token},
   })
   let sres = await res.text();
+  if (!res.ok) {
+    alert(sres);
+    return;
+  }
   if (sres == "") { sres = "<nil> <nil>" }
   let pres = "";
   for (const r of JSON.parse(sres)) {
-    pres += `<span style="color: blue;">` + r.id + ":</span><br>"
+    // pres += `<span style="color: blue;">` + r.id + ":</span><br>"
     let mklen = 0;
     for (const key of Object.keys(r)) {
       if (key.length > mklen) { mklen = key.length }
     }
     for (const [key, value] of Object.entries(r)) {
       if (value.length > 50) {
-        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: green;">${key}:</span>&nbsp;<span id="dots-${r.id}-${key}">...</span><br>`
+        pres += `${"&nbsp;".repeat(mklen-key.length)}<span style="color: green;">${key}:</span>&nbsp;<span id="dots-${r.id}-${key}">...</span><br>`
       } else {
-        pres += `${"&nbsp;".repeat(mklen+3-key.length)}<span style="color: green;">${key}:</span>&nbsp;${value}<br>`
+        pres += `${"&nbsp;".repeat(mklen-key.length)}<span style="color: green;">${key}:</span>&nbsp;${value}<br>`
       }
     }
     pres += "<br>"
@@ -196,4 +231,17 @@ $("#mail-set").addEventListener("click", async () => {clown();
   })
   let sres = await res.text();
   alert(`${res.status}: ${sres}`)
+});
+
+$("#query-set").addEventListener("click", async () => {clown();
+  const res = await fetch(
+    `/api/admin/getdump`,
+    {headers: {"Authorization": pb.authStore.token},
+  })
+  let sres = await res.text();
+  if (!res.ok) {
+    alert(sres);
+    return;
+  }
+  $("#dump-p").innerHTML = sres;
 });

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	log "github.com/anteat3r/golog"
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/tools/security"
@@ -103,6 +104,7 @@ type ProbS struct {
   Img string
   Solution string
   Workers []string
+  Graph *Graph
 }
 type ProbM = *RWMutexWrap[ProbS]
 
@@ -972,26 +974,34 @@ func DBLoadFromPB(ac string) error {
       (*v)[tm.Id] = &newteam
     }
   })
-  probs, err := App.Dao().FindRecordsByFilter(
-    "probs",
-    `contest = "` + ac + `"`,
-    "updated", 0, 0,
-  )
+  probs := make([]map[string]any, 0)
+  App.Dao().DB().
+    NewQuery(`select count(*) from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
+    Bind(dbx.Params{"contest": ac}).
+    Execute()
   if err != nil { return err }
   Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
     for _, pr := range probs {
+      graphs := pr["graph"].(string)
+      var graph Graph
+      if graphs != "" {
+        graph, err = ParseGraph(graphs)
+        if err != nil { return }
+      }
       newprob := NewRWMutexWrap(ProbS{
-        Id: pr.Id,
-        Name: pr.GetString("name"),
-        Diff: pr.GetString("diff"),
-        Text: pr.GetString("text"),
-        Img: pr.GetString("img"),
-        Solution: pr.GetString("solution"),
+        Id: pr["id"].(string),
+        Name: pr["name"].(string),
+        Diff: pr["diff"].(string),
+        Text: pr["text"].(string),
+        Img: pr["img"].(string),
+        Solution: pr["solution"].(string),
         Workers: make([]string, 0),
+        Graph: &graph,
       })
-      (*v)[pr.Id] = &newprob
+      (*v)[pr["id"].(string)] = &newprob
     }
   })
+  if err != nil { return err }
   contest, err := App.Dao().FindRecordById("contests", ac)
   if err != nil { return err }
   ContInfo.With(func(v *string) {

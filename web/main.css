@@ -1,10 +1,5 @@
 
 .grid-main-a{
-    margin-left: 15%;
-    margin-right: 5%;
-    background-color: white;
-    margin-top: 40px;
-    margin-bottom: 100px;
     display: grid;
     grid-template:
         'ma0 ma0 ma0 ma0'
@@ -23,8 +18,8 @@
     max-width: 100vw;
     padding-right: 5%;
     background-color: white;
-    padding-top: 40px;
-    padding-bottom: 100px;
+    padding-top: 20px;
+    padding-bottom: 60px;
     display: grid;
     grid-template: 
     'mb0'
@@ -96,6 +91,34 @@
     transition: all 0s;
 }
 
+.main-a-content{
+    display: flex;
+    flex-direction: column;
+    margin-left: 15%;
+    margin-right: 5%;
+    background-color: white;
+    margin-top: 20px;
+    margin-bottom: 60px;
+    gap: 30px;
+}
+
+.video{
+    padding-top: 20px;
+    padding-bottom: 20px;
+    width: 90%;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+.video span{
+    margin-right: 2vw;
+}
+
+.video b{
+    margin-left: 2vw;
+}
+
 @media (max-width: 1100px){
     .grid-main-c, .task-button{
         padding-left: 5%;
@@ -114,6 +137,10 @@
         'ma2'
         'ma3'
         'ma4'
+    }
+    .main-a-content{
+        margin-left: 5%;
+        gap: 50px;
     }
     .grid-main-c{
         grid-template: 
@@ -139,6 +166,12 @@
     }
     .m-c2{
         margin-top: 60px;
+    }
+    .video{
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+        max-width: 400px;
     }
 }
 @media (max-width:300px){
