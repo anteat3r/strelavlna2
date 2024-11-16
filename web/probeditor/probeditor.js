@@ -784,7 +784,7 @@ function updateFinallook(){
 
         for (let nodeId of setNodes) {
             const node = prob.graph.nodes.set[nodeId];
-            if (node.value == "redo"){
+            if (node.value == "redo()"){
                 if (computeNode(prob.graph, cache, nodeId)){
                     validated = false;
                     break;
