@@ -125,7 +125,30 @@
         "overone": "overone",
         "underone": "underone",
 
-        "redo": "redo"
+        "redo": "redo",
+
+        "lcm": "lcm",
+
+        "absolute": "absolute",
+        "abs": "absolute",
+
+        "factorial": "factorial",
+        "fac": "factorial",
+
+        "isNaN": "isNaN",
+        "isFinite": "isFinite",
+
+        "not": "not",
+        "and": "and",
+        "or": "or",
+
+        "sin": "sin",
+        "cos": "cos",
+        "tan": "tan",
+        "asin": "asin",
+        "acos": "acos",
+        "atan": "atan"
+
     },
 
     "nodes": {
@@ -380,6 +403,132 @@
               "fontSize": 16,
               "inputs": 2,
               "inputTypes": ["number", "number"],
+              "outputType": "number"
+            },
+            "lcm": {
+              "width": 50,
+              "height": 30,
+              "text": "lcm",
+              "fontSize": 16,
+              "inputs": 2,
+              "inputTypes": ["number", "number"],
+              "outputType": "number"
+            },
+            "absolute": {
+              "width": 50,
+              "height": 30,
+              "text": "abs()",
+              "fontSize": 16,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "number"
+            },
+            "factorial": {
+              "width": 30,
+              "height": 30,
+              "text": "!",
+              "fontSize": 24,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "number"
+            },
+            "isNaN": {
+              "width": 50,
+              "height": 30,
+              "text": "?NaN",
+              "fontSize": 16,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "boolean"
+            },
+            "isFinite": {
+              "width": 50,
+              "height": 30,
+              "text": "?Inf",
+              "fontSize": 16,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "boolean"
+            },
+            "not": {
+              "width": 40,
+              "height": 30,
+              "text": "not",
+              "fontSize": 18,
+              "inputs": 1,
+              "inputTypes": ["boolean"],
+              "outputType": "boolean"
+            },
+            "and": {
+              "width": 40,
+              "height": 30,
+              "text": "and",
+              "fontSize": 18,
+              "inputs": 2,
+              "inputTypes": ["boolean", "boolean"],
+              "outputType": "boolean"
+            },
+            "or": {
+              "width": 40,
+              "height": 30,
+              "text": "or",
+              "fontSize": 18,
+              "inputs": 2,
+              "inputTypes": ["boolean", "boolean"],
+              "outputType": "boolean"
+            },
+            "sin": {
+              "width": 60,
+              "height": 30,
+              "text": "sin()",
+              "fontSize": 18,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "number"
+            },
+            "cos": {
+              "width": 60,
+              "height": 30,
+              "text": "cos()",
+              "fontSize": 18,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "number"
+            },
+            "tan": {
+              "width": 60,
+              "height": 30,
+              "text": "tan()",
+              "fontSize": 18,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "number"
+            },
+            "asin": {
+              "width": 60,
+              "height": 30,
+              "text": "asin()",
+              "fontSize": 18,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "number"
+            },
+            "acos": {
+              "width": 60,
+              "height": 30,
+              "text": "acos()",
+              "fontSize": 18,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "number"
+            },
+            "atan": {
+              "width": 60,
+              "height": 30,
+              "text": "atan()",
+              "fontSize": 18,
+              "inputs": 1,
+              "inputTypes": ["number"],
               "outputType": "number"
             }
         },

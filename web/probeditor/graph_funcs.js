@@ -92,4 +92,27 @@ export default {
     "overone": (i, _, __) => new Fraction(i[0], 1),
     "underone": (i, _, __) => new Fraction(1, i[0]),
     "redo": (i, _, __) => i[0],
+    "lcm": (i, _, __) => {
+        return 1; //idk jak se to dela
+    },
+    "absolute": (i, _, __) => Math.abs(i[0]),
+    "factorial": (i, _, __) => {
+        if (i[0] < 0) return NaN;
+        let result = 1;
+        for (let j = 2; j <= i[0]; j++) {
+            result *= j;
+        }
+        return result;
+    },
+    "isNaN": (i, _, __) => isNaN(i[0]),
+    "isFinite": (i, _, __) => isFinite(i[0]),
+    "not": (i, _, __) => !i[0],
+    "and": (i, _, __) => i[0] && i[1],
+    "or": (i, _, __) => i[0] || i[1],
+    "sin": (i, _, __) => Math.sin(i[0]),
+    "cos": (i, _, __) => Math.cos(i[0]),
+    "tan": (i, _, __) => Math.tan(i[0]),
+    "asin": (i, _, __) => Math.asin(i[0]),
+    "acos": (i, _, __) => Math.acos(i[0]),
+    "atan": (i, _, __) => Math.atan(i[0]),
 }
