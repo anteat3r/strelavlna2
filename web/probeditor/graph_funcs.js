@@ -1,3 +1,20 @@
+class Fraction {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.simplify()
+  }
+  simplify() {
+    let a = this.x;
+    let b = this.y;
+    while (b) { [a, b] = [b, a % b]; }
+    this.x /= a
+    this.y /= a
+  }
+  num() { return this.x }
+  den() { return this.y }
+}
+
 export default {
     "addition": (i, _, __) => i[0] + i[1],
     "addition3": (i, _, __) => i[0] + i[1] + i[2],
@@ -39,5 +56,11 @@ export default {
         if (a == 0) return b;
         b %= a;
       }
-    }
+    },
+
+    "fraction": (i, _, __) => new Fraction(i[0], i[1]),
+    "numerator": (i, _, __) => {
+      console.log(typeof i);
+    },
+    "denominator": (i, _, __) => i.x,
 }

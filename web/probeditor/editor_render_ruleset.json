@@ -103,7 +103,13 @@
 
         "sqrt": "sqrt",
 
-        "gcd": "gcd"
+        "gcd": "gcd",
+        "fraction": "fraction",
+        "frc": "fraction",
+        "numerator": "numerator",
+        "nmr": "numerator",
+        "denominator": "denominator",
+        "dnm": "denominator"
     },
 
     "nodes": {
@@ -268,6 +274,33 @@
               "fontSize": 24,
               "inputs": 2,
               "inputTypes": ["number", "number"],
+              "outputType": "number"
+            },
+            "fraction": {
+              "width": 30,
+              "height": 30,
+              "text": "⅞",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["number", "number"],
+              "outputType": "fraction"
+            },
+            "numerator": {
+              "width": 50,
+              "height": 20,
+              "text": "num",
+              "fontSize": 16,
+              "inputs": 1,
+              "inputTypes": ["fraction"],
+              "outputType": "number"
+            },
+            "denominator": {
+              "width": 50,
+              "height": 20,
+              "text": "den",
+              "fontSize": 16,
+              "inputs": 1,
+              "inputTypes": ["fraction"],
               "outputType": "number"
             },
             "gcd": {
