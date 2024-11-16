@@ -59,8 +59,6 @@ export default {
     },
 
     "fraction": (i, _, __) => new Fraction(i[0], i[1]),
-    "numerator": (i, _, __) => {
-      console.log(i);
-    },
-    "denominator": (i, _, __) => i.x,
+    "numerator": (i, _, __) => i[0].num(),
+    "denominator": (i, _, __) => i[0].den(),
 }
