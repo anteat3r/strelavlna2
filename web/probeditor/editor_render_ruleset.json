@@ -72,7 +72,11 @@
         "rnd": "round",
 
         "roundplaces": "roundplaces",
-        "rndp": "roundplaces"
+        "rndp": "roundplaces",
+
+        "numbercomparison": "numbercomparison",
+        "numcmp": "numbercomparison",
+        "=": "numbercomparison" 
     },
 
     "nodes": {
