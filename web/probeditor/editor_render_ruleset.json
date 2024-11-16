@@ -9,48 +9,202 @@
     "defaultInputExtendX": 5,
     "defaultInputExtendY": 10,
     "defaultInputPadding": 5,
+    "variableTextPadding": 10,
 
     "typeColors": {
         "number": "#3e93a2",
         "string": "#8b67cc"
     },
 
+    "shortcuts": {
+        "addition": "addition",
+        "add": "addition",
+        "+": "addition",
+
+        "subtraction": "subtraction",
+        "sub": "subtraction",
+        "-": "subtraction",
+
+        "multiplication": "multiplication",
+        "mul": "multiplication",
+        "*": "multiplication",
+
+        "division": "division",
+        "div": "division",
+        "/": "division",
+
+        "tostring": "tostring",
+        "toStr": "tostring",
+        "ts": "tostring",
+
+        "fromstring": "fromstring",
+        "fromStr": "fromstring",
+        "fs": "fromstring",
+
+        "randomInteger": "randomInteger",
+        "rInt": "randomInteger",
+        "ri": "randomInteger",
+
+        "randomFloat": "randomFloat",
+        "rFloat": "randomFloat",
+        "rf": "randomFloat",
+
+        "number": "number",
+        "num": "number",
+
+        "string": "string",
+        "str": "string",
+
+        "setstring": "setstring",
+        "setstr": "setstring",
+        "ss": "setstring",
+
+        "setnumber": "setnumber",
+        "setnum": "setnumber",
+        "sn": "setnumber",
+
+        "constant": "constant",
+        "const": "constant",
+        "c": "constant",
+
+        "round": "round",
+        "rnd": "round",
+
+        "roundplaces": "roundplaces",
+        "rndp": "roundplaces"
+    },
+
     "nodes": {
-        "addition": {
-            "width": 30,
-            "height": 30,
-            "text": "+",
-            "fontSize": 24,
-            "inputs": 2,
-            "inputTypes": ["number", "number"],
-            "outputType": "number"
+        "basic": {
+            "addition": {
+                "width": 30,
+                "height": 30,
+                "text": "+",
+                "fontSize": 24,
+                "inputs": 2,
+                "inputTypes": ["number", "number"],
+                "outputType": "number"
+            },
+            "subtraction": {
+                "width": 30,
+                "height": 30,
+                "text": "-",
+                "fontSize": 24,
+                "inputs": 2,
+                "inputTypes": ["number", "number"],
+                "outputType": "number"
+            },
+            "multiplication": {
+                "width": 30,
+                "height": 30,
+                "text": "*",
+                "fontSize": 24,
+                "inputs": 2,
+                "inputTypes": ["number", "number"],
+                "outputType": "number"
+            },
+            "division": {
+                "width": 30,
+                "height": 30,
+                "text": "/",
+                "fontSize": 24,
+                "inputs": 2,
+                "inputTypes": ["number", "number"],
+                "outputType": "number"
+            },
+            "tostring": {
+                "width": 60,
+                "height": 20,
+                "text": "toStr()",
+                "fontSize": 16,
+                "inputs": 1,
+                "inputTypes": ["number"],
+                "outputType": "string"
+            },
+            "fromstring": {
+                "width": 60,
+                "height": 20,
+                "text": "frStr()",
+                "fontSize": 16,
+                "inputs": 1,
+                "inputTypes": ["string"],
+                "outputType": "number"
+            },
+            "randomInteger": {
+                "width": 60,
+                "height": 30,
+                "text": "rInt()",
+                "fontSize": 16,
+                "inputs": 2,
+                "inputTypes": ["number", "number"],
+                "outputType": "number"
+            },
+            "randomFloat": {
+                "width": 80,
+                "height": 30,
+                "text": "rFloat()",
+                "fontSize": 16,
+                "inputs": 2,
+                "inputTypes": ["number", "number"],
+                "outputType": "number"
+            },
+            "round": {
+                "width": 70,
+                "height": 20,
+                "text": "round()",
+                "fontSize": 16,
+                "inputs": 1,
+                "inputTypes": ["number"],
+                "outputType": "number"
+            },
+            "roundplaces": {
+                "width": 80,
+                "height": 30,
+                "text": "roundP()",
+                "fontSize": 16,
+                "inputs": 2,
+                "inputTypes": ["number", "number"],
+                "outputType": "number"
+            }
         },
-        "subtraction": {
-            "width": 30,
-            "height": 30,
-            "text": "-",
-            "fontSize": 24,
-            "inputs": 2,
-            "inputTypes": ["number", "number"],
-            "outputType": "number"
+        "get": {
+            "number": {
+                "text": "number",
+                "height": 30,
+                "value": 1,
+                "fontSize": 18,
+                "outputType": "number"
+            },
+            "string": {
+                "text": "string",
+                "height": 30,
+                "value": "a",
+                "fontSize": 18,
+                "outputType": "string"
+            },
+            "constant": {
+                "text": "constant",
+                "height": 30,
+                "value": "const()",
+                "fontSize": 15,
+                "outputType": "number"
+            }
         },
-        "tostring": {
-            "width": 60,
-            "height": 20,
-            "text": "toStr()",
-            "fontSize": 16,
-            "inputs": 1,
-            "inputTypes": ["number"],
-            "outputType": "string"
-        },
-        "fromstring": {
-            "width": 60,
-            "height": 20,
-            "text": "frStr()",
-            "fontSize": 16,
-            "inputs": 1,
-            "inputTypes": ["string"],
-            "outputType": "number"
+        "set": {
+            "setstring": {
+                "text": "sestring",
+                "height": 30,
+                "value": "set()",
+                "fontSize": 18,
+                "inputType": "string"
+            },
+            "setnumber": {
+                "text": "setnumber",
+                "height": 30,
+                "value": "set()",
+                "fontSize": 18,
+                "inputType": "number"
+            }
         }
     }
 }

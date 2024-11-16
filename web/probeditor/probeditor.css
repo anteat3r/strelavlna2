@@ -656,20 +656,34 @@
     margin: 0px;
     outline: none;
     transition: all 0.3s ease-out;
+    z-index: 1;
 }
 #generationeditor-command-input::placeholder{
     color: #a6a9aa;
     font-weight: 700;
     font-size: 16px;
     transition: color 0.0s ease-out;
+    user-select: none;
 }
 #generationeditor-command-input:focus{
     border-color: var(--color-secondary);
     background-color: var(--color-secondary-white);
-    transition: all 0.0s;
+    transition: all 0.3s;
 }
 #generationeditor-command-input:focus::placeholder{
     color: #9dbcc5;
+}
+.error#generationeditor-command-input{
+    border-color: #e12f56;
+    background-color: #ddb6c3;
+    color: #e12f56;
+    transition: all 0.0s;
+}
+.success#generationeditor-command-input{
+    border-color: #20c276;
+    background-color: #a6dbc2;
+    color: #20c276;
+    transition: all 0.0s;
 }
 
 #generationeditor-canvas{
@@ -899,6 +913,13 @@ th:last-child, td:last-child{
     margin: 0px;
     padding: 10px;
     flex-grow: 1;
+}
+#finallook-answer{
+    font-family: 'Lexend';
+    font-size: 16px;
+    color: var(--color-secondary-dark);
+    margin: 0px;
+    padding: 10px;
 }
 #finallook-image{
     display: block;

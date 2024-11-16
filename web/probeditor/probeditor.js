@@ -1,4 +1,5 @@
 import PocketBase from '../pocketbase.es.mjs';
+import funcs from './graph_funcs.js';
 const pb = new PocketBase("https://strela-vlna.gchd.cz");
 await login();
 
@@ -107,7 +108,7 @@ class TableRow {
 
 
 class Prob {
-    constructor(id, title, rank, type, content, solution, image, authorId, authorName) {
+    constructor(id, title, rank, type, content, solution, image, authorId, authorName, graph, infinite) {
       this._id = id;
       this._title = title;
       this._rank = rank;
@@ -117,6 +118,8 @@ class Prob {
       this._image = image;
       this._authorId = authorId
       this._authorName = authorName;
+      this._graph = graph;
+      this._infinite = infinite;
 
       this.title_modified = false;
       this.rank_modified = false;
@@ -125,6 +128,8 @@ class Prob {
       this.solution_modified = false;
       this.image_modified = false;
       this.author_modified = false;
+      this._graph_modified = false;
+      this._infinite_modified = false;
     }
   
     // Getters and setters
@@ -214,8 +219,33 @@ class Prob {
         this._authorName = newName;
     }
 
+    get graph() {
+        return this._graph;
+    }
+
+    set graph(newGraph) {
+        changesUnsaved();
+        this._graph_modified = true;
+        this._graph = newGraph;
+    }
+
+    get infinite() {
+        return this._infinite;
+    }
+
+    set infinite(newInfinite) {
+        changesUnsaved();
+        this._infinite_modified = true;
+        this._infinite = newInfinite;
+    }
+
+    modifyGraph(){
+        changesUnsaved();
+        this._graph_modified = true;
+    }
+
     pushChanges() {
-      if (!(this.title_modified || this.rank_modified || this.type_modified || this.content_modified || this.solution_modified || this.image_modified || this.author_modified)) return;
+      if (!(this.title_modified || this.rank_modified || this.type_modified || this.content_modified || this.solution_modified || this.image_modified || this.author_modified || this._graph_modified || this._infinite_modified)) return;
 
       const update_data = {};
 
@@ -226,6 +256,8 @@ class Prob {
       if (this.solution_modified) update_data.solution = this._solution;
       if (this.image_modified) update_data.img = this._image;
       if (this.author_modified) update_data.author = this._authorId;
+      if (this._graph_modified) update_data.graph = this._graph;
+      if (this._infinite_modified) update_data.infinite = this._infinite;
 
       pb.collection('probs').update(this.id, update_data);
 
@@ -236,10 +268,12 @@ class Prob {
       this.solution_modified = false;
       this.image_modified = false;
       this.author_modified = false;
+      this._graph_modified = false;
+      this._infinite_modified = false;
     }
 
     isChanged() {
-        return this.title_modified || this.rank_modified || this.type_modified || this.content_modified || this.solution_modified || this.image_modified || this.author_modified;
+        return this.title_modified || this.rank_modified || this.type_modified || this.content_modified || this.solution_modified || this.image_modified || this.author_modified || this._graph_modified || this._infinite_modified;
     }
 }
 
@@ -587,28 +621,14 @@ let editor_types = ["finallook", "table", "generationeditor", "table-plus-genera
 let editor_type = "finallook";
 let author_filter = "all";
 let type_filter = "all";
-let table = [
-    // {
-    //     id: "hkajs2das65d1a3",
-    //     name: "Gravitační konstanta",
-    //     symmbol: "g",
-    //     value: "9.81",
-    //     unit: "m/s2",
-    //     description: "Gravitační konstanta"
-    // }
-];
-let probs = [
-    // {
-    //     id: "iuhs4f9ds6515df1",
-    //     title: "Popelar",
-    //     rank: "A",
-    //     content: "Potápěč naměřil v moři tlak 158kPa. Hustota mořské vody je 1030 kg/m$^3$. V jaké hloubce (v metrech) se potápěč nachází? Výsledek uveďte bez jednotky a zaokrouhlete na 3 platné cifry.",
-    //     solution: "0.000",
-    //     image: "popelar.png"
-    // },
-];
+let table = [];
+let probs = [];
 let filtered_probs = [];
 let show_filtered = false;
+
+
+let command = "";
+const commandInput = document.getElementById("generationeditor-command-input");
 
 
 async function login(){
@@ -632,7 +652,9 @@ async function load(){
             item.solution,
             item.img,
             item.author,
-            item.author == "" ? "" : item.expand.author.username
+            item.author == "" ? "" : item.expand.author.username,
+            item.graph,
+            item.infinite
         ));
     }
 
@@ -731,6 +753,8 @@ function updateRightEditor(){
         right_editor_elements[1].classList.add("small");
     }
 
+    refreshCanvas();
+
     // graph_canvas.width = graph_canvas.clientWidth;
     // graph_canvas.height = graph_canvas.clientHeight - 10;
 }
@@ -741,13 +765,25 @@ function updateFinallook(){
     const finallook_title_DOM = document.getElementById("finallook-title");
     const finallook_text_DOM = document.getElementById("finallook-text");
     const finallook_image_DOM = document.getElementById("finallook-image");
+    const finallook_answer_DOM = document.getElementById("finallook-answer");
 
     const add_image_button = document.getElementById("add-image");
     const remove_image_button = document.getElementById("remove-image");
 
 
+    let cache = new Map();
+    let computedOutputs = new Map();
+    const setNodes = Object.entries(prob.graph.nodes.set).map(([key, node]) => key);
+
+    for (let nodeId of setNodes) {
+        const node = prob.graph.nodes.set[nodeId];
+        computedOutputs.set(node.value.slice(5, -2), computeNode(prob.graph, cache, nodeId));
+    }
+    
+
     finallook_title_DOM.innerHTML = prob.title;
-    finallook_text_DOM.innerHTML = parseContentForLatex(prob.content);
+    finallook_text_DOM.innerHTML = parseContentForLatex(parseContentForAutogeneratedFills(prob.content, computedOutputs));
+    finallook_answer_DOM.innerHTML = `Správná odpověď: ${parseContentForAutogeneratedFills(prob.solution, computedOutputs)}`;
     if(prob.image != ""){
         const img = new Image();
         finallook_image_DOM.src = `https://strela-vlna.gchd.cz/api/files/probs/${prob.id}/${prob.image}`;
@@ -823,6 +859,17 @@ function parseContentForLatex(txt){
     return newtxt;
 }
 
+function parseContentForAutogeneratedFills(txt, fills){
+    let newtxt = txt
+    
+    for (let [key, value] of fills.entries()) {
+        const placeholder = `\`${key}\``;
+        newtxt = newtxt.replaceAll(placeholder, value);
+    }
+
+    return newtxt;
+}
+
 document.getElementById('add-image').addEventListener('click', function() {
     if(focused_prob == "") return;
     document.getElementById('image-input').click();
@@ -867,8 +914,11 @@ function updateTable(){
             `
     }
     for(let item of table_DOM.children){
-        item.addEventListener("click", function(){
+        item.addEventListener("click", function(e){
             if(document.querySelector(".editing")) return;
+            if (command == "editconstant") {
+                submitConstant(this.id);
+            }
             focused_const = this.id;
             updateTable();
         })
@@ -913,6 +963,7 @@ document.getElementById("table-edit").addEventListener("click", function(){
         document.getElementById("table-edit").classList.remove("active");
         document.getElementById("table-delete").classList.remove("disabled");
 
+        focused_const = "";
         updateTable();
         return;
     }
@@ -1216,7 +1267,7 @@ function updateProbList(){
             this.classList.add("selected");
             document.getElementById("problems-delete").classList.remove("disabled");
             updateRankSelector();
-            // updateRightEditor();
+            updateRightEditor();
             updateFinallook();
             updateLeftEditor();
 
@@ -1245,7 +1296,15 @@ async function addProb(){
         solution: "",
         img: "",
         workers: "",
-        author: my_id
+        author: my_id,
+        graph: {
+            nodes: {
+                "basic": {},
+                "get": {},
+                "set": {}
+            }
+        },
+        infinite: false,
     });
     probs.push(new Prob(
         response.id,
@@ -1255,7 +1314,10 @@ async function addProb(){
         "",
         "",
         "",
-        my_id
+        my_id,
+        my_name,
+        response.graph,
+        response.infinite,
     ));
     focused_prob = response.id;
     
@@ -1380,89 +1442,287 @@ function initializeCanvasWhenVisible() {
 
 initializeCanvasWhenVisible()
 
-let graph = {
-    nodes: [
-        {
-            id: 0,
-            type: "addition",
-            x: 100,
-            y: 100,
-            targetX: 100,
-            targetY: 100,
-            inputs: [-1, -1],
-            defautltInputs: [185, 4]
-        },
-        {
-            id: 1,
-            type: "addition",
-            x: 200,
-            y: 230,
-            targetX: 200,
-            targetY: 230,
-            inputs: [-1, 0],
-            defautltInputs: [25, 3]
-        },
-        {
-            id: 2,
-            type: "addition",
-            x: 270,
-            y: 260,
-            targetX: 270,
-            targetY: 260,
-            inputs: [1, 0],
-            defautltInputs: [6, 6]
-        },
-        {
-            id: 3,
-            type: "addition",
-            x: 350,
-            y: 200,
-            targetX: 350,
-            targetY: 200,
-            inputs: [2, -1],
-            defautltInputs: [185, 9]
-        },
-        {
-            id: 4,
-            type: "tostring",
-            x: 400,
-            y: 300,
-            targetX: 400,
-            targetY: 300,
-            inputs: [3],
-            defautltInputs: [0]
-        },
-        {
-            id: 5,
-            type: "fromstring",
-            x: 500,
-            y: 300,
-            targetX: 500,
-            targetY: 300,
-            inputs: [4],
-            defautltInputs: [0]
+
+
+function findNode(id){
+    if (focused_prob == "") return;
+    const graph = probs.find(prob => prob.id == focused_prob).graph;
+
+    const rules = editor_render_ruleset.nodes;
+    let node = null;
+    let nodeRules = null;
+    let nodeType = null;
+    let nodeName = null;
+    for (const [type, nodes] of Object.entries(graph.nodes)) {
+        if(nodes.hasOwnProperty(id)){
+            node = nodes[id];
+            nodeRules = rules[type][node.type];
+            nodeType = type;
+            nodeName = node.type
+            break;
         }
-    ],
+    }
+    return [node, nodeRules, nodeType, nodeName];
 }
 
-let graphMouse = {x: 0, y: 0, hover: -1, grab: -1, grabX: 0, grabY: 0, connect: -1};
+//node adder
+function submitConstant(c){
+    const [n, _, __, ___] = findNode(graphMouse.doubleClick);
+    const row = table.find(row => row.id == c);
+    n.value = `const( ${row.name} )`;
+    n.referenceId = c;
+    command = "";
+    commandInput.blur();
+    n.selected = false;
+    graphMouse.doubleClick = -1;
+    refreshCanvas();
+}
+
+commandInput.addEventListener("keydown", function(e){
+    if(focused_prob == ""){
+        this.classList.add("error");
+        
+        setTimeout(e=>{
+            this.classList.remove("error");
+        }, 100);
+        return;
+    }
+
+    if (command == "editconstant"){
+        e.preventDefault();
+    }
+    if(e.key == "Enter"){
+        e.preventDefault();
+        if (command == "add"){
+            const s = editor_render_ruleset.shortcuts; //shortcuts
+            if(s.hasOwnProperty(commandInput.value)){
+                addToGraph(s[this.value], -graphCam.x + 100, -graphCam.y + 100);
+                
+                commandInput.value = "";
+                this.blur();
+                refreshCanvas();
+                
+                command = "";
+                graphMouse.doubleClick = -1;
+
+                this.classList.add("success");
+                setTimeout(e=>{
+                    this.classList.remove("success");
+                }, 100)
+            }else{
+                this.classList.add("error");
+                
+                setTimeout(e=>{
+                    this.classList.remove("error");
+                }, 100);
+            }
+        } else if (command == "edit"){
+            const [n, nr, __, ___] = findNode(graphMouse.doubleClick);
+            if (n == null) {
+                this.classList.add("error");
+                setTimeout(e=>{
+                    this.classList.remove("error");
+                }, 100);
+                return;
+            }
+            if (nr.outputType == "number"){
+                let v = parseFloat(commandInput.value);
+                if (Number.isNaN(v)){
+                    this.classList.add("error");
+                    setTimeout(e=>{
+                        this.classList.remove("error");
+                    }, 100);
+                    return;
+
+                } else {
+                    n.value = v;
+                }
+            } else if (n.outputType == "string"){
+                n.value = commandInput.value;
+            }
+
+            commandInput.value = "";
+            this.blur();
+            refreshCanvas();
+
+            n.selected = false;
+            graphMouse.doubleClick = -1;
+            
+            command = "";
+            
+            this.classList.add("success");
+            setTimeout(e=>{
+                this.classList.remove("success");
+            }, 100);
+        } else if (command == "editset"){
+            const [n, _, __, ___] = findNode(graphMouse.doubleClick);
+            if (n == null) {
+                this.classList.add("error");
+                setTimeout(e=>{
+                    this.classList.remove("error");
+                }, 100);
+                return;
+            }
+
+            n.value = `set( ${commandInput.value} )`;
+            commandInput.value = "";
+            this.blur();
+            refreshCanvas();
+
+            n.selected = false;
+            graphMouse.doubleClick = -1;
+            
+            command = "";
+            
+            this.classList.add("success");
+            setTimeout(e=>{
+                this.classList.remove("success");
+            }, 100);
+        }
+        
+    }
+});
+
+commandInput.addEventListener("blur", function(){
+    if (command == "editconstant") return;
+        
+    command = "";
+    if(graphMouse.doubleClick != -1){
+        const [n, _, __, ___] = findNode(graphMouse.doubleClick);
+        if(n != null){
+            n.selected = false;
+        }
+        graphMouse.doubleClick = -1;
+    }
+});
+
+document.addEventListener("keydown", function(e){
+    if(e.key == " " && document.activeElement.tagName != "INPUT" && document.activeElement.tagName != "TEXTAREA" && (editor_type == "generationeditor" || editor_type == "table-plus-generationeditor")){
+        e.preventDefault();
+        command = "add";
+        commandInput.focus();
+    }
+});
+
+function cancleDoubleClick(){
+    if (command == ""){
+        graphMouse.doubleClick = -1;
+    }
+}
+
+
+
+//adds a node to the graph
+function addToGraph(nodeName, x, y){
+    if (focused_prob == "") return;
+    const graph = probs.find(prob => prob.id == focused_prob).graph;
+
+    const rules = editor_render_ruleset.nodes;
+    let nodeClass = "";
+    for (const [key, value] of Object.entries(rules)) {
+        if(value.hasOwnProperty(nodeName)){
+            nodeClass = key;
+            break;
+        }
+    }
+    if(nodeClass == "") {
+        console.error("node not found");
+        return;
+    }
+
+    //get free id
+    let got = false;
+    let freeId = 0;
+    while (!got) {
+        got = true;
+        for (const [key, value] of Object.entries(graph.nodes)) {
+            if(value.hasOwnProperty(freeId)){
+                got = false;
+                break;
+            }
+        }
+        if(!got){
+            freeId++;
+        }
+    }
+
+    if(nodeClass == "basic"){
+        graph.nodes.basic[freeId] = {
+            type: nodeName,
+            x: x,
+            y: y,
+            inputs: Array(rules.basic[nodeName].inputs).fill(-1),
+        };
+    }else if(nodeClass == "get"){
+        if (nodeName == "constant"){
+            graph.nodes.get[freeId] = {
+                type: nodeName,
+                x: x,
+                y: y,
+                value: rules.get[nodeName].value,
+                selected: false,
+                referenceId: "",
+            };
+        } else {
+            graph.nodes.get[freeId] = {
+                type: nodeName,
+                x: x,
+                y: y,
+                value: rules.get[nodeName].value,
+                selected: false,
+            };
+        }
+    } else if (nodeClass == "set") {
+        graph.nodes.set[freeId] = {
+            type: nodeName,
+            x: x,
+            y: y,
+            value: rules.set[nodeName].value,
+            selected: false,
+            input: -1
+        };
+    }
+}
+
+//removes a node from the graph and removes all connections to the node
+function removeFromGraph(id){
+    if (focused_prob == "") return;
+    const graph = probs.find(prob => prob.id == focused_prob).graph;
+
+    for (const [type, nodes] of Object.entries(graph.nodes)) {
+        if (nodes.hasOwnProperty(id)) {
+            delete nodes[id];
+            break; // exit loop once the node is found and removed
+        }
+    }
+
+    for (const [type, nodes] of Object.entries(graph.nodes)) {
+        for (const node of Object.values(nodes)) {
+            if (type == "basic"){
+                for (let i = 0; i < node.inputs.length; i++) {
+                    if (node.inputs[i] === id) {
+                        node.inputs[i] = -1;
+                    }
+                }
+            } else if (type == "set") {
+                if (node.input === id) {
+                    node.input = -1;
+                }
+            }
+        }
+    }
+
+    graphMouse.hover = -1;
+}
+
+let graphMouse = {x: 0, y: 0, hover: -1, grab: -1, grabX: 0, grabY: 0, connect: -1, doubleClick: -1};
 let graphCam = {x: 0, y: 0, zoom: 1};
 const grabRadius = 8;
 
 graph_canvas.addEventListener("mousemove", function(e){
     graphMouse.x = e.offsetX;
     graphMouse.y = e.offsetY;
-    let found = false;
-    for(let node of graph.nodes){
-        const node_rules = editor_render_ruleset.nodes[node.type];
-        if(node.x - grabRadius <= graphMouse.x - graphCam.x && node.x + node_rules.width + grabRadius >= graphMouse.x - graphCam.x && node.y - grabRadius <= graphMouse.y - graphCam.y && node.y + node_rules.height + grabRadius >= graphMouse.y - graphCam.y){
-            graphMouse.hover = node.id;
-            found = true;
-            break;
-        }
-    }
-    if(!found) graphMouse.hover = -1;
-
+    
     if(graphMouse.grab != -1){
         if(graphMouse.grab == -2){
             graphCam.x += graphMouse.x - graphMouse.grabX;
@@ -1472,20 +1732,13 @@ graph_canvas.addEventListener("mousemove", function(e){
             refreshCanvas();
 
         }else{
-            const node = graph.nodes.find(node => node.id == graphMouse.grab);
-            node.targetX += graphMouse.x - graphMouse.grabX;
-            node.targetY += graphMouse.y - graphMouse.grabY;
+            const [node, _, __, ___] = findNode(graphMouse.hover);
+
+            node.x += graphMouse.x - graphMouse.grabX;
+            node.y += graphMouse.y - graphMouse.grabY;
             graphMouse.grabX = graphMouse.x;
             graphMouse.grabY = graphMouse.y;
-    
-            while(Math.abs(node.targetX - node.x) >= 10){
-                node.x += 10 * Math.sign(node.targetX - node.x);
-                refreshCanvas();
-            }
-            while(Math.abs(node.targetY - node.y) >= 10){
-                node.y += 10 * Math.sign(node.targetY - node.y);
-                refreshCanvas();
-            }
+            refreshCanvas();
         }
 
     } else if (graphMouse.connect != -1){
@@ -1493,80 +1746,251 @@ graph_canvas.addEventListener("mousemove", function(e){
     }
 
 });
+
+graph_canvas.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+});
+
 graph_canvas.addEventListener("mousedown", function(e){
     if(e.button == 0){
+        graphMouse.hover = findHoveredNode(graphMouse.x - graphCam.x, graphMouse.y - graphCam.y);
         if(graphMouse.hover == -1) return;
-        const node = graph.nodes.find(node => node.id == graphMouse.hover);
+
+
         const rules = editor_render_ruleset;
-        const node_rules = rules.nodes[node.type];
-        const output = {x: node.x + node_rules.width, y: node.y + node_rules.height / 2};
-        let inputs = [];
-        for(let i = 0; i < node.inputs.length; i++){
-            inputs.push({x: node.x, y: node.y + (i + 1) * rules.inputSeparation});
-        }
+        const [node, nodeRules, nodeType, _] = findNode(graphMouse.hover);
 
-        let closest = -1;
-        let closestDist = Infinity;
-        for(let i = 0; i < inputs.length; i++){
-            const dist = Math.abs(inputs[i].x - (graphMouse.x - graphCam.x)) + Math.abs(inputs[i].y - (graphMouse.y - graphCam.y));
-            if(dist < closestDist){
-                closestDist = dist;
-                closest = i;
+        console.log(node);
+        if(graphMouse.doubleClick != -1 && graphMouse.doubleClick == graphMouse.hover && nodeType != "basic"){
+            e.preventDefault();
+            command = "edit";
+            commandInput.focus();
+            node.selected = true;
+            refreshCanvas();
+
+            if (nodeType == "get" && nodeRules.text == "constant") {
+                command = "editconstant";
+                editor_type_buttons[3].click();
+                let curentConst = node.referenceId;
+                console.log(curentConst);
+                if (curentConst == ""){
+                    focused_const = "";
+
+                }else{
+                    focused_const = curentConst;
+                    updateTable();
+                }
+
+
+                updateRightEditor();
+            } else if (nodeType == "set") {
+                command = "editset";
             }
+            return;
         }
 
-        if(closestDist <= grabRadius || Math.abs(output.x - (graphMouse.x - graphCam.x)) + Math.abs(output.y - (graphMouse.y - graphCam.y)) < grabRadius){
-            if(Math.abs(output.x - (graphMouse.x - graphCam.x)) + Math.abs(output.y - (graphMouse.y - graphCam.y)) < closestDist){
-                graphMouse.connect = node.id;
+        graphMouse.doubleClick = graphMouse.hover;
+        setTimeout(cancleDoubleClick, 500);
+        if(nodeType == "basic"){
+            const output = {x: node.x + nodeRules.width, y: node.y + nodeRules.height / 2};
+            
+            let inputs = [];
+            for(let i = 0; i < node.inputs.length; i++){
+                inputs.push({x: node.x, y: node.y + (i + 1) * rules.inputSeparation});
+            }
+    
+            let closest = -1;
+            let closestDist = Infinity;
+            for(let i = 0; i < inputs.length; i++){
+                if(node.inputs[i] == -1) continue;
+                const dist = Math.abs(inputs[i].x - (graphMouse.x - graphCam.x)) + Math.abs(inputs[i].y - (graphMouse.y - graphCam.y));
+                if(dist < closestDist){
+                    closestDist = dist;
+                    closest = i;
+                }
+            }
+    
+            if(closestDist <= grabRadius || Math.abs(output.x - (graphMouse.x - graphCam.x)) + Math.abs(output.y - (graphMouse.y - graphCam.y)) <= grabRadius){
+                if(Math.abs(output.x - (graphMouse.x - graphCam.x)) + Math.abs(output.y - (graphMouse.y - graphCam.y)) < closestDist){
+                    graphMouse.connect = graphMouse.hover;
+                } else {
+                    graphMouse.connect = node.inputs[closest];
+                    node.inputs[closest] = -1;
+                }
             } else {
-                graphMouse.connect = node.inputs[closest];
-                node.inputs[closest] = -1;
+                graphMouse.grab = graphMouse.hover;
+                graphMouse.grabX = graphMouse.x;
+                graphMouse.grabY = graphMouse.y;
             }
-        } else {
-            graphMouse.grab = graphMouse.hover;
-            graphMouse.grabX = graphMouse.x;
-            graphMouse.grabY = graphMouse.y;
+        } else if (nodeType == "get"){
+            graph_ctx.font = `${nodeRules.fontSize}px Lexend`;
+
+            const width = graph_ctx.measureText(node.value).width + rules.variableTextPadding * 2;
+            const output = {x: node.x + width, y: node.y + nodeRules.height / 2};
+
+            if (Math.abs(output.x - (graphMouse.x - graphCam.x)) + Math.abs(output.y - (graphMouse.y - graphCam.y)) <= grabRadius) {
+                graphMouse.connect = graphMouse.hover;
+            } else {
+                graphMouse.grab = graphMouse.hover;
+                graphMouse.grabX = graphMouse.x;
+                graphMouse.grabY = graphMouse.y;
+            }
+        } else if (nodeType == "set"){
+            const input = {x: node.x, y: node.y + rules.inputSeparation};
+
+            if (Math.abs(input.x - (graphMouse.x - graphCam.x)) + Math.abs(input.y - (graphMouse.y - graphCam.y)) <= grabRadius) {
+                graphMouse.connect = node.input;
+                node.input = -1;
+            } else {
+                graphMouse.grab = graphMouse.hover;
+                graphMouse.grabX = graphMouse.x;
+                graphMouse.grabY = graphMouse.y;
+            }
         }
+        
 
     } else if (e.button == 1) {
         graphMouse.grab = -2;
         graphMouse.grabX = graphMouse.x;
         graphMouse.grabY = graphMouse.y;
+    } else if (e.button == 2) {
+        graphMouse.hover = findHoveredNode(graphMouse.x - graphCam.x, graphMouse.y - graphCam.y);
+        removeFromGraph(graphMouse.hover);
+        refreshCanvas();
     }
 });
+
 graph_canvas.addEventListener("mouseup", function(e){
     graphMouse.grab = -1;
 
-    if (graphMouse.connect != -1 && graphMouse.hover != -1){
-        const node = graph.nodes.find(node => node.id == graphMouse.hover);
-        const rules = editor_render_ruleset;
-        const node_rules = rules.nodes[node.type];
-        let inputs = [];
-        for(let i = 0; i < node.inputs.length; i++){
-            inputs.push({x: node.x, y: node.y + (i + 1) * rules.inputSeparation});
-        }
+    graphMouse.hover = findHoveredNode(graphMouse.x - graphCam.x, graphMouse.y - graphCam.y);
 
-        let closest = -1;
-        let closestDist = Infinity;
-        for(let i = 0; i < inputs.length; i++){
-            const dist = Math.abs(inputs[i].x - (graphMouse.x - graphCam.x)) + Math.abs(inputs[i].y - (graphMouse.y - graphCam.y));
-            if(dist < closestDist){
-                closestDist = dist;
-                closest = i;
+    if (graphMouse.connect != -1 && graphMouse.hover != -1){
+        const rules = editor_render_ruleset;
+        
+        const [node, nodeRules, nodeType, _] = findNode(graphMouse.hover);
+
+        if (nodeType == "basic") {
+            let inputs = [];
+            for(let i = 0; i < node.inputs.length; i++){
+                inputs.push({x: node.x, y: node.y + (i + 1) * rules.inputSeparation});
+            }
+    
+            let closest = -1;
+            let closestDist = Infinity;
+            for(let i = 0; i < inputs.length; i++){
+                const dist = Math.abs(inputs[i].x - (graphMouse.x - graphCam.x)) + Math.abs(inputs[i].y - (graphMouse.y - graphCam.y));
+                if(dist < closestDist){
+                    closestDist = dist;
+                    closest = i;
+                }
+            }
+            
+            const [connectNode, connectNodeRules, connectNodeType, _] = findNode(graphMouse.connect);
+    
+            if(closestDist <= grabRadius && node.inputs[closest] == -1 && nodeRules.inputTypes[closest] == connectNodeRules.outputType){
+                node.inputs[closest] = graphMouse.connect;
+            }
+            
+        } else if (nodeType == "get") {
+            //do nothing
+            
+        } else if (nodeType == "set") {
+            const input = {x: node.x, y: node.y + rules.inputSeparation};
+            const [connectNode, connectNodeRules, connectNodeType, _] = findNode(graphMouse.connect);
+
+            const dist = Math.abs(input.x - (graphMouse.x - graphCam.x)) + Math.abs(input.y - (graphMouse.y - graphCam.y))
+
+            if(dist <= grabRadius && node.input == -1 && nodeRules.inputType == connectNodeRules.outputType){
+                node.input = graphMouse.connect;
             }
         }
-
-        const connectNode = graph.nodes.find(node => node.id == graphMouse.connect);
-        const connectNodeRules = rules.nodes[connectNode.type];
-        if(closestDist <= grabRadius && node.inputs[closest] == -1 && node_rules.inputTypes[closest] == connectNodeRules.outputType){
-            node.inputs[closest] = graphMouse.connect;
-        }
+        
         
         
     }
     graphMouse.connect = -1;
     refreshCanvas(false);
 });
+
+function findHoveredNode(){
+    if (focused_prob == null) return -1;
+    const graph = probs.find(prob => prob.id == focused_prob).graph;
+
+    const rules = editor_render_ruleset;
+
+    for (const [type, nodes] of Object.entries(graph.nodes)) {
+        for (const [key, node] of Object.entries(nodes)) {
+            
+            if (type == "basic") {
+                const nr = editor_render_ruleset.nodes.basic[node.type]; //node rules
+
+                if (node.x - grabRadius <= graphMouse.x - graphCam.x && node.x + nr.width + grabRadius >= graphMouse.x - graphCam.x && node.y - grabRadius <= graphMouse.y - graphCam.y && node.y + nr.height + grabRadius >= graphMouse.y - graphCam.y) {
+                    graphMouse.hover = key;
+                    return key;
+                }
+
+            } else if (type == "get") {
+                const nr = editor_render_ruleset.nodes.get[node.type]; //node rules
+                graph_ctx.font = `${nr.fontSize}px Lexend`;
+                const width = graph_ctx.measureText(node.value).width + rules.variableTextPadding * 2;
+
+                if (node.x - grabRadius <= graphMouse.x - graphCam.x && node.x + width + grabRadius >= graphMouse.x - graphCam.x && node.y - grabRadius <= graphMouse.y - graphCam.y && node.y + nr.height + grabRadius >= graphMouse.y - graphCam.y) {
+                    graphMouse.hover = key;
+                    return key;
+                }
+
+            } else if (type == "set") {
+                const nr = editor_render_ruleset.nodes.set[node.type]; //node rules
+                graph_ctx.font = `${nr.fontSize}px Lexend`;
+                const width = graph_ctx.measureText(node.value).width + rules.variableTextPadding * 2;
+
+                if (node.x - grabRadius <= graphMouse.x - graphCam.x && node.x + width + grabRadius >= graphMouse.x - graphCam.x && node.y - grabRadius <= graphMouse.y - graphCam.y && node.y + nr.height + grabRadius >= graphMouse.y - graphCam.y) {
+                    graphMouse.hover = key;
+                    return key;
+                }
+            }
+        }
+    }
+
+    return -1;
+}
+
+function computeNode(graph, cache, nodeId){
+    if (cache.get(nodeId) != undefined) {
+        return cache.get(nodeId);
+    }
+
+    const [node, nodeRules, nodeType, nodeName] = findNode(nodeId);
+
+    if (node === null){
+        return null;
+    }
+
+    let inputs = [];
+    if (nodeType == "basic") {
+        for(let input of node.inputs){
+            inputs.push(computeNode(graph, cache, input));
+        }
+    } else if (nodeType == "set"){
+        inputs.push(computeNode(graph, cache, node.input));
+    } else if (nodeName == "constant") {
+        inputs = [node.referenceId];
+    }
+    const out = funcs[nodeName](inputs, node.value, table);
+
+    cache.set(nodeId, out);
+
+    return out;
+}
+
+document.addEventListener("keydown", function(e) {
+    if (e.key === 'p') {
+        
+    }
+});
+
+
 
 
 function graphEditorLoop(){
@@ -1578,45 +2002,46 @@ function graphEditorLoop(){
 function refreshCanvas(pathRepaint = false){
     graph_ctx.clearRect(0, 0, graph_canvas.width, graph_canvas.height);
     my_grid.clear();
-    renderGraph(graph, pathRepaint);
+
+    if (focused_prob != "") {
+        const prob = probs.find(prob => prob.id == focused_prob)
+        renderGraph(prob.graph, pathRepaint);
+        prob.modifyGraph();
+    }
+
     
 }
 
 function renderGraph(graph, pathRepaint = false){
     const rules = editor_render_ruleset;
-    let grid = new PFgrid(5);
-    graph_ctx.translate(graphCam.x, graphCam.y);
-    for(let node of graph.nodes){
-        const node_rules = editor_render_ruleset.nodes[node.type];
 
+    graph_ctx.translate(graphCam.x, graphCam.y);
+
+    //basics
+    for(const [id, node] of Object.entries(graph.nodes.basic)){
+        //node rules
+        const nr = editor_render_ruleset.nodes.basic[node.type];
+        
+        //draw the default rectangle
         graph_ctx.fillStyle = "#0f455a";
         graph_ctx.beginPath();
-        graph_ctx.roundRect(node.x, node.y, node_rules.width, node_rules.height, 5);
+        graph_ctx.roundRect(node.x, node.y, nr.width, nr.height, 5);
         graph_ctx.fill();
 
-        graph_ctx.font = `${node_rules.fontSize}px Lexend`;
+        //draw the text
+        graph_ctx.font = `${nr.fontSize}px Lexend`;
         graph_ctx.fillStyle = "#ffffff";
         graph_ctx.textAlign = "center";
         graph_ctx.textBaseline = "middle";
-        graph_ctx.fillText(node_rules.text, node.x + node_rules.width/2, node.y + node_rules.height/2);
+        graph_ctx.fillText(nr.text, node.x + nr.width/2, node.y + nr.height/2);
 
-        graph_ctx.fillStyle = rules.typeColors[node_rules.outputType];
+        //draw the output circle
+        graph_ctx.fillStyle = rules.typeColors[nr.outputType];
         graph_ctx.beginPath();
-        graph_ctx.arc(node.x + node_rules.width, node.y + node_rules.height / 2, 4, -0.5 * Math.PI, 0.5 * Math.PI);
+        graph_ctx.arc(node.x + nr.width, node.y + nr.height / 2, 4, -0.5 * Math.PI, 0.5 * Math.PI);
         graph_ctx.fill();
 
-        if(pathRepaint){
-            grid.addObstacle({x: node.x, y: node.y}, node_rules.width, node_rules.height);
-            console.log("obstacle added");
-        }
-
-
-    }
-    grid.addPadding(5);
-    
-
-    for(let node of graph.nodes){
-        const node_rules = editor_render_ruleset.nodes[node.type];
+        //draw the input connections
         for(let i = 0; i < node.inputs.length; i++){
             graph_ctx.strokeStyle = "#c0d5dd";
             graph_ctx.strokeWidth = rules.connectionWidth;
@@ -1624,30 +2049,29 @@ function renderGraph(graph, pathRepaint = false){
             const x = node.x;
             const y = node.y + rules.inputSeparation * (i + 1);
 
-            graph_ctx.strokeStyle = rules.typeColors[node_rules.inputTypes[i]];
+            graph_ctx.strokeStyle = rules.typeColors[nr.inputTypes[i]];
 
             if(node.inputs[i] != -1) {
-                const target_node = graph.nodes.find(nd => nd.id == node.inputs[i]);
-                const target_rules = editor_render_ruleset.nodes[target_node.type];
-                const target = {x: target_node.x + target_rules.width, y: target_node.y + target_rules.height/2};
-                
-                if(pathRepaint){
-    
-                    const path = grid.findPath({x: x - 5, y: y}, {x: target.x + 5, y: target.y}, 5);
-                    const pathToDraw = [{x: x, y: y}, ...path, {x: target.x, y: target.y},];
-    
-                    drawRoundedPath(graph_ctx, pathToDraw, 5);
-                }else{
-                    graph_ctx.beginPath();
-                    graph_ctx.moveTo(x, y);
-                    const dx = Math.max(x - target.x, 50);
-                    graph_ctx.bezierCurveTo(x - Math.min(dx/2, 50), y, target.x + Math.min(dx/2, 50), target.y, target.x, target.y);
-                    // graph_ctx.lineTo(target.x, target.y);
-                    graph_ctx.stroke();
+                const [tn, tr, tt, _] = findNode(node.inputs[i]);
+                let t; //target
+                if (tt == "get" || tt == "set") {
+                    graph_ctx.font = `${tr.fontSize}px Lexend`;
+                    const width = graph_ctx.measureText(tn.value).width + rules.variableTextPadding * 2;
+
+                    t = {x: tn.x + width, y: tn.y + tr.height/2};
+
+                } else {
+                    t = {x: tn.x + tr.width, y: tn.y + tr.height/2};
                 }
+            
+                graph_ctx.beginPath();
+                graph_ctx.moveTo(x, y);
+                const dx = Math.max(x - t.x, 50);
+                graph_ctx.bezierCurveTo(x - Math.min(dx/2, 50), y, t.x + Math.min(dx/2, 50), t.y, t.x, t.y);
+                graph_ctx.stroke();
             }
 
-            graph_ctx.fillStyle = rules.typeColors[node_rules.inputTypes[i]];
+            graph_ctx.fillStyle = rules.typeColors[nr.inputTypes[i]];
 
             graph_ctx.beginPath();
             graph_ctx.arc(x, y, 4, 0.5 * Math.PI, -0.5 * Math.PI);
@@ -1655,22 +2079,128 @@ function renderGraph(graph, pathRepaint = false){
 
         }
 
-        if (graphMouse.connect == node.id) {
-            const node_rules = rules.nodes[node.type];
-            graph_ctx.strokeStyle = rules.typeColors[node_rules.outputType];
+        if (graphMouse.connect == id) {
+            graph_ctx.strokeStyle = rules.typeColors[nr.outputType];
+
             const x = graphMouse.x - graphCam.x;
             const y = graphMouse.y - graphCam.y;
 
-            const target = {x: node.x + node_rules.width, y: node.y + node_rules.height/2};
+            const t = {x: node.x + nr.width, y: node.y + nr.height/2}; //target
 
             graph_ctx.beginPath();
             graph_ctx.moveTo(x, y);
-            const dx = Math.max(x - target.x, 50);
-            graph_ctx.bezierCurveTo(x - Math.min(dx/2, 50), y, target.x + Math.min(dx/2, 50), target.y, target.x, target.y);
-            // graph_ctx.lineTo(target.x, target.y);
+            const dx = Math.max(x - t.x, 50);
+            graph_ctx.bezierCurveTo(x - Math.min(dx/2, 50), y, t.x + Math.min(dx/2, 50), t.y, t.x, t.y);
             graph_ctx.stroke();
         }
     }
+
+    //getters
+    for(const [id, node] of Object.entries(graph.nodes.get)){
+        //node rules
+        const nr = editor_render_ruleset.nodes.get[node.type];
+
+        //calculate the width
+        graph_ctx.font = `${nr.fontSize}px Lexend`;
+        const width = graph_ctx.measureText(node.value).width + rules.variableTextPadding * 2;
+
+        //draw the default rectangle
+        graph_ctx.fillStyle = "#0f455a";
+        if (node.selected == true) {
+            graph_ctx.fillStyle = "#55b2e0";
+        }
+        graph_ctx.beginPath();
+        graph_ctx.roundRect(node.x, node.y, width, nr.height, 5);
+        graph_ctx.fill();
+        
+        //draw the text
+        graph_ctx.fillStyle = "#ffffff";
+        graph_ctx.textAlign = "center";
+        graph_ctx.textBaseline = "middle";
+        graph_ctx.fillText(node.value, node.x + width/2, node.y + nr.height/2);
+
+        //draw the output circle
+        graph_ctx.fillStyle = rules.typeColors[nr.outputType];
+        graph_ctx.beginPath();
+        graph_ctx.arc(node.x + width, node.y + nr.height / 2, 4, -0.5 * Math.PI, 0.5 * Math.PI);
+        graph_ctx.fill();
+
+        
+
+        if (graphMouse.connect == id) {
+            graph_ctx.strokeStyle = rules.typeColors[nr.outputType];
+
+            const x = graphMouse.x - graphCam.x;
+            const y = graphMouse.y - graphCam.y;
+
+            const t = {x: node.x + width, y: node.y + nr.height/2}; //target
+
+            graph_ctx.beginPath();
+            graph_ctx.moveTo(x, y);
+            const dx = Math.max(x - t.x, 50);
+            graph_ctx.bezierCurveTo(x - Math.min(dx/2, 50), y, t.x + Math.min(dx/2, 50), t.y, t.x, t.y);
+            graph_ctx.stroke();
+        }
+    }
+
+    //setters
+    for (const [id, node] of Object.entries(graph.nodes.set)) {
+        //node rules
+        const nr = editor_render_ruleset.nodes.set[node.type];
+
+        //calculate the width
+        graph_ctx.font = `${nr.fontSize}px Lexend`;
+        const width = graph_ctx.measureText(node.value).width + rules.variableTextPadding * 2;
+
+        //draw the default rectangle
+        graph_ctx.fillStyle = "#0f455a";
+        if (node.selected == true) {
+            graph_ctx.fillStyle = "#55b2e0";
+        }
+        graph_ctx.beginPath();
+        graph_ctx.roundRect(node.x, node.y, width, nr.height, 5);
+        graph_ctx.fill();
+        
+        //draw the text
+        graph_ctx.fillStyle = "#ffffff";
+        graph_ctx.textAlign = "center";
+        graph_ctx.textBaseline = "middle";
+        graph_ctx.fillText(node.value, node.x + width/2, node.y + nr.height/2);
+
+        //draw the input
+        graph_ctx.fillStyle = rules.typeColors[nr.inputType];
+        graph_ctx.beginPath();
+        graph_ctx.arc(node.x, node.y + nr.height / 2, 4, 0.5 * Math.PI, -0.5 * Math.PI);
+        graph_ctx.fill();
+
+        if (node.input != -1) {
+            const x = node.x;
+            const y = node.y + nr.height/2;
+
+            const [tn, tr, tt, __] = findNode(node.input);
+            let width;
+            if (tt != "basic"){
+                graph_ctx.font = `${tr.fontSize}px Lexend`;
+                width = graph_ctx.measureText(tn.value).width + rules.variableTextPadding * 2;
+            } else {
+                width = tr.width;
+            }
+
+            const t = {x: tn.x + width, y: tn.y + tr.height/2}; //target
+            
+            graph_ctx.strokeStyle = rules.typeColors[nr.inputType];
+
+            graph_ctx.beginPath();
+            graph_ctx.moveTo(x, y);
+            const dx = Math.max(x - t.x, 50);
+            graph_ctx.bezierCurveTo(x - Math.min(dx/2, 50), y, t.x + Math.min(dx/2, 50), t.y, t.x, t.y);
+            graph_ctx.stroke();
+        }
+
+    }
+
+
+
     graph_ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
