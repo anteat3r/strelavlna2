@@ -65,5 +65,6 @@ export default {
     "setnumber": setnumber,
 
     "round": round,
-    "roundplaces": roundplaces
+    "roundplaces": roundplaces,
+    "numbercomparison": (i, _, _) => i[0] == i[1],
 }

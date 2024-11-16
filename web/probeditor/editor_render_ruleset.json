@@ -13,7 +13,8 @@
 
     "typeColors": {
         "number": "#3e93a2",
-        "string": "#8b67cc"
+        "string": "#8b67cc",
+        "bool":   "#e10c0c"
     },
 
     "shortcuts": {
@@ -165,6 +166,15 @@
                 "inputs": 2,
                 "inputTypes": ["number", "number"],
                 "outputType": "number"
+            },
+            "numbercomparison": {
+              "width": 30,
+              "height": 30,
+              "text": "=",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["number", "number"],
+              "outputType": "bool"
             }
         },
         "get": {
