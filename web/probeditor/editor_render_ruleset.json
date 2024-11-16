@@ -244,8 +244,8 @@
               "outputType": "number"
             },
             "gcd": {
-              "width": 30,
-              "height": 30,
+              "width": 50,
+              "height": 20,
               "text": "gcd",
               "fontSize": 16,
               "inputs": 2,
