@@ -66,5 +66,5 @@ export default {
 
     "round": round,
     "roundplaces": roundplaces,
-    "numbercomparison": (i, _, _) => i[0] == i[1],
+    "numbercomparison": (i, _, __) => i[0] == i[1],
 }
