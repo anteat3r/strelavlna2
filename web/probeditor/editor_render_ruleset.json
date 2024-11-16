@@ -83,7 +83,11 @@
         "?": "numberif",
 
         "stringif": "stringif",
-        "sif": "stringif"
+        "sif": "stringif",
+        
+        "power": "power",
+        "pwr": "power",
+        "^": "power"
     },
 
     "nodes": {
@@ -199,11 +203,38 @@
             "stringif": {
               "width": 30,
               "height": 40,
-              "text": "s",
+              "text": "?",
               "fontSize": 24,
               "inputs": 3,
               "inputTypes": ["bool", "string", "string"],
               "outputType": "string"
+            },
+            "square": {
+              "width": 30,
+              "height": 30,
+              "text": "²",
+              "fontSize": 24,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "number"
+            },
+            "sqrt": {
+              "width": 30,
+              "height": 30,
+              "text": "√",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["number"],
+              "outputType": "number"
+            },
+            "power": {
+              "width": 30,
+              "height": 30,
+              "text": "^",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["number", "number"],
+              "outputType": "number"
             }
         },
         "get": {

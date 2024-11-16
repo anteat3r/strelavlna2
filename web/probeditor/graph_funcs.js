@@ -23,4 +23,7 @@ export default {
     "numbercomparison": (i, _, __) => i[0] == i[1],
     "numberif": (i, _, __) => i[0] ? i[1] : i[2],
     "stringif": (i, _, __) => i[0] ? i[1] : i[2],
+
+    "power": (i, _, __) => Math.pow(i[0], i[1]),
+    "square": (i, _, __) => i[0] * i[1],
 }
