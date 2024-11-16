@@ -76,7 +76,14 @@
 
         "numbercomparison": "numbercomparison",
         "numcmp": "numbercomparison",
-        "=": "numbercomparison" 
+        "=": "numbercomparison", 
+
+        "numberif": "numberif",
+        "nif": "numberif",
+        "?": "numberif",
+
+        "stringif": "stringif",
+        "sif": "stringif"
     },
 
     "nodes": {
