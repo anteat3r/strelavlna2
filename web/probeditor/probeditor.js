@@ -1537,7 +1537,7 @@ commandInput.addEventListener("keydown", function(e){
                 } else {
                     n.value = v;
                 }
-            } else if (n.outputType == "string"){
+            } else if (nr.outputType == "string"){
                 n.value = commandInput.value;
             }
 
