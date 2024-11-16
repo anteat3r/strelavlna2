@@ -1,7 +1,7 @@
 class Fraction {
   constructor(x, y) {
-    this.x = Math.abs(Math.round(x));
-    this.y = Math.abs(Math.round(y));
+    this.x = Math.round(x);
+    this.y = Math.round(y);
     this.simplify()
   }
   simplify() {
@@ -17,25 +17,25 @@ class Fraction {
     this.x = this.x*f.y + f.x*this.y;
     this.y *= f.y;
     this.simplify();
-    return this;
+    return new Fraction(this.x, this.y);
   }
   sub(f) {
     this.x = this.x*f.y - f.x*this.y;
     this.y *= f.y;
     this.simplify();
-    return this;
+    return new Fraction(this.x, this.y);
   }
   mul(f) {
     this.x *= f.x;
     this.y *= f.y;
     this.simplify();
-    return this;
+    return new Fraction(this.x, this.y);
   }
   div(f) {
     this.x *= f.y;
     this.y *= f.x;
     this.simplify();
-    return this;
+    return new Fraction(this.x, this.y);
   }
 }
 
