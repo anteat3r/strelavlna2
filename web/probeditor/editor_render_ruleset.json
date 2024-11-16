@@ -22,6 +22,10 @@
         "add": "addition",
         "+": "addition",
 
+        "addition3": "addition3",
+        "add3": "addition3",
+        "+3": "addition3",
+
         "subtraction": "subtraction",
         "sub": "subtraction",
         "-": "subtraction",
@@ -29,6 +33,10 @@
         "multiplication": "multiplication",
         "mul": "multiplication",
         "*": "multiplication",
+
+        "multiplication3": "multiplication3",
+        "mul3": "multiplication3",
+        "*3": "multiplication3",
 
         "division": "division",
         "div": "division",
@@ -108,6 +116,15 @@
                 "inputTypes": ["number", "number"],
                 "outputType": "number"
             },
+            "addition3": {
+                "width": 30,
+                "height": 40,
+                "text": "+",
+                "fontSize": 24,
+                "inputs": 3,
+                "inputTypes": ["number", "number", "number"],
+                "outputType": "number"
+            },
             "subtraction": {
                 "width": 30,
                 "height": 30,
@@ -124,6 +141,15 @@
                 "fontSize": 24,
                 "inputs": 2,
                 "inputTypes": ["number", "number"],
+                "outputType": "number"
+            },
+            "multiplication3": {
+                "width": 30,
+                "height": 40,
+                "text": "*",
+                "fontSize": 24,
+                "inputs": 3,
+                "inputTypes": ["number", "number", "number"],
                 "outputType": "number"
             },
             "division": {
