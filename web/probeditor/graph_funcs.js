@@ -13,6 +13,30 @@ class Fraction {
   }
   num() { return this.x }
   den() { return this.y }
+  add(f) {
+    this.x = this.x*f.y + f.x*this.y;
+    this.y *= f.y;
+    this.simplify();
+    return this;
+  }
+  sub(f) {
+    this.x = this.x*f.y - f.x*this.y;
+    this.y *= f.y;
+    this.simplify();
+    return this;
+  }
+  mul(f) {
+    this.x *= f.x;
+    this.y *= f.y;
+    this.simplify();
+    return this;
+  }
+  div(f) {
+    this.x *= f.y;
+    this.y *= f.x;
+    this.simplify();
+    return this;
+  }
 }
 
 export default {
@@ -61,4 +85,8 @@ export default {
     "fraction": (i, _, __) => new Fraction(i[0], i[1]),
     "numerator": (i, _, __) => i[0].num(),
     "denominator": (i, _, __) => i[0].den(),
+    "fractionaddition": (i, _, __) => i[0].add(i[1]),
+    "fractionsubstraction": (i, _, __) => i[0].sub(i[1]),
+    "fractionmultiplication": (i, _, __) => i[0].mul(i[1]),
+    "fractiondivision": (i, _, __) => i[0].div(i[1]),
 }

@@ -109,7 +109,19 @@
         "numerator": "numerator",
         "nmr": "numerator",
         "denominator": "denominator",
-        "dnm": "denominator"
+        "dnm": "denominator",
+        "fractionaddition": "fractionaddition",
+        "fadd": "fractionaddition",
+        "f+": "fractionaddition",
+        "fractionsubstraction": "fractionsubstraction",
+        "fsub": "fractionsubstraction",
+        "f-": "fractionsubstraction",
+        "fractionmultiplication": "fractionmultiplication",
+        "fmul": "fractionmultiplication",
+        "f*": "fractionmultiplication",
+        "fractiondivision": "fractiondivision",
+        "fdiv": "fractiondivision",
+        "f/": "fractiondivision"
     },
 
     "nodes": {
@@ -279,7 +291,7 @@
             "fraction": {
               "width": 30,
               "height": 30,
-              "text": "⅞",
+              "text": "÷",
               "fontSize": 24,
               "inputs": 2,
               "inputTypes": ["number", "number"],
@@ -302,6 +314,42 @@
               "inputs": 1,
               "inputTypes": ["fraction"],
               "outputType": "number"
+            },
+            "fractionaddition": {
+              "width": 30,
+              "height": 30,
+              "text": "+",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["fraction", "fraction"],
+              "outputType": "fraction"
+            },
+            "fractionsubstraction": {
+              "width": 30,
+              "height": 30,
+              "text": "-",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["fraction", "fraction"],
+              "outputType": "fraction"
+            },
+            "fractionmultiplication": {
+              "width": 30,
+              "height": 30,
+              "text": "*",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["fraction", "fraction"],
+              "outputType": "fraction"
+            },
+            "fractiondivision": {
+              "width": 30,
+              "height": 30,
+              "text": "/",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["fraction", "fraction"],
+              "outputType": "fraction"
             },
             "gcd": {
               "width": 50,
