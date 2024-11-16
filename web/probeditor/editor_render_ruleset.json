@@ -199,7 +199,7 @@
             "stringif": {
               "width:": 30,
               "height": 80,
-              "text": "?",
+              "text": "?s",
               "fontSize": 24,
               "inputs": 3,
               "inputTypes": ["bool", "string", "string"],
