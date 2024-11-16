@@ -179,6 +179,24 @@
               "inputs": 2,
               "inputTypes": ["number", "number"],
               "outputType": "bool"
+            },
+            "numberif": {
+              "width:": 30,
+              "height": 50,
+              "text": "?",
+              "fontSize": 24,
+              "inputs": 3,
+              "inputTypes": ["bool", "number", "number"],
+              "outputType": "number"
+            },
+            "stringif": {
+              "width:": 30,
+              "height": 50,
+              "text": "?",
+              "fontSize": 24,
+              "inputs": 3,
+              "inputTypes": ["bool", "string", "string"],
+              "outputType": "string"
             }
         },
         "get": {
