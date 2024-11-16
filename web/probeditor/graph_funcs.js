@@ -28,8 +28,8 @@ export default {
     "square": (i, _, __) => i[0] * i[1],
     "sqrt": (i, _, __) => Math.sqrt(i[0]),
     "gcd": (i, _, __) => {
-      a = Math.abs(Math.round(i[0]));
-      b = Math.abs(Math.round(i[1]));
+      let a = Math.abs(Math.round(i[0]));
+      let b = Math.abs(Math.round(i[1]));
       if (b > a) [a, b] = [b, a];
       while (true) {
         if (b == 0) return a;
