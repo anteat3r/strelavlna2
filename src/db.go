@@ -104,7 +104,7 @@ type ProbS struct {
   Img string
   Solution string
   Workers []string
-  Graph *Graph
+  Graph Graph
 }
 type ProbM = *RWMutexWrap[ProbS]
 
@@ -124,8 +124,9 @@ var (
   Teams = NewRWMutexWrap(make(map[string]TeamM))
   Probs = NewRWMutexWrap(make(map[string]ProbM))
   Checks = NewRWMutexWrap(make(map[string]CheckM))
-  ContInfo = RWMutexWrap[string]{}
+  ContInfo = NewRWMutexWrap("")
   ContName = NewRWMutexWrap("")
+  Consts = NewRWMutexWrap(make(map[string]float64))
 
   DBData = map[string]any{
     "costs": &Costs,
@@ -235,6 +236,7 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
     var probM ProbM
     Probs.RWith(func(probmap map[string]*RWMutexWrap[ProbS]) {
       for id, probv := range probmap {
+        if len(id) > 15 { continue }
         var valid bool
         probv.With(func(probS *ProbS) {
           _, bought := teamS.Bought[probv]
@@ -257,8 +259,33 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
       }
       if prob == "" { oerr = dbErr("no prob found") }
     })
+    if oerr != nil { return }
 
-    teamS.Bought[probM] = struct{}{}
+    bprob := probM
+    probM.RWith(func(v ProbS) {
+      if v.Graph == nil { return }
+      text, sol, err := v.Graph.Generate(v.Text, v.Solution)
+      if err != nil { oerr = err; return }
+      nworkers := make([]string, len(v.Workers))
+      copy(nworkers, v.Workers)
+      nid := v.Id + ":" + GetRandomId()
+      nbprob := NewRWMutexWrap(ProbS{
+        Id: nid,
+        Name: v.Name,
+        Diff: v.Diff,
+        Text: text,
+        Img: v.Img,
+        Solution: sol,
+        Workers: nworkers,
+        Graph: nil,
+      })
+      bprob = &nbprob
+      Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
+        (*w)[nid] = bprob
+      })
+    })
+    if oerr != nil { return }
+    teamS.Bought[bprob] = struct{}{}
 
     teamS.Money -= diffcost
     money = teamS.Money
@@ -936,6 +963,7 @@ func DBLoadFromPB(ac string) error {
   Checks = NewRWMutexWrap(make(map[string]CheckM))
   ContInfo = NewRWMutexWrap("")
   ContName = NewRWMutexWrap("")
+  Consts = NewRWMutexWrap(make(map[string]float64))
   teams, err := App.Dao().FindRecordsByFilter(
     "teams",
     `contest = "` + ac + `"`,
@@ -974,29 +1002,55 @@ func DBLoadFromPB(ac string) error {
       (*v)[tm.Id] = &newteam
     }
   })
-  probs := make([]map[string]any, 0)
-  App.Dao().DB().
+  consts := make([]map[string]any, 0)
+  err = App.Dao().DB().
     NewQuery(`select count(*) from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
     Bind(dbx.Params{"contest": ac}).
-    Execute()
+    All(&consts)
+  if err != nil { return err }
+  Consts.With(func(v *map[string]float64) {
+    for _, cnst := range consts {
+      (*v)[cnst["id"].(string)] = cnst["value"].(float64)
+    }
+  })
+  probs := make([]map[string]any, 0)
+  err = App.Dao().DB().
+    NewQuery(`select count(*) from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
+    Bind(dbx.Params{"contest": ac}).
+    All(&probs)
   if err != nil { return err }
   Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
     for _, pr := range probs {
       graphs := pr["graph"].(string)
+      text := pr["text"].(string)
+      sol := pr["solution"].(string)
+      inf := pr["infinite"].(bool)
       var graph Graph
       if graphs != "" {
-        graph, err = ParseGraph(graphs)
-        if err != nil { return }
+        if inf {
+          graph, err = ParseGraph(graphs)
+          if err != nil { return }
+          textg, solg, err := graph.Generate(text, sol)
+          if err != nil { return }
+          log.Info(textg, solg)
+        } else {
+          graph, err = ParseGraph(graphs)
+          if err != nil { return }
+          text, sol, err = graph.Generate(text, sol)
+          if err != nil { return }
+          graph = nil
+          log.Info(text, sol)
+        }
       }
       newprob := NewRWMutexWrap(ProbS{
         Id: pr["id"].(string),
         Name: pr["name"].(string),
         Diff: pr["diff"].(string),
-        Text: pr["text"].(string),
+        Text: text,
         Img: pr["img"].(string),
-        Solution: pr["solution"].(string),
+        Solution: sol,
         Workers: make([]string, 0),
-        Graph: &graph,
+        Graph: graph,
       })
       (*v)[pr["id"].(string)] = &newprob
     }
