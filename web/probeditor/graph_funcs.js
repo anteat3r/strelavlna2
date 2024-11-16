@@ -60,7 +60,7 @@ export default {
       }
     },
 
-    "fraction": (i, _, __) => Fraction(i[0], i[1]),
+    "fraction": (i, _, __) => new Fraction(i[0], i[1]),
     "numerator": (i, _, __) => i.num(),
     "denominator": (i, _, __) => i.den(),
 }
