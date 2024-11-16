@@ -147,7 +147,10 @@
         "tan": "tan",
         "asin": "asin",
         "acos": "acos",
-        "atan": "atan"
+        "atan": "atan",
+
+        "fractiontonumber": "fractiontonumber",
+        "ftn": "fractiontonumber"
 
     },
 
@@ -529,6 +532,15 @@
               "fontSize": 15,
               "inputs": 1,
               "inputTypes": ["number"],
+              "outputType": "number"
+            },
+            "fractiontonumber": {
+              "width": 80,
+              "height": 30,
+              "text": "÷ -> n",
+              "fontSize": 16,
+              "inputs": 1,
+              "inputTypes": ["fraction"],
               "outputType": "number"
             }
         },

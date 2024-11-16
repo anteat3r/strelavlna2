@@ -115,4 +115,5 @@ export default {
     "asin": (i, _, __) => Math.asin(i[0]),
     "acos": (i, _, __) => Math.acos(i[0]),
     "atan": (i, _, __) => Math.atan(i[0]),
+    "fractiontonumber": (i, _, __) => i[0].num() / i[0].den(),
 }
