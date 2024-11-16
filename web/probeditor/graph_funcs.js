@@ -1,7 +1,7 @@
 class Fraction {
   constructor(x, y) {
-    this.x = x;
-    this.y = y;
+    this.x = Math.abs(Math.round(x));
+    this.y = Math.abs(Math.round(y));
     this.simplify()
   }
   simplify() {
@@ -89,4 +89,6 @@ export default {
     "fractionsubstraction": (i, _, __) => i[0].sub(i[1]),
     "fractionmultiplication": (i, _, __) => i[0].mul(i[1]),
     "fractiondivision": (i, _, __) => i[0].div(i[1]),
+    "overone": (i, _, __) => new Fraction(i[0], 1),
+    "underone": (i, _, __) => new Fraction(1, i[0]),
 }

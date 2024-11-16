@@ -121,7 +121,9 @@
         "f*": "fractionmultiplication",
         "fractiondivision": "fractiondivision",
         "fdiv": "fractiondivision",
-        "f/": "fractiondivision"
+        "f/": "fractiondivision",
+        "overone": "overone",
+        "underone": "underone"
     },
 
     "nodes": {
@@ -314,6 +316,24 @@
               "inputs": 1,
               "inputTypes": ["fraction"],
               "outputType": "number"
+            },
+            "overone": {
+              "width": 40,
+              "height": 20,
+              "text": "/1",
+              "fontSize": 16,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "fraction"
+            },
+            "underone": {
+              "width": 40,
+              "height": 20,
+              "text": "1/",
+              "fontSize": 16,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "fraction"
             },
             "fractionaddition": {
               "width": 30,
