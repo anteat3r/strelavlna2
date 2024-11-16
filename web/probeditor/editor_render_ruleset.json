@@ -193,7 +193,7 @@
             },
             "numberif": {
               "width": 30,
-              "height": 35,
+              "height": 40,
               "text": "?",
               "fontSize": 24,
               "inputs": 3,
