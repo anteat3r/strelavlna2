@@ -189,7 +189,7 @@
             },
             "numberif": {
               "width": 30,
-              "height": 50,
+              "height": 35,
               "text": "?",
               "fontSize": 24,
               "inputs": 3,
@@ -198,7 +198,7 @@
             },
             "stringif": {
               "width": 30,
-              "height": 50,
+              "height": 35,
               "text": "s",
               "fontSize": 24,
               "inputs": 3,
