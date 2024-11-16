@@ -245,7 +245,7 @@
             },
             "gcd": {
               "width": 50,
-              "height": 20,
+              "height": 30,
               "text": "gcd",
               "fontSize": 16,
               "inputs": 2,
