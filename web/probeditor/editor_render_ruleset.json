@@ -14,8 +14,8 @@
     "typeColors": {
         "number": "#3e93a2",
         "string": "#8b67cc",
-        "bool":   "#ff7c4c",
-        "fraction": "#4dce2d"
+        "bool":   "#ce4010",
+        "fraction": "#41ad26"
     },
 
     "shortcuts": {
