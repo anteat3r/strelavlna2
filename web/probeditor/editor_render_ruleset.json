@@ -92,7 +92,9 @@
         "square": "square",
         "sq": "square",
 
-        "sqrt": "sqrt"
+        "sqrt": "sqrt",
+
+        "gcd": "gcd"
     },
 
     "nodes": {
@@ -237,6 +239,15 @@
               "height": 30,
               "text": "^",
               "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["number", "number"],
+              "outputType": "number"
+            },
+            "gcd": {
+              "width": 30,
+              "height": 30,
+              "text": "gcd",
+              "fontSize": 16,
               "inputs": 2,
               "inputTypes": ["number", "number"],
               "outputType": "number"
