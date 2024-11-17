@@ -1005,7 +1005,10 @@ func DBLoadFromPB(ac string) error {
       (*v)[tm.Id] = &newteam
     }
   })
-  consts := make([]map[string]any, 0)
+  consts := make([]struct{
+    Id string `db:"id"`
+    Value float64 `db:"value"`
+  }, 0)
   err = App.Dao().DB().
     NewQuery(`select count(*) from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
     Bind(dbx.Params{"contest": ac}).
@@ -1013,10 +1016,20 @@ func DBLoadFromPB(ac string) error {
   if err != nil { return err }
   Consts.With(func(v *map[string]float64) {
     for _, cnst := range consts {
-      (*v)[cnst["id"].(string)] = cnst["value"].(float64)
+      (*v)[cnst.Id] = cnst.Value
     }
   })
-  probs := make([]map[string]any, 0)
+  probs := make([]struct{
+    Id string `db:"id"`
+    Name string `db:"name"`
+    Diff string `db:"diff"`
+    Img string `db:"img"`
+    Author string `db:"author"`
+    Text string `db:"text"`
+    Graph string `db:"graph"`
+    Solution string `db:"solution"`
+    Infinite bool `db:"infinite"`
+  }, 0)
   err = App.Dao().DB().
     NewQuery(`select count(*) from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
     Bind(dbx.Params{"contest": ac}).
@@ -1024,10 +1037,10 @@ func DBLoadFromPB(ac string) error {
   if err != nil { return err }
   Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
     for _, pr := range probs {
-      graphs := pr["graph"].(string)
-      text := pr["text"].(string)
-      sol := pr["solution"].(string)
-      inf := pr["infinite"].(bool)
+      graphs := pr.Graph
+      text := pr.Text
+      sol := pr.Solution
+      inf := pr.Infinite
       var graph Graph
       if graphs != "" {
         if inf {
@@ -1046,17 +1059,17 @@ func DBLoadFromPB(ac string) error {
         }
       }
       newprob := NewRWMutexWrap(ProbS{
-        Id: pr["id"].(string),
-        Name: pr["name"].(string),
-        Diff: pr["diff"].(string),
+        Id: pr.Id,
+        Name: pr.Name,
+        Diff: pr.Diff,
         Text: text,
-        Img: pr["img"].(string),
+        Img: pr.Img,
         Solution: sol,
         Workers: make([]string, 0),
         Graph: graph,
-        Author: pr["author"].(string),
+        Author: pr.Author,
       })
-      (*v)[pr["id"].(string)] = &newprob
+      (*v)[pr.Author] = &newprob
     }
   })
   if err != nil { return err }
