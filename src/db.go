@@ -99,9 +99,11 @@ type moneyHistRec struct {
   Time time.Time `json:"time"`
 }
 type TeamStats struct {
-  NumSold int `json:"numsold"`
-  NumBought int `json:"numbought"`
-  NumSolved int `json:"numsolved"`
+  NumSold map[string]int `json:"numsold"`
+  NumBought map[string]int `json:"numbought"`
+  NumSolved map[string]int `json:"numsolved"`
+  NumIncc map[string]int `json:"numincc"`
+  MoneyMade map[string]int `json:"moneymade"`
   MoneyHist []moneyHistRec `json:"moneyhist"`
 }
 
@@ -234,7 +236,7 @@ func DBSell(team TeamM, probid string) (money int, oerr error) {
       Time: time.Now(),
       Money: money,
     })
-    teamS.Stats.NumSold ++
+    teamS.Stats.NumSold[diff] ++
 
   })
 
@@ -312,7 +314,7 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
       Time: time.Now(),
       Money: money,
     })
-    teamS.Stats.NumBought ++
+    teamS.Stats.NumBought[diff] ++
   })
   return
 }
@@ -657,9 +659,10 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
   check.With(func(checkS *CheckS) {
     team := checkS.Team
     prob := checkS.Prob
-    var cost int
+    var diff string
     var probid string
-    prob.RWith(func(v ProbS) { cost, ok = GetCost("+" + v.Diff); probid = v.Id })
+    prob.RWith(func(v ProbS) { diff = v.Diff; probid = v.Id })
+    cost, ok := GetCost(diff)
     if !ok { oerr = dbErr("grade", "invalid cost") }
 
     team.With(func(v *TeamS) {
@@ -682,7 +685,8 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
           Time: time.Now(),
           Money: money,
         })
-        v.Stats.NumSolved ++
+        v.Stats.NumSolved[diff] ++
+        v.Stats.MoneyMade[diff] += cost
         delete(v.SolChecksCache, probid)
         delete(v.ChatChecksCache, probid)
         if len(probid) > 15 {
@@ -692,6 +696,7 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
         }
       } else {
         money = v.Money
+        v.Stats.NumIncc[diff] ++
       }
 
     })
@@ -1034,9 +1039,11 @@ func DBLoadFromPB(ac string) error {
           tm.GetString("player5"),
         },
         Stats: TeamStats{
-          NumBought: 0,
-          NumSold: 0,
-          NumSolved: 0,
+          NumBought: map[string]int{"A": 0, "B": 0, "C": 0},
+          NumSold: map[string]int{"A": 0, "B": 0, "C": 0},
+          NumSolved: map[string]int{"A": 0, "B": 0, "C": 0},
+          NumIncc: map[string]int{"A": 0, "B": 0, "C": 0},
+          MoneyMade: map[string]int{"A": 0, "B": 0, "C": 0},
           MoneyHist: make([]moneyHistRec, 0),
         },
       })
