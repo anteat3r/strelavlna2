@@ -1599,8 +1599,7 @@ commandInput.addEventListener("keydown", function(e){
 });
 
 commandInput.addEventListener("focus", function(){
-    if (command == "editconstant") return;
-
+    if (command != "") return;
     command = "add";
 });
 
