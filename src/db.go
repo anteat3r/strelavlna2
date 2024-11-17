@@ -1015,9 +1015,7 @@ func DBLoadFromPB(ac string) error {
     Value float64 `db:"value"`
   }, 0)
   err = App.Dao().DB().
-    NewQuery(`select count(*) from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
-    Bind(dbx.Params{"contest": ac}).
-    All(&consts)
+    NewQuery(`select id, value from consts`).All(&consts)
   if err != nil { return err }
   Consts.With(func(v *map[string]float64) {
     for _, cnst := range consts {
@@ -1036,7 +1034,7 @@ func DBLoadFromPB(ac string) error {
     Infinite bool `db:"infinite"`
   }, 0)
   err = App.Dao().DB().
-    NewQuery(`select count(*) from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
+    NewQuery(`select * from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
     Bind(dbx.Params{"contest": ac}).
     All(&probs)
   if err != nil { return err }
