@@ -287,7 +287,7 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     adminid := c.PathParam("admin")
     if adminid == "" { return nErr("invalid admin path param") }
 
-    adminrec, err := dao.FindAdminById(adminid)
+    adminrec, err := dao.FindRecordById("correctors", adminid)
     if err != nil { return err }
 
     var ok bool
@@ -305,7 +305,7 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     fmt.Printf("%s >>- %s + >->\n", formTime(), adminrec.GetId())
     JSONlog(adminrec.GetId(), true, true, 0, ":connect")
-    go AdminWsLoop(conn, adminrec.Email, perchan, adminid)
+    go AdminWsLoop(conn, adminrec.Username(), perchan, adminid)
 
     return nil
   }
