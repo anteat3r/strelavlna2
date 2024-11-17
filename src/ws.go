@@ -198,6 +198,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     var team TeamM
     Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+      log.Info(v)
       team, ok = v[teamid]
     })
     if !ok {
