@@ -1053,6 +1053,7 @@ func DBLoadFromPB(ac string) error {
   if err != nil { return err }
   Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
     for _, pr := range probs {
+      if pr.Author == "" { continue }
       graphs := pr.Graph
       text := pr.Text
       sol := pr.Solution
