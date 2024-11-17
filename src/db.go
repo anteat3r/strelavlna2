@@ -1135,7 +1135,7 @@ func DBGenProbWorkers(probs map[string]ProbM) error {
       queue := make([]int, len(cnts))
       for i := range queue { queue[i] = i }
       sort.Slice(queue, func(i, j int) bool {
-        return cnts[i] < cnts[j]
+        return cnts[queue[i]] < cnts[queue[i]]
       })
       for _, i := range queue {
         if slices.Contains(ap[i], pr) { continue }
@@ -1146,6 +1146,7 @@ func DBGenProbWorkers(probs map[string]ProbM) error {
         break
       }
     }
+    sectors = append(sectors, sec)
   }
   sectors = sectors[:len(sectors)-1]
   queues := make([][]string, 0, len(probsnm))
