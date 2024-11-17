@@ -282,7 +282,9 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
     probM.RWith(func(v ProbS) {
       nid = v.Id
       if v.Graph == nil { return }
-      text, sol, err := v.Graph.Generate(v.Text, v.Solution)
+      var sol string
+      var err error
+      text, sol, err = v.Graph.Generate(v.Text, v.Solution)
       if err != nil { oerr = err; return }
       nworkers := make([]string, len(v.Workers))
       copy(nworkers, v.Workers)
