@@ -2315,6 +2315,7 @@ fetch('https://strela-vlna.gchd.cz/probeditor/editor_render_ruleset.json') //htt
   .then(response => response.json())
   .then(data => {
     editor_render_ruleset = data;
+    console.log("ruleset loaded");
 })
   .catch(error => console.error('Error fetching JSON:', error));
 updateProbList();
