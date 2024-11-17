@@ -206,14 +206,14 @@ func ParseGraph(graphs string) (Graph, error) {
       nnd = FunctionNode{
         wtypes: []DataType{Frac},
         fn: func(i []any) any {
-          return i[0].(Fraction).x
+          return float64(i[0].(Fraction).x)
         },
       }
     case "denominator":
       nnd = FunctionNode{
         wtypes: []DataType{Frac},
         fn: func(i []any) any {
-          return i[0].(Fraction).y
+          return float64(i[0].(Fraction).y)
         },
       }
     case "fractionaddition":
@@ -224,12 +224,35 @@ func ParseGraph(graphs string) (Graph, error) {
           return a.Add(i[1].(Fraction))
         },
       }
+    case "fractionmultiplication":
+      nnd = FunctionNode{
+        wtypes: []DataType{Frac, Frac},
+        fn: func(i []any) any {
+          a := i[0].(Fraction)
+          return a.Mul(i[1].(Fraction))
+        },
+      }
+    case "fractionsubstraction":
+      nnd = FunctionNode{
+        wtypes: []DataType{Frac, Frac},
+        fn: func(i []any) any {
+          a := i[0].(Fraction)
+          return a.Sub(i[1].(Fraction))
+        },
+      }
     case "fractiondivision":
       nnd = FunctionNode{
         wtypes: []DataType{Frac, Frac},
         fn: func(i []any) any {
           a := i[0].(Fraction)
           return a.Div(i[1].(Fraction))
+        },
+      }
+    case "overone":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          return NewFraction(i[0].(float64), 1)
         },
       }
     case "underone":
@@ -313,6 +336,7 @@ func (g Graph) Generate(text, sol string) (string, string, error) {
         ndres, err := redond.Compute(g, cache)
         if err != nil { return "", "", err }
         if ndres.(bool) {
+          fmt.Println("redoing")
           continue redol
         }
       }
@@ -330,6 +354,7 @@ func (g Graph) Generate(text, sol string) (string, string, error) {
           fmt.Printf("%v %T %v %v\n", ndres, ndres, nd, id)
           return "", "", InvalidGraphErr{"invalid ret type"} 
         }
+        fmt.Println(setnd.name)
         ntext = strings.ReplaceAll(ntext, "`" + setnd.name + "`", ndresstr)
         nsol = strings.ReplaceAll(nsol, "`" + setnd.name + "`", ndresstr)
         continue
