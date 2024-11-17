@@ -467,7 +467,7 @@ func main() {
 
     if src.ActiveContest.GetPrimitiveVal().Id != "" {
       err = src.DBLoadFromDump()
-      if err != nil { return err }
+      if err != nil { log.Error(err) }
     }
 
     return nil
