@@ -1058,11 +1058,12 @@ func DBLoadFromPB(ac string) error {
       sol := pr.Solution
       inf := pr.Infinite
       var graph Graph
-      if graphs != "" {
+      if graphs != `{"nodes":{"basic":{},"get":{},"set":{}}}` {
         if inf {
           graph, err = ParseGraph(graphs)
           if err != nil { return }
-          textg, solg, err := graph.Generate(text, sol)
+          var textg, solg string
+          textg, solg, err = graph.Generate(text, sol)
           if err != nil { return }
           log.Info(textg, solg)
         } else {
