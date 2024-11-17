@@ -207,6 +207,7 @@ func SetupContEndp() echo.HandlerFunc {
     if c.QueryParam("id") == "" { return nErr("empty id") }
 
     err := DBLoadFromPB(c.QueryParam("id"))
+    log.Info("loaded")
     if err != nil { return err }
     Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
       err = DBGenProbWorkers(*v)
