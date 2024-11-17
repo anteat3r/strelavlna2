@@ -1086,7 +1086,7 @@ func DBLoadFromPB(ac string) error {
         Graph: graph,
         Author: pr.Author,
       })
-      (*v)[pr.Author] = &newprob
+      (*v)[pr.Id] = &newprob
     }
     log.Info(*v)
   })
