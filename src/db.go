@@ -403,11 +403,6 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
     
     delete(teamS.Bought, prob)
     teamS.Pending[prob] = probres
-    if len(prob) > 15 {
-      Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
-        delete(*v, prob)
-      })
-    }
   })
   return
 }
@@ -683,6 +678,11 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
       }
 
       delete(v.SolChecksCache, probid)
+      if len(probid) > 15 {
+        Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
+          delete(*v, probid)
+        })
+      }
     })
     if oerr != nil { return }
 
@@ -751,7 +751,6 @@ func DBAdminView(teamid string, probid string, sprob bool, schat bool) (text str
 
   var prob ProbM
   var ok bool
-  if len(probid) > 15 { probid = probid[:15] }
   Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) { prob, ok = v[probid] })
   if !ok { oerr = dbErr("view", "invalid prob id"); return }
 
