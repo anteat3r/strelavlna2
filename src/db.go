@@ -280,6 +280,7 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
     bprob := probM
     var nid string
     probM.RWith(func(v ProbS) {
+      nid = v.Id
       if v.Graph == nil { return }
       text, sol, err := v.Graph.Generate(v.Text, v.Solution)
       if err != nil { oerr = err; return }
