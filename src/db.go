@@ -995,7 +995,7 @@ func DBLoadFromPB(ac string) error {
       newteam := NewRWMutexWrap(TeamS{
         Id: tm.Id,
         Name: tm.GetString("name"),
-        Money: 0,
+        Money: tm.GetInt("score"),
         Bought: make(map[string]ProbM),
         Pending: make(map[string]ProbM),
         Solved: make(map[string]ProbM),
