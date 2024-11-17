@@ -304,6 +304,7 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
         (*w)[nid] = bprob
       })
     })
+    prob = nid
     if oerr != nil { return }
     teamS.Bought[nid] = bprob
 
