@@ -437,6 +437,19 @@ func main() {
       apis.RequireAdminAuth(),
     )
 
+    e.Router.GET(
+      "/api/test/probgen",
+      func(c echo.Context) error {
+        prob, err := app.Dao().FindRecordById("probs", c.QueryParam("id"))
+        if err != nil { return err }
+        g, err := src.ParseGraph(prob.GetString("graph"))
+        if err != nil { return err }
+        text, sol, err := g.Generate(prob.GetString("text"), prob.GetString("solution"))
+        if err != nil { return err }
+        return c.String(200, text + "\n\n\n\n" + sol)
+      },
+    )
+
     err = src.SetupInitLoadData(app.Dao())
     if err != nil { return err }
 

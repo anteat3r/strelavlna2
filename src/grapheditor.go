@@ -26,12 +26,12 @@ func ParseGraph(graphs string) (Graph, error) {
         Inputs []string `json:"inputs"`
         Type string `json:"type"`
       } `json:"basic"`
-      Get struct{
+      Get map[string]struct{
         Selected bool `json:"selected"`
         Type string `json:"type"`
-        Value string `json:"value"`
+        Value any `json:"value"`
       } `json:"get"`
-      Set struct{
+      Set map[string]struct{
         Selected bool `json:"selected"`
         Type string `json:"type"`
         Value string `json:"value"`
@@ -115,15 +115,6 @@ func ParseGraph(graphs string) (Graph, error) {
         wtypes: []DataType{Number, Number},
         fn: func(i []any) any {
           return rand.Float64()*(i[0].(float64)-i[1].(float64))+i[0].(float64)
-        },
-      }
-    case "constant":
-      nnd = FunctionNode{
-        wtypes: []DataType{String},
-        fn: func(i []any) any {
-          var res float64
-          Consts.RWith(func(v map[string]float64) { res = v[i[0].(string)] })
-          return res
         },
       }
     case "round":
@@ -254,33 +245,90 @@ func ParseGraph(graphs string) (Graph, error) {
     nnd.inputs = nd.Inputs
     graphres[id] = nnd
   }
+  for id, nd := range graphinp.Nodes.Get {
+    nnd := FunctionNode{}
+    switch nd.Type {
+    case "number", "string":
+      nnd = FunctionNode{
+        wtypes: []DataType{},
+        fn: func(i []any) any {
+          return nd.Value
+        },
+      }
+    case "constant":
+      if _, ok := nd.Value.(string); !ok {
+        return nil, InvalidGraphErr{"invalid constant value"}
+      }
+      nnd = FunctionNode{
+        wtypes: []DataType{},
+        fn: func(i []any) any {
+          var res float64
+          Consts.RWith(func(v map[string]float64) { res = v[nd.Value.(string)] })
+          return res
+        },
+      }
+    }
+    nnd.id = id
+    nnd.inputs = []GraphId{}
+    graphres[id] = nnd
+  }
+  for id, nd := range graphinp.Nodes.Set {
+    if len(nd.Value) < 6 {
+      return nil, InvalidGraphErr{"invalid setnode value"}
+    }
+    var nnd GraphNode
+    switch nd.Type {
+    case "setstring", "setnumber":
+      nnd = SetNode{
+        id: id,
+        inp: nd.Input,
+        name: nd.Value[5:len(nd.Value)-2],
+      }
+    case "redo":
+      nnd = RedoNode{
+        id: id,
+        inp: nd.Input,
+      }
+    }
+    graphres[id] = nnd
+  }
   return graphres, nil
 }
 
 func (g Graph) Generate(text, sol string) (string, string, error) {
-  cache := make(PathSet)
-  for _, nd := range g {
-    strnd, ok := nd.(SetNode[string])
-    if ok {
-      ndres, err := strnd.Compute(g, cache)
-      if err != nil { return "", "", err }
-      ndresstr, ok := ndres.(string)
-      if !ok { return "", "", InvalidGraphErr{"invalid ret type"} }
-      text = strings.ReplaceAll(text, "`" + strnd.name + "`", ndresstr)
-      sol = strings.ReplaceAll(sol, "`" + strnd.name + "`", ndresstr)
-      continue
+  redos := 10
+  redol: for redos > 0 {
+    redos--
+    cache := make(PathSet)
+    ntext := text
+    nsol := sol
+    for _, nd := range g {
+      redond, ok := nd.(RedoNode)
+      if ok {
+        ndres, err := redond.Compute(g, cache)
+        if err != nil { return "", "", err }
+        if ndres.(bool) {
+          continue redol
+        }
+      }
+      setnd, ok := nd.(SetNode)
+      if ok {
+        ndres, err := nd.Compute(g, cache)
+        if err != nil { return "", "", err }
+        var ndresstr string
+        switch ndt := ndres.(type) {
+        case string: ndresstr = ndt
+        case float64: ndresstr = strconv.FormatFloat(ndt, 'g', -1, 64)
+        case bool: ndresstr = strconv.FormatBool(ndt)
+        case Fraction: ndresstr = strconv.Itoa(ndt.x) + "/" + strconv.Itoa(ndt.y)
+        default: return "", "", InvalidGraphErr{"invalid ret type"} 
+        }
+        ntext = strings.ReplaceAll(ntext, "`" + setnd.name + "`", ndresstr)
+        nsol = strings.ReplaceAll(nsol, "`" + setnd.name + "`", ndresstr)
+        continue
+      }
     }
-    fltnd, ok := nd.(SetNode[float64])
-    if ok {
-      ndres, err := fltnd.Compute(g, cache)
-      if err != nil { return "", "", err }
-      ndresflt, ok := ndres.(float64)
-      if !ok { return "", "", InvalidGraphErr{"invalid ret type"} }
-      ndresstr := strconv.FormatFloat(ndresflt, 'g', -1, 64)
-      text = strings.ReplaceAll(text, "`" + strnd.name + "`", ndresstr)
-      sol = strings.ReplaceAll(sol, "`" + strnd.name + "`", ndresstr)
-      continue
-    }
+    return ntext, nsol, nil
   }
   return text, sol, nil
 }
@@ -374,23 +422,44 @@ func (v FunctionNode) Compute(g Graph, cache PathSet) (any, error) {
 //   return v.val, nil
 // }
 
-type SetNode[T float64 | string] struct{
+type SetNode struct{
   id GraphId
   name string
   inp GraphId
 }
-var _ GraphNode = (*SetNode[float64])(nil)
-func (v SetNode[T]) Compute(g Graph, cache PathSet) (any, error) {
+var _ GraphNode = (*SetNode)(nil)
+func (v SetNode) Compute(g Graph, cache PathSet) (any, error) {
   cval, ok := cache[v.id]
   if ok {
     if cval == nil { return nil, InvalidGraphErr{"cyclic ref"} }
     return cval, nil
   }
+  cache[v.id] = nil
   nd, ok := g[v.inp]
   if !ok { return nil, InvalidGraphErr{"invalid ref"} }
   comp, err := nd.Compute(g, cache)
   if err != nil { return nil, err }
-  compt, ok := comp.(T)
+  cache[v.id] = comp
+  return comp, nil
+}
+
+type RedoNode struct {
+  id GraphId
+  inp GraphId
+}
+var _ GraphNode = (*RedoNode)(nil)
+func (v RedoNode) Compute(g Graph, cache PathSet) (any, error) {
+  cval, ok := cache[v.id]
+  if ok {
+    if cval == nil { return nil, InvalidGraphErr{"cyclic ref"} }
+    return cval, nil
+  }
+  cache[v.id] = nil
+  nd, ok := g[v.inp]
+  if !ok { return nil, InvalidGraphErr{"invalid ref"} }
+  comp, err := nd.Compute(g, cache)
+  if err != nil { return nil, err }
+  compt, ok := comp.(bool)
   if !ok { return nil, InvalidGraphErr{"invalid type"} }
   cache[v.id] = compt
   return compt, nil
