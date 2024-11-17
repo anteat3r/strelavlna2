@@ -386,6 +386,7 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
         _, ok = (*checksmap)[check]
         if ok { oerr = dbErr("check id collision"); return }
         ncheck := NewRWMutexWrap(CheckS{
+          Id: check,
           Prob: probres,
           ProbId: prob,
           Team: team,
