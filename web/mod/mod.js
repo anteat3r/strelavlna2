@@ -53,6 +53,9 @@ updateChat();
 
 document.getElementById("chat-dismiss-button").addEventListener("click", function(){
     if(focused_check == "") return;
+    const focused_check_obj = checks.find(check => check.id == focused_check);
+    const chat_obj = cached_chats.find(chat => chat.teamid == focused_check_obj.teamid && chat.probid == focused_check_obj.probid);
+    if(chat_obj && chat_obj.banned) return;
     dismiss(focused_check);
 })
 
@@ -125,6 +128,7 @@ accept_button.addEventListener("click", function(){
     if(focused_check_obj){
         grade(focused_check_obj.id, focused_check_obj.teamid, focused_check_obj.probid, true);
     }
+    focusNextCheck();
 });
 
 reject_button.addEventListener("click", function(){
@@ -132,6 +136,7 @@ reject_button.addEventListener("click", function(){
     if(focused_check_obj){
         grade(focused_check_obj.id, focused_check_obj.teamid, focused_check_obj.probid, false);
     }
+    focusNextCheck();
 });
 
 document.getElementById("help-center-mute-button").addEventListener("click", function(){
@@ -182,6 +187,30 @@ function updateModHome(){
         textfield_wrapper.classList.remove("hidden");
     }
 }
+
+function focusNextCheck(){
+    if( myRole != "worker" ) return;
+    console.log("focusNextCheck");
+
+    const nfc = checks.find(check => check.assignid == myId && check.id != focused_check);
+
+    if(nfc){
+        console.log(document.getElementById(nfc.id));
+        document.getElementById(nfc.id).click();
+    }
+}
+
+document.addEventListener("keydown", function(e){
+    if(e.altKey && e.key == "a"){
+        accept_button.click();
+    }
+});
+
+document.addEventListener("keydown", function(e){
+    if(e.altKey && e.key == "r"){
+        reject_button.click();
+    }
+});
 
 
 
@@ -777,6 +806,7 @@ function connectWS() {
 
   socket.addEventListener("open", (event) => {
     load();
+    setRole("worker");
   });
 
   socket.addEventListener("message", (event) => {
@@ -970,7 +1000,7 @@ function unwork() {
 
 function reassigned(items){
     items = JSON.parse(items);
-    for(item of items){
+    for(let item of items){
         const check_obj = checks.find(check => check.id == item.id);
         if(check_obj != null){
             if(check_obj.id == focused_check && item.assign != myId && myRole == "worker"){
