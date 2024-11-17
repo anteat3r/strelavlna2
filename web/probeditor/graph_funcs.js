@@ -42,7 +42,7 @@ class Fraction {
 export default {
     "addition": (i, _, __) => i[0] + i[1],
     "addition3": (i, _, __) => i[0] + i[1] + i[2],
-    "subtraction": (i, _, __) => i[0] - i[1],
+    "substraction": (i, _, __) => i[0] - i[1],
     "multiplication": (i, _, __) => i[0] * i[1],
     "multiplication3": (i, _, __) => i[0] * i[1] * i[2],
     "division": (i, _, __) => i[0] / i[1],

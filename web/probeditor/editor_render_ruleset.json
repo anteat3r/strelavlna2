@@ -27,9 +27,9 @@
         "add3": "addition3",
         "+3": "addition3",
 
-        "subtraction": "subtraction",
-        "sub": "subtraction",
-        "-": "subtraction",
+        "substraction": "substraction",
+        "sub": "substraction",
+        "-": "substraction",
 
         "multiplication": "multiplication",
         "mul": "multiplication",
@@ -185,7 +185,7 @@
                 "inputTypes": ["number", "number", "number"],
                 "outputType": "number"
             },
-            "subtraction": {
+            "substraction": {
                 "width": 30,
                 "height": 30,
                 "text": "-",
