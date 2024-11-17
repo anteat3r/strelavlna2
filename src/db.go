@@ -600,6 +600,7 @@ func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
       res.Checks = make([]checkRes, 0, len(t.ChatChecksCache) + len(t.SolChecksCache))
       for p, c := range t.ChatChecksCache {
         sol := ""
+        if _, ok := checksmap[c]; !ok { continue }
         checksmap[c].RWith(func(v CheckS) { sol = v.Sol })
         res.Checks = append(res.Checks, checkRes{
           Prob: p,
@@ -608,6 +609,7 @@ func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
       }
       for p, c := range t.SolChecksCache {
         sol := ""
+        if _, ok := checksmap[c]; !ok { continue }
         checksmap[c].RWith(func(v CheckS) { sol = v.Sol })
         res.Checks = append(res.Checks, checkRes{
           Prob: p,
