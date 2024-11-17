@@ -2,6 +2,7 @@ package src
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"math/rand/v2"
 	"strconv"
@@ -321,7 +322,9 @@ func (g Graph) Generate(text, sol string) (string, string, error) {
         case float64: ndresstr = strconv.FormatFloat(ndt, 'g', -1, 64)
         case bool: ndresstr = strconv.FormatBool(ndt)
         case Fraction: ndresstr = strconv.Itoa(ndt.x) + "/" + strconv.Itoa(ndt.y)
-        default: return "", "", InvalidGraphErr{"invalid ret type"} 
+        default:
+          fmt.Printf("%v %T\n", ndres, ndres)
+          return "", "", InvalidGraphErr{"invalid ret type"} 
         }
         ntext = strings.ReplaceAll(ntext, "`" + setnd.name + "`", ndresstr)
         nsol = strings.ReplaceAll(nsol, "`" + setnd.name + "`", ndresstr)
