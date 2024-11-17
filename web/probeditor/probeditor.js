@@ -1782,7 +1782,7 @@ graph_canvas.addEventListener("mousedown", function(e){
             node.selected = true;
             refreshCanvas();
 
-            if (nodeType == "get" && nodeRules.text == "constant") {
+            if (nodeType == "get" && nodeName == "constant") {
                 command = "editconstant";
                 editor_type_buttons[3].click();
                 let curentConst = node.referenceId;
@@ -1974,7 +1974,8 @@ function findHoveredNode(){
 
 function computeNode(graph, cache, nodeId){
     if (cache.get(nodeId) != undefined) {
-        return cache.get(nodeId);
+        const c = cache.get(nodeId);
+        return c;
     }
 
     const [node, nodeRules, nodeType, nodeName] = findNode(nodeId);

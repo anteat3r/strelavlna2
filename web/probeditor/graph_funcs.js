@@ -116,4 +116,8 @@ export default {
     "acos": (i, _, __) => Math.acos(i[0]),
     "atan": (i, _, __) => Math.atan(i[0]),
     "fractiontonumber": (i, _, __) => i[0].num() / i[0].den(),
+    "lessthan": (i, _, __) => i[0] < i[1],
+    "greaterthan": (i, _, __) => i[0] > i[1],
+    "lessthanequal": (i, _, __) => i[0] <= i[1],
+    "greaterthanequal": (i, _, __) => i[0] >= i[1],
 }

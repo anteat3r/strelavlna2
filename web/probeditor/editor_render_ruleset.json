@@ -152,7 +152,16 @@
         "atan": "atan",
 
         "fractiontonumber": "fractiontonumber",
-        "ftn": "fractiontonumber"
+        "ftn": "fractiontonumber",
+
+        "lessthan": "lessthan",
+        "<": "lessthan",
+        "greaterthan": "greaterthan",
+        ">": "greaterthan",
+        "lessthanequal": "lessthanequal",
+        "<=": "lessthanequal",
+        "greaterthanequal": "greaterthanequal",
+        ">=": "greaterthanequal"
 
     },
 
@@ -544,6 +553,42 @@
               "inputs": 1,
               "inputTypes": ["fraction"],
               "outputType": "number"
+            },
+            "lessthan": {
+              "width": 30,
+              "height": 30,
+              "text": "<",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["number", "number"],
+              "outputType": "bool"
+            },
+            "greaterthan": {
+              "width": 30,
+              "height": 30,
+              "text": ">",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["number", "number"],
+              "outputType": "bool"
+            },
+            "lessthanequal": {
+              "width": 40,
+              "height": 30,
+              "text": "<=",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["number", "number"],
+              "outputType": "bool"
+            },
+            "greaterthanequal": {
+              "width": 40,
+              "height": 30,
+              "text": ">=",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["number", "number"],
+              "outputType": "bool"
             }
         },
         "get": {
