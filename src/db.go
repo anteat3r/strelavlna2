@@ -1008,6 +1008,7 @@ func DBLoadFromPB(ac string) error {
       })
       (*v)[tm.Id] = &newteam
     }
+    log.Info(*v)
   })
   consts := make([]struct{
     Id string `db:"id"`
