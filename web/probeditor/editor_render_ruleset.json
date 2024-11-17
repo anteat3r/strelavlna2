@@ -185,7 +185,7 @@
                 "inputTypes": ["number", "number", "number"],
                 "outputType": "number"
             },
-            "subtraction": {
+            "substraction": {
                 "width": 30,
                 "height": 30,
                 "text": "-",
