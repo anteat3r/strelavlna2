@@ -300,9 +300,9 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
         Graph: nil,
       })
       bprob = &nbprob
-      Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
-        (*w)[nid] = bprob
-      })
+    })
+    Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
+      (*w)[nid] = bprob
     })
     prob = nid
     if oerr != nil { return }
@@ -656,7 +656,7 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
     prob.RWith(func(v ProbS) { cost, ok = GetCost("+" + v.Diff); probid = v.Id })
     if !ok { oerr = dbErr("grade", "invalid cost") }
 
-    team.RWith(func(v TeamS) {
+    team.With(func(v *TeamS) {
       if v.Banned { oerr = dbErr("grade", "cannot grade banned team"); return }
       _, ok = v.Pending[probid]
       if !ok { oerr = dbErr("grade", "prob not pending"); return }
