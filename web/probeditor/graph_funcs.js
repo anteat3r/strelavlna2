@@ -93,7 +93,17 @@ export default {
     "underone": (i, _, __) => new Fraction(1, i[0]),
     "redo": (i, _, __) => i[0],
     "lcm": (i, _, __) => {
-        return 1; //idk jak se to dela
+      let a = Math.abs(Math.round(i[0]));
+      let b = Math.abs(Math.round(i[1]));
+      if (b > a) [a, b] = [b, a];
+      let res = 0;
+      while (true) {
+        if (b == 0) { res = a; break };
+        a %= b;
+        if (a == 0) { res = b; break };
+        b %= a;
+      }
+      return a * b / res
     },
     "absolute": (i, _, __) => Math.abs(i[0]),
     "factorial": (i, _, __) => {
