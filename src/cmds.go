@@ -207,12 +207,13 @@ func SetupContEndp() echo.HandlerFunc {
     if c.QueryParam("id") == "" { return nErr("empty id") }
 
     err := DBLoadFromPB(c.QueryParam("id"))
-    log.Info("loaded")
     if err != nil { return err }
+    log.Info("loaded")
     Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
       err = DBGenProbWorkers(*v)
     })
     if err != nil { return err }
+    log.Info("gened")
 
     res, err := json.Marshal(DBData)
     if err != nil { return err }
