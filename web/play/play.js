@@ -307,8 +307,11 @@ function updateFocusedProblem(){
     }else{
         img.classList.remove("hidden");
     }
-
-    img.src = `http://strela-vlna.gchd.cz/api/files/probs/${focused_check}/${focused_problem_obj.image}`;
+    if (focused_problem_obj.image != ""){
+        img.src = `http://strela-vlna.gchd.cz/api/files/probs/${focused_check}/${focused_problem_obj.image}`;
+    } else {
+        img.src = "";
+    }
     
     if(focused_problem_obj.pending || focused_problem_obj.incorrect || focused_problem_obj.correct){
         answer_input.placeholder = "Odpověděli jste: " + focused_problem_obj.solution;
@@ -523,7 +526,8 @@ function sellProblem(){
     const confirm_dialog = document.getElementById("confiramtion-dialog-bg");
     confirm_dialog.style.display = "block";
     const focused_problem_obj = problems.find(prob => prob.id == focused_check);
-    document.getElementById("confirm-dialog-content").innerHTML = `Opravdu chcete prodat úlohu:<br><span class="bold">${focused_problem_obj.title}</span> za <span class="bold">${focused_problem_obj.rank == "A" ? 5 : focused_problem_obj.rank == "B" ? 10 : 15}</span> DC?`;
+    const sellPrice = prices[2]["ABC".indexOf(focused_problem_obj.rank)];
+    document.getElementById("confirm-dialog-content").innerHTML = `Opravdu chcete prodat úlohu:<br><span class="bold">${focused_problem_obj.title}</span> za <span class="bold">${sellPrice}</span> DC?`;
     document.getElementById("confirm-dialog-ok").addEventListener("click", function(){
         sellProb(focused_check);
 
@@ -603,7 +607,8 @@ function update(){
     else if (contest_state == "waiting"){
         contest_state = "running";
     }
-    if ((Math.floor(remaining / 1000) != lastSecond && remaining>=0) || (!clock_zeroed && remaining < 0)){
+
+    if ((Math.floor(remaining / 1000) != lastSecond && remaining>=0) || (!clock_zeroed && remaining < 0) && contest_state == "running"){
         if (remaining < 0){
             clock_zeroed = true;
             updateShop();
@@ -612,7 +617,13 @@ function update(){
             passed = end_time-start_time;
             contest_state = "ended";
         }
-        updateClock(remaining, passed);
+        if (passed < 0){
+            updateClock(-passed, 1000);
+        } else {
+            updateClock(remaining, passed);
+        }
+    } else if (contest_state == "waiting"){
+        
     }
 
 }

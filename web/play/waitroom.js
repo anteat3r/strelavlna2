@@ -216,9 +216,9 @@ function frame(){
     const now = Date.now();
     const remaining = target_time - now;
 
-    if (remaining <= 0 && redirects) {
-        window.location.href = `../play?id=${id}`;
-    }
+    // if (remaining <= 0 && redirects) {
+    //     window.location.href = `../play?id=${id}`;
+    // }
 
     const this_second = Math.floor(now/1000);
     if (this_second != last_second) {
