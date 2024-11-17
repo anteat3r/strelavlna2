@@ -208,8 +208,14 @@ func SetupContEndp() echo.HandlerFunc {
 
     err := DBLoadFromPB(c.QueryParam("id"))
     if err != nil { return err }
+    Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
+      err = DBGenProbWorkers(*v)
+    })
+    if err != nil { return err }
 
-		return c.String(200, "")
+    res, err := json.Marshal(DBData)
+    if err != nil { return err }
+    return c.String(200, string(res))
 	}
 }
 

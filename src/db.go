@@ -5,6 +5,8 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"slices"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -105,6 +107,7 @@ type ProbS struct {
   Solution string
   Workers []string
   Graph Graph
+  Author string
 }
 type ProbM = *RWMutexWrap[ProbS]
 
@@ -1051,6 +1054,7 @@ func DBLoadFromPB(ac string) error {
         Solution: sol,
         Workers: make([]string, 0),
         Graph: graph,
+        Author: pr["author"].(string),
       })
       (*v)[pr["id"].(string)] = &newprob
     }
@@ -1068,7 +1072,86 @@ func DBLoadFromPB(ac string) error {
   return nil
 }
 
-func DBGenProbWorkers(map[string]ProbM) error {
+func DBGenProbWorkers(probs map[string]ProbM) error {
+  corrs, err := App.Dao().FindRecordsByFilter(
+    "correctors",
+    `username != ""`,
+    "-created", 0, 0,
+  )
+  if err != nil { return err }
+  corricache := make(map[string]int)
+  for i, corr := range corrs {
+    corricache[corr.GetId()] = i
+  }
+  sectors := make([][][]string, 1)
+  for i := range sectors {
+    sectors[i] = make([][]string, len(corrs))
+    for j := range sectors {
+      sectors[i][j] = make([]string, 0)
+    }
+  }
+  probsnm := make([]string, 0, len(probs))
+  for id, prm := range probs {
+    prm.RWith(func(v ProbS) {
+      corri := corricache[v.Author]
+      sectors[0][corri] = append(sectors[0][corri], id)
+    })
+    probsnm = append(probsnm, id)
+  }
+  added := true
+  for added {
+    ap := make([][]string, len(corrs))
+    for i := range ap {
+      ap[i] = make([]string, 0)
+    }
+    for _, sec := range sectors {
+      for i, adm := range sec {
+        ap[i] = append(ap[i], adm...)
+      }
+    }
+    sec := make([][]string, len(corrs))
+    for i := range sec {
+      sec[i] = make([]string, 0)
+    }
+    cnts := make([]int, len(ap))
+    for i := range cnts {
+      cnts[i] = len(ap[i])
+    }
+    added = false
+    for _, pr := range probsnm {
+      queue := make([]int, len(cnts))
+      for i := range queue { queue[i] = i }
+      sort.Slice(queue, func(i, j int) bool {
+        return cnts[i] < cnts[j]
+      })
+      for _, i := range queue {
+        if slices.Contains(ap[i], pr) { continue }
+        ap[i] = append(ap[i], pr)
+        sec[i] = append(sec[i], pr)
+        cnts[i]++
+        added = true
+        break
+      }
+    }
+  }
+  sectors = sectors[:len(sectors)-1]
+  queues := make([][]string, 0, len(probsnm))
+  for i, pr := range probsnm {
+    queues = append(queues, make([]string, 0))
+    for _, sec := range sectors {
+      for j, adm := range sec {
+        if slices.Contains(adm, pr) {
+          queues[i] = append(queues[i], corrs[j].GetId())
+          break
+        }
+      }
+    }
+  }
+  for i, queue := range queues {
+    probs[probsnm[i]].With(func(v *ProbS) {
+      v.Workers = queue
+    })
+  }
   return nil
 }
 

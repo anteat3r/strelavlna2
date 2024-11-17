@@ -10,14 +10,10 @@ def new_sector():
     ap = [] #admin probs
     for i in range(len(admins)):
         ap.append([])
-
-
-    
     for sector in sectors:
         for i, admin in enumerate(sector):
             for prob in admin:
                 ap[i].append(prob)
-    
     #create new sector
     sector = []
     for i in range(len(admins)):
@@ -57,8 +53,5 @@ def compile_sectors():
 while new_sector():
     pass
 sectors.pop()
-
-
-
 
 print(compile_sectors())
