@@ -163,9 +163,9 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     log.Info("as")
 
-    teamrec, err := dao.FindRecordById("teams", teamid)
-    if err != nil { return err }
-    log.Info("as")
+    var ok bool
+    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) { _, ok = v[teamid] })
+    if !ok { return nErr("invalid team") }
     // cont := team.GetString("contest")
 
     // ActiveContestMu.RLock()
@@ -173,16 +173,15 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     // ActiveContestMu.RUnlock()
 
     var teamchan *TeamChanMu
-    var ok bool
     TeamChanMap.With(func(v *map[string]*TeamChanMu) {
       teamchan, ok = (*v)[teamid]
       if !ok {
         log.Info("new")
-        teamchan = &TeamChanMu{sync.RWMutex{}, make([]chan string, 5, 5), teamid}
+        teamchan = &TeamChanMu{sync.RWMutex{}, make([]chan string, 5), teamid}
         (*v)[teamid] = teamchan
       }
     })
-    log.Info("as")
+    log.Info(teamchan)
 
     i := -1
 
@@ -221,7 +220,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     if err != nil { return err }
     log.Info("as")
 
-    fmt.Printf("%s >- %s:%d + >->\n", formTime(), teamrec.GetId(), i)
+    fmt.Printf("%s >- %s:%d + >->\n", formTime(), teamid, i)
     JSONlog(teamid, false, true, i, ":connect")
     go PlayerWsLoop(conn, teamid, perchan, teamchan, i, team)
     log.Info("as")

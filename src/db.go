@@ -256,9 +256,9 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
         var valid bool
         probv.With(func(probS *ProbS) {
           _, bought := teamS.Bought[id]
-          _, pending := teamS.Bought[id]
-          _, solved := teamS.Bought[id]
-          _, sold := teamS.Bought[id]
+          _, pending := teamS.Pending[id]
+          _, solved := teamS.Solved[id]
+          _, sold := teamS.Sold[id]
           valid = probS.Diff == diff && 
             !bought &&
             !pending &&
@@ -300,10 +300,11 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
         Graph: nil,
       })
       bprob = &nbprob
-      Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
-        (*w)[nid] = bprob
-      })
     })
+    Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
+      (*w)[nid] = bprob
+    })
+    prob = nid
     if oerr != nil { return }
     teamS.Bought[nid] = bprob
 
@@ -372,6 +373,7 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
       exCheckid, exists := teamS.ChatChecksCache[prob]
       if exists {
         exCheck, ok := (*checksmap)[exCheckid]
+        check = exCheckid
         if !ok { oerr = dbErr("solve", "invalid check cache"); return }
         exCheck.With(func(checkS *CheckS) {
           checkS.Msg = false
@@ -382,10 +384,11 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
         delete(teamS.ChatChecksCache, prob)
         teamS.SolChecksCache[prob] = prob
       } else {
-        check := GetRandomId()
+        check = GetRandomId()
         _, ok = (*checksmap)[check]
         if ok { oerr = dbErr("check id collision"); return }
         ncheck := NewRWMutexWrap(CheckS{
+          Id: check,
           Prob: probres,
           ProbId: prob,
           Team: team,
@@ -401,11 +404,6 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
     
     delete(teamS.Bought, prob)
     teamS.Pending[prob] = probres
-    if len(prob) > 15 {
-      Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
-        delete(*v, prob)
-      })
-    }
   })
   return
 }
@@ -508,9 +506,16 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
       })
       return
     }
+    for _, m := range teamS.Chat {
+      chrole := "p"
+      if m.Admin { chrole = "a" }
+      probid := ""
+      if m.Prob != nil { m.Prob.RWith(func(v ProbS) { probid = v.Id }) }
+      chat += chrole + "\x09" + probid + "\x09" + m.Text + "\x0b"
+    }
     check = GetRandomId()
     ncheck := &RWMutexWrap[CheckS]{
-      v: CheckS{check, probres, prob, team, teamS.Id, false, msg},
+      v: CheckS{check, probres, prob, team, teamS.Id, true, msg},
     }
     Checks.With(func(checksmap *map[string]*RWMutexWrap[CheckS]) {
       (*checksmap)[check] = ncheck
@@ -603,6 +608,7 @@ func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
       res.Checks = make([]checkRes, 0, len(t.ChatChecksCache) + len(t.SolChecksCache))
       for p, c := range t.ChatChecksCache {
         sol := ""
+        if _, ok := checksmap[c]; !ok { continue }
         checksmap[c].RWith(func(v CheckS) { sol = v.Sol })
         res.Checks = append(res.Checks, checkRes{
           Prob: p,
@@ -611,6 +617,7 @@ func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
       }
       for p, c := range t.SolChecksCache {
         sol := ""
+        if _, ok := checksmap[c]; !ok { continue }
         checksmap[c].RWith(func(v CheckS) { sol = v.Sol })
         res.Checks = append(res.Checks, checkRes{
           Prob: p,
@@ -657,7 +664,7 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
     prob.RWith(func(v ProbS) { cost, ok = GetCost("+" + v.Diff); probid = v.Id })
     if !ok { oerr = dbErr("grade", "invalid cost") }
 
-    team.RWith(func(v TeamS) {
+    team.With(func(v *TeamS) {
       if v.Banned { oerr = dbErr("grade", "cannot grade banned team"); return }
       _, ok = v.Pending[probid]
       if !ok { oerr = dbErr("grade", "prob not pending"); return }
@@ -667,7 +674,7 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
         target = v.Solved
       }
 
-      delete(target, probid)
+      delete(v.Pending, probid)
       target[probid] = prob
 
       if corr {
@@ -678,7 +685,17 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
           Money: money,
         })
         v.Stats.NumSolved ++
+        delete(v.SolChecksCache, probid)
+        delete(v.ChatChecksCache, probid)
+        if len(probid) > 15 {
+          Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
+            delete(*w, probid)
+          })
+        }
+      } else {
+        money = v.Money
       }
+
     })
     if oerr != nil { return }
 
@@ -734,7 +751,10 @@ func DBAdminDismiss(checkid string) (team string, prob string, oerr error) {
     if !ok { oerr = dbErr("dismiss", "invalid check id"); return }
     ch.RWith(func(v CheckS) {
       if !v.Msg { oerr = dbErr("dismiss", "cannot dismiss solution check"); return }
-      v.Team.With(func(t *TeamS) { delete(t.ChatChecksCache, v.ProbId) })
+      v.Team.With(func(t *TeamS) { 
+        delete(t.ChatChecksCache, v.ProbId)
+        delete(t.SolChecksCache, v.ProbId)
+      })
     })
     if oerr != nil { return }
     delete(*v, checkid)
