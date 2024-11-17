@@ -256,9 +256,9 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
         var valid bool
         probv.With(func(probS *ProbS) {
           _, bought := teamS.Bought[id]
-          _, pending := teamS.Bought[id]
-          _, solved := teamS.Bought[id]
-          _, sold := teamS.Bought[id]
+          _, pending := teamS.Pending[id]
+          _, solved := teamS.Solved[id]
+          _, sold := teamS.Sold[id]
           valid = probS.Diff == diff && 
             !bought &&
             !pending &&
@@ -511,7 +511,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     }
     check = GetRandomId()
     ncheck := &RWMutexWrap[CheckS]{
-      v: CheckS{check, probres, prob, team, teamS.Id, false, msg},
+      v: CheckS{check, probres, prob, team, teamS.Id, true, msg},
     }
     Checks.With(func(checksmap *map[string]*RWMutexWrap[CheckS]) {
       (*checksmap)[check] = ncheck
