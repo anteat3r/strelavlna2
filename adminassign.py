@@ -18,7 +18,6 @@ def new_sector():
         for i, admin in enumerate(sector):
             for prob in admin:
                 ap[i].append(prob)
-    
     #create new sector
     sector = []
     for i in range(len(admins)):

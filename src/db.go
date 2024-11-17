@@ -5,6 +5,8 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"slices"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -105,6 +107,7 @@ type ProbS struct {
   Solution string
   Workers []string
   Graph Graph
+  Author string
 }
 type ProbM = *RWMutexWrap[ProbS]
 
@@ -1002,7 +1005,10 @@ func DBLoadFromPB(ac string) error {
       (*v)[tm.Id] = &newteam
     }
   })
-  consts := make([]map[string]any, 0)
+  consts := make([]struct{
+    Id string `db:"id"`
+    Value float64 `db:"value"`
+  }, 0)
   err = App.Dao().DB().
     NewQuery(`select count(*) from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
     Bind(dbx.Params{"contest": ac}).
@@ -1010,10 +1016,20 @@ func DBLoadFromPB(ac string) error {
   if err != nil { return err }
   Consts.With(func(v *map[string]float64) {
     for _, cnst := range consts {
-      (*v)[cnst["id"].(string)] = cnst["value"].(float64)
+      (*v)[cnst.Id] = cnst.Value
     }
   })
-  probs := make([]map[string]any, 0)
+  probs := make([]struct{
+    Id string `db:"id"`
+    Name string `db:"name"`
+    Diff string `db:"diff"`
+    Img string `db:"img"`
+    Author string `db:"author"`
+    Text string `db:"text"`
+    Graph string `db:"graph"`
+    Solution string `db:"solution"`
+    Infinite bool `db:"infinite"`
+  }, 0)
   err = App.Dao().DB().
     NewQuery(`select count(*) from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
     Bind(dbx.Params{"contest": ac}).
@@ -1021,10 +1037,10 @@ func DBLoadFromPB(ac string) error {
   if err != nil { return err }
   Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
     for _, pr := range probs {
-      graphs := pr["graph"].(string)
-      text := pr["text"].(string)
-      sol := pr["solution"].(string)
-      inf := pr["infinite"].(bool)
+      graphs := pr.Graph
+      text := pr.Text
+      sol := pr.Solution
+      inf := pr.Infinite
       var graph Graph
       if graphs != "" {
         if inf {
@@ -1043,16 +1059,17 @@ func DBLoadFromPB(ac string) error {
         }
       }
       newprob := NewRWMutexWrap(ProbS{
-        Id: pr["id"].(string),
-        Name: pr["name"].(string),
-        Diff: pr["diff"].(string),
+        Id: pr.Id,
+        Name: pr.Name,
+        Diff: pr.Diff,
         Text: text,
-        Img: pr["img"].(string),
+        Img: pr.Img,
         Solution: sol,
         Workers: make([]string, 0),
         Graph: graph,
+        Author: pr.Author,
       })
-      (*v)[pr["id"].(string)] = &newprob
+      (*v)[pr.Author] = &newprob
     }
   })
   if err != nil { return err }
@@ -1068,7 +1085,86 @@ func DBLoadFromPB(ac string) error {
   return nil
 }
 
-func DBGenProbWorkers(map[string]ProbM) error {
+func DBGenProbWorkers(probs map[string]ProbM) error {
+  corrs, err := App.Dao().FindRecordsByFilter(
+    "correctors",
+    `username != ""`,
+    "-created", 0, 0,
+  )
+  if err != nil { return err }
+  corricache := make(map[string]int)
+  for i, corr := range corrs {
+    corricache[corr.GetId()] = i
+  }
+  sectors := make([][][]string, 1)
+  for i := range sectors {
+    sectors[i] = make([][]string, len(corrs))
+    for j := range sectors {
+      sectors[i][j] = make([]string, 0)
+    }
+  }
+  probsnm := make([]string, 0, len(probs))
+  for id, prm := range probs {
+    prm.RWith(func(v ProbS) {
+      corri := corricache[v.Author]
+      sectors[0][corri] = append(sectors[0][corri], id)
+    })
+    probsnm = append(probsnm, id)
+  }
+  added := true
+  for added {
+    ap := make([][]string, len(corrs))
+    for i := range ap {
+      ap[i] = make([]string, 0)
+    }
+    for _, sec := range sectors {
+      for i, adm := range sec {
+        ap[i] = append(ap[i], adm...)
+      }
+    }
+    sec := make([][]string, len(corrs))
+    for i := range sec {
+      sec[i] = make([]string, 0)
+    }
+    cnts := make([]int, len(ap))
+    for i := range cnts {
+      cnts[i] = len(ap[i])
+    }
+    added = false
+    for _, pr := range probsnm {
+      queue := make([]int, len(cnts))
+      for i := range queue { queue[i] = i }
+      sort.Slice(queue, func(i, j int) bool {
+        return cnts[i] < cnts[j]
+      })
+      for _, i := range queue {
+        if slices.Contains(ap[i], pr) { continue }
+        ap[i] = append(ap[i], pr)
+        sec[i] = append(sec[i], pr)
+        cnts[i]++
+        added = true
+        break
+      }
+    }
+  }
+  sectors = sectors[:len(sectors)-1]
+  queues := make([][]string, 0, len(probsnm))
+  for i, pr := range probsnm {
+    queues = append(queues, make([]string, 0))
+    for _, sec := range sectors {
+      for j, adm := range sec {
+        if slices.Contains(adm, pr) {
+          queues[i] = append(queues[i], corrs[j].GetId())
+          break
+        }
+      }
+    }
+  }
+  for i, queue := range queues {
+    probs[probsnm[i]].With(func(v *ProbS) {
+      v.Workers = queue
+    })
+  }
   return nil
 }
 
