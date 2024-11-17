@@ -206,14 +206,14 @@ func ParseGraph(graphs string) (Graph, error) {
       nnd = FunctionNode{
         wtypes: []DataType{Frac},
         fn: func(i []any) any {
-          return i[0].(Fraction).x
+          return float64(i[0].(Fraction).x)
         },
       }
     case "denominator":
       nnd = FunctionNode{
         wtypes: []DataType{Frac},
         fn: func(i []any) any {
-          return i[0].(Fraction).y
+          return float64(i[0].(Fraction).y)
         },
       }
     case "fractionaddition":
