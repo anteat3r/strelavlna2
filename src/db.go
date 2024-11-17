@@ -382,7 +382,7 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
         delete(teamS.ChatChecksCache, prob)
         teamS.SolChecksCache[prob] = prob
       } else {
-        check := GetRandomId()
+        check = GetRandomId()
         _, ok = (*checksmap)[check]
         if ok { oerr = dbErr("check id collision"); return }
         ncheck := NewRWMutexWrap(CheckS{
