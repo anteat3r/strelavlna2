@@ -664,7 +664,7 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
         target = v.Solved
       }
 
-      delete(target, probid)
+      delete(v.Pending, probid)
       target[probid] = prob
 
       if corr {
@@ -675,14 +675,14 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
           Money: money,
         })
         v.Stats.NumSolved ++
+        delete(v.SolChecksCache, probid)
+        if len(probid) > 15 {
+          Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
+            delete(*v, probid)
+          })
+        }
       }
 
-      delete(v.SolChecksCache, probid)
-      if len(probid) > 15 {
-        Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
-          delete(*v, probid)
-        })
-      }
     })
     if oerr != nil { return }
 
