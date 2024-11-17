@@ -302,6 +302,8 @@ func ParseGraph(graphs string) (Graph, error) {
           return res
         },
       }
+    default:
+      return nil, InvalidGraphErr{"unsopportes node " + nd.Type}
     }
     nnd.id = id
     nnd.inputs = []GraphId{}
@@ -324,6 +326,8 @@ func ParseGraph(graphs string) (Graph, error) {
         id: id,
         inp: nd.Input,
       }
+    default:
+      return nil, InvalidGraphErr{"unsopportes node " + nd.Type}
     }
     graphres[id] = nnd
   }
