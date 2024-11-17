@@ -55,6 +55,9 @@ func (w *RWMutexWrap[T]) UnmarshalJSON(b []byte) error {
   return nil
 }
 
+var _ json.Marshaler = (*RWMutexWrap[string])(nil)
+var _ json.Unmarshaler = (*RWMutexWrap[string])(nil)
+
 func (w *RWMutexWrap[T]) GetPrimitiveVal() (v T) {
   w.m.RLock()
   defer w.m.RUnlock()

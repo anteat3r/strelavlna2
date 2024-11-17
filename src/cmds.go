@@ -2,6 +2,7 @@ package src
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"net/mail"
 	"os"
@@ -217,7 +218,12 @@ func SetupContEndp() echo.HandlerFunc {
 
     res, err := json.Marshal(DBData)
     if err != nil { return err }
-    return c.String(200, string(res))
+
+    pres := ""
+    Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
+      pres = fmt.Sprint(v)
+    })
+    return c.String(200, string(res) + "\n\n" + pres)
 	}
 }
 
