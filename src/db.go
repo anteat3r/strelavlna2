@@ -373,6 +373,7 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
       exCheckid, exists := teamS.ChatChecksCache[prob]
       if exists {
         exCheck, ok := (*checksmap)[exCheckid]
+        check = exCheckid
         if !ok { oerr = dbErr("solve", "invalid check cache"); return }
         exCheck.With(func(checkS *CheckS) {
           checkS.Msg = false
