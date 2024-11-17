@@ -29,10 +29,41 @@ let balance_chart = [{x:0, y: 50}, {x:15*60000, y: 100}, {x:22*60000, y: 40}, {x
 let balance = 245;
 let rank = 5;
 
-function gotLog(data){
+function showRank(){
+    setRank();
+}
+
+function showLowerRank(){
+    if (rank > 15){
+        setRank();
+    }
+}
+
+function gotdata(r, data, dt){
     results_ready = true;
+    
+    rank = parseInt(r);
+    
+    data = JSON.parse(data);
+
+    solved = [data.numsolved.A, data.numsolved.B, data.numsolved.C];
+    sold = [data.numsold.A, data.numsold.B, data.numsold.C];
+    accuracy = [data.numsolved.A / (data.numincc.A + data.numsolved.A), data.numsolved.B / (data.numincc.B + data.numsolved.B), data.numsolved.C / (data.numincc.C + data.numsolved.C)];
+    income_portions = [data.moneymade.A, data.moneymade.B, data.moneymade.C];
+    
+    balance_chart = [];
+    const startT = new Date(Date.parse(data.moneyhist[0].time));
+    for (let hist of data.moneyhist){
+        const time = new Date(Date.parse(hist.time));
+        const deltaTime = (time.getTime() - startT.getTime());
+        balance_chart.push({x: deltaTime*60, y: hist.money});
+    }
 
 
+
+    console.log(balance_chart);
+
+    generateTicks();
     startLoadingAnimation();
 }
 
@@ -584,7 +615,7 @@ function resultsAnimationFrame(){
     // console.log(animation_accuracy_speed[0]);
 }
 
-generateTicks();
+// generateTicks();
 generateQRcode();
 resultsAnimationFrame();
 for(item of main_wrappers){
@@ -600,7 +631,6 @@ function startLoadingAnimation(){
 
 
     setTimeout(setBalance, 1000);
-    setTimeout(setRank, 10000);
 
     animation_start_balance_chart_X = true;
     setTimeout(e=>{animation_start_balance_chart_Y = true;}, 300);

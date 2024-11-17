@@ -199,6 +199,7 @@ function updateShop(){
 
 function updateTeamStats(){
     document.getElementById("team-name").innerHTML = team_name;
+    document.getElementById("results-team-name").innerHTML = team_name;
     document.getElementById("rank-number").innerHTML = team_rank;
     document.getElementById("team-balance").innerHTML = team_balance + " DC"
     document.getElementById("team-stats-main-title").innerHTML = team_name;
@@ -207,10 +208,14 @@ function updateTeamStats(){
     document.getElementById("information-content").innerHTML = contest_info;
     document.getElementById("title").innerHTML = contest_name;
     const team_stats_players_wrapper = document.getElementById("team-stats-players-wrapper");
+    const team_stats_results_playeres = document.getElementById("results-players-wrapper");
     team_stats_players_wrapper.innerHTML = "";
+    team_stats_results_playeres.innerHTML = "";
     for(const member of team_members){
         team_stats_players_wrapper.innerHTML +=
         `<h2 class="team-stats-player">${member}</h2>`
+        team_stats_results_playeres.innerHTML +=
+        `<h2 class="results-player">${member}</h2>`
     }
 }
 
@@ -707,9 +712,17 @@ function connectWS() {
         if (msg.length != 2) { cLe() }
         gotinfo(msg[1]);
       break;
-      case "gotlog":
-        if (msg.length != 2) { cLe() }
-        gotLog(msg[1]);
+      case "gotdata":
+        if (msg.length != 3) { cLe() }
+        gotdata(msg[1], msg[2], (end_time - start_time));
+      break;
+      case "showrank":
+        if (msg.length != 1) { cLe() }
+        showRank();
+      break;
+      case "showlowerrank":
+        if (msg.length != 1) { cLe() }
+        showLowerRank();
       break;
       case "err":
         console.log(msg)
