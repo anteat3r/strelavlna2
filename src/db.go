@@ -87,8 +87,8 @@ type TeamS struct {
   Chat []ChatMsg
   Banned bool
   LastBanned time.Time
-  ChatChecksCache map[ProbM]string
-  SolChecksCache map[ProbM]string
+  ChatChecksCache map[string]string
+  SolChecksCache map[string]string
   Players [5]string
   Stats TeamStats
 }
@@ -366,7 +366,7 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
     teamname = teamS.Name
 
     Checks.With(func(checksmap *map[string]*RWMutexWrap[CheckS]) {
-      exCheckid, exists := teamS.ChatChecksCache[probres]
+      exCheckid, exists := teamS.ChatChecksCache[prob]
       if exists {
         exCheck, ok := (*checksmap)[exCheckid]
         if !ok { oerr = dbErr("solve", "invalid check cache"); return }
@@ -376,8 +376,8 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
         })
         updated = true
         csol = sol
-        delete(teamS.ChatChecksCache, probres)
-        teamS.SolChecksCache[probres] = prob
+        delete(teamS.ChatChecksCache, prob)
+        teamS.SolChecksCache[prob] = prob
       } else {
         check := GetRandomId()
         _, ok = (*checksmap)[check]
@@ -391,7 +391,7 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
           Sol: sol,
         })
         (*checksmap)[check] = &ncheck
-        teamS.SolChecksCache[probres] = check
+        teamS.SolChecksCache[prob] = check
       }
     })
     if oerr != nil { return }
@@ -441,7 +441,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     team.With(func(teamS *TeamS) {
       teamS.Chat = append(teamS.Chat, ChatMsg{false, nil, team, msg})
       var ok bool
-      check, ok = teamS.ChatChecksCache[nil]
+      check, ok = teamS.ChatChecksCache[""]
       if ok {
         var ocheck CheckM
         Checks.RWith(func(checksmap map[string]*RWMutexWrap[CheckS]) {
@@ -465,7 +465,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
       Checks.With(func(checksmap *map[string]*RWMutexWrap[CheckS]) {
         (*checksmap)[check] = ncheck
       })
-      teamS.ChatChecksCache[nil] = check
+      teamS.ChatChecksCache[""] = check
     })
 
     return
@@ -488,7 +488,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     _, pending := teamS.Pending[prob]
     if !bought && !pending { oerr = dbErr("chat", "prob not owned"); return }
     teamS.Chat = append(teamS.Chat, ChatMsg{false, probres, team, msg})
-    check, ok = teamS.ChatChecksCache[probres]
+    check, ok = teamS.ChatChecksCache[prob]
     if ok {
       var ocheck CheckM
       Checks.RWith(func(checksmap map[string]*RWMutexWrap[CheckS]) {
@@ -512,7 +512,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     Checks.With(func(checksmap *map[string]*RWMutexWrap[CheckS]) {
       (*checksmap)[check] = ncheck
     })
-    teamS.ChatChecksCache[probres] = check
+    teamS.ChatChecksCache[prob] = check
   })
 
   return
@@ -599,22 +599,18 @@ func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
     Checks.RWith(func(checksmap map[string]*RWMutexWrap[CheckS]) {
       res.Checks = make([]checkRes, 0, len(t.ChatChecksCache) + len(t.SolChecksCache))
       for p, c := range t.ChatChecksCache {
-        probid := ""
-        if p != nil { p.RWith(func(v ProbS) { probid = v.Id }) }
         sol := ""
         checksmap[c].RWith(func(v CheckS) { sol = v.Sol })
         res.Checks = append(res.Checks, checkRes{
-          Prob: probid,
+          Prob: p,
           Sol: sol,
         })
       }
       for p, c := range t.SolChecksCache {
-        probid := ""
-        p.RWith(func(v ProbS) { probid = v.Id })
         sol := ""
         checksmap[c].RWith(func(v CheckS) { sol = v.Sol })
         res.Checks = append(res.Checks, checkRes{
-          Prob: probid,
+          Prob: p,
           Sol: sol,
         })
       }
@@ -735,7 +731,7 @@ func DBAdminDismiss(checkid string) (team string, prob string, oerr error) {
     if !ok { oerr = dbErr("dismiss", "invalid check id"); return }
     ch.RWith(func(v CheckS) {
       if !v.Msg { oerr = dbErr("dismiss", "cannot dismiss solution check"); return }
-      v.Team.With(func(t *TeamS) { delete(t.ChatChecksCache, v.Prob) })
+      v.Team.With(func(t *TeamS) { delete(t.ChatChecksCache, v.ProbId) })
     })
     if oerr != nil { return }
     delete(*v, checkid)
@@ -1007,8 +1003,8 @@ func DBLoadFromPB(ac string) error {
         Chat: make([]ChatMsg, 0),
         Banned: false,
         LastBanned: time.Time{},
-        ChatChecksCache: make(map[ProbM]string),
-        SolChecksCache: make(map[ProbM]string),
+        ChatChecksCache: make(map[string]string),
+        SolChecksCache: make(map[string]string),
         Players: [5]string{
           tm.GetString("player1"),
           tm.GetString("player2"),
