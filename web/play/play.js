@@ -931,6 +931,8 @@ function graded(probid, correct, money) {
 
 function loaded(data) {
     data = JSON.parse(data);
+
+    console.log("data: ", data);
     
     problems = data.bought.map(bought => {
         return {

@@ -16,7 +16,7 @@ stoneSetup = {
     InnerMax: 200
 }
 
-var target_time = Date.now() + 3600000;
+let target_time = Date.now() + 3600000;
 
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
@@ -29,7 +29,7 @@ fetch(`https://strela-vlna.gchd.cz/api/teamcontstart/${id}`)
         return response.text();
     })
     .then(data => {
-        console.log(data);
+        console.log("start: ", data);
         target_time = Date.now() + parseInt(data);
         // console.log(data);
         // target_time = Date.now() + 10000;
@@ -212,32 +212,24 @@ function drawSilentLines() {
 }
 
 var last_second = Math.floor(Date.now()/1000);
-// function frame(){
-//     updateSpectrogramMountains();
-//     const now = Date.now();
-//     const remaining = target_time - now;
+function frame(){
+    const now = Date.now();
+    const remaining = target_time - now;
 
-//     if (remaining <= 0 && redirects) {
-//         window.location.href = `../play?id=${id}`;
-//     }
+    if (remaining <= 0 && redirects) {
+        window.location.href = `../play?id=${id}`;
+    }
 
-//     const this_second = Math.floor(now/1000);
-//     if (this_second != last_second) {
-//         last_second = this_second;
-//         for (const timer of document.getElementsByClassName('waitroom-timer')) {
-//             if (Math.floor(remaining / 86400000) == 0) {
-//                 timer.innerText = new Date(remaining).toISOString().substr(11, 8);
-//             } else {
-//                 timer.innerText = "Zbývá " + Math.floor(remaining / 86400000) + ' dní';
-//             }
-//         }
-//     }
-    
-//     // document.getElementById('waitroom-timer').innerText = new Date(remaining).toISOString().substr(11, 8);
+    const this_second = Math.floor(now/1000);
+    if (this_second != last_second) {
+        last_second = this_second;
+        document.getElementById('wait-time').innerHTML = new Date(remaining).toISOString().substr(11, 8);
+    }
     
     
-//     requestAnimationFrame(frame);
-// }
+    
+    requestAnimationFrame(frame);
+}
 
 audioElement.onplay = () => {
     audioCtx.resume();
@@ -245,7 +237,7 @@ audioElement.onplay = () => {
 pregenerateStones(130, 1);
 console.log(stones);
 drawSilentLines();
-// frame();
+frame();
 
 
 function playStop(){
