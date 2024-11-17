@@ -676,9 +676,10 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
         })
         v.Stats.NumSolved ++
         delete(v.SolChecksCache, probid)
+        delete(v.ChatChecksCache, probid)
         if len(probid) > 15 {
-          Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
-            delete(*v, probid)
+          Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
+            delete(*w, probid)
           })
         }
       }
@@ -738,7 +739,10 @@ func DBAdminDismiss(checkid string) (team string, prob string, oerr error) {
     if !ok { oerr = dbErr("dismiss", "invalid check id"); return }
     ch.RWith(func(v CheckS) {
       if !v.Msg { oerr = dbErr("dismiss", "cannot dismiss solution check"); return }
-      v.Team.With(func(t *TeamS) { delete(t.ChatChecksCache, v.ProbId) })
+      v.Team.With(func(t *TeamS) { 
+        delete(t.ChatChecksCache, v.ProbId)
+        delete(t.SolChecksCache, v.ProbId)
+      })
     })
     if oerr != nil { return }
     delete(*v, checkid)
