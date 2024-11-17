@@ -262,6 +262,13 @@ func ParseGraph(graphs string) (Graph, error) {
           return NewFraction(1, i[0].(float64))
         },
       }
+    case "fractiontonumber":
+      nnd = FunctionNode{
+        wtypes: []DataType{Frac},
+        fn: func(i []any) any {
+          return float64(i[0].(Fraction).x) / float64(i[0].(Fraction).y)
+        },
+      }
     default:
       return nil, InvalidGraphErr{"unsopportes node " + nd.Type}
     }
