@@ -203,42 +203,40 @@ func SliceExclude[T comparable](s []T, v T) ([]T, bool) {
 }
 
 func DBSell(team TeamM, probid string) (money int, oerr error) {
-    var probres ProbM
-    var ok bool
-    Probs.RWith(func(v map[string]ProbM) { probres, ok = v[probid] })
-    if !ok { oerr = dbErr("invalid prob id"); return }
+  var probres ProbM
+  var ok bool
+  Probs.RWith(func(v map[string]ProbM) { probres, ok = v[probid] })
+  if !ok { oerr = dbErr("invalid prob id"); return }
 
-    var diff string
-    probres.RWith(func(v ProbS) { diff = v.Diff })
-    cost, ok := GetCost("-" + diff)
-    if !ok { log.Error("invalid diff", probid, diff) }
+  var diff string
+  probres.RWith(func(v ProbS) { diff = v.Diff })
+  cost, ok := GetCost("-" + diff)
+  if !ok { log.Error("invalid diff", probid, diff) }
 
-    var found bool
-    team.With(func(teamS *TeamS) {
+  team.With(func(teamS *TeamS) {
 
-      _, ok = teamS.Bought[probid]
-      if !ok { oerr = dbErr("sell", "prob not owned") }
+    _, ok = teamS.Bought[probid]
+    if !ok { oerr = dbErr("sell", "prob not owned"); return }
 
-      delete(teamS.Bought, probid)
-      teamS.Sold[probid] = probres
+    delete(teamS.Bought, probid)
+    teamS.Sold[probid] = probres
 
-      if len(probid) > 15 {
-        Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
-          delete(*v, probid)
-        })
-      }
-
-      teamS.Money += cost
-      money = teamS.Money
-
-      teamS.Stats.MoneyHist = append(teamS.Stats.MoneyHist, moneyHistRec{
-        Time: time.Now(),
-        Money: money,
+    if len(probid) > 15 {
+      Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
+        delete(*v, probid)
       })
-      teamS.Stats.NumSold ++
+    }
 
+    teamS.Money += cost
+    money = teamS.Money
+
+    teamS.Stats.MoneyHist = append(teamS.Stats.MoneyHist, moneyHistRec{
+      Time: time.Now(),
+      Money: money,
     })
-    if !found { oerr = dbClownErr("sell", "prob not owned"); return }
+    teamS.Stats.NumSold ++
+
+  })
 
   return
 }
@@ -300,9 +298,9 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
         Graph: nil,
       })
       bprob = &nbprob
-    })
-    Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
-      (*w)[nid] = bprob
+      Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
+        (*w)[nid] = bprob
+      })
     })
     prob = nid
     if oerr != nil { return }
