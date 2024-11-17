@@ -751,6 +751,7 @@ func DBAdminView(teamid string, probid string, sprob bool, schat bool) (text str
 
   var prob ProbM
   var ok bool
+  if len(probid) > 15 { probid = probid[:15] }
   Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) { prob, ok = v[probid] })
   if !ok { oerr = dbErr("view", "invalid prob id"); return }
 
