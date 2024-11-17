@@ -680,6 +680,8 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
         })
         v.Stats.NumSolved ++
       }
+
+      delete(v.SolChecksCache, probid)
     })
     if oerr != nil { return }
 
