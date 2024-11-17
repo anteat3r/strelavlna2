@@ -108,14 +108,14 @@ func ParseGraph(graphs string) (Graph, error) {
         wtypes: []DataType{Number, Number},
         fn: func(i []any) any {
           return math.Floor(
-            rand.Float64()*(i[0].(float64)-i[1].(float64))+i[0].(float64))
+            rand.Float64()*(i[0].(float64)-i[1].(float64))+i[1].(float64))
         },
       }
     case "randomFloat":
       nnd = FunctionNode{
         wtypes: []DataType{Number, Number},
         fn: func(i []any) any {
-          return rand.Float64()*(i[0].(float64)-i[1].(float64))+i[0].(float64)
+          return rand.Float64()*(i[0].(float64)-i[1].(float64))+i[1].(float64)
         },
       }
     case "round":
