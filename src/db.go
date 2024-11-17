@@ -42,16 +42,16 @@ func (w *RWMutexWrap[T]) RWith(f func(v T)) {
 func (w *RWMutexWrap[T]) MarshalJSON() ([]byte, error) {
   w.m.RLock()
   defer w.m.RUnlock()
-  return json.Marshal(struct{v T}{v: w.v})
+  return json.Marshal(struct{V T `json:"v"`}{V: w.v})
 }
 
 func (w *RWMutexWrap[T]) UnmarshalJSON(b []byte) error {
   w.m.Lock()
   defer w.m.Unlock()
-  var res struct{v T}
+  var res struct{V T `json:"v"`}
   err := json.Unmarshal(b, &res)
   if err != nil { return err }
-  w.v = res.v
+  w.v = res.V
   return nil
 }
 
