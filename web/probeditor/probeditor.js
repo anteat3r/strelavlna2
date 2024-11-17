@@ -1458,6 +1458,7 @@ initializeCanvasWhenVisible()
 
 
 
+
 function findNode(id){
     if (focused_prob == "") return;
     const graph = probs.find(prob => prob.id == focused_prob).graph;
@@ -1595,6 +1596,12 @@ commandInput.addEventListener("keydown", function(e){
         }
         
     }
+});
+
+commandInput.addEventListener("focus", function(){
+    if (command == "editconstant") return;
+
+    command = "add";
 });
 
 commandInput.addEventListener("blur", function(){
