@@ -1975,6 +1975,7 @@ function findHoveredNode(){
 function computeNode(graph, cache, nodeId){
     if (cache.get(nodeId) != undefined) {
         const c = cache.get(nodeId);
+        console.log(c);
         return c;
     }
 
