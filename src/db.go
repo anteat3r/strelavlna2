@@ -1087,6 +1087,7 @@ func DBLoadFromPB(ac string) error {
       })
       (*v)[pr.Author] = &newprob
     }
+    log.Info(*v)
   })
   if err != nil { return err }
   contest, err := App.Dao().FindRecordById("contests", ac)
