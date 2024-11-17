@@ -177,6 +177,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     TeamChanMap.With(func(v *map[string]*TeamChanMu) {
       teamchan, ok = (*v)[teamid]
       if !ok {
+        log.Info("new")
         teamchan = &TeamChanMu{sync.RWMutex{}, make([]chan string, 5, 5), teamid}
         (*v)[teamid] = teamchan
       }
