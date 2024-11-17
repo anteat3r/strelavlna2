@@ -219,11 +219,13 @@ func SetupContEndp() echo.HandlerFunc {
     res, err := json.Marshal(DBData)
     if err != nil { return err }
 
-    pres := ""
     Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
-      pres = fmt.Sprint(v)
+      fmt.Println(v)
     })
-    return c.String(200, string(res) + "\n\n" + pres)
+    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+      fmt.Println(v)
+    })
+    return c.String(200, string(res))
 	}
 }
 
