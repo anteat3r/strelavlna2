@@ -330,6 +330,7 @@ func (g Graph) Generate(text, sol string) (string, string, error) {
           fmt.Printf("%v %T %v %v\n", ndres, ndres, nd, id)
           return "", "", InvalidGraphErr{"invalid ret type"} 
         }
+        fmt.Println(setnd.name)
         ntext = strings.ReplaceAll(ntext, "`" + setnd.name + "`", ndresstr)
         nsol = strings.ReplaceAll(nsol, "`" + setnd.name + "`", ndresstr)
         continue
