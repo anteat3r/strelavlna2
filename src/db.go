@@ -280,8 +280,11 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
     bprob := probM
     var nid string
     probM.RWith(func(v ProbS) {
+      nid = v.Id
       if v.Graph == nil { return }
-      text, sol, err := v.Graph.Generate(v.Text, v.Solution)
+      var sol string
+      var err error
+      text, sol, err = v.Graph.Generate(v.Text, v.Solution)
       if err != nil { oerr = err; return }
       nworkers := make([]string, len(v.Workers))
       copy(nworkers, v.Workers)
@@ -995,7 +998,7 @@ func DBLoadFromPB(ac string) error {
       newteam := NewRWMutexWrap(TeamS{
         Id: tm.Id,
         Name: tm.GetString("name"),
-        Money: 0,
+        Money: tm.GetInt("score"),
         Bought: make(map[string]ProbM),
         Pending: make(map[string]ProbM),
         Solved: make(map[string]ProbM),
@@ -1053,16 +1056,18 @@ func DBLoadFromPB(ac string) error {
   if err != nil { return err }
   Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
     for _, pr := range probs {
+      if pr.Author == "" { continue }
       graphs := pr.Graph
       text := pr.Text
       sol := pr.Solution
       inf := pr.Infinite
       var graph Graph
-      if graphs != "" {
+      if graphs != `{"nodes":{"basic":{},"get":{},"set":{}}}` {
         if inf {
           graph, err = ParseGraph(graphs)
           if err != nil { return }
-          textg, solg, err := graph.Generate(text, sol)
+          var textg, solg string
+          textg, solg, err = graph.Generate(text, sol)
           if err != nil { return }
           log.Info(textg, solg)
         } else {
@@ -1085,8 +1090,9 @@ func DBLoadFromPB(ac string) error {
         Graph: graph,
         Author: pr.Author,
       })
-      (*v)[pr.Author] = &newprob
+      (*v)[pr.Id] = &newprob
     }
+    log.Info(*v)
   })
   if err != nil { return err }
   contest, err := App.Dao().FindRecordById("contests", ac)

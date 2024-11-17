@@ -73,6 +73,18 @@ func main() {
       },
     )
 
+    sched.MustAdd(
+      "dumpdb",
+      "* * * * *",
+      func() {
+        if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
+        err := src.DBDump()
+        if err != nil {
+          log.Error(err)
+        }
+      },
+    )
+
     sched.Start()
 
     e.Router.GET(
@@ -452,6 +464,11 @@ func main() {
 
     err = src.SetupInitLoadData(app.Dao())
     if err != nil { return err }
+
+    if src.ActiveContest.GetPrimitiveVal().Id != "" {
+      err = src.DBLoadFromDump()
+      if err != nil { log.Error(err) }
+    }
 
     return nil
   })
