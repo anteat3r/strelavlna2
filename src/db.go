@@ -684,6 +684,8 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
             delete(*w, probid)
           })
         }
+      } else {
+        money = v.Money
       }
 
     })
