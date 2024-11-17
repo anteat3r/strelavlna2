@@ -224,12 +224,35 @@ func ParseGraph(graphs string) (Graph, error) {
           return a.Add(i[1].(Fraction))
         },
       }
+    case "fractionmultiplication":
+      nnd = FunctionNode{
+        wtypes: []DataType{Frac, Frac},
+        fn: func(i []any) any {
+          a := i[0].(Fraction)
+          return a.Mul(i[1].(Fraction))
+        },
+      }
+    case "fractionsubstraction":
+      nnd = FunctionNode{
+        wtypes: []DataType{Frac, Frac},
+        fn: func(i []any) any {
+          a := i[0].(Fraction)
+          return a.Sub(i[1].(Fraction))
+        },
+      }
     case "fractiondivision":
       nnd = FunctionNode{
         wtypes: []DataType{Frac, Frac},
         fn: func(i []any) any {
           a := i[0].(Fraction)
           return a.Div(i[1].(Fraction))
+        },
+      }
+    case "overone":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          return NewFraction(i[0].(float64), 1)
         },
       }
     case "underone":
