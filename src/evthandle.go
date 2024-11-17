@@ -9,6 +9,7 @@ import (
 	"time"
 
 	log "github.com/anteat3r/golog"
+	"github.com/pocketbase/dbx"
 )
 
 type InvalidMsgError struct { msg string }
@@ -321,11 +322,15 @@ func AdminWsHandleMsg(
       for id, tm := range v {
         var bres []byte
         var err error
+        var mn int
         tm.RWith(func(t TeamS) {
           bres, err = json.Marshal(t.Stats)
+          mn = t.Money
         })
         if err != nil { fmt.Println(err); continue }
         WriteTeamChan(id, "gotdata", string(bres))
+        App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
+        Bind(dbx.Params{"score": mn, "id": id}).Execute()
       }
     })
   }
