@@ -10,6 +10,7 @@ import (
 
 	log "github.com/anteat3r/golog"
 	"github.com/pocketbase/dbx"
+	"slices"
 )
 
 type InvalidMsgError struct { msg string }
@@ -318,6 +319,7 @@ func AdminWsHandleMsg(
 
   case "senddata":
     if len(m) != 1 { return eIm(msg) }
+    scores := []teamData{}
     Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
       for id, tm := range v {
         var bres []byte
@@ -328,17 +330,53 @@ func AdminWsHandleMsg(
           mn = t.Money
         })
         if err != nil { fmt.Println(err); continue }
-        WriteTeamChan(id, "gotdata", string(bres))
-        App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
-        Bind(dbx.Params{"score": mn, "id": id}).Execute()
+        scores = append(scores, teamData{
+          id: id,
+          money: mn,
+          data: string(bres),
+        })
+      }
+    })
+    slices.SortFunc(scores, func(i, j teamData) int {
+      if i.money > j.money { return -1 }
+      if i.money < j.money { return 1 }
+      return 0
+    })
+    for i, sc := range scores {
+      WriteTeamChan(sc.id, "gotdata", strconv.Itoa(i+1), sc.data)
+      App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
+      Bind(dbx.Params{"score": sc.money, "id": id}).Execute()
+    }
+
+  case "sendlowerrank":
+    if len(m) != 1 { return eIm(msg) }
+    TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
+      for _, tc := range v {
+        tc.Send("showlowerrank")
+      }
+    })
+
+  case "sendrank":
+    if len(m) != 1 { return eIm(msg) }
+    TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
+      for _, tc := range v {
+        tc.Send("showrank")
       }
     })
   }
+
+
 
   fmt.Printf("%s >>- %s <- %s\n", formTime(), id, readmsg)
   JSONlog(id, true, true, 0, readmsg)
 
   return nil
+}
+
+type teamData struct{
+  id string
+  money int
+  data string
 }
 
 // func LoadLog() ([]string, error) {
