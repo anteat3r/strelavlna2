@@ -137,7 +137,7 @@ func ParseGraph(graphs string) (Graph, error) {
       nnd = FunctionNode{
         wtypes: []DataType{Number, Number},
         fn: func(i []any) any {
-          return i[0].(float64) == i[0].(float64)
+          return i[0].(float64) == i[1].(float64)
         },
       }
     case "numberif":
