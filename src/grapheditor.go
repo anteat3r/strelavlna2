@@ -303,7 +303,7 @@ func (g Graph) Generate(text, sol string) (string, string, error) {
     cache := make(PathSet)
     ntext := text
     nsol := sol
-    for _, nd := range g {
+    for id, nd := range g {
       redond, ok := nd.(RedoNode)
       if ok {
         ndres, err := redond.Compute(g, cache)
@@ -323,7 +323,7 @@ func (g Graph) Generate(text, sol string) (string, string, error) {
         case bool: ndresstr = strconv.FormatBool(ndt)
         case Fraction: ndresstr = strconv.Itoa(ndt.x) + "/" + strconv.Itoa(ndt.y)
         default:
-          fmt.Printf("%v %T\n", ndres, ndres)
+          fmt.Printf("%v %T %v %v\n", ndres, ndres, nd, id)
           return "", "", InvalidGraphErr{"invalid ret type"} 
         }
         ntext = strings.ReplaceAll(ntext, "`" + setnd.name + "`", ndresstr)
