@@ -76,10 +76,14 @@ type TeamS struct {
   Id string
   Name string
   Money int
-  Bought map[ProbM]struct{}
-  Pending map[ProbM]struct{}
-  Solved map[ProbM]struct{}
-  Sold map[ProbM]struct{}
+  // Bought map[ProbM]struct{}
+  // Pending map[ProbM]struct{}
+  // Solved map[ProbM]struct{}
+  // Sold map[ProbM]struct{}
+  Bought map[string]ProbM
+  Pending map[string]ProbM
+  Solved map[string]ProbM
+  Sold map[string]ProbM
   Chat []ChatMsg
   Banned bool
   LastBanned time.Time
@@ -212,11 +216,17 @@ func DBSell(team TeamM, probid string) (money int, oerr error) {
     var found bool
     team.With(func(teamS *TeamS) {
 
-      _, ok = teamS.Bought[probres]
+      _, ok = teamS.Bought[probid]
       if !ok { oerr = dbErr("sell", "prob not owned") }
 
-      delete(teamS.Bought, probres)
-      teamS.Sold[probres] = struct{}{}
+      delete(teamS.Bought, probid)
+      teamS.Sold[probid] = probres
+
+      if len(probid) > 15 {
+        Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
+          delete(*v, probid)
+        })
+      }
 
       teamS.Money += cost
       money = teamS.Money
@@ -245,10 +255,10 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
         if len(id) > 15 { continue }
         var valid bool
         probv.With(func(probS *ProbS) {
-          _, bought := teamS.Bought[probv]
-          _, pending := teamS.Bought[probv]
-          _, solved := teamS.Bought[probv]
-          _, sold := teamS.Bought[probv]
+          _, bought := teamS.Bought[id]
+          _, pending := teamS.Bought[id]
+          _, solved := teamS.Bought[id]
+          _, sold := teamS.Bought[id]
           valid = probS.Diff == diff && 
             !bought &&
             !pending &&
@@ -268,13 +278,14 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
     if oerr != nil { return }
 
     bprob := probM
+    var nid string
     probM.RWith(func(v ProbS) {
       if v.Graph == nil { return }
       text, sol, err := v.Graph.Generate(v.Text, v.Solution)
       if err != nil { oerr = err; return }
       nworkers := make([]string, len(v.Workers))
       copy(nworkers, v.Workers)
-      nid := v.Id + ":" + GetRandomId()
+      nid = v.Id + ":" + GetRandomId()
       nbprob := NewRWMutexWrap(ProbS{
         Id: nid,
         Name: v.Name,
@@ -291,7 +302,7 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
       })
     })
     if oerr != nil { return }
-    teamS.Bought[bprob] = struct{}{}
+    teamS.Bought[nid] = bprob
 
     teamS.Money -= diffcost
     money = teamS.Money
@@ -311,7 +322,7 @@ func DBBuyOld(team TeamM, diff string) (prob string, money int, name string, tex
   team.With(func(teamS *TeamS) {
     if diffcost > teamS.Money { oerr = dbErr("buy", "not enough money"); return }
     var probM ProbM
-    for probv, _ := range teamS.Sold {
+    for _, probv := range teamS.Sold {
       var valid bool
       probv.With(func(probS *ProbS) {
         valid = probS.Diff == diff 
@@ -326,8 +337,8 @@ func DBBuyOld(team TeamM, diff string) (prob string, money int, name string, tex
     }
 
     if prob == "" { oerr = dbErr("buyold", "no prob found"); return }
-    delete(teamS.Sold, probM)
-    teamS.Bought[probM] = struct{}{}
+    delete(teamS.Sold, prob)
+    teamS.Bought[prob] = probM
 
     teamS.Money -= diffcost
     money = teamS.Money
@@ -349,7 +360,7 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
   })
 
   team.With(func(teamS *TeamS) {
-    _, ok = teamS.Bought[probres]
+    _, ok = teamS.Bought[prob]
     if !ok { oerr = dbErr("prob not owned") }
 
     teamname = teamS.Name
@@ -385,8 +396,13 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
     })
     if oerr != nil { return }
     
-    delete(teamS.Bought, probres)
-    teamS.Pending[probres] = struct{}{}
+    delete(teamS.Bought, prob)
+    teamS.Pending[prob] = probres
+    if len(prob) > 15 {
+      Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
+        delete(*v, prob)
+      })
+    }
   })
   return
 }
@@ -468,8 +484,8 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
   })
 
   team.With(func(teamS *TeamS) {
-    _, bought := teamS.Bought[probres]
-    _, pending := teamS.Pending[probres]
+    _, bought := teamS.Bought[prob]
+    _, pending := teamS.Pending[prob]
     if !bought && !pending { oerr = dbErr("chat", "prob not owned"); return }
     teamS.Chat = append(teamS.Chat, ChatMsg{false, probres, team, msg})
     check, ok = teamS.ChatChecksCache[probres]
@@ -554,7 +570,7 @@ func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
     res.NumSold = len(t.Sold)
     res.NumSolved = len(t.Solved)
     res.Bought = make([]probRes, 0, len(t.Bought))
-    for pr, _ := range t.Bought {
+    for _, pr := range t.Bought {
       pr.RWith(func(v ProbS) { res.Bought = append(res.Bought, probRes{
         Name: v.Name,
         Id: v.Id,
@@ -564,7 +580,7 @@ func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
       }) })
     }
     res.Pending = make([]probRes, 0, len(t.Pending))
-    for pr, _ := range t.Pending {
+    for _, pr := range t.Pending {
       pr.RWith(func(v ProbS) { res.Pending = append(res.Pending, probRes{
         Name: v.Name,
         Id: v.Id,
@@ -638,12 +654,13 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
     team := checkS.Team
     prob := checkS.Prob
     var cost int
-    prob.RWith(func(v ProbS) { cost, ok = GetCost("+" + v.Diff) })
+    var probid string
+    prob.RWith(func(v ProbS) { cost, ok = GetCost("+" + v.Diff); probid = v.Id })
     if !ok { oerr = dbErr("grade", "invalid cost") }
 
     team.RWith(func(v TeamS) {
       if v.Banned { oerr = dbErr("grade", "cannot grade banned team"); return }
-      _, ok = v.Pending[prob]
+      _, ok = v.Pending[probid]
       if !ok { oerr = dbErr("grade", "prob not pending"); return }
 
       target := v.Bought
@@ -651,8 +668,8 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
         target = v.Solved
       }
 
-      delete(target, prob)
-      target[prob] = struct{}{}
+      delete(target, probid)
+      target[probid] = prob
 
       if corr {
         money = v.Money + cost
@@ -983,10 +1000,10 @@ func DBLoadFromPB(ac string) error {
         Id: tm.Id,
         Name: tm.GetString("name"),
         Money: 0,
-        Bought: make(map[ProbM]struct{}),
-        Pending: make(map[ProbM]struct{}),
-        Solved: make(map[ProbM]struct{}),
-        Sold: make(map[ProbM]struct{}),
+        Bought: make(map[string]ProbM),
+        Pending: make(map[string]ProbM),
+        Solved: make(map[string]ProbM),
+        Sold: make(map[string]ProbM),
         Chat: make([]ChatMsg, 0),
         Banned: false,
         LastBanned: time.Time{},
