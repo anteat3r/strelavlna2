@@ -972,9 +972,10 @@ func DBLoadFromPB(ac string) error {
   Consts = NewRWMutexWrap(make(map[string]float64))
   teams, err := App.Dao().FindRecordsByFilter(
     "teams",
-    `contest = "` + ac + `"`,
+    `contest = '` + ac + `'`,
     "updated", 0, 0,
   )
+  log.Info(teams)
   if err != nil { return err }
   Teams.With(func(v *map[string]*RWMutexWrap[TeamS]) {
     for _, tm := range teams {
