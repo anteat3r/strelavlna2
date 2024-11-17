@@ -313,6 +313,7 @@ func (g Graph) Generate(text, sol string) (string, string, error) {
         ndres, err := redond.Compute(g, cache)
         if err != nil { return "", "", err }
         if ndres.(bool) {
+          fmt.Println("redoing")
           continue redol
         }
       }
