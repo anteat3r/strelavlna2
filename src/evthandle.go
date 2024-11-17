@@ -355,6 +355,14 @@ func AdminWsHandleMsg(
         tc.Send("showlowerrank")
       }
     })
+
+  case "sendrank":
+    if len(m) != 1 { return eIm(msg) }
+    TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
+      for _, tc := range v {
+        tc.Send("showrank")
+      }
+    })
   }
 
 
