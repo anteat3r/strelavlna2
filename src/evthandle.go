@@ -343,7 +343,7 @@ func AdminWsHandleMsg(
       return 0
     })
     for i, sc := range scores {
-      WriteTeamChan(id, "gotdata", strconv.Itoa(i+1), sc.data)
+      WriteTeamChan(sc.id, "gotdata", strconv.Itoa(i+1), sc.data)
       App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
       Bind(dbx.Params{"score": sc.money, "id": id}).Execute()
     }
