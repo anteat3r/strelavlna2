@@ -1,8 +1,9 @@
-admins = ["a", "b", "c", "d"]
-probs = ["u0", "u1", "u2", "u3", "u4", "u5", "u6", "u7"]
+import time
+admins = ["a", "b", "c", "d", "e", "f", "g", "h"]
+probs = ["u{}".format(i) for i in range(500)]
 
 sectors = [
-    [["u0", "u1"], ["u2", "u3", "u4"], ["u5"], ["u6", "u7"]]
+    [["u0", "u1"], ["u2", "u3", "u4"], ["u5"], ["u6", "u7"], ["u8", "u9"], ["u10", "u11", "u12"], ["u13", "u14", "u15"], ["u16", "u17", "u18", "u19"]],
 ]
 
 def new_sector():
@@ -10,6 +11,9 @@ def new_sector():
     ap = [] #admin probs
     for i in range(len(admins)):
         ap.append([])
+
+
+    
     for sector in sectors:
         for i, admin in enumerate(sector):
             for prob in admin:
@@ -50,8 +54,13 @@ def compile_sectors():
     
     return queues
 
+
+start = time.time()
 while new_sector():
     pass
 sectors.pop()
+print("Took {} seconds".format(time.time() - start))
+
+
 
 print(compile_sectors())
