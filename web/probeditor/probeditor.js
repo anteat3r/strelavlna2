@@ -1975,7 +1975,9 @@ function findHoveredNode(){
 function computeNode(graph, cache, nodeId){
     if (cache.get(nodeId) != undefined) {
         const c = cache.get(nodeId);
-        console.log(c);
+        if (typeof c == "object") {
+            return c.clone();
+        }
         return c;
     }
 
@@ -2309,7 +2311,7 @@ function drawRoundedPath(ctx, points, radius) {
 
 
 await load();
-fetch('https://strela-vlna.gchd.cz/probeditor/editor_render_ruleset.json') //https://strela-vlna.gchd.cz/probeditor/editor_render_ruleset.json
+fetch('editor_render_ruleset.json') //https://strela-vlna.gchd.cz/probeditor/editor_render_ruleset.json
   .then(response => response.json())
   .then(data => {
     editor_render_ruleset = data;

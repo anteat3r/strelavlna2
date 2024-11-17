@@ -37,6 +37,10 @@ class Fraction {
     this.simplify();
     return new Fraction(this.x, this.y);
   }
+
+  clone() {
+    return new Fraction(this.x, this.y);
+  }
 }
 
 export default {
