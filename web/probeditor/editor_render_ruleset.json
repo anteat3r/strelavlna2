@@ -164,7 +164,16 @@
         "lessthanequal": "lessthanequal",
         "<=": "lessthanequal",
         "greaterthanequal": "greaterthanequal",
-        ">=": "greaterthanequal"
+        ">=": "greaterthanequal",
+
+        "nocachenumber": "nocachenumber",
+        "noc": "nocachenumber",
+        "nocachestring": "nocachestring",
+        "nocs": "nocachestring",
+        "nocachebool": "nocachebool",
+        "nocb": "nocachebool",
+        "nocachefraction": "nocachefraction",
+        "nocf": "nocachefraction"
 
     },
 
@@ -592,6 +601,42 @@
               "inputs": 2,
               "inputTypes": ["number", "number"],
               "outputType": "bool"
+            },
+            "nocachenumber": {
+              "width": 80,
+              "height": 20,
+              "text": "nocache",
+              "fontSize": 15,
+              "inputs": 1,
+              "inputTypes": ["number"],
+              "outputType": "number"
+            },
+            "nocachestring": {
+              "width": 80,
+              "height": 20,
+              "text": "nocache",
+              "fontSize": 15,
+              "inputs": 1,
+              "inputTypes": ["string"],
+              "outputType": "string"
+            },
+            "nocachebool": {
+              "width": 80,
+              "height": 20,
+              "text": "nocache",
+              "fontsize": 15,
+              "inputs": 1,
+              "inputtypes": ["bool"],
+              "outputtype": "bool"
+            },
+            "nocachefraction": {
+              "width": 80,
+              "height": 20,
+              "text": "nocache",
+              "fontSize": 15,
+              "inputs": 1,
+              "inputTypes": ["fraction"],
+              "outputType": "fraction"
             }
         },
         "get": {

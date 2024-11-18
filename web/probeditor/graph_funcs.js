@@ -134,4 +134,8 @@ export default {
     "greaterthan": (i, _, __) => i[0] > i[1],
     "lessthanequal": (i, _, __) => i[0] <= i[1],
     "greaterthanequal": (i, _, __) => i[0] >= i[1],
+    "nocachenumber": (i, _, __) => i[0],
+    "nocachestring": (i, _, __) => i[0],
+    "nocachebool": (i, _, __) => i[0],
+    "nocachefraction": (i, _, __) => i[0],
 }
