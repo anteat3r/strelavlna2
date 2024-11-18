@@ -161,6 +161,8 @@ function updateModHome(){
     const title = document.getElementById("title").innerHTML = contest_name;
     const textfield_wrapper = document.getElementById("global-info-textfield-wrapper");
     const textfield = document.getElementById("global-info-textfield");
+    const sendResultsWrapper = document.getElementById("end-contest-wrapper");
+    const sendResults = document.getElementById("end-contest");
     textfield.placeholder = contest_info;
     const role_worker = document.getElementById("role-worker");
     const role_manager = document.getElementById("role-manager");
@@ -170,23 +172,37 @@ function updateModHome(){
         role_manager.classList.remove("role-selected");
         role_admin.classList.remove("role-selected");
         textfield_wrapper.classList.add("hidden");
+        sendResultsWrapper.classList.add("hidden");
     }else if(myRole == "worker"){
         role_worker.classList.add("role-selected");
         role_manager.classList.remove("role-selected");
         role_admin.classList.remove("role-selected");
         textfield_wrapper.classList.add("hidden");
+        sendResultsWrapper.classList.add("hidden");
     }else if(myRole == "manager"){
         role_worker.classList.remove("role-selected");
         role_manager.classList.add("role-selected");
         role_admin.classList.remove("role-selected");
         textfield_wrapper.classList.remove("hidden");
+        sendResultsWrapper.classList.remove("hidden");
     }else if(myRole == "admin"){
         role_worker.classList.remove("role-selected");
         role_manager.classList.remove("role-selected");
         role_admin.classList.add("role-selected");
         textfield_wrapper.classList.remove("hidden");
+        sendResultsWrapper.classList.remove("hidden");
     }
 }
+
+document.getElementById("end-contest").addEventListener("click", function(){
+    const now = new Date().getTime();
+    var remaining = end_time - now;
+
+    if(remaining > 0) return;
+    if(checks.length > 0) return;
+
+    sendResults();
+});
 
 function focusNextCheck(){
     if( myRole != "worker" ) return;
@@ -604,7 +620,7 @@ function updateFocusedCheck(){
         problem_content.innerHTML = "Načítání...";
     }else{
         problem_title.innerHTML = focused_problem_obj.title + " [" + focused_problem_obj.rank + "]";
-        problem_content.innerHTML = focused_problem_obj.content;
+        problem_content.innerHTML = parseContentForLatex(focused_problem_obj.content);
     }
     
     team_name.innerHTML = focused_check_obj.teamname;
@@ -641,6 +657,42 @@ function updateFocusedCheck(){
     }
     MathJax.typeset();
 
+}
+
+function parseContentForLatex(txt){
+    let newtxt = "";
+    let curent_state = 0;
+    let i = 0;
+    for(;i < txt.length - 1; i++){
+        if(txt[i] == "$" && txt[i + 1] == "$"){
+            if(curent_state == 0){
+                curent_state = 2;
+                newtxt += `<span class="latex-styled">$`;
+            }else if(curent_state == 1){
+                newtxt += "$$";
+            }else if(curent_state == 2){
+                curent_state = 0;
+                newtxt += `$</span>`;
+            }
+            i++;
+        }else if(txt[i] == "$" && txt[i + 1] != "$"){
+            if(curent_state == 0){
+                curent_state = 1;
+                newtxt += "$";
+            }else if(curent_state == 1){
+                newtxt += "$";
+                curent_state = 0;
+            }else if(curent_state == 2){
+                console.error("parsing error");
+            }
+        }else{
+            newtxt += txt[i];
+        }
+    }
+    if(i == txt.length - 1){
+        newtxt += txt[txt.length - 1];
+    }
+    return newtxt;
 }
 
 function updateChat(){
@@ -883,6 +935,10 @@ function connectWS() {
         if (msg.length != 2) { cLe() }
         reassigned(msg[1]);
         break;
+      case "gotdata":
+        if (msg.length != 2) { cLe() }
+        gotData(msg[1]);
+        break;
       case "err":
         console.log(msg)
       break;
@@ -991,6 +1047,9 @@ function unwork() {
   socket.send("unwork");
 }
 
+function sendResults() {
+  socket.send("sendresults");
+}
 
 
 
@@ -1221,6 +1280,9 @@ function checkFocused(checkid, modid) {
     updateChat();
 }
 
+function gotData(data) {
+    
+}
 
 /**
  * @param {string} modid

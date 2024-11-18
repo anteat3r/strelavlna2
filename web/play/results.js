@@ -34,6 +34,7 @@ function showRank(){
 }
 
 function loadData(data){
+    console.log(data);
     rank = data.rank;
     solved = [data.numsolved.A, data.numsolved.B, data.numsolved.C];
     sold = [data.numsold.A, data.numsold.B, data.numsold.C];
@@ -41,11 +42,15 @@ function loadData(data){
     income_portions = [data.moneymade.A, data.moneymade.B, data.moneymade.C];
     
     balance_chart = [];
-    const startT = new Date(Date.parse(data.moneyhist[0].time));
-    for (let hist of data.moneyhist){
-        const time = new Date(Date.parse(hist.time));
-        const deltaTime = (time.getTime() - startT.getTime());
-        balance_chart.push({x: deltaTime*60, y: hist.money});
+    if (data.moneyhist.length != 0){
+        const startT = new Date(Date.parse(data.moneyhist[0].time));
+        for (let hist of data.moneyhist){
+            const time = new Date(Date.parse(hist.time));
+            const deltaTime = (time.getTime() - startT.getTime());
+            balance_chart.push({x: deltaTime*60, y: hist.money});
+        }
+    }else{
+        balance_chart = [{x:0, y: 50}, {x:15*60000, y: 100}, {x:22*60000, y: 40}, {x:50*60000, y: 250}, {x:75*60000, y: 220}, {x:120*60000, y: 245}];
     }
 
     if (data.rank_public) {
