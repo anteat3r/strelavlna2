@@ -322,18 +322,11 @@ func AdminWsHandleMsg(
     scores := []teamData{}
     Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
       for id, tm := range v {
-        var bres []byte
-        var err error
         var mn int
-        tm.RWith(func(t TeamS) {
-          bres, err = json.Marshal(t.Stats)
-          mn = t.Money
-        })
-        if err != nil { fmt.Println(err); continue }
+        tm.RWith(func(t TeamS) { mn = t.Money })
         scores = append(scores, teamData{
           id: id,
           money: mn,
-          data: string(bres),
         })
       }
     })
@@ -342,30 +335,53 @@ func AdminWsHandleMsg(
       if i.money < j.money { return 1 }
       return 0
     })
-    for i, sc := range scores {
-      WriteTeamChan(sc.id, "gotdata", strconv.Itoa(i+1), sc.data)
-      App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
-      Bind(dbx.Params{"score": sc.money, "id": id}).Execute()
-    }
+    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+      for id, tm := range v {
+        var data string
+        var money int
+        tm.With(func(t *TeamS) {
+          idx := slices.IndexFunc(scores, func(a teamData) bool { return a.id == id })
+          t.Stats.Rank = idx+1
+          t.Stats.StatsPublic = true
+          bts, err := json.Marshal(t.Stats)
+          if err != nil { log.Error(err) }
+          data = string(bts)
+          money = t.Money
+        })
+        WriteTeamChan(id, "gotdata", data)
+        App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
+        Bind(dbx.Params{"score": money, "id": id}).Execute()
+      }
+    })
 
   case "sendlowerrank":
     if len(m) != 1 { return eIm(msg) }
-    TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
-      for _, tc := range v {
-        tc.Send("showlowerrank")
+    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+      for id, tm := range v {
+        lower := true
+        tm.With(func(v *TeamS) {
+          lower = v.Stats.Rank <= 16
+          if lower { v.Stats.RankPublic = true }
+        })
+        if !lower { continue }
+        WriteTeamChan(id, "showrank")
       }
     })
 
   case "sendrank":
-    if len(m) != 1 { return eIm(msg) }
-    TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
-      for _, tc := range v {
-        tc.Send("showrank")
-      }
+    if len(m) != 2 { return eIm(msg) }
+    team := m[1]
+    var ok bool
+    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+      var tm TeamM
+      tm, ok = v[team]
+      if !ok { return }
+      tm.With(func(v *TeamS) { v.Stats.RankPublic = true })
     })
+    if !ok { return }
+    WriteTeamChan(team, "showrank")
+
   }
-
-
 
   fmt.Printf("%s >>- %s <- %s\n", formTime(), id, readmsg)
   JSONlog(id, true, true, 0, readmsg)
@@ -376,7 +392,6 @@ func AdminWsHandleMsg(
 type teamData struct{
   id string
   money int
-  data string
 }
 
 // func LoadLog() ([]string, error) {

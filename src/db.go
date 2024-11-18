@@ -91,6 +91,8 @@ type TeamS struct {
   SolChecksCache map[string]string
   Players [5]string
   Stats TeamStats
+  GenProbCache map[string]int
+  GenProbCacheLen int
 }
 type TeamM = *RWMutexWrap[TeamS]
 
@@ -105,6 +107,9 @@ type TeamStats struct {
   NumIncc map[string]int `json:"numincc"`
   MoneyMade map[string]int `json:"moneymade"`
   MoneyHist []moneyHistRec `json:"moneyhist"`
+  Rank int `json:"rank"`
+  StatsPublic bool `json:"stats_public"`
+  RankPublic bool `json:"rank_public"`
 }
 
 type ProbS struct {
@@ -131,6 +136,16 @@ type CheckS struct {
 }
 type CheckM = *RWMutexWrap[CheckS]
 
+type Constant struct {
+  Id string `db:"id" json:"id"`
+  Value float64 `db:"value" json:"value"`
+  Name string `db:"name" json:"name"`
+  Symbol string `db:"symbol" json:"symbol"`
+  Unit string `db:"unit" json:"unit"`
+  Desc string `db:"desc" json:"desc"`
+  Group string `db:"group" json:"group"`
+}
+
 var (
   Costs = NewRWMutexWrap(make(map[string]int))
   Teams = NewRWMutexWrap(make(map[string]TeamM))
@@ -138,7 +153,7 @@ var (
   Checks = NewRWMutexWrap(make(map[string]CheckM))
   ContInfo = NewRWMutexWrap("")
   ContName = NewRWMutexWrap("")
-  Consts = NewRWMutexWrap(make(map[string]float64))
+  Consts = NewRWMutexWrap(make(map[string]Constant))
 
   DBData = map[string]any{
     "costs": &Costs,
@@ -254,16 +269,22 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
       for id, probv := range probmap {
         if len(id) > 15 { continue }
         var valid bool
-        probv.With(func(probS *ProbS) {
+        probv.RWith(func(probS ProbS) {
           _, bought := teamS.Bought[id]
           _, pending := teamS.Pending[id]
           _, solved := teamS.Solved[id]
           _, sold := teamS.Sold[id]
+          queued := false
+          if probS.Graph == nil {
+            _, ok := teamS.GenProbCache[probS.Id]
+            if ok { queued = true }
+          }
           valid = probS.Diff == diff && 
             !bought &&
             !pending &&
             !solved &&
-            !sold
+            !sold &&
+            !queued
           if !valid { return }
           prob = id
           name = probS.Name
@@ -303,6 +324,13 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
       Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
         (*w)[nid] = bprob
       })
+      remid := ""
+      for id, idx := range teamS.GenProbCache {
+        if idx == teamS.GenProbCacheLen-1 { remid = id }
+        teamS.GenProbCache[id] = idx+1
+      }
+      delete(teamS.GenProbCache, remid)
+      teamS.GenProbCache[nid] = 0
     })
     prob = nid
     if oerr != nil { return }
@@ -556,6 +584,8 @@ type teamRes struct {
   Player3 string `json:"player3"`
   Player4 string `json:"player4"`
   Player5 string `json:"player5"`
+  Stats string `json:"stats"`
+  Consts string `json:"consts"`
 }
 
 type checkRes struct{
@@ -625,12 +655,24 @@ func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
         })
       }
     })
+    if t.Stats.StatsPublic {
+      resb, err := json.Marshal(t.Stats)
+      if err != nil { oerr = err; return }
+      res.Stats = string(resb)
+    }
   })
+  if oerr != nil { return }
 
   res.Costs = make(map[string]int)
   Costs.RWith(func(vm map[string]int) {
     for k, v := range vm { res.Costs[k] = v }
   })
+  Consts.RWith(func(v map[string]Constant) {
+    cnstsb, err := json.Marshal(v)
+    if err != nil { oerr = err; return }
+    res.Consts = string(cnstsb)
+  })
+  if oerr != nil { return }
 
   ContName.RWith(func(v string) { res.ContestName = v })
   ContInfo.RWith(func(v string) { res.ContestInfo = v })
@@ -987,7 +1029,7 @@ func DBDump() error {
 
   err = os.WriteFile(
     "/opt/strelavlna2/dist/svdata_" + ac + ".json", 
-    resb, fs.FileMode(os.O_WRONLY),
+    resb, fs.FileMode(os.O_WRONLY | os.O_CREATE),
   )
   return err
 }
@@ -1008,59 +1050,14 @@ func DBLoadFromPB(ac string) error {
   Checks = NewRWMutexWrap(make(map[string]CheckM))
   ContInfo = NewRWMutexWrap("")
   ContName = NewRWMutexWrap("")
-  Consts = NewRWMutexWrap(make(map[string]float64))
-  teams, err := App.Dao().FindRecordsByFilter(
-    "teams",
-    `contest = '` + ac + `'`,
-    "updated", 0, 0,
-  )
-  log.Info(teams)
+  Consts = NewRWMutexWrap(make(map[string]Constant))
+  consts := make([]Constant, 0)
+  err := App.Dao().DB().
+    NewQuery(`select * from consts`).All(&consts)
   if err != nil { return err }
-  Teams.With(func(v *map[string]*RWMutexWrap[TeamS]) {
-    for _, tm := range teams {
-      newteam := NewRWMutexWrap(TeamS{
-        Id: tm.Id,
-        Name: tm.GetString("name"),
-        Money: tm.GetInt("score"),
-        Bought: make(map[string]ProbM),
-        Pending: make(map[string]ProbM),
-        Solved: make(map[string]ProbM),
-        Sold: make(map[string]ProbM),
-        Chat: make([]ChatMsg, 0),
-        Banned: false,
-        LastBanned: time.Time{},
-        ChatChecksCache: make(map[string]string),
-        SolChecksCache: make(map[string]string),
-        Players: [5]string{
-          tm.GetString("player1"),
-          tm.GetString("player2"),
-          tm.GetString("player3"),
-          tm.GetString("player4"),
-          tm.GetString("player5"),
-        },
-        Stats: TeamStats{
-          NumBought: map[string]int{"A": 0, "B": 0, "C": 0},
-          NumSold: map[string]int{"A": 0, "B": 0, "C": 0},
-          NumSolved: map[string]int{"A": 0, "B": 0, "C": 0},
-          NumIncc: map[string]int{"A": 0, "B": 0, "C": 0},
-          MoneyMade: map[string]int{"A": 0, "B": 0, "C": 0},
-          MoneyHist: make([]moneyHistRec, 0),
-        },
-      })
-      (*v)[tm.Id] = &newteam
-    }
-    log.Info(*v)
-  })
-  consts := make([]struct{
-    Id string `db:"id"`
-    Value float64 `db:"value"`
-  }, 0)
-  err = App.Dao().DB().
-    NewQuery(`select id, value from consts`).All(&consts)
-  if err != nil { return err }
-  Consts.With(func(v *map[string]float64) {
+  Consts.With(func(v *map[string]Constant) {
     for _, cnst := range consts {
-      (*v)[cnst.Id] = cnst.Value
+      (*v)[cnst.Id] = cnst
     }
   })
   probs := make([]struct{
@@ -1079,6 +1076,7 @@ func DBLoadFromPB(ac string) error {
     Bind(dbx.Params{"contest": ac}).
     All(&probs)
   if err != nil { return err }
+  genprobcnt := 0
   Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
     for _, pr := range probs {
       if pr.Author == "" { continue }
@@ -1091,17 +1089,15 @@ func DBLoadFromPB(ac string) error {
         if inf {
           graph, err = ParseGraph(graphs)
           if err != nil { return }
-          var textg, solg string
-          textg, solg, err = graph.Generate(text, sol)
+          _, _, err = graph.Generate(text, sol)
           if err != nil { return }
-          log.Info(textg, solg)
+          genprobcnt++
         } else {
           graph, err = ParseGraph(graphs)
           if err != nil { return }
           text, sol, err = graph.Generate(text, sol)
           if err != nil { return }
           graph = nil
-          log.Info(text, sol)
         }
       }
       newprob := NewRWMutexWrap(ProbS{
@@ -1117,9 +1113,53 @@ func DBLoadFromPB(ac string) error {
       })
       (*v)[pr.Id] = &newprob
     }
-    log.Info(*v)
   })
   if err != nil { return err }
+  teams, err := App.Dao().FindRecordsByFilter(
+    "teams",
+    `contest = '` + ac + `'`,
+    "updated", 0, 0,
+  )
+  if err != nil { return err }
+  Teams.With(func(v *map[string]*RWMutexWrap[TeamS]) {
+    for _, tm := range teams {
+      newteam := NewRWMutexWrap(TeamS{
+        Id: tm.Id,
+        Name: tm.GetString("name"),
+        Money: tm.GetInt("score"),
+        Bought: make(map[string]ProbM),
+        Pending: make(map[string]ProbM),
+        Solved: make(map[string]ProbM),
+        Sold: make(map[string]ProbM),
+        Chat: make([]ChatMsg, 0),
+        Banned: false,
+        LastBanned: time.Time{},
+        ChatChecksCache: make(map[string]string),
+        SolChecksCache: make(map[string]string),
+        GenProbCache: make(map[string]int),
+        GenProbCacheLen: genprobcnt / 2,
+        Players: [5]string{
+          tm.GetString("player1"),
+          tm.GetString("player2"),
+          tm.GetString("player3"),
+          tm.GetString("player4"),
+          tm.GetString("player5"),
+        },
+        Stats: TeamStats{
+          NumBought: map[string]int{"A": 0, "B": 0, "C": 0},
+          NumSold: map[string]int{"A": 0, "B": 0, "C": 0},
+          NumSolved: map[string]int{"A": 0, "B": 0, "C": 0},
+          NumIncc: map[string]int{"A": 0, "B": 0, "C": 0},
+          MoneyMade: map[string]int{"A": 0, "B": 0, "C": 0},
+          MoneyHist: make([]moneyHistRec, 0),
+          Rank: -1,
+          StatsPublic: false,
+          RankPublic: false,
+        },
+      })
+      (*v)[tm.Id] = &newteam
+    }
+  })
   contest, err := App.Dao().FindRecordById("contests", ac)
   if err != nil { return err }
   ContInfo.With(func(v *string) {
