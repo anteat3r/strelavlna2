@@ -7,6 +7,8 @@ import (
 	"math/rand/v2"
 	"strconv"
 	"strings"
+
+  log "github.com/anteat3r/golog"
 )
 
 type GraphNode interface {
@@ -41,8 +43,10 @@ func ParseGraph(graphs string) (Graph, error) {
       } `json:"set"`
     } `json:"nodes"`
   }{}
+  log.Info(graphs)
   err := json.Unmarshal([]byte(graphs), &graphinp)
   if err != nil { return nil, err }
+  log.Info("made it")
   graphres := make(Graph)
   for id, nd := range graphinp.Nodes.Basic {
     var nnd FunctionNode

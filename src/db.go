@@ -76,10 +76,6 @@ type TeamS struct {
   Id string
   Name string
   Money int
-  // Bought map[ProbM]struct{}
-  // Pending map[ProbM]struct{}
-  // Solved map[ProbM]struct{}
-  // Sold map[ProbM]struct{}
   Bought map[string]ProbM
   Pending map[string]ProbM
   Solved map[string]ProbM
@@ -153,6 +149,7 @@ var (
   Checks = NewRWMutexWrap(make(map[string]CheckM))
   ContInfo = NewRWMutexWrap("")
   ContName = NewRWMutexWrap("")
+  ContStats = NewRWMutexWrap("")
   Consts = NewRWMutexWrap(make(map[string]Constant))
 
   DBData = map[string]any{
@@ -162,6 +159,8 @@ var (
     "checks": &Checks,
     "continfo": &ContInfo,
     "contname": &ContName,
+    "consts": &Consts,
+    "contstats": &ContStats,
   }
 
   App *pocketbase.PocketBase
@@ -884,6 +883,7 @@ type adminInitLoad struct {
   ContestName string `json:"contest_name"`
   ContestInfo string `json:"contest_info"`
   Banned []adminBannedRes `json:"banned"`
+  ContestStats string `json:"contest_stats"`
 }
 
 type adminBannedRes struct{
@@ -913,6 +913,7 @@ func DBAdminInitLoad(id string) (res string, oerr error) {
   })
   ContInfo.RWith(func(v string) { ares.ContestInfo = v })
   ContName.RWith(func(v string) { ares.ContestName = v })
+  ContStats.RWith(func(v string) { ares.ContestStats = v })
 
   ares.Banned = make([]adminBannedRes, 0)
   Teams.RWith(func(teammap map[string]*RWMutexWrap[TeamS]) {
@@ -1040,6 +1041,17 @@ func DBLoadFromDump() error {
   if err != nil { return err }
 
   err = json.Unmarshal(resb, &DBData)
+  if err != nil { return err }
+
+  TeamChanMap.With(func(v *map[string]*TeamChanMu) {
+    Teams.RWith(func(w map[string]*RWMutexWrap[TeamS]) {
+      for id, _ := range w {
+        teamchan := &TeamChanMu{sync.RWMutex{}, make([]chan string, 5), id}
+        (*v)[id] = teamchan
+      }
+    })
+  })
+
   return err
 }
 
@@ -1051,6 +1063,7 @@ func DBLoadFromPB(ac string) error {
   ContInfo = NewRWMutexWrap("")
   ContName = NewRWMutexWrap("")
   Consts = NewRWMutexWrap(make(map[string]Constant))
+  ContStats = NewRWMutexWrap("")
   consts := make([]Constant, 0)
   err := App.Dao().DB().
     NewQuery(`select * from consts`).All(&consts)
@@ -1167,6 +1180,9 @@ func DBLoadFromPB(ac string) error {
   })
   ContName.With(func(v *string) {
     *v = contest.GetString("name")
+  })
+  ContStats.With(func(v *string) {
+    *v = contest.GetString("stats")
   })
 
   return nil

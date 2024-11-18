@@ -335,6 +335,7 @@ func AdminWsHandleMsg(
       if i.money < j.money { return 1 }
       return 0
     })
+    fulldata := "{"
     Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
       for id, tm := range v {
         var data string
@@ -349,10 +350,20 @@ func AdminWsHandleMsg(
           money = t.Money
         })
         WriteTeamChan(id, "gotdata", data)
-        App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
+        fulldata += `"` + id + `":` + data + ","
+        _, err := App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
         Bind(dbx.Params{"score": money, "id": id}).Execute()
+        if err != nil { log.Error(err) }
       }
     })
+    fulldata = strings.TrimSuffix(fulldata, ",")
+    fulldata += "}"
+    ContStats.With(func(v *string) { *v = fulldata })
+    ac := ActiveContest.GetPrimitiveVal().Id
+    _, err := App.Dao().DB().NewQuery("update contests set stats = {:stats} where id = {:id}").
+    Bind(dbx.Params{"stats": fulldata, "id": ac}).Execute()
+    if err != nil { log.Error(err) }
+
 
   case "sendlowerrank":
     if len(m) != 1 { return eIm(msg) }
@@ -360,7 +371,7 @@ func AdminWsHandleMsg(
       for id, tm := range v {
         lower := true
         tm.With(func(v *TeamS) {
-          lower = v.Stats.Rank <= 16
+          lower = v.Stats.Rank <= 15
           if lower { v.Stats.RankPublic = true }
         })
         if !lower { continue }
