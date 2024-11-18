@@ -453,7 +453,7 @@ func ParseGraph(graphs string) (Graph, error) {
       nnd = FunctionNode{
         wtypes: []DataType{},
         fn: func(i []any) any {
-          return res
+          return res.Value
         },
       }
     default:
