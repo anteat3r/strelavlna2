@@ -161,8 +161,6 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     teamid := c.PathParam("team")
     if teamid == "" { return nErr("invalid team path param") }
 
-    log.Info("as")
-
     var ok bool
     Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) { _, ok = v[teamid] })
     if !ok { return nErr("invalid team") }
@@ -176,54 +174,43 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     TeamChanMap.With(func(v *map[string]*TeamChanMu) {
       teamchan, ok = (*v)[teamid]
       if !ok {
-        log.Info("new")
         teamchan = &TeamChanMu{sync.RWMutex{}, make([]chan string, 5), teamid}
         (*v)[teamid] = teamchan
       }
     })
-    log.Info(teamchan)
 
     i := -1
 
     teamchan.mu.RLock()
-    log.Info("as")
     for j, ch := range teamchan.ch {
       if ch != nil { continue }
       i = j
       break
     }
-    log.Info("as")
     teamchan.mu.RUnlock()
-    log.Info("as")
 
     if i == -1 { return errors.New("too many players") }
     perchan := make(chan string, 10)
-    log.Info("as")
 
     teamchan.mu.Lock()
     teamchan.ch[i] = perchan
     teamchan.mu.Unlock()
-    log.Info("as")
 
     var team TeamM
     Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
-      log.Info(v)
       team, ok = v[teamid]
     })
     if !ok {
       log.Error("invalid teamid", teamid)
       return dbErr("invalid teamid", teamid)
     }
-    log.Info("as")
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     if err != nil { return err }
-    log.Info("as")
 
     fmt.Printf("%s >- %s:%d + >->\n", formTime(), teamid, i)
     JSONlog(teamid, false, true, i, ":connect")
     go PlayerWsLoop(conn, teamid, perchan, teamchan, i, team)
-    log.Info("as")
 
     return nil
   }
