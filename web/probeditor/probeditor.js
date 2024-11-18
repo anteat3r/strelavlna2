@@ -933,16 +933,35 @@ function updateTable(){
 
     table_DOM.innerHTML = "";
 
+    let possibleGroups = [];
     for(let item of table){
-        table_DOM.innerHTML += `
-            <tr id=${item.id} class="${focused_const == item.id ? "selected" : ""}">
-                <td>${item.name}</td>
-                <td>${item.symbol}</td>
-                <td>${item.value}</td>
-                <td>${item.unit}</td>
-            </tr>
-            `
+        if (!possibleGroups.includes(item.group)) possibleGroups.push(item.group);
     }
+
+    possibleGroups.sort((a, b) => a.localeCompare(b));
+
+    table.sort((a, b) => a.name.localeCompare(b.name, "cs"));
+
+    console.log(table);
+
+    for (let group of possibleGroups) {
+        table_DOM.innerHTML += `
+            <tr class="table-group-title">
+                <td colspan="4"><h2>${group}</h2></td>
+            </tr>
+                `
+        for(let item of table.filter(item => item.group == group)){
+            table_DOM.innerHTML += `
+                <tr id=${item.id} class="${focused_const == item.id ? "selected" : ""}">
+                    <td>${item.name}</td>
+                    <td>${item.symbol}</td>
+                    <td>${item.value}</td>
+                    <td>${item.unit}</td>
+                </tr>
+                `
+        }
+    }
+
     for(let item of table_DOM.children){
         item.addEventListener("click", function(e){
             if(document.querySelector(".editing")) return;
@@ -1097,14 +1116,24 @@ document.getElementById("add-category-name").addEventListener("blur", function()
     this.classList.add("hidden");
     document.getElementById("add-category").classList.remove("hidden");
     document.getElementById("reassign-wrapper").classList.add("hidden");
-    this.value = "";
-    if (focused_const == "") return;
+    if (focused_const == "") {
+        this.value = "";
+        return;   
+    }
     if (this.value == "") return;
 
     const row = table.find(row => row.id == focused_const);
 
     row.group = this.value;
     updateTable();
+    this.value = "";
+
+});
+
+document.getElementById("add-category-name").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        this.blur();
+    }
 });
 
 //left editor
