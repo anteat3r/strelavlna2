@@ -1781,7 +1781,7 @@ function addToGraph(nodeName, x, y){
             type: nodeName,
             x: x,
             y: y,
-            inputs: Array(rules.basic[nodeName].inputs).fill(-1),
+            inputs: Array(rules.basic[nodeName].inputs).fill("-1"),
         };
     }else if(nodeClass == "get"){
         if (nodeName == "constant"){

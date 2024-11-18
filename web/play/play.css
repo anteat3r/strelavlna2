@@ -2135,7 +2135,8 @@ audio {
     max-width: 700px;
     max-height: 500px;
     overflow-y: auto;
-    box-shadow: 0px 0px 20px 0px #00000034;
+    box-shadow: 0px 0px 0px 10px #ffffff,
+    0px 0px 0px 11px #c0d5dd;
 }
 #constants-container::-webkit-scrollbar {
     width: 8px;
