@@ -2089,7 +2089,7 @@ function computeNode(graph, cache, nodeId){
     }
     const out = funcs[nodeName](inputs, node.value, table);
 
-    cache.set(nodeId, out);
+    if (!nocache) { cache.set(nodeId, out); }
 
     return out;
 }
