@@ -33,19 +33,8 @@ function showRank(){
     setRank();
 }
 
-function showLowerRank(){
-    if (rank > 15){
-        setRank();
-    }
-}
-
-function gotdata(r, data, dt){
-    results_ready = true;
-    
-    rank = parseInt(r);
-    
-    data = JSON.parse(data);
-
+function loadData(data){
+    rank = data.rank;
     solved = [data.numsolved.A, data.numsolved.B, data.numsolved.C];
     sold = [data.numsold.A, data.numsold.B, data.numsold.C];
     accuracy = [data.numsolved.A / (data.numincc.A + data.numsolved.A), data.numsolved.B / (data.numincc.B + data.numsolved.B), data.numsolved.C / (data.numincc.C + data.numsolved.C)];
@@ -59,12 +48,20 @@ function gotdata(r, data, dt){
         balance_chart.push({x: deltaTime*60, y: hist.money});
     }
 
+    if (data.rank_public) {
+        setRank();
+    }
 
+    if (data.results_public) {
+        results_ready = true;
+        generateTicks();
+        startLoadingAnimation();
+    }
 
-    console.log(balance_chart);
+}
 
-    generateTicks();
-    startLoadingAnimation();
+function gotdata(data){
+    loadData(JSON.parse(data));
 }
 
 //animation variables

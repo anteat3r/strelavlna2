@@ -713,16 +713,12 @@ function connectWS() {
         gotinfo(msg[1]);
       break;
       case "gotdata":
-        if (msg.length != 3) { cLe() }
-        gotdata(msg[1], msg[2], (end_time - start_time));
+        if (msg.length != 2) { cLe() }
+        gotdata(msg[1]);
       break;
       case "showrank":
         if (msg.length != 1) { cLe() }
         showRank();
-      break;
-      case "showlowerrank":
-        if (msg.length != 1) { cLe() }
-        showLowerRank();
       break;
       case "err":
         console.log(msg)
@@ -1022,6 +1018,8 @@ function loaded(data) {
     myId = data.idx.toString();
     contest_info = data.contest_info;
     contest_name = data.contest_name;
+    loadData(data.stats);
+
     updatePriceList();
     // console.log(problems[0].chat);
     updateProblemList();
