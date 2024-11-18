@@ -28,6 +28,7 @@ func ParseGraph(graphs string) (Graph, error) {
         Type string `json:"type"`
       } `json:"basic"`
       Get map[string]struct{
+        RefId string `json:"referenceId,omitempty"`
         Selected bool `json:"selected"`
         Type string `json:"type"`
         Value any `json:"value"`
@@ -133,6 +134,34 @@ func ParseGraph(graphs string) (Graph, error) {
           return math.Round(i[0].(float64) * exp) / exp
         },
       }
+    case "lessthan":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number, Number},
+        fn: func(i []any) any {
+          return i[0].(float64) < i[1].(float64)
+        },
+      }
+    case "greaterthan":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number, Number},
+        fn: func(i []any) any {
+          return i[0].(float64) > i[1].(float64)
+        },
+      }
+    case "lessthanequal":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number, Number},
+        fn: func(i []any) any {
+          return i[0].(float64) <= i[1].(float64)
+        },
+      }
+    case "greaterthanequal":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number, Number},
+        fn: func(i []any) any {
+          return i[0].(float64) >= i[1].(float64)
+        },
+      }
     case "numbercomparison":
       nnd = FunctionNode{
         wtypes: []DataType{Number, Number},
@@ -171,11 +200,122 @@ func ParseGraph(graphs string) (Graph, error) {
           return r * r
         },
       }
+    case "absolute":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          return math.Abs(i[0].(float64))
+        },
+      }
+    case "factorial":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          a := int64(math.Abs(i[0].(float64)))
+          res := int64(1)
+          for i := int64(2); i <= a; i++ { res *= i }
+          return float64(a)
+        },
+      }
+    case "or":
+      nnd = FunctionNode{
+        wtypes: []DataType{Bool, Bool},
+        fn: func(i []any) any {
+          return i[0].(bool) || i[1].(bool)
+        },
+      }
+    case "and":
+      nnd = FunctionNode{
+        wtypes: []DataType{Bool, Bool},
+        fn: func(i []any) any {
+          return i[0].(bool) && i[1].(bool)
+        },
+      }
+    case "not":
+      nnd = FunctionNode{
+        wtypes: []DataType{Bool},
+        fn: func(i []any) any {
+          return !i[0].(bool)
+        },
+      }
+    case "isFinite":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          return !math.IsInf(i[0].(float64), 0)
+        },
+      }
+    case "isNaN":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          return math.IsNaN(i[0].(float64))
+        },
+      }
+    case "sin":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          return math.Sin(i[0].(float64))
+        },
+      }
+    case "cos":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          return math.Cos(i[0].(float64))
+        },
+      }
+    case "tan":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          return math.Tan(i[0].(float64))
+        },
+      }
+    case "asin":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          return math.Asin(i[0].(float64))
+        },
+      }
+    case "acos":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          return math.Acos(i[0].(float64))
+        },
+      }
+    case "atan":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number},
+        fn: func(i []any) any {
+          return math.Atan(i[0].(float64))
+        },
+      }
     case "sqrt":
       nnd = FunctionNode{
         wtypes: []DataType{Number},
         fn: func(i []any) any {
           return math.Sqrt(i[0].(float64))
+        },
+      }
+    case "lcm":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number, Number},
+        fn: func(i []any) any {
+          a := int64(math.Abs(i[0].(float64)))
+          b := int64(math.Abs(i[1].(float64)))
+          if b > a { a, b = b, a }
+          res := int64(0)
+          for {
+            if (b == 0) { res = a; break };
+            a %= b
+            if (a == 0) { res = b; break };
+            b %= a
+          }
+          return float64(a * b / res)
         },
       }
     case "gcd":
@@ -269,6 +409,14 @@ func ParseGraph(graphs string) (Graph, error) {
           return float64(i[0].(Fraction).x) / float64(i[0].(Fraction).y)
         },
       }
+    case "nocache":
+      if len(nd.Inputs) != 1 { return nil, InvalidGraphErr{"invalid nocache node"}}
+      nnnd := NoCacheNode{
+        id: id,
+        inp: nd.Inputs[0],
+      }
+      graphres[id] = nnnd
+      continue
     default:
       return nil, InvalidGraphErr{"unsopportes node " + nd.Type}
     }
@@ -291,14 +439,18 @@ func ParseGraph(graphs string) (Graph, error) {
         },
       }
     case "constant":
-      if _, ok := nd.Value.(string); !ok {
-        return nil, InvalidGraphErr{"invalid constant value"}
+      if nd.RefId == "" {
+        return nil, InvalidGraphErr{"invalid constant"}
+      }
+      var res Constant
+      var ok bool
+      Consts.RWith(func(v map[string]Constant) { res, ok = v[nd.RefId] })
+      if !ok {
+        return nil, InvalidGraphErr{"nonexistant constant"}
       }
       nnd = FunctionNode{
         wtypes: []DataType{},
         fn: func(i []any) any {
-          var res float64
-          Consts.RWith(func(v map[string]float64) { res = v[nd.Value.(string)] })
           return res
         },
       }
@@ -506,6 +658,27 @@ func (v RedoNode) Compute(g Graph, cache PathSet) (any, error) {
   if !ok { return nil, InvalidGraphErr{"invalid type"} }
   cache[v.id] = compt
   return compt, nil
+}
+
+type NoCacheNode struct {
+  id GraphId
+  inp GraphId
+}
+var _ GraphNode = (*NoCacheNode)(nil)
+func (v NoCacheNode) Compute(g Graph, cache PathSet) (any, error) {
+  cval, ok := cache[v.id]
+  if ok {
+    if cval == nil { return nil, InvalidGraphErr{"cyclic ref"} }
+    return cval, nil
+  }
+  newcache := make(PathSet)
+  newcache[v.id] = nil
+  nd, ok := g[v.inp]
+  if !ok { return nil, InvalidGraphErr{"invalid ref"} }
+  comp, err := nd.Compute(g, newcache)
+  if err != nil { return nil, err }
+  newcache[v.id] = comp
+  return comp, nil
 }
 
 // type AdditionNode struct {

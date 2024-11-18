@@ -2075,9 +2075,12 @@ function computeNode(graph, cache, nodeId){
     }
 
     let inputs = [];
+    const nocache = nodeName.startsWith("nocache");
+    let ncache;
+    if (nocache) { ncache = new Map(); }
     if (nodeType == "basic") {
         for(let input of node.inputs){
-            inputs.push(computeNode(graph, cache, input));
+            inputs.push(computeNode(graph, nocache ? ncache : cache, input));
         }
     } else if (nodeType == "set"){
         inputs.push(computeNode(graph, cache, node.input));
