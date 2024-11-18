@@ -8,7 +8,7 @@ var team_balance = 400;
 var team_name = "Team 1";
 var team_rank = "14";
 var start_time = new Date().getTime() - 5000;
-var end_time = new Date().getTime() + 5000;
+var end_time = new Date().getTime() + 5000000;
 var prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]]; //[buy], [solve], [sell]
 var team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
 var problems_solved = 12;
@@ -1030,3 +1030,7 @@ function loaded(data) {
     updateTeamStats();
     updateChat();
 }
+
+document.getElementById("table-button").addEventListener("click", function() {
+    document.querySelector("#table-content-wrapper").classList.toggle("hidden");
+});
