@@ -1519,12 +1519,22 @@ prob_selector_my.addEventListener("click", function(){
 
 function filterSearch(){
     const search = document.getElementById("problem-filter-input").value.toLowerCase();
-    return probs.filter(prob => 
-        (prob.title.toLowerCase().includes(search) || 
-        prob.id.toLowerCase().includes(search) || 
-        prob.solution.toLowerCase().includes(search) || 
-        prob.content.toLowerCase().includes(search))
-    );
+
+    const normalize = (str) => 
+        str.toLowerCase()
+           .normalize("NFD")
+           .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
+           .replace(/[^\w\s]/g, ''); // Remove punctuation
+    
+    return probs.filter(prob => {
+        const normalizedSearch = normalize(search);
+        return (
+            normalize(prob.title).includes(normalizedSearch) || 
+            normalize(prob.id).includes(normalizedSearch) || 
+            normalize(prob.solution).includes(normalizedSearch) || 
+            normalize(prob.content).includes(normalizedSearch)
+        );
+    });
 }
 document.getElementById("problem-filter-input").addEventListener("blur", function(){
     const search = document.getElementById("problem-filter-input").value;
