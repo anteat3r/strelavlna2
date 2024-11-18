@@ -863,6 +863,34 @@ th:last-child, td:last-child{
     transition: all 0.0s;
 }
 
+#table-reassign{
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    background-color: white;
+    border: 2px solid #c0d5dd;
+    border-radius: 5px;
+    padding: 5px;
+    padding-inline: 10px;
+    margin: 0px;
+    transition: all 0.3s ease-out;
+    outline: none;
+}
+#table-reassign:hover{
+    color: white;
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
+    transition: all 0.0s;
+}
+.disabled#table-reassign{
+    color: #c0d5dd;
+    background-color: white;
+    border-color: #c0d5dd;
+    transition: all 0.0s;
+    cursor: not-allowed;
+}
+
 #table-delete{
     font-family: 'Lexend';
     font-size: 12px;
@@ -1198,5 +1226,111 @@ th:last-child, td:last-child{
     background-color: var(--color-secondary-dark);
     color: white;
     border-color: var(--color-secondary-dark);
+    transition: all 0.0s;
+}
+
+#reassign-wrapper{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#reassign-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-height: 250px;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: var(--color-secondary-white);
+    border: 2px solid #c0d5dd;
+    transition: all 0.3s ease-out;
+    z-index: 1;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.10);
+}
+#assign-catories{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+.table-category{
+    padding: 5px;
+    width: 200px;
+    background-color: white;
+    border-radius: 5px;
+    border: 2px solid #c0d5dd;
+    transition: all 0.3s ease-out;
+}
+.table-category:hover{
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary);
+    transition: all 0.0s;
+}
+.active.table-category{
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary);
+    transition: all 0.0s;
+}
+.table-category-name{
+    font-family: 'Lexend';
+    font-size: 14px;
+    color: var(--color-secondary-dark);
+    font-weight: 700;
+    margin: 0px;
+    min-height: 14px;
+}
+.table-category:hover .table-category-name{
+    color: white;
+    transition: all 0.0s;
+}
+.active .table-category-name{
+    color: white;
+    transition: all 0.0s;
+}
+
+#add-category{
+    font-family: 'Lexend';
+    font-size: 13px;
+    padding: 3px;
+    padding-inline: 6px;
+    color: var(--color-secondary-dark);
+    text-align: center;
+    border: 2px solid #c0d5dd;
+    background-color: white;
+    transition: all 0.3s ease-out;
+}
+#add-category:hover{
+    background-color: var(--color-secondary-dark);
+    color: white;
+    border-color: var(--color-secondary-dark);
+    transition: all 0.0s;
+}
+#add-category-name{
+    font-family: 'Lexend';
+    font-size: 13px;
+    padding: 3px;
+    padding-inline: 6px;
+    color: var(--color-secondary-dark);
+    border: 2px solid #c0d5dd;
+    background-color: white;
+    border-radius: 5px;
+    transition: all 0.3s ease-out;
+}
+#add-category-name:focus{
+    background-color: var(--color-secondary-white);
+    border-color: var(--color-secondary-light);
+    outline: none;
     transition: all 0.0s;
 }

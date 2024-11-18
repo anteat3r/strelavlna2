@@ -140,6 +140,23 @@
                 <canvas id="generationeditor-canvas" height="800" width="800"></canvas>
             </div>
             <div id="table-wrapper" class="hidden">
+                <div id="reassign-wrapper" class="hidden">
+                    <div id="reassign-container">
+                        <div id="assign-catories">
+                            <button class="table-category">
+                                <p class="table-category-name">Hustoty</p>
+                            </button>
+                            <button class="table-category">
+                                <p class="table-category-name">Obecne</p>
+                            </button>
+                            <button class="table-category active">
+                                <p class="table-category-name">Dalsi</p>
+                            </button>
+                        </div>
+                        <button id="add-category">Přidat</button>
+                        <input type="text" id="add-category-name" class="hidden">
+                    </div>
+                </div>
                 <table id="table">
                     <thead>
                         <tr>
@@ -156,6 +173,7 @@
                 <div id="table-controlls">
                     <button id="table-add">Přidat</button>
                     <button id="table-edit">Upravit</button>
+                    <button id="table-reassign">Přeřadit</button>
                     <button id="table-delete">Odstranit</button>
                 </div>
             </div>
