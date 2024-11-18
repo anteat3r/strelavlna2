@@ -349,8 +349,9 @@ func AdminWsHandleMsg(
           money = t.Money
         })
         WriteTeamChan(id, "gotdata", data)
-        App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
+        _, err := App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
         Bind(dbx.Params{"score": money, "id": id}).Execute()
+        if err != nil { log.Error(err) }
       }
     })
 
@@ -360,7 +361,7 @@ func AdminWsHandleMsg(
       for id, tm := range v {
         lower := true
         tm.With(func(v *TeamS) {
-          lower = v.Stats.Rank <= 16
+          lower = v.Stats.Rank <= 15
           if lower { v.Stats.RankPublic = true }
         })
         if !lower { continue }
