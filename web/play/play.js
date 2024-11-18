@@ -1,30 +1,32 @@
 const redirects = false;
 //global states
-var contest_name = "X";
-var contest_info = "";
-var contest_state = "running";
-var seen_contest_info = true;
-var team_balance = 400;
-var team_name = "Team 1";
-var team_rank = "14";
-var start_time = new Date().getTime() - 5000;
-var end_time = new Date().getTime() + 5000000;
-var prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]]; //[buy], [solve], [sell]
-var team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
-var problems_solved = 12;
-var problems_sold = 3;
-var global_chat = [];
-var seen_global_chat = true;
-var menu_focused_by = [];
-var problems = [];
-var myId = "";
-var chat_banned = false;
-var results_ready = false;
+let contest_name = "X";
+let contest_info = "";
+let contest_state = "running";
+let seen_contest_info = true;
+let team_balance = 400;
+let team_name = "Team 1";
+let team_rank = "14";
+let start_time = new Date().getTime() - 5000;
+let end_time = new Date().getTime() + 5000000;
+let prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]]; //[buy], [solve], [sell]
+let team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
+let problems_solved = 12;
+let problems_sold = 3;
+let global_chat = [];
+let seen_global_chat = true;
+let menu_focused_by = [];
+let problems = [];
+let myId = "";
+let chat_banned = false;
+let results_ready = false;
+
+let table = [];
 
 //local states
-var focused_check = "";
+let focused_check = "";
 
-var clock_zeroed = false;
+let clock_zeroed = false;
 
 const buy_button_wrapper = document.getElementById("buy-button-wrapper");
 const buy_button = document.getElementById("buy-button");
@@ -562,6 +564,49 @@ function contestStateUpdated(){
     }
 }
 
+function updateTable(){
+    const table_DOM = document.getElementById("table-body");
+
+    table_DOM.innerHTML = "";
+
+    let possibleGroups = [];
+    for(let item of table){
+        if (!possibleGroups.includes(item.group)) possibleGroups.push(item.group);
+    }
+
+    possibleGroups.sort((a, b) => a.localeCompare(b));
+
+    table.sort((a, b) => a.name.localeCompare(b.name, "cs"));
+
+    console.log(table);
+
+    for (let group of possibleGroups) {
+        table_DOM.innerHTML += `
+            <tr class="table-group-title">
+                <td colspan="4"><h2>${group}</h2></td>
+            </tr>
+                `
+        for(let item of table.filter(item => item.group == group)){
+            table_DOM.innerHTML += `
+                <tr id=${item.id} class="${focused_const == item.id ? "selected" : ""}">
+                    <td>${item.name}</td>
+                    <td>${item.symbol}</td>
+                    <td>${item.value}</td>
+                    <td>${item.unit}</td>
+                </tr>
+                `
+        }
+    }
+
+    MathJax.typeset();
+}
+
+document.getElementById("show-constants").addEventListener("click", function() {
+    this.classList.toggle("active");
+    document.getElementById("constants-wrapper").classList.toggle("hidden");
+
+});
+
 
 
 let lastSecond = 0;
@@ -1018,17 +1063,18 @@ function loaded(data) {
     myId = data.idx.toString();
     contest_info = data.contest_info;
     contest_name = data.contest_name;
+    for ([key, value] of Object.entries(data.consts)) {
+        table.push(value);
+    }
     loadData(data.stats);
 
     updatePriceList();
-    // console.log(problems[0].chat);
     updateProblemList();
     updateShop();
     updateFocusedProblem();
     updateTeamStats();
     updateChat();
+    updateTable();
+
 }
 
-document.getElementById("table-button").addEventListener("click", function() {
-    document.querySelector("#table-content-wrapper").classList.toggle("hidden");
-});
