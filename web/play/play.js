@@ -8,7 +8,7 @@ var team_balance = 400;
 var team_name = "Team 1";
 var team_rank = "14";
 var start_time = new Date().getTime() - 5000;
-var end_time = new Date().getTime() + 5000;
+var end_time = new Date().getTime() + 5000000;
 var prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]]; //[buy], [solve], [sell]
 var team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
 var problems_solved = 12;
@@ -713,16 +713,12 @@ function connectWS() {
         gotinfo(msg[1]);
       break;
       case "gotdata":
-        if (msg.length != 3) { cLe() }
-        gotdata(msg[1], msg[2], (end_time - start_time));
+        if (msg.length != 2) { cLe() }
+        gotdata(msg[1]);
       break;
       case "showrank":
         if (msg.length != 1) { cLe() }
         showRank();
-      break;
-      case "showlowerrank":
-        if (msg.length != 1) { cLe() }
-        showLowerRank();
       break;
       case "err":
         console.log(msg)
@@ -1022,6 +1018,8 @@ function loaded(data) {
     myId = data.idx.toString();
     contest_info = data.contest_info;
     contest_name = data.contest_name;
+    loadData(data.stats);
+
     updatePriceList();
     // console.log(problems[0].chat);
     updateProblemList();
@@ -1030,3 +1028,7 @@ function loaded(data) {
     updateTeamStats();
     updateChat();
 }
+
+document.getElementById("table-button").addEventListener("click", function() {
+    document.querySelector("#table-content-wrapper").classList.toggle("hidden");
+});
