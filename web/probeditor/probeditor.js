@@ -7,19 +7,21 @@ await login();
 //classes
 
 class TableRow {
-    constructor(id, name, symbol, value, unit, description) {
+    constructor(id, name, symbol, value, unit, description, group) {
       this._id = id;
       this._name = name;
       this._symbol = symbol;
       this._value = value;
       this._unit = unit;
       this._description = description;
+      this._group = group;
 
       this.name_modified = false;
       this.symbol_modified = false;
       this.value_modified = false;
       this.unit_modified = false;
       this.description_modified = false;
+      this.group_modified = false;
     }
   
     // Getters and setters
@@ -81,8 +83,19 @@ class TableRow {
       this._description = newDescription;
     }
 
+    get group() {
+      return this._group;
+    }
+  
+    set group(newGroup) {
+        console.log("setting group", newGroup);
+      changesUnsaved();
+      this.group_modified = true;
+      this._group = newGroup;
+    }
+
     pushChanges() {
-      if (!(this.name_modified || this.symbol_modified || this.value_modified || this.unit_modified || this.description_modified)) return;
+      if (!(this.name_modified || this.symbol_modified || this.value_modified || this.unit_modified || this.description_modified || this.group_modified)) return;
 
       const update_data = {};
 
@@ -91,6 +104,7 @@ class TableRow {
       if (this.value_modified) update_data.value = this._value;
       if (this.unit_modified) update_data.unit = this._unit;
       if (this.description_modified) update_data.desc = this._description;
+      if (this.group_modified) update_data.group = this._group;
 
       pb.collection('consts').update(this.id, update_data);
 
@@ -99,10 +113,11 @@ class TableRow {
       this.value_modified = false;
       this.unit_modified = false;
       this.description_modified = false;
+      this.group_modified = false;
     }
 
     isChanged() {
-        return this.name_modified || this.symbol_modified || this.value_modified || this.unit_modified || this.description_modified;
+        return this.name_modified || this.symbol_modified || this.value_modified || this.unit_modified || this.description_modified || this.group_modified;
     }
 }
 
@@ -665,7 +680,8 @@ async function load(){
             item.symbol,
             item.value,
             item.unit,
-            item.desc
+            item.desc,
+            item.group
         ));
     }
 }
@@ -1013,6 +1029,45 @@ document.getElementById("table-edit").addEventListener("click", function(){
     }
 });
 
+document.getElementById("table-reassign").addEventListener("click", async function(){
+    if(focused_const == "") return;
+
+    const row = table.find(row => row.id == focused_const);
+
+    const rw = document.getElementById("reassign-wrapper");
+    const ac = document.getElementById("assign-catories");
+
+    rw.classList.remove("hidden");
+    
+    let possibleGroups = [];
+    for(let item of table){
+
+        if (!possibleGroups.includes(item.group) && item.group != "") possibleGroups.push(item.group);
+    }
+    const selected = row.group;
+
+
+    possibleGroups.sort((a, b) => a.localeCompare(b));
+
+    ac.innerHTML = "";
+    for (let item of possibleGroups) {
+        ac.innerHTML += `
+            <button class="table-category${item == selected ? " active" : ""}">
+                <p class="table-category-name">${item}</p>
+            </button>
+        `
+    }
+    for (let item of ac.children) {
+        item.addEventListener("click", function(){
+            row.group = item.children[0].innerHTML;
+            console.log(row.group);
+            rw.classList.add("hidden");
+            updateTable();
+        });
+    }
+
+});
+
 document.getElementById("table-delete").addEventListener("click", async function(){
     if(focused_const == "") return;
     if(document.querySelector(".editing")) return;
@@ -1025,6 +1080,32 @@ document.getElementById("table-delete").addEventListener("click", async function
     updateTable();
 });
 
+document.getElementById("add-category").addEventListener("click", function(){
+    if (focused_const == "") return;
+
+    const row = table.find(row => row.id == focused_const);
+
+    const inp = document.getElementById("add-category-name");
+
+    this.classList.add("hidden");
+    inp.classList.remove("hidden");
+
+    inp.focus();
+});
+
+document.getElementById("add-category-name").addEventListener("blur", function(){
+    this.classList.add("hidden");
+    document.getElementById("add-category").classList.remove("hidden");
+    document.getElementById("reassign-wrapper").classList.add("hidden");
+    this.value = "";
+    if (focused_const == "") return;
+    if (this.value == "") return;
+
+    const row = table.find(row => row.id == focused_const);
+
+    row.group = this.value;
+    updateTable();
+});
 
 //left editor
 const rank_DOM = document.getElementById("problem-rank-selector-button");
@@ -1936,7 +2017,7 @@ graph_canvas.addEventListener("mouseup", function(e){
 });
 
 function findHoveredNode(){
-    if (focused_prob == null) return -1;
+    if (focused_prob == "") return -1;
     const graph = probs.find(prob => prob.id == focused_prob).graph;
 
     const rules = editor_render_ruleset;
