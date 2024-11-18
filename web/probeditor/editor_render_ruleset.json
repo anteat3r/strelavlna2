@@ -605,7 +605,7 @@
             "nocachenumber": {
               "width": 60,
               "height": 20,
-              "text": "![]",
+              "text": "nocache",
               "fontSize": 15,
               "inputs": 1,
               "inputTypes": ["number"],
@@ -614,7 +614,7 @@
             "nocachestring": {
               "width": 60,
               "height": 20,
-              "text": "![]",
+              "text": "nocache",
               "fontSize": 15,
               "inputs": 1,
               "inputTypes": ["string"],
@@ -623,7 +623,7 @@
             "nocachebool": {
               "width": 60,
               "height": 20,
-              "text": "![]",
+              "text": "nocache",
               "fontsize": 15,
               "inputs": 1,
               "inputtypes": ["bool"],
@@ -632,7 +632,7 @@
             "nocachefraction": {
               "width": 60,
               "height": 20,
-              "text": "![]",
+              "text": "nocache",
               "fontSize": 15,
               "inputs": 1,
               "inputTypes": ["fraction"],
