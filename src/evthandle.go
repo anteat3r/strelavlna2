@@ -363,6 +363,7 @@ func AdminWsHandleMsg(
     _, err := App.Dao().DB().NewQuery("update contests set stats = {:stats} where id = {:id}").
     Bind(dbx.Params{"stats": fulldata, "id": ac}).Execute()
     if err != nil { log.Error(err) }
+    AdminSend("finalstats", fulldata)
 
 
   case "sendlowerrank":

@@ -1103,12 +1103,14 @@ func DBLoadFromPB(ac string) error {
           graph, err = ParseGraph(graphs)
           if err != nil { return }
           _, _, err = graph.Generate(text, sol)
+          log.Error(pr.Id)
           if err != nil { return }
           genprobcnt++
         } else {
           graph, err = ParseGraph(graphs)
           if err != nil { return }
           text, sol, err = graph.Generate(text, sol)
+          log.Error(pr.Id)
           if err != nil { return }
           graph = nil
         }
