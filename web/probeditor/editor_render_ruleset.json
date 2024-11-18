@@ -603,7 +603,7 @@
               "outputType": "bool"
             },
             "nocachenumber": {
-              "width": 60,
+              "width": 80,
               "height": 20,
               "text": "nocache",
               "fontSize": 15,
@@ -612,7 +612,7 @@
               "outputType": "number"
             },
             "nocachestring": {
-              "width": 60,
+              "width": 80,
               "height": 20,
               "text": "nocache",
               "fontSize": 15,
@@ -621,7 +621,7 @@
               "outputType": "string"
             },
             "nocachebool": {
-              "width": 60,
+              "width": 80,
               "height": 20,
               "text": "nocache",
               "fontsize": 15,
@@ -630,7 +630,7 @@
               "outputtype": "bool"
             },
             "nocachefraction": {
-              "width": 60,
+              "width": 80,
               "height": 20,
               "text": "nocache",
               "fontSize": 15,
