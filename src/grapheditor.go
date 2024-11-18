@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-  log "github.com/anteat3r/golog"
+  // log "github.com/anteat3r/golog"
 )
 
 type GraphNode interface {
