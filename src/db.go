@@ -705,7 +705,7 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
     var diff string
     var probid string
     prob.RWith(func(v ProbS) { diff = v.Diff; probid = v.Id })
-    cost, ok := GetCost(diff)
+    cost, ok := GetCost("+" + diff)
     if !ok { oerr = dbErr("grade", "invalid cost") }
 
     team.With(func(v *TeamS) {
@@ -1168,7 +1168,7 @@ func DBLoadFromPB(ac string) error {
           NumSolved: map[string]int{"A": 0, "B": 0, "C": 0},
           NumIncc: map[string]int{"A": 0, "B": 0, "C": 0},
           MoneyMade: map[string]int{"A": 0, "B": 0, "C": 0},
-          MoneyHist: make([]moneyHistRec, 0),
+          MoneyHist: []moneyHistRec{{tm.GetInt("score"), ActiveContest.GetPrimitiveVal().Start,}},
           Rank: -1,
           StatsPublic: false,
           RankPublic: false,
