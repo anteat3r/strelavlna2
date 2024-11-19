@@ -1340,12 +1340,12 @@ func DBGenProbWorkers(probsr map[string]ProbM) error {
 
 
 
-  // for i, pr := range finalsec {
-  //   id := probs[i]
-  //   probsr[id].With(func(v *ProbS) {
-  //     v.Workers = pr
-  //   })
-  // }
+  for i, pr := range finalsec {
+    id := probs[i]
+    probsr[id].With(func(v *ProbS) {
+      v.Workers = pr
+    })
+  }
   return nil
 }
 
