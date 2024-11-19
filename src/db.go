@@ -1313,9 +1313,12 @@ var sectors = [][][]string{
   log.Info(sectors, probs, admins)
 
   for newSector(probs, sectors, admins) {}
+  log.Info("oasj")
   sectors = sectors[:len(sectors)-1]
+  log.Info("2ioioih")
 
   finalsec := compileSectors(probs, sectors, admins)
+  log.Info("29382938")
 
   for i, pr := range finalsec {
     id := probs[i]
@@ -1323,6 +1326,7 @@ var sectors = [][][]string{
       v.Workers = pr
     })
   }
+  log.Info("298392")
   return nil
 }
 
