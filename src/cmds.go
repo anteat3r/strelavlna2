@@ -214,6 +214,13 @@ func SetupContEndp() echo.HandlerFunc {
       err = DBGenProbWorkers(v)
     })
     if err != nil { return err }
+    Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
+      for id, pr := range v {
+        pr.RWith(func(v ProbS) {
+          log.Info(id, v.Workers)
+        })
+      }
+    })
     log.Info("gened")
 
     res, err := json.Marshal(DBData)
