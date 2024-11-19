@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"slices"
+
 	// "slices"
 
 	// "slices"
@@ -1288,31 +1290,31 @@ func compileSectors() [][]string {
 }
 
 func DBGenProbWorkers(probsr map[string]ProbM) error {
-  // corrs, err := App.Dao().FindRecordsByFilter(
-  //   "correctors",
-  //   `username != ""`,
-  //   "-created", 0, 0,
-  // )
-  // if err != nil { return err }
-  // admins = make([]string, len(corrs))
-  // for i, corr := range corrs {
-  //   admins[i] = corr.GetId()
-  // }
-  // probs = make([]string, 0, len(probsr))
-  // for id, _ := range probsr {
-  //   probs = append(probs, id)
-  // }
-  // sectors = make([][][]string, 1)
-  // sectors[0] = make([][]string, 0)
-  // for range admins {
-  //   sectors[0] = append(sectors[0], make([]string, 0))
-  // }
-  // for id, pr := range probsr {
-  //   pr.RWith(func(v ProbS) {
-  //     idx := slices.Index(admins, v.Author)
-  //     sectors[0][idx] = append(sectors[0][idx], id)
-  //   })
-  // }
+  corrs, err := App.Dao().FindRecordsByFilter(
+    "correctors",
+    `username != ""`,
+    "-created", 0, 0,
+  )
+  if err != nil { return err }
+  admins = make([]string, len(corrs))
+  for i, corr := range corrs {
+    admins[i] = corr.GetId()
+  }
+  probs = make([]string, 0, len(probsr))
+  for id, _ := range probsr {
+    probs = append(probs, id)
+  }
+  sectors = make([][][]string, 1)
+  sectors[0] = make([][]string, 0)
+  for range admins {
+    sectors[0] = append(sectors[0], make([]string, 0))
+  }
+  for id, pr := range probsr {
+    pr.RWith(func(v ProbS) {
+      idx := slices.Index(admins, v.Author)
+      sectors[0][idx] = append(sectors[0][idx], id)
+    })
+  }
   // admins = []string{"a", "b", "c", "d", "e", "f", "g", "h"}
   // probs = func() []string {
   //   problems := make([]string, 20)
@@ -1321,12 +1323,12 @@ func DBGenProbWorkers(probsr map[string]ProbM) error {
   //   }
   //   return problems
   // }()
-  sectors = [][][]string{
-    {
-      {"u0", "u1"}, {"u2", "u3", "u4"}, {"u5"}, {"u6", "u7"},
-      {"u8", "u9"}, {"u10", "u11", "u12"}, {"u13", "u14", "u15"}, {"u16", "u17", "u18", "u19"},
-    },
-  }
+  // sectors = [][][]string{
+  //   {
+  //     {"u0", "u1"}, {"u2", "u3", "u4"}, {"u5"}, {"u6", "u7"},
+  //     {"u8", "u9"}, {"u10", "u11", "u12"}, {"u13", "u14", "u15"}, {"u16", "u17", "u18", "u19"},
+  //   },
+  // }
   log.Info(sectors, probs, admins)
 
   for newSector() {}
