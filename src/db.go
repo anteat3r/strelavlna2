@@ -1298,7 +1298,7 @@ func DBGenProbWorkers(probsr map[string]ProbM) error {
   // }
 var admins = []string{"a", "b", "c", "d", "e", "f", "g", "h"}
 var probs = func() []string {
-	problems := make([]string, 500)
+	problems := make([]string, 20)
 	for i := range problems {
 		problems[i] = fmt.Sprintf("u%d", i)
 	}
