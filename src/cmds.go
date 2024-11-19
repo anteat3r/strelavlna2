@@ -2,7 +2,7 @@ package src
 
 import (
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"math/rand"
 	"net/mail"
 	"os"
