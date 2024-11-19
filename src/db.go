@@ -1344,6 +1344,7 @@ func DBGenProbWorkers(probsr map[string]ProbM) error {
     id := probs[i]
     probsr[id].With(func(v *ProbS) {
       v.Workers = pr
+      log.Info(id, pr)
     })
   }
   return nil
