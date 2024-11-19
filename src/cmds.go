@@ -227,11 +227,13 @@ func SetupContEndp() echo.HandlerFunc {
     if err != nil { return err }
 
     Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
-      fmt.Println(v)
+      for id, pr := range v {
+        pr.RWith(func(v ProbS) {
+          log.Info(id, v.Workers)
+        })
+      }
     })
-    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
-      fmt.Println(v)
-    })
+
     return c.String(200, string(res))
 	}
 }
