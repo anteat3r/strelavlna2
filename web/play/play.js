@@ -303,7 +303,7 @@ function updateFocusedProblem(){
     problem_title.innerHTML = focused_problem_obj.title + " [" + focused_problem_obj.rank + "]";
 
     const content = focused_problem_obj.problem_content;
-    problem_content.innerHTML = content;
+    problem_content.innerHTML = parseContentForLatex(content);
 
     const answer_input_wrapper = document.getElementById("answer-input-wrapper");
     const answer_input = document.getElementById("answer-input");
@@ -575,7 +575,7 @@ function updateTable(){
     }
 
     possibleGroups.sort((a, b) => a.localeCompare(b));
-
+    console.log("table", table);
     table.sort((a, b) => a.name.localeCompare(b.name, "cs"));
 
     console.log(table);
@@ -588,7 +588,7 @@ function updateTable(){
                 `
         for(let item of table.filter(item => item.group == group)){
             table_DOM.innerHTML += `
-                <tr id=${item.id} class="${focused_const == item.id ? "selected" : ""}">
+                <tr id=${item.id}">
                     <td>${item.name}</td>
                     <td>${item.symbol}</td>
                     <td>${item.value}</td>
@@ -599,6 +599,42 @@ function updateTable(){
     }
 
     MathJax.typeset();
+}
+
+function parseContentForLatex(txt){
+    let newtxt = "";
+    let curent_state = 0;
+    let i = 0;
+    for(;i < txt.length - 1; i++){
+        if(txt[i] == "$" && txt[i + 1] == "$"){
+            if(curent_state == 0){
+                curent_state = 2;
+                newtxt += `<span class="latex-styled">$`;
+            }else if(curent_state == 1){
+                newtxt += "$$";
+            }else if(curent_state == 2){
+                curent_state = 0;
+                newtxt += `$</span>`;
+            }
+            i++;
+        }else if(txt[i] == "$" && txt[i + 1] != "$"){
+            if(curent_state == 0){
+                curent_state = 1;
+                newtxt += "$";
+            }else if(curent_state == 1){
+                newtxt += "$";
+                curent_state = 0;
+            }else if(curent_state == 2){
+                console.error("parsing error");
+            }
+        }else{
+            newtxt += txt[i];
+        }
+    }
+    if(i == txt.length - 1){
+        newtxt += txt[txt.length - 1];
+    }
+    return newtxt;
 }
 
 document.getElementById("show-constants").addEventListener("click", function() {
@@ -1063,10 +1099,11 @@ function loaded(data) {
     myId = data.idx.toString();
     contest_info = data.contest_info;
     contest_name = data.contest_name;
-    for ([key, value] of Object.entries(data.consts)) {
+    for ([key, value] of Object.entries(JSON.parse(data.consts))) {
         table.push(value);
     }
-    loadData(data.stats);
+    loadData(JSON.parse(data.stats));
+    // loadData(data.stats);
 
     updatePriceList();
     updateProblemList();

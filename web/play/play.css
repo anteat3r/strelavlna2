@@ -1416,7 +1416,7 @@
     margin: 0px;
 }
 
-.MJX-TEX{
+.latex-styled .MJX-TEX{
     font-size: 25px;
     background-color: #e3f8ff;
     padding: 10px;
@@ -2106,6 +2106,12 @@ audio {
     color: white;
     transition: all 0.0s;
 }
+.active#show-constants{
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
+    color: white;
+    transition: all 0.0s;
+}
 
 #constants-wrapper{
     position: absolute;
@@ -2161,18 +2167,18 @@ audio {
     border-collapse: collapse;
     width: 100%;
 }
-thead{
+#table thead{
     position: sticky;
     top:0px;
     background-color: var(--color-black-white);
     border-bottom: 2px solid #c0d5dd;
     z-index: 1;
 }
-tr{
+#table tr{
     border-bottom: 2px solid #c0d5dd;
 }
 
-th, td{
+#table th, td{
     border-right: 2px solid #c0d5dd;
     padding: 5px;
     text-align: center;
@@ -2182,28 +2188,28 @@ th, td{
     transition: all 0.3s ease-out;
 }
 
-tbody tr{
+#table tbody tr{
     cursor: pointer;
     user-select: none;
     transition: all 0.3s ease-out;
 }
-tbody tr:hover{
+#table tbody tr:hover{
     background-color: var(--color-secondary-glow);
     transition: all 0.0s;
 }
-tbody tr:hover td{
+#table tbody tr:hover td{
     border-right: var(--color-secondary-light) solid 2px;
     transition: all 0.0s;
 }
-tr.selected{
+#table tr.selected{
     background-color: var(--color-secondary-light) !important;
     transition: all 0.0s;
 }
-tr.selected td{
+#table tr.selected td{
     border-right: var(--color-secondary-glow) solid 2px !important;
     transition: all 0.0s;
 }
 
-th:last-child, td:last-child{
+#table th:last-child, td:last-child{
     border-right: none !important;
 }

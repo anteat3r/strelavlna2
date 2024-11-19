@@ -1404,6 +1404,40 @@
     background-color: var(--color-secondary-dark);
     color: var(--color-secondary-white);
 }
+
+#end-contest-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+#end-contest{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Lexend';
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    border: var(--color-secondary-dark) 2px solid;
+    border-radius: 5px;
+    background-color: var(--color-black-white);
+    padding: 10px;
+    padding-inline: 20px;
+    transition: all 0.3s ease-out;
+}
+#end-contest:hover{
+    background-color: var(--color-secondary-dark);
+    color: var(--color-secondary-white);
+    transition: all 0.0s;
+}
+
+#end-contest p{
+    margin: 0px;
+}
+
 .price-list-a-input{
     outline: none;
     width: 30px;
@@ -1618,10 +1652,10 @@
     transition: opacity 0.0s;
 }
 
-.MJX-TEX{
+.latex-styled .MJX-TEX{
     font-size: 25px;
-    background-color: #e0ecf5;
-    padding: 5px;
+    background-color: #e3f8ff;
+    padding: 10px;
     border-radius: 10px;
     margin: 10px;
 }
