@@ -1295,6 +1295,7 @@ func DBGenProbWorkers(probsr map[string]ProbM) error {
       sectors[0][idx] = append(sectors[0][idx], id)
     })
   }
+  log.Info(sectors, probs, admins)
 
   for newSector(probs, sectors, admins) {}
   sectors = sectors[:len(sectors)-1]
