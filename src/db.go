@@ -1289,7 +1289,7 @@ func compileSectors() [][]string {
 	return queues
 }
 
-func DBGenProbWorkers(probsr map[string]ProbM) error {
+func DBGenProbWorkers(probsr *map[string]ProbM) error {
   corrs, err := App.Dao().FindRecordsByFilter(
     "correctors",
     `username != ""`,
@@ -1300,8 +1300,8 @@ func DBGenProbWorkers(probsr map[string]ProbM) error {
   for i, corr := range corrs {
     admins[i] = corr.GetId()
   }
-  probs = make([]string, 0, len(probsr))
-  for id, _ := range probsr {
+  probs = make([]string, 0, len(*probsr))
+  for id, _ := range *probsr {
     probs = append(probs, id)
   }
   sectors = make([][][]string, 1)
@@ -1309,7 +1309,7 @@ func DBGenProbWorkers(probsr map[string]ProbM) error {
   for range admins {
     sectors[0] = append(sectors[0], make([]string, 0))
   }
-  for id, pr := range probsr {
+  for id, pr := range *probsr {
     pr.RWith(func(v ProbS) {
       idx := slices.Index(admins, v.Author)
       sectors[0][idx] = append(sectors[0][idx], id)
@@ -1342,7 +1342,7 @@ func DBGenProbWorkers(probsr map[string]ProbM) error {
 
   for i, pr := range finalsec {
     id := probs[i]
-    probsr[id].With(func(v *ProbS) {
+    (*probsr)[id].With(func(v *ProbS) {
       v.Workers = pr
       log.Info(id, pr)
     })

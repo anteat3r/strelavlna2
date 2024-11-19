@@ -211,7 +211,7 @@ func SetupContEndp() echo.HandlerFunc {
     if err != nil { return err }
     log.Info("loaded")
     Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
-      err = DBGenProbWorkers(*v)
+      err = DBGenProbWorkers(v)
     })
     if err != nil { return err }
     log.Info("gened")
