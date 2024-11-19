@@ -1199,7 +1199,15 @@ func DBLoadFromPB(ac string) error {
   return nil
 }
 
-func newSector(probs []string, sectors [][][]string, admins []string) bool {
+func newSector(probsp *[]string, sectorsp *[][][]string, adminsp *[]string) bool {
+  probs := *probsp
+  sectors := *sectorsp
+  admins := *adminsp
+  defer func(){
+    probsp = &probs
+    sectorsp = &sectors
+    adminsp = &admins
+  }()
 	ap := make([][]string, len(admins))
 	for _, sector := range sectors {
 		for i, admin := range sector {
@@ -1253,7 +1261,10 @@ func newSector(probs []string, sectors [][][]string, admins []string) bool {
 	return added
 }
 
-func compileSectors(probs []string, sectors [][][]string, admins []string) [][]string {
+func compileSectors(probsp *[]string, sectorsp *[][][]string, adminsp *[]string) [][]string {
+  probs := *probsp
+  sectors := *sectorsp
+  admins := *adminsp
 	queues := make([][]string, len(probs))
 	for i, prob := range probs {
 		for _, sector := range sectors {
@@ -1312,12 +1323,12 @@ var sectors = [][][]string{
 }
   log.Info(sectors, probs, admins)
 
-  for newSector(probs, sectors, admins) {}
+  for newSector(&probs, &sectors, &admins) {}
   log.Info("oasj")
   sectors = sectors[:len(sectors)-1]
   log.Info("2ioioih")
 
-  finalsec := compileSectors(probs, sectors, admins)
+  finalsec := compileSectors(&probs, &sectors, &admins)
   log.Info("29382938")
 
   for i, pr := range finalsec {
