@@ -1288,39 +1288,39 @@ func compileSectors() [][]string {
 }
 
 func DBGenProbWorkers(probsr map[string]ProbM) error {
-  corrs, err := App.Dao().FindRecordsByFilter(
-    "correctors",
-    `username != ""`,
-    "-created", 0, 0,
-  )
-  if err != nil { return err }
-  admins = make([]string, len(corrs))
-  for i, corr := range corrs {
-    admins[i] = corr.GetId()
-  }
-  probs = make([]string, 0, len(probsr))
-  for id, _ := range probsr {
-    probs = append(probs, id)
-  }
-  sectors = make([][][]string, 1)
-  sectors[0] = make([][]string, 0)
-  for range admins {
-    sectors[0] = append(sectors[0], make([]string, 0))
-  }
-  for id, pr := range probsr {
-    pr.RWith(func(v ProbS) {
-      idx := slices.Index(admins, v.Author)
-      sectors[0][idx] = append(sectors[0][idx], id)
-    })
-  }
-  admins = []string{"a", "b", "c", "d", "e", "f", "g", "h"}
-  probs = func() []string {
-    problems := make([]string, 20)
-    for i := range problems {
-      problems[i] = fmt.Sprintf("u%d", i)
-    }
-    return problems
-  }()
+  // corrs, err := App.Dao().FindRecordsByFilter(
+  //   "correctors",
+  //   `username != ""`,
+  //   "-created", 0, 0,
+  // )
+  // if err != nil { return err }
+  // admins = make([]string, len(corrs))
+  // for i, corr := range corrs {
+  //   admins[i] = corr.GetId()
+  // }
+  // probs = make([]string, 0, len(probsr))
+  // for id, _ := range probsr {
+  //   probs = append(probs, id)
+  // }
+  // sectors = make([][][]string, 1)
+  // sectors[0] = make([][]string, 0)
+  // for range admins {
+  //   sectors[0] = append(sectors[0], make([]string, 0))
+  // }
+  // for id, pr := range probsr {
+  //   pr.RWith(func(v ProbS) {
+  //     idx := slices.Index(admins, v.Author)
+  //     sectors[0][idx] = append(sectors[0][idx], id)
+  //   })
+  // }
+  // admins = []string{"a", "b", "c", "d", "e", "f", "g", "h"}
+  // probs = func() []string {
+  //   problems := make([]string, 20)
+  //   for i := range problems {
+  //     problems[i] = fmt.Sprintf("u%d", i)
+  //   }
+  //   return problems
+  // }()
   sectors = [][][]string{
     {
       {"u0", "u1"}, {"u2", "u3", "u4"}, {"u5"}, {"u6", "u7"},
@@ -1334,14 +1334,16 @@ func DBGenProbWorkers(probsr map[string]ProbM) error {
 
   finalsec := compileSectors()
 
+  log.Info(finalsec)
 
 
-  for i, pr := range finalsec {
-    id := probs[i]
-    probsr[id].With(func(v *ProbS) {
-      v.Workers = pr
-    })
-  }
+
+  // for i, pr := range finalsec {
+  //   id := probs[i]
+  //   probsr[id].With(func(v *ProbS) {
+  //     v.Workers = pr
+  //   })
+  // }
   return nil
 }
 
