@@ -1199,15 +1199,22 @@ func DBLoadFromPB(ac string) error {
   return nil
 }
 
-func newSector(probsp *[]string, sectorsp *[][][]string, adminsp *[]string) bool {
-  probs := *probsp
-  sectors := *sectorsp
-  admins := *adminsp
-  defer func(){
-    probsp = &probs
-    sectorsp = &sectors
-    adminsp = &admins
-  }()
+var admins = []string{"a", "b", "c", "d", "e", "f", "g", "h"}
+var probs = func() []string {
+	problems := make([]string, 20)
+	for i := range problems {
+		problems[i] = fmt.Sprintf("u%d", i)
+	}
+	return problems
+}()
+var sectors = [][][]string{
+	{
+		{"u0", "u1"}, {"u2", "u3", "u4"}, {"u5"}, {"u6", "u7"},
+		{"u8", "u9"}, {"u10", "u11", "u12"}, {"u13", "u14", "u15"}, {"u16", "u17", "u18", "u19"},
+	},
+}
+
+func newSector() bool {
 	ap := make([][]string, len(admins))
 	for _, sector := range sectors {
 		for i, admin := range sector {
@@ -1261,10 +1268,7 @@ func newSector(probsp *[]string, sectorsp *[][][]string, adminsp *[]string) bool
 	return added
 }
 
-func compileSectors(probsp *[]string, sectorsp *[][][]string, adminsp *[]string) [][]string {
-  probs := *probsp
-  sectors := *sectorsp
-  admins := *adminsp
+func compileSectors() [][]string {
 	queues := make([][]string, len(probs))
 	for i, prob := range probs {
 		for _, sector := range sectors {
@@ -1323,12 +1327,12 @@ var sectors = [][][]string{
 }
   log.Info(sectors, probs, admins)
 
-  for newSector(&probs, &sectors, &admins) {}
+  for newSector() {}
   log.Info("oasj")
   sectors = sectors[:len(sectors)-1]
   log.Info("2ioioih")
 
-  finalsec := compileSectors(&probs, &sectors, &admins)
+  finalsec := compileSectors()
   log.Info("29382938")
 
   for i, pr := range finalsec {
