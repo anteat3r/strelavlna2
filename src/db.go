@@ -150,6 +150,8 @@ var (
   ContInfo = NewRWMutexWrap("")
   ContName = NewRWMutexWrap("")
   ContStats = NewRWMutexWrap("")
+  ContProbGenCacheLen = NewRWMutexWrap(0)
+  ContTeamAdvanceCount = NewRWMutexWrap(0)
   Consts = NewRWMutexWrap(make(map[string]Constant))
 
   DBData = map[string]any{
@@ -1185,6 +1187,12 @@ func DBLoadFromPB(ac string) error {
   })
   ContStats.With(func(v *string) {
     *v = contest.GetString("stats")
+  })
+  ContProbGenCacheLen.With(func(v *int) {
+    *v = contest.GetInt("probgencachelen")
+  })
+  ContTeamAdvanceCount.With(func(v *int) {
+    *v = contest.GetInt("advanceteamcount")
   })
 
   return nil

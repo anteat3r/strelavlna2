@@ -55,7 +55,7 @@ func PlayerWsHandleMsg(
   now := time.Now()
   var ok bool
   ActiveContest.RWith(func(v ActiveContStruct) {
-    ok = m[0] == "load" ||
+    ok = m[0] == "load" || m[0] == "focus" ||
       ( now.After(v.Start) && now.Before(v.End) )
   })
   if !ok { return dbErr("contest not running") }
@@ -372,10 +372,19 @@ func AdminWsHandleMsg(
       for id, tm := range v {
         lower := true
         tm.With(func(v *TeamS) {
-          lower = v.Stats.Rank <= 15
+          lower = v.Stats.Rank > ContTeamAdvanceCount.GetPrimitiveVal()
           if lower { v.Stats.RankPublic = true }
         })
         if !lower { continue }
+        WriteTeamChan(id, "showrank")
+      }
+    })
+
+  case "sendallranks":
+    if len(m) != 1 { return eIm(msg) }
+    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+      for id, tm := range v {
+        tm.With(func(v *TeamS) { v.Stats.RankPublic = true })
         WriteTeamChan(id, "showrank")
       }
     })
