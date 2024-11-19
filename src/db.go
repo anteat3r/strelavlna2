@@ -1311,20 +1311,20 @@ func DBGenProbWorkers(probsr map[string]ProbM) error {
   //     sectors[0][idx] = append(sectors[0][idx], id)
   //   })
   // }
-var admins = []string{"a", "b", "c", "d", "e", "f", "g", "h"}
-var probs = func() []string {
-	problems := make([]string, 20)
-	for i := range problems {
-		problems[i] = fmt.Sprintf("u%d", i)
-	}
-	return problems
-}()
-var sectors = [][][]string{
-	{
-		{"u0", "u1"}, {"u2", "u3", "u4"}, {"u5"}, {"u6", "u7"},
-		{"u8", "u9"}, {"u10", "u11", "u12"}, {"u13", "u14", "u15"}, {"u16", "u17", "u18", "u19"},
-	},
-}
+// var admins = []string{"a", "b", "c", "d", "e", "f", "g", "h"}
+// var probs = func() []string {
+// 	problems := make([]string, 20)
+// 	for i := range problems {
+// 		problems[i] = fmt.Sprintf("u%d", i)
+// 	}
+// 	return problems
+// }()
+// var sectors = [][][]string{
+// 	{
+// 		{"u0", "u1"}, {"u2", "u3", "u4"}, {"u5"}, {"u6", "u7"},
+// 		{"u8", "u9"}, {"u10", "u11", "u12"}, {"u13", "u14", "u15"}, {"u16", "u17", "u18", "u19"},
+// 	},
+// }
   log.Info(sectors, probs, admins)
 
   for newSector() {}
