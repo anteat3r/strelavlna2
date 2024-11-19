@@ -1102,8 +1102,11 @@ function loaded(data) {
     for ([key, value] of Object.entries(JSON.parse(data.consts))) {
         table.push(value);
     }
-    loadData(JSON.parse(data.stats));
+    if (data.stats != ""){
+        loadData(JSON.parse(data.stats));
+    }
     // loadData(data.stats);
+
 
     updatePriceList();
     updateProblemList();

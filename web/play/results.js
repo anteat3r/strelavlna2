@@ -34,7 +34,7 @@ function showRank(){
 }
 
 function loadData(data){
-    console.log(data);
+    console.log("data: ", data);
     rank = data.rank;
     solved = [data.numsolved.A, data.numsolved.B, data.numsolved.C];
     sold = [data.numsold.A, data.numsold.B, data.numsold.C];
