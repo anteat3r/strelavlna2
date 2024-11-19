@@ -50,14 +50,14 @@ function loadData(data){
             balance_chart.push({x: deltaTime*60, y: hist.money});
         }
     }else{
-        balance_chart = [{x:0, y: 50}, {x:15*60000, y: 100}, {x:22*60000, y: 40}, {x:50*60000, y: 250}, {x:75*60000, y: 220}, {x:120*60000, y: 245}];
+        balance_chart = [{x:0, y: 0}, {x:10, y: 10}];
     }
 
     if (data.rank_public) {
         setRank();
     }
 
-    if (data.results_public) {
+    if (data.stats_public) {
         results_ready = true;
         generateTicks();
         startLoadingAnimation();

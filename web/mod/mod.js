@@ -935,7 +935,7 @@ function connectWS() {
         if (msg.length != 2) { cLe() }
         reassigned(msg[1]);
         break;
-      case "gotdata":
+      case "finalstats":
         if (msg.length != 2) { cLe() }
         gotData(msg[1]);
         break;
@@ -1048,7 +1048,7 @@ function unwork() {
 }
 
 function sendResults() {
-  socket.send("sendresults");
+  socket.send("senddata");
 }
 
 
@@ -1281,7 +1281,7 @@ function checkFocused(checkid, modid) {
 }
 
 function gotData(data) {
-    
+    data = JSON.parse(data);
 }
 
 /**
