@@ -53,7 +53,7 @@ async function github_login() {
 login_gh_button.addEventListener("click", github_login);
 
 async function disc_login() {
-  await pb.collection("correctors").authWithOAuth2({ prvider: "discord" })
+  await pb.collection("correctors").authWithOAuth2({ provider: "discord" })
   if(pb.authStore.isValid){
       if(localStorage.getItem("logging_from")){
           window.location.href = localStorage.getItem("logging_from");
