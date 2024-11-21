@@ -6,6 +6,7 @@ const password_DOM = document.getElementById("password");
 const login_message = document.getElementById("login-message");
 const login_button = document.getElementById("login");
 const login_disc_button = document.getElementById("login-disc");
+const login_gh_button = document.getElementById("login-github");
 const logout_button = document.getElementById("logout");
 
 logout_button.classList.add("hidden");
@@ -34,6 +35,22 @@ async function login(username, password){
 
     setTimeout(e=>{is_loading_running = false;}, 1000);
 }
+
+async function github_login() {
+  await pb.collection("correctors").authWithOAuth2({ prvider: "github" })
+  if(pb.authStore.isValid){
+      if(localStorage.getItem("logging_from")){
+          window.location.href = localStorage.getItem("logging_from");
+          localStorage.removeItem("logging_from");
+      }else{
+          logout_button.classList.remove("hidden");
+      }
+      login_message.innerHTML = "Přihlášení bylo uspěsné.";
+  }
+
+  setTimeout(e=>{is_loading_running = false;}, 1000);
+}
+login_gh_button.addEventListener("click", github_login);
 
 async function disc_login() {
   await pb.collection("correctors").authWithOAuth2({ prvider: "discord" })
