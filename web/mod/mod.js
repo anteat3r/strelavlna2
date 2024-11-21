@@ -204,6 +204,18 @@ document.getElementById("end-contest").addEventListener("click", function(){
     sendResults();
 });
 
+document.getElementById("end-contest").addEventListener("mouseover", function(){
+    const now = new Date().getTime();
+    var remaining = end_time - now;
+
+    if(remaining > 0 || checks.length > 0) {
+        this.classList.add("disabled");
+        return;
+    } 
+
+    this.classList.remove("disabled");
+});
+
 function focusNextCheck(){
     if( myRole != "worker" ) return;
     console.log("focusNextCheck");

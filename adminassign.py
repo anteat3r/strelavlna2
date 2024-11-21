@@ -1,9 +1,9 @@
 import time
 admins = ["a", "b", "c", "d", "e", "f", "g", "h"]
-probs = ["u{}".format(i) for i in range(500)]
+probs = ["u{}".format(i) for i in range(20)]
 
 sectors = [
-    [["u0", "u1"], ["u2", "u3", "u4"], ["u5"], ["u6", "u7"], ["u8", "u9"], ["u10", "u11", "u12"], ["u13", "u14", "u15"], ["u16", "u17", "u18", "u19"]],
+    [["u0", "u1", "u2", "u3", "u4", "u5", "u6", "u7", "u8", "u9"], ["u10", "u11", "u12", "u13", "u14", "u15", "u16", "u17", "u18"], ["u19"], [], [], [], [], [], [], []],
 ]
 
 def new_sector():
@@ -62,5 +62,8 @@ sectors.pop()
 print("Took {} seconds".format(time.time() - start))
 
 
+cs = compile_sectors()
 
-print(compile_sectors())
+for iteom in cs:
+    print(iteom)
+# print(compile_sectors())
