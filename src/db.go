@@ -3,9 +3,14 @@ package src
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"slices"
+
+	// "slices"
+
+	// "slices"
 	"sort"
 	"strings"
 	"sync"
@@ -705,7 +710,7 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
     var diff string
     var probid string
     prob.RWith(func(v ProbS) { diff = v.Diff; probid = v.Id })
-    cost, ok := GetCost(diff)
+    cost, ok := GetCost("+" + diff)
     if !ok { oerr = dbErr("grade", "invalid cost") }
 
     team.With(func(v *TeamS) {
@@ -1168,7 +1173,7 @@ func DBLoadFromPB(ac string) error {
           NumSolved: map[string]int{"A": 0, "B": 0, "C": 0},
           NumIncc: map[string]int{"A": 0, "B": 0, "C": 0},
           MoneyMade: map[string]int{"A": 0, "B": 0, "C": 0},
-          MoneyHist: make([]moneyHistRec, 0),
+          MoneyHist: []moneyHistRec{{tm.GetInt("score"), ActiveContest.GetPrimitiveVal().Start,}},
           Rank: -1,
           StatsPublic: false,
           RankPublic: false,
@@ -1198,85 +1203,148 @@ func DBLoadFromPB(ac string) error {
   return nil
 }
 
-func DBGenProbWorkers(probs map[string]ProbM) error {
+var admins = []string{"a", "b", "c", "d", "e", "f", "g", "h"}
+var probs = func() []string {
+	problems := make([]string, 20)
+	for i := range problems {
+		problems[i] = fmt.Sprintf("u%d", i)
+	}
+	return problems
+}()
+var sectors = [][][]string{
+	{
+		{"u0", "u1"}, {"u2", "u3", "u4"}, {"u5"}, {"u6", "u7"},
+		{"u8", "u9"}, {"u10", "u11", "u12"}, {"u13", "u14", "u15"}, {"u16", "u17", "u18", "u19"},
+	},
+}
+
+func newSector() bool {
+	ap := make([][]string, len(admins))
+	for _, sector := range sectors {
+		for i, admin := range sector {
+			ap[i] = append(ap[i], admin...)
+		}
+	}
+
+	sector := make([][]string, len(admins))
+	for i := range sector {
+		sector[i] = []string{}
+	}
+
+	counts := make([]int, len(admins))
+	for i, p := range ap {
+		counts[i] = len(p)
+	}
+
+	added := false
+	for _, prob := range probs {
+		queue := make([]int, len(counts))
+		for i := range queue {
+			queue[i] = i
+		}
+
+		sort.Slice(queue, func(i, j int) bool {
+			return counts[queue[i]] < counts[queue[j]]
+		})
+
+		for _, i := range queue {
+			// Check if the problem is already assigned to this admin
+			found := false
+			for _, p := range ap[i] {
+				if p == prob {
+					found = true
+					break
+				}
+			}
+			if found {
+				continue
+			}
+
+			ap[i] = append(ap[i], prob)
+			sector[i] = append(sector[i], prob)
+			counts[i]++
+			added = true
+			break
+		}
+	}
+
+	sectors = append(sectors, sector)
+	return added
+}
+
+func compileSectors() [][]string {
+	queues := make([][]string, len(probs))
+	for i, prob := range probs {
+		for _, sector := range sectors {
+			for j, admin := range sector {
+				for _, p := range admin {
+					if p == prob {
+						queues[i] = append(queues[i], admins[j])
+						break
+					}
+				}
+			}
+		}
+	}
+	return queues
+}
+
+func DBGenProbWorkers(probsr *map[string]ProbM) error {
   corrs, err := App.Dao().FindRecordsByFilter(
     "correctors",
     `username != ""`,
     "-created", 0, 0,
   )
   if err != nil { return err }
-  corricache := make(map[string]int)
+  admins = make([]string, len(corrs))
   for i, corr := range corrs {
-    corricache[corr.GetId()] = i
+    admins[i] = corr.GetId()
   }
-  sectors := make([][][]string, 1)
-  for i := range sectors {
-    sectors[i] = make([][]string, len(corrs))
-    for j := range sectors {
-      sectors[i][j] = make([]string, 0)
-    }
+  probs = make([]string, 0, len(*probsr))
+  for id, _ := range *probsr {
+    probs = append(probs, id)
   }
-  probsnm := make([]string, 0, len(probs))
-  for id, prm := range probs {
-    prm.RWith(func(v ProbS) {
-      corri := corricache[v.Author]
-      sectors[0][corri] = append(sectors[0][corri], id)
+  sectors = make([][][]string, 1)
+  sectors[0] = make([][]string, 0)
+  for range admins {
+    sectors[0] = append(sectors[0], make([]string, 0))
+  }
+  for id, pr := range *probsr {
+    pr.RWith(func(v ProbS) {
+      idx := slices.Index(admins, v.Author)
+      sectors[0][idx] = append(sectors[0][idx], id)
     })
-    probsnm = append(probsnm, id)
   }
-  added := true
-  for added {
-    ap := make([][]string, len(corrs))
-    for i := range ap {
-      ap[i] = make([]string, 0)
-    }
-    for _, sec := range sectors {
-      for i, adm := range sec {
-        ap[i] = append(ap[i], adm...)
-      }
-    }
-    sec := make([][]string, len(corrs))
-    for i := range sec {
-      sec[i] = make([]string, 0)
-    }
-    cnts := make([]int, len(ap))
-    for i := range cnts {
-      cnts[i] = len(ap[i])
-    }
-    added = false
-    for _, pr := range probsnm {
-      queue := make([]int, len(cnts))
-      for i := range queue { queue[i] = i }
-      sort.Slice(queue, func(i, j int) bool {
-        return cnts[queue[i]] < cnts[queue[i]]
-      })
-      for _, i := range queue {
-        if slices.Contains(ap[i], pr) { continue }
-        ap[i] = append(ap[i], pr)
-        sec[i] = append(sec[i], pr)
-        cnts[i]++
-        added = true
-        break
-      }
-    }
-    sectors = append(sectors, sec)
-  }
+  // admins = []string{"a", "b", "c", "d", "e", "f", "g", "h"}
+  // probs = func() []string {
+  //   problems := make([]string, 20)
+  //   for i := range problems {
+  //     problems[i] = fmt.Sprintf("u%d", i)
+  //   }
+  //   return problems
+  // }()
+  // sectors = [][][]string{
+  //   {
+  //     {"u0", "u1"}, {"u2", "u3", "u4"}, {"u5"}, {"u6", "u7"},
+  //     {"u8", "u9"}, {"u10", "u11", "u12"}, {"u13", "u14", "u15"}, {"u16", "u17", "u18", "u19"},
+  //   },
+  // }
+  log.Info(sectors, probs, admins)
+
+  for newSector() {}
   sectors = sectors[:len(sectors)-1]
-  queues := make([][]string, 0, len(probsnm))
-  for i, pr := range probsnm {
-    queues = append(queues, make([]string, 0))
-    for _, sec := range sectors {
-      for j, adm := range sec {
-        if slices.Contains(adm, pr) {
-          queues[i] = append(queues[i], corrs[j].GetId())
-          break
-        }
-      }
-    }
-  }
-  for i, queue := range queues {
-    probs[probsnm[i]].With(func(v *ProbS) {
-      v.Workers = queue
+
+  finalsec := compileSectors()
+
+  log.Info(finalsec)
+
+
+
+  for i, pr := range finalsec {
+    id := probs[i]
+    (*probsr)[id].With(func(v *ProbS) {
+      v.Workers = pr
+      log.Info(id, pr)
     })
   }
   return nil
