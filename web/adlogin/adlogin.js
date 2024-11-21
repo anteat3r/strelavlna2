@@ -37,7 +37,7 @@ async function login(username, password){
 }
 
 async function github_login() {
-  await pb.collection("correctors").authWithOAuth2({ prvider: "github" })
+  await pb.collection("correctors").authWithOAuth2({ provider: "github" })
   if(pb.authStore.isValid){
       if(localStorage.getItem("logging_from")){
           window.location.href = localStorage.getItem("logging_from");
