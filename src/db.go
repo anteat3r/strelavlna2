@@ -423,9 +423,12 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
         delete(teamS.ChatChecksCache, prob)
         teamS.SolChecksCache[prob] = prob
       } else {
-        check = GetRandomId()
-        _, ok = (*checksmap)[check]
-        if ok { oerr = dbErr("check id collision"); return }
+        ok = true
+        for ok {
+          check = GetRandomId()
+          _, ok = (*checksmap)[check]
+        }
+        // if ok { oerr = dbErr("check id collision"); return }
         ncheck := NewRWMutexWrap(CheckS{
           Id: check,
           Prob: probres,
@@ -755,11 +758,12 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
         v.Stats.NumIncc[diff] ++
       }
 
-    })
-    if oerr != nil { return }
+      if oerr != nil { return }
 
-    Checks.With(func(v *map[string]*RWMutexWrap[CheckS]) {
-      delete(*v, checkid)
+      Checks.With(func(v *map[string]*RWMutexWrap[CheckS]) {
+        delete(*v, checkid)
+      })
+
     })
   })
   return 
