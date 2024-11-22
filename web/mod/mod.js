@@ -1327,8 +1327,8 @@ function gotData(data) {
             if (stats.rank <= 15){
                 teamsList.innerHTML += `
                     <div class="team-row" id="${id}">
-                        <p class="team-row-name">${teamName}</p>
-                        <p class="team-row-money">0 DC</p>
+                        <p class="team-row-name">${stats.teamname}</p>
+                        <p class="team-row-money">${stats.money} DC</p>
                         <p class="team-row-rank">${stats.rank}.</p>
                         <button class="team-row-sendrank${stats.rank_public ? " active" : ""}">Zobrazit pořadí</button>
                     </div>
@@ -1336,8 +1336,8 @@ function gotData(data) {
             }else{
                 teamsList.innerHTML += `
                     <div class="team-row" id="${id}">
-                        <p class="team-row-name">${teamName}</p>
-                        <p class="team-row-money">0 DC</p>
+                        <p class="team-row-name">${stats.teamname}</p>
+                        <p class="team-row-money">${stats.money} DC</p>
                         <p class="team-row-rank">${stats.rank}.</p>
                         <button class="team-row-sendrank${stats.rank_public ? " active" : ""}">
                             <i class="fa-solid fa-angle-down"></i>
