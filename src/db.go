@@ -559,9 +559,9 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     for _, m := range teamS.Chat {
       chrole := "p"
       if m.Admin { chrole = "a" }
-      probid := ""
-      if m.Prob != nil { m.Prob.RWith(func(v ProbS) { probid = v.Id }) }
-      chat += chrole + "\x09" + probid + "\x09" + m.Text + "\x0b"
+      // probid := ""
+      // if m.Prob != nil { m.Prob.RWith(func(v ProbS) { probid = v.Id }) }
+      chat += chrole + "\x09" + "\x09" + m.Text + "\x0b"
     }
     check = GetRandomId()
     ncheck := &RWMutexWrap[CheckS]{
