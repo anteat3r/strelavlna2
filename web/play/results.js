@@ -42,15 +42,17 @@ function loadData(data){
     income_portions = [data.moneymade.A, data.moneymade.B, data.moneymade.C];
     
     balance_chart = [];
-    if (data.moneyhist.length != 0){
+    if (data.moneyhist.length > 1){
+        balance = data.moneyhist[data.moneyhist.length - 1].money;
         const startT = new Date(Date.parse(data.moneyhist[0].time));
         for (let hist of data.moneyhist){
             const time = new Date(Date.parse(hist.time));
             const deltaTime = (time.getTime() - startT.getTime());
-            balance_chart.push({x: deltaTime*60, y: hist.money});
+            balance_chart.push({x: deltaTime, y: hist.money});
         }
     }else{
-        balance_chart = [{x:0, y: 0}, {x:10, y: 10}];
+        balance_chart.push({x: 120*60*1000, y: data.moneyhist[0].money});
+        balance = data.moneyhist[0].money;
     }
 
     if (data.rank_public) {
@@ -535,6 +537,13 @@ function drawResults(){
 }
 
 function generateTicks(){
+    animation_balance_chart_ticks_X_progresses = [];
+    balance_chart_ticks_labels_X = [];
+    balance_chart_label_states_X = [];
+    animation_balance_chart_ticks_Y_progresses = [];
+    balance_chart_ticks_labels_Y = [];
+    balance_chart_label_states_Y = [];
+    
     let length_X = balance_chart.reduce((max, item) => item.x > max ? item.x : max, 0)/1000/60/balance_chart_ticks_X_separation;
     for(let i = 0; i <= length_X; i++){
         animation_balance_chart_ticks_X_progresses.push(0.0);
