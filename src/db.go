@@ -548,6 +548,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
         }
       })
       upd = true
+      log.Info(ocheck)
       ocheck.With(func(checkS *CheckS) {
         checkS.Sol = msg
       })
