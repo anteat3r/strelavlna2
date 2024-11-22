@@ -744,7 +744,7 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
       target[probid] = prob
 
       delete(v.SolChecksCache, probid)
-      delete(v.ChatChecksCache, probid)
+      // delete(v.ChatChecksCache, probid)
       if corr {
         money = v.Money + cost
         v.Money = money

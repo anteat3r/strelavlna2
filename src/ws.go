@@ -285,15 +285,18 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
   return func(c echo.Context) error {
 
     adminid := c.PathParam("admin")
+    log.Info("as")
     if adminid == "" { return nErr("invalid admin path param") }
 
     adminrec, err := dao.FindRecordById("correctors", adminid)
+    log.Info("as")
     if err != nil { return err }
 
     var ok bool
     AdminsChans.RWith(func(v map[string]chan string) {
       _, ok = v[adminid]
     })
+    log.Info("as")
     if ok { return nErr("admin already connected") }
     perchan := make(chan string, 10)
     AdminsChans.With(func(v *map[string]chan string) {
@@ -301,7 +304,9 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     })
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+    log.Info("as")
     if err != nil { return err }
+    log.Info("as")
 
     fmt.Printf("%s >>- %s + >->\n", formTime(), adminrec.GetId())
     JSONlog(adminrec.GetId(), true, true, 0, ":connect")
