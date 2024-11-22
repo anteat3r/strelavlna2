@@ -298,10 +298,12 @@ func AdminWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     })
     log.Info("as")
     if ok { return nErr("admin already connected") }
+    log.Info("as")
     perchan := make(chan string, 10)
     AdminsChans.With(func(v *map[string]chan string) {
       (*v)[adminid] = perchan
     })
+    log.Info("as")
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
     log.Info("as")
