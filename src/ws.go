@@ -163,7 +163,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     var ok bool
     Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) { _, ok = v[teamid] })
-    if !ok { return nErr("invalid team") }
+    if !ok { log.Info("asd"); return nErr("invalid team") }
     // cont := team.GetString("contest")
 
     // ActiveContestMu.RLock()
@@ -189,7 +189,7 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     }
     teamchan.mu.RUnlock()
 
-    if i == -1 { return errors.New("too many players") }
+    if i == -1 { log.Info("asd"); return errors.New("too many players") }
     perchan := make(chan string, 10)
 
     teamchan.mu.Lock()
@@ -202,11 +202,12 @@ func PlayWsEndpoint(dao *daos.Dao) echo.HandlerFunc {
     })
     if !ok {
       log.Error("invalid teamid", teamid)
+      log.Info("asd") 
       return dbErr("invalid teamid", teamid)
     }
 
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
-    if err != nil { return err }
+    if err != nil { log.Info("asd"); return err }
 
     fmt.Printf("%s >- %s:%d + >->\n", formTime(), teamid, i)
     JSONlog(teamid, false, true, i, ":connect")
