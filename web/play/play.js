@@ -10,6 +10,7 @@ let team_rank = "14";
 let start_time = new Date().getTime() - 5000;
 let end_time = new Date().getTime() + 5000000;
 let prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]]; //[buy], [solve], [sell]
+let remaining = [-1, 8, 0];
 let team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
 let problems_solved = 12;
 let problems_sold = 3;
@@ -76,10 +77,17 @@ document.getElementById("send-message-button").addEventListener("click", functio
 
 buy_buttons.forEach(function(button, n){
     button.addEventListener("mouseover", function(){
-        button.getElementsByClassName("buy-dropdown-difficulty")[0].innerHTML = `&nbsp` + prices[0][n];
+        const but = button.getElementsByClassName("buy-dropdown-difficulty")[0];
+        const tooltip = document.getElementById("tooltip");
+        but.innerHTML = prices[0][n];
+        tooltip.innerHTML = `Zbývá: ${n == 0 ? "hodně" : remaining[n]}`;
+        tooltip.classList.remove("hidden");
     });
     button.addEventListener("mouseout", function(){
-        button.getElementsByClassName("buy-dropdown-difficulty")[0].innerHTML = ["[A]", "[B]", "[C]"][n];
+        const but = button.getElementsByClassName("buy-dropdown-difficulty")[0];
+        const tooltip = document.getElementById("tooltip");
+        but.innerHTML = ["[A]", "[B]", "[C]"][n];
+        tooltip.classList.add("hidden");
     });
 });
 
@@ -163,10 +171,10 @@ document.getElementById("answer-input").addEventListener("keydown", function(e){
 
 function updateShop(){
     buy_buttons.forEach(function(button, n){
-        if(team_balance >= prices[0][n]){
-            button.classList.remove("subbuy-disabled");
-        }else{
+        if(team_balance < prices[0][n] || remaining[n] == 0){
             button.classList.add("subbuy-disabled");
+        }else{
+            button.classList.remove("subbuy-disabled");
         }
     });
     const focused_problem_obj = problems.find(prob => prob.id == focused_check);
@@ -751,8 +759,8 @@ function connectWS() {
         probSold(msg[1], msg[2]);
       break;
       case "bought":
-        if (msg.length != 7) { cLe() }
-        probBought(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6]);
+        if (msg.length != 8) { cLe() }
+        probBought(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
       break;
       case "solved":
         if (msg.length != 3) { cLe() }
@@ -929,7 +937,7 @@ function probSold(id, money) {
  * @param {string} name
  * @param {string} text 
  * @param {string} imgsrc*/
-function probBought(id, diff, money, name, text, imgname) {
+function probBought(id, diff, money, name, text, imgname, rem) {
     const new_problem = {
         id: id,
         title: name,
@@ -943,9 +951,9 @@ function probBought(id, diff, money, name, text, imgname) {
         image: imgname,
         chat: []
     }
+    remaining[["A", "B", "C"].indexOf(diff)] = rem;
     problems.push(new_problem);
     team_balance = parseInt(money);
-    console.log(id, diff, money, name, text) 
     updateProblemList();
     updateTeamStats();
     updateShop();
