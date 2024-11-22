@@ -1082,7 +1082,8 @@ function sendRank(teamid) {
 
 
 function rankSent(teamid) {
-    document.getElementById(teamid).classList.add("active");
+    document.getElementById(teamid).getElementsByClassName("team-row-sendrank")[0].classList.add("active");
+    console.log("heheehha");
 }
 
 function reassigned(items){
@@ -1421,6 +1422,9 @@ function loaded(data) {
     myId = data.idx.toString();
     contest_info = data.contest_info;
     contest_name = data.contest_name;
+    if (data.contest_stats != "") {
+        gotData(data.contest_stats);
+    }
     // updateCheckList();
     // updateFocusedCheck();
     // updateChat();
