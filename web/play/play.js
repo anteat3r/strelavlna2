@@ -705,6 +705,8 @@ function update(){
     }
     else if (contest_state == "waiting"){
         contest_state = "running";
+        stopMusic();
+        adjustDivHeight();
     }
 
     if ((Math.floor(remaining / 1000) != lastSecond && remaining>=0) || (!clock_zeroed && remaining < 0) && contest_state == "running"){

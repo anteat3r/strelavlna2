@@ -173,7 +173,11 @@
         "nocachebool": "nocachebool",
         "nocb": "nocachebool",
         "nocachefraction": "nocachefraction",
-        "nocf": "nocachefraction"
+        "nocf": "nocachefraction",
+
+        "modulo": "modulo",
+        "mod": "modulo",
+        "%": "modulo"
 
     },
 
@@ -637,6 +641,15 @@
               "inputs": 1,
               "inputTypes": ["fraction"],
               "outputType": "fraction"
+            },
+            "modulo": {
+              "width": 30,
+              "height": 30,
+              "text": "%",
+              "fontSize": 24,
+              "inputs": 2,
+              "inputTypes": ["number", "number"],
+              "outputType": "number"
             }
         },
         "get": {

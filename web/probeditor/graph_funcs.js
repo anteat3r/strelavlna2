@@ -138,4 +138,5 @@ export default {
     "nocachestring": (i, _, __) => i[0],
     "nocachebool": (i, _, __) => i[0],
     "nocachefraction": (i, _, __) => i[0],
+    "modulo": (i, _, __) => i[0] % i[1]
 }

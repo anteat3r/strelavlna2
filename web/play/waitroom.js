@@ -239,6 +239,11 @@ console.log(stones);
 drawSilentLines();
 frame();
 
+function stopMusic() {
+    audioElement.pause();
+    audioElement.currentTime = 0;
+}
+
 
 function playStop(){
     document.getElementById('note-button').removeEventListener('click', arguments.callee);
