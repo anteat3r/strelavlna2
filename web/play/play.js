@@ -81,6 +81,11 @@ buy_buttons.forEach(function(button, n){
         const tooltip = document.getElementById("tooltip");
         but.innerHTML = prices[0][n];
         tooltip.innerHTML = `Zbývá: ${n == 0 ? "hodně" : remaining[n]}`;
+        if (remaining[n] == 0) {
+            tooltip.classList.add("warning");
+        } else {
+            tooltip.classList.remove("warning");
+        }
         tooltip.classList.remove("hidden");
     });
     button.addEventListener("mouseout", function(){
