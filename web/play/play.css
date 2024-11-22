@@ -408,6 +408,7 @@
 }
 
 #buy-button-wrapper{
+    position: relative;
     padding: 15px;
 }
 
@@ -499,7 +500,7 @@
 
 .buy-dropdown-difficulty{
     margin: 0px;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--color-secondary-dark);
 }
@@ -2212,4 +2213,21 @@ audio {
 
 #table th:last-child, td:last-child{
     border-right: none !important;
+}
+
+#tooltip{
+    position: absolute;
+    top: 130px;
+    left: 40px;
+    z-index: 10;
+    background-color: var(--color-secondary-glow);
+    border-color: var(--color-secondary-dark);
+    border-radius: 5px;
+    font-family: 'Lexend';
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-secondary-dark);
+    border: 2px solid var(--color-secondary-light);
+    padding: 2px;
+    padding-inline: 4px;
 }

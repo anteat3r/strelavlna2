@@ -1322,8 +1322,6 @@ function gotData(data) {
 
     } else {
         for (const [id, stats] of Object.entries(sortedData)) {
-            let teamName = "- - - -";
-    
             if (stats.rank <= 15){
                 teamsList.innerHTML += `
                     <div class="team-row" id="${id}">
