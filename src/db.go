@@ -340,8 +340,10 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
       }
       delete(teamS.GenProbCache, remid)
       teamS.GenProbCache[nid] = 0
+      log.Info(teamS.RemProbCnt)
       teamS.RemProbCnt[diff]--
       remcnt = teamS.RemProbCnt[diff]
+      log.Info(teamS.RemProbCnt)
     })
     prob = nid
     if oerr != nil { return }
