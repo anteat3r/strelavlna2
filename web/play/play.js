@@ -1114,7 +1114,7 @@ function loaded(data) {
         loadData(JSON.parse(data.stats));
     }
     // loadData(data.stats);
-
+    remaining = [-1, data.remprobscnt.B, data.remprobscnt.C];
 
     updatePriceList();
     updateProblemList();
