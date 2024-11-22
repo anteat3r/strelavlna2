@@ -421,7 +421,7 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
         updated = true
         csol = sol
         delete(teamS.ChatChecksCache, prob)
-        teamS.SolChecksCache[prob] = prob
+        teamS.SolChecksCache[prob] = check
       } else {
         ok = true
         for ok {
