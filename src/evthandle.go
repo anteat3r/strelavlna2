@@ -83,9 +83,9 @@ func PlayerWsHandleMsg(
   case "buy":
     if len(m) != 2 { return eIm(msg) }
     diff := m[1]
-    prob, money, name, text, img, err := DBBuy(teamM, diff)
+    prob, money, name, text, img, remcnt, err := DBBuy(teamM, diff)
     if err != nil { return err }
-    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img)
+    tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img, strconv.Itoa(remcnt))
 
   // case "buyold":
   //   if len(m) != 2 { return eIm(msg) }
@@ -344,6 +344,7 @@ func AdminWsHandleMsg(
           idx := slices.IndexFunc(scores, func(a teamData) bool { return a.id == id })
           t.Stats.Rank = idx+1
           t.Stats.StatsPublic = true
+          t.Stats.Money = t.Money
           bts, err := json.Marshal(t.Stats)
           if err != nil { log.Error(err) }
           data = string(bts)
@@ -401,6 +402,7 @@ func AdminWsHandleMsg(
     })
     if !ok { return }
     WriteTeamChan(team, "showrank")
+    AdminSend("ranksent", team)
 
   }
 

@@ -94,6 +94,7 @@ type TeamS struct {
   Stats TeamStats
   GenProbCache map[string]int
   GenProbCacheLen int
+  RemProbCnt map[string]int
 }
 type TeamM = *RWMutexWrap[TeamS]
 
@@ -111,6 +112,8 @@ type TeamStats struct {
   Rank int `json:"rank"`
   StatsPublic bool `json:"stats_public"`
   RankPublic bool `json:"rank_public"`
+  TeamName string `json:"teamname"`
+  Money int `json:"money"`
 }
 
 type ProbS struct {
@@ -264,7 +267,7 @@ func DBSell(team TeamM, probid string) (money int, oerr error) {
   return
 }
 
-func DBBuy(team TeamM, diff string) (prob string, money int, name string, text string, img string, oerr error) {
+func DBBuy(team TeamM, diff string) (prob string, money int, name string, text string, img string, remcnt int, oerr error) {
   diffcost, ok := GetCost(diff)
   if !ok { oerr = dbClownErr("buy", "invalid diff"); return }
 
@@ -337,6 +340,8 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
       }
       delete(teamS.GenProbCache, remid)
       teamS.GenProbCache[nid] = 0
+      teamS.RemProbCnt[diff]--
+      remcnt = teamS.RemProbCnt[diff]
     })
     prob = nid
     if oerr != nil { return }
@@ -592,6 +597,7 @@ type teamRes struct {
   Player5 string `json:"player5"`
   Stats string `json:"stats"`
   Consts string `json:"consts"`
+  RemProbsCnt map[string]int `json:"remprobscnt"`
 }
 
 type checkRes struct{
@@ -661,6 +667,8 @@ func DBPlayerInitLoad(team TeamM, idx int) (sres string, oerr error) {
         })
       }
     })
+    res.RemProbsCnt = make(map[string]int)
+    for diff, cnt := range t.RemProbCnt { res.RemProbsCnt[diff] = cnt }
     if t.Stats.StatsPublic {
       resb, err := json.Marshal(t.Stats)
       if err != nil { oerr = err; return }
@@ -1042,6 +1050,39 @@ func DBDump() error {
   return err
 }
 
+func DBDumpTeams() error {
+  resb, err := json.Marshal(&Teams)
+  if err != nil { return err }
+
+  ac := ActiveContest.GetPrimitiveVal().Id
+
+  err = os.WriteFile(
+    "/opt/strelavlna2/dist/svdataT_" + ac + ".json", 
+    resb, fs.FileMode(os.O_WRONLY | os.O_CREATE),
+  )
+  return err
+}
+
+func DBLoadTeamsFromDump() error {
+  ac := ActiveContest.GetPrimitiveVal().Id
+  resb, err := os.ReadFile("/opt/strelavlna2/dist/svdataT_" + ac + ".json")
+  if err != nil { return err }
+
+  err = json.Unmarshal(resb, &Teams)
+  if err != nil { return err }
+
+  TeamChanMap.With(func(v *map[string]*TeamChanMu) {
+    Teams.RWith(func(w map[string]*RWMutexWrap[TeamS]) {
+      for id, _ := range w {
+        teamchan := &TeamChanMu{sync.RWMutex{}, make([]chan string, 5), id}
+        (*v)[id] = teamchan
+      }
+    })
+  })
+
+  return err
+}
+
 func DBLoadFromDump() error {
   ac := ActiveContest.GetPrimitiveVal().Id
   resb, err := os.ReadFile("/opt/strelavlna2/dist/svdata_" + ac + ".json")
@@ -1097,6 +1138,7 @@ func DBLoadFromPB(ac string) error {
     All(&probs)
   if err != nil { return err }
   genprobcnt := 0
+  probcnts := make(map[string]int)
   Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
     for _, pr := range probs {
       if pr.Author == "" { continue }
@@ -1133,6 +1175,7 @@ func DBLoadFromPB(ac string) error {
         Graph: graph,
         Author: pr.Author,
       })
+      probcnts[pr.Diff]++
       (*v)[pr.Id] = &newprob
     }
   })
@@ -1160,6 +1203,7 @@ func DBLoadFromPB(ac string) error {
         SolChecksCache: make(map[string]string),
         GenProbCache: make(map[string]int),
         GenProbCacheLen: genprobcnt / 2,
+        RemProbCnt: make(map[string]int),
         Players: [5]string{
           tm.GetString("player1"),
           tm.GetString("player2"),
@@ -1177,8 +1221,10 @@ func DBLoadFromPB(ac string) error {
           Rank: -1,
           StatsPublic: false,
           RankPublic: false,
+          TeamName: tm.GetString("name"),
         },
       })
+      for diff, cnt := range probcnts { newteam.v.RemProbCnt[diff] = cnt }
       (*v)[tm.Id] = &newteam
     }
   })
