@@ -746,6 +746,10 @@ function updateChat(){
     conversation_wrapper.scrollTop = conversation_wrapper.scrollHeight;
 }
 
+document.getElementById("show-leaderboard-button").addEventListener("click", function() {
+    document.getElementById("leaderboard-wrapper").classList.toggle("hidden");
+});
+
 function updateClock(remaining, passed){
     lastSecond = Math.floor(remaining / 1000);
 
@@ -951,6 +955,10 @@ function connectWS() {
         if (msg.length != 2) { cLe() }
         gotData(msg[1]);
         break;
+      case "ranksent":
+        if (msg.length != 2) { cLe() }
+        rankSent(msg[1]);
+        break;
       case "err":
         console.log(msg)
       break;
@@ -1063,11 +1071,19 @@ function sendResults() {
   socket.send("senddata");
 }
 
+function sendRank(teamid) {
+  socket.send(`sendrank\x00${teamid}`);
+}
 
 
 
 
 
+
+
+function rankSent(teamid) {
+    document.getElementById(teamid).classList.add("active");
+}
 
 function reassigned(items){
     items = JSON.parse(items);
@@ -1293,7 +1309,60 @@ function checkFocused(checkid, modid) {
 }
 
 function gotData(data) {
+    const teamsList = document.getElementById("leaderboard-container");
     data = JSON.parse(data);
+
+    const sortedData = Object.fromEntries(
+        Object.entries(data).sort(([, a], [, b]) => a.rank - b.rank)
+    );
+
+    teamsList.innerHTML = "";
+    if (Object.entries(sortedData).length == 0) {
+        teamsList.innerHTML = `<h2 id="nothing-here-yet-message">- - - zatim tu nic neni - - -</h2>`;
+
+    } else {
+        for (const [id, stats] of Object.entries(sortedData)) {
+            let teamName = "- - - -";
+    
+            if (stats.rank <= 15){
+                teamsList.innerHTML += `
+                    <div class="team-row" id="${id}">
+                        <p class="team-row-name">${teamName}</p>
+                        <p class="team-row-money">0 DC</p>
+                        <p class="team-row-rank">${stats.rank}.</p>
+                        <button class="team-row-sendrank${stats.rank_public ? " active" : ""}">Zobrazit pořadí</button>
+                    </div>
+                `
+            }else{
+                teamsList.innerHTML += `
+                    <div class="team-row" id="${id}">
+                        <p class="team-row-name">${teamName}</p>
+                        <p class="team-row-money">0 DC</p>
+                        <p class="team-row-rank">${stats.rank}.</p>
+                        <button class="team-row-sendrank${stats.rank_public ? " active" : ""}">
+                            <i class="fa-solid fa-angle-down"></i>
+                        </button>
+                    </div>
+                `
+            }
+        }
+
+        for (const [id, stats] of Object.entries(sortedData)) {
+            const teamRow = document.getElementById(id);
+            teamRow.addEventListener("click", () => {
+                if (stats.rank <= 15){
+                    sendRank(id);
+                } else {
+                    for (const [otherId, otherStats] of Object.entries(sortedData)) {
+                        if (otherStats.rank <= stats.rank) {
+                            sendRank(otherId);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
 }
 
 /**
@@ -1346,8 +1415,6 @@ function loaded(data) {
         }
     });
 
-
-    // checks.forEach(check => focusCheck(check.id, check.probid, check.teamid, check.probid != "", true));
     
     console.log("data");
     console.log(checks);

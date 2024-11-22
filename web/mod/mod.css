@@ -1701,6 +1701,7 @@
     cursor: pointer;
     transition: all 0.3s ease-out;
     z-index: 11;
+    box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.7);
 
 }
 #show-leaderboard-button:hover{
@@ -1716,26 +1717,104 @@
     transition: all 0.0s;
 }
 
-#leaderboard-wrapper{
+#leaderboard-wrapper {
     position: absolute;
-    top: 0px;
-    left: 0px;
     width: 100%;
     height: 100%;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     z-index: 10;
+    backdrop-filter: blur(2px) brightness(0.7);
 }
-#leaderboard-container{
+#leaderboard-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     background-color: #f3f3f3;
     border-radius: 10px;
-    border: 2px var(--color-secondary-dark) solid;
-    padding: 20px;
-    gap: 10px;
+    border: 2px white solid;
+    padding: 10px;
+    /* gap: 10px; */
+    box-shadow: 0 0 50px 0 rgba(255, 255, 255, 0.7);
+    max-height: calc(100% - 200px);
+    overflow-y: auto;
+}
+
+.team-row{
+    width: 700px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5px;
+    margin-inline: 0px;
+    padding-inline: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px dashed #a6b8be;
+}
+.team-row:last-child {
+    border-bottom: none;
+}
+#leaderboard-container > .team-row:nth-of-type(15) {
+    border-bottom: 2px solid #a6b8be;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(100, 208, 241, 0.13));
+    
+}
+
+.team-row-name{
+    font-family: 'Lexend';
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0px;
+    color: var(--color-secondary-dark);
+}
+.team-row-money{
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0px;
+    color: var(--color-secondary-dark);
+}
+.team-row-rank{
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0px;
+    color: var(--color-secondary-dark);
+}
+.team-row-sendrank{
+    width: 130px;
+    font-family: 'Lexend';
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0px;
+    color: var(--color-secondary-dark);
+    cursor: pointer;
+    border: 2px #badae7 solid;
+    border-radius: 5px;
+    padding: 5px;
+    padding-inline: 10px;
+    background-color: white;
+    transition: all 0.3s ease-out;
+}
+.team-row-sendrank:hover{
+    color: white;
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
+    transition: all 0.0s;
+}
+.active.team-row-sendrank{
+    color: white;
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
+    transition: all 0.0s;
+}
+
+#nothing-here-yet-message{
+    font-family: 'Lexend';
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0px;
+    color: var(--color-secondary-dark);
 }
