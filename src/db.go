@@ -514,6 +514,8 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     return
   }
 
+  log.Info("sadakldj")
+
   var probres ProbM
   var ok bool
   Probs.RWith(func(v map[string]ProbM) { probres, ok = v[prob] })
