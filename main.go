@@ -78,7 +78,7 @@ func main() {
       "* * * * *",
       func() {
         if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
-        err := src.DBDump()
+        err := src.DBDumpTeams()
         if err != nil {
           log.Error(err)
         }
@@ -449,26 +449,36 @@ func main() {
       apis.RequireAdminAuth(),
     )
 
+    // e.Router.GET(
+    //   "/api/test/probgen",
+    //   func(c echo.Context) error {
+    //     prob, err := app.Dao().FindRecordById("probs", c.QueryParam("id"))
+    //     if err != nil { return err }
+    //     g, err := src.ParseGraph(prob.GetString("graph"))
+    //     if err != nil { return err }
+    //     text, sol, err := g.Generate(prob.GetString("text"), prob.GetString("solution"))
+    //     if err != nil { return err }
+    //     return c.String(200, text + "\n\n\n\n" + sol)
+    //   },
+    // )
+    //
+
     e.Router.GET(
-      "/api/test/probgen",
+      "/api/admin/loadteams",
       func(c echo.Context) error {
-        prob, err := app.Dao().FindRecordById("probs", c.QueryParam("id"))
-        if err != nil { return err }
-        g, err := src.ParseGraph(prob.GetString("graph"))
-        if err != nil { return err }
-        text, sol, err := g.Generate(prob.GetString("text"), prob.GetString("solution"))
-        if err != nil { return err }
-        return c.String(200, text + "\n\n\n\n" + sol)
+        return src.DBLoadTeamsFromDump()
       },
+      apis.RequireAdminAuth(),
     )
+
 
     err = src.SetupInitLoadData(app.Dao())
     if err != nil { return err }
 
-    if src.ActiveContest.GetPrimitiveVal().Id != "" {
-      err = src.DBLoadFromDump()
-      if err != nil { log.Error(err) }
-    }
+    // if src.ActiveContest.GetPrimitiveVal().Id != "" {
+    //   err = src.DBLoadTeamsFromDump()
+    //   if err != nil { log.Error(err) }
+    // }
 
     return nil
   })
