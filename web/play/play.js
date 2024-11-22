@@ -10,7 +10,7 @@ let team_rank = "14";
 let start_time = new Date().getTime() - 5000;
 let end_time = new Date().getTime() + 5000000;
 let prices = [[10, 20, 30], [15, 35, 69], [5, 10, 15]]; //[buy], [solve], [sell]
-let remaining = [-1, 8, 0];
+let remaining = [-1, 0, 0];
 let team_members = ["Eduard Smetana", "Jiří Matoušek", "Antonín Šreiber", "Vanda Kybalová", "Jan Halfar"];
 let problems_solved = 12;
 let problems_sold = 3;
@@ -81,6 +81,11 @@ buy_buttons.forEach(function(button, n){
         const tooltip = document.getElementById("tooltip");
         but.innerHTML = prices[0][n];
         tooltip.innerHTML = `Zbývá: ${n == 0 ? "hodně" : remaining[n]}`;
+        if (remaining[n] == 0) {
+            tooltip.classList.add("warning");
+        } else {
+            tooltip.classList.remove("warning");
+        }
         tooltip.classList.remove("hidden");
     });
     button.addEventListener("mouseout", function(){

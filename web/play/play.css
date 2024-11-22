@@ -2231,3 +2231,8 @@ audio {
     padding: 2px;
     padding-inline: 4px;
 }
+.warning#tooltip{
+    background-color: #e0a393;
+    border-color: #e44821;
+    color: black;
+}
