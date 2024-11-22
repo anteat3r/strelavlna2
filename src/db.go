@@ -742,6 +742,8 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
       delete(v.Pending, probid)
       target[probid] = prob
 
+      delete(v.SolChecksCache, probid)
+      delete(v.ChatChecksCache, probid)
       if corr {
         money = v.Money + cost
         v.Money = money
@@ -751,8 +753,6 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
         })
         v.Stats.NumSolved[diff] ++
         v.Stats.MoneyMade[diff] += cost
-        delete(v.SolChecksCache, probid)
-        delete(v.ChatChecksCache, probid)
         if len(probid) > 15 {
           Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
             delete(*w, probid)
