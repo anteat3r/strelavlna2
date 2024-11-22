@@ -531,6 +531,11 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     _, pending := teamS.Pending[prob]
     if !bought && !pending { oerr = dbErr("chat", "prob not owned"); return }
     teamS.Chat = append(teamS.Chat, ChatMsg{false, probres, team, msg})
+    check, ok = teamS.SolChecksCache[prob]
+    if ok {
+      upd = true
+      return
+    }
     check, ok = teamS.ChatChecksCache[prob]
     if ok {
       var ocheck CheckM
