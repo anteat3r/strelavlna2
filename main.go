@@ -73,17 +73,17 @@ func main() {
       },
     )
 
-    sched.MustAdd(
-      "dumpdb",
-      "* * * * *",
-      func() {
-        if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
-        err := src.DBDumpTeams()
-        if err != nil {
-          log.Error(err)
-        }
-      },
-    )
+    // sched.MustAdd(
+    //   "dumpdb",
+    //   "* * * * *",
+    //   func() {
+    //     if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
+    //     err := src.DBDumpTeams()
+    //     if err != nil {
+    //       log.Error(err)
+    //     }
+    //   },
+    // )
 
     sched.Start()
 

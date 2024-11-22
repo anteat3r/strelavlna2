@@ -421,7 +421,7 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
         updated = true
         csol = sol
         delete(teamS.ChatChecksCache, prob)
-        teamS.SolChecksCache[prob] = prob
+        teamS.SolChecksCache[prob] = check
       } else {
         ok = true
         for ok {
@@ -514,6 +514,8 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     return
   }
 
+  log.Info("sadakldj")
+
   var probres ProbM
   var ok bool
   Probs.RWith(func(v map[string]ProbM) { probres, ok = v[prob] })
@@ -531,6 +533,11 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     _, pending := teamS.Pending[prob]
     if !bought && !pending { oerr = dbErr("chat", "prob not owned"); return }
     teamS.Chat = append(teamS.Chat, ChatMsg{false, probres, team, msg})
+    check, ok = teamS.SolChecksCache[prob]
+    if ok {
+      upd = true
+      return
+    }
     check, ok = teamS.ChatChecksCache[prob]
     if ok {
       var ocheck CheckM
@@ -543,6 +550,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
         }
       })
       upd = true
+      log.Info(ocheck)
       ocheck.With(func(checkS *CheckS) {
         checkS.Sol = msg
       })
@@ -737,6 +745,8 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
       delete(v.Pending, probid)
       target[probid] = prob
 
+      delete(v.SolChecksCache, probid)
+      // delete(v.ChatChecksCache, probid)
       if corr {
         money = v.Money + cost
         v.Money = money
@@ -746,8 +756,6 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
         })
         v.Stats.NumSolved[diff] ++
         v.Stats.MoneyMade[diff] += cost
-        delete(v.SolChecksCache, probid)
-        delete(v.ChatChecksCache, probid)
         if len(probid) > 15 {
           Probs.With(func(w *map[string]*RWMutexWrap[ProbS]) {
             delete(*w, probid)
