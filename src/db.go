@@ -561,7 +561,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
       if m.Admin { chrole = "a" }
       // probid := ""
       // if m.Prob != nil { m.Prob.RWith(func(v ProbS) { probid = v.Id }) }
-      chat += chrole + "\x09" + "\x09" + m.Text + "\x0b"
+      chat += chrole + "\x09" + m.Text + "\x0b"
     }
     check = GetRandomId()
     ncheck := &RWMutexWrap[CheckS]{
