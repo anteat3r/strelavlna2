@@ -1,0 +1,23 @@
+.rrs-list p{
+    margin-left: 50px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    font-size: 16px;
+}
+
+.rrs-list h1{
+    margin-left: 50px;
+}
+
+.rrs-list p span{
+    color: red;
+    font-weight: bold;
+}
+
+@media (max-width: 700px){
+    .white-section{
+        padding-left: 5%;
+        padding-right: 5%;
+    }
+}
