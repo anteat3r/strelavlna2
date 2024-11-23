@@ -411,6 +411,13 @@ func ParseGraph(graphs string) (Graph, error) {
           return float64(i[0].(Fraction).x) / float64(i[0].(Fraction).y)
         },
       }
+    case "modulo":
+      nnd = FunctionNode{
+        wtypes: []DataType{Number, Number},
+        fn: func(i []any) any {
+          return float64(int(i[0].(float64)) % int(i[1].(float64)))
+        },
+      }
     case "nocache":
       if len(nd.Inputs) != 1 { return nil, InvalidGraphErr{"invalid nocache node"}}
       nnnd := NoCacheNode{

@@ -559,9 +559,9 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     for _, m := range teamS.Chat {
       chrole := "p"
       if m.Admin { chrole = "a" }
-      probid := ""
-      if m.Prob != nil { m.Prob.RWith(func(v ProbS) { probid = v.Id }) }
-      chat += chrole + "\x09" + probid + "\x09" + m.Text + "\x0b"
+      // probid := ""
+      // if m.Prob != nil { m.Prob.RWith(func(v ProbS) { probid = v.Id }) }
+      chat += chrole + "\x09" + m.Text + "\x0b"
     }
     check = GetRandomId()
     ncheck := &RWMutexWrap[CheckS]{
@@ -1229,7 +1229,7 @@ func DBLoadFromPB(ac string) error {
           NumSolved: map[string]int{"A": 0, "B": 0, "C": 0},
           NumIncc: map[string]int{"A": 0, "B": 0, "C": 0},
           MoneyMade: map[string]int{"A": 0, "B": 0, "C": 0},
-          MoneyHist: []moneyHistRec{{tm.GetInt("score"), ActiveContest.GetPrimitiveVal().Start,}},
+          MoneyHist: []moneyHistRec{{tm.GetInt("score"), ActiveContest.GetPrimitiveVal().Start.Add(time.Hour),}},
           Rank: -1,
           StatsPublic: false,
           RankPublic: false,
