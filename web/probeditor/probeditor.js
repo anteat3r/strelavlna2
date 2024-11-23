@@ -1291,6 +1291,7 @@ function updateLeftEditor(){
     const solution_DOM = document.getElementById("problem-solution-input");
     const author_DOM = document.getElementById("author-name");
     const change_author_DOM = document.getElementById("change-author-button");
+    const infinitySelectorDOM = document.getElementById("infinity-selector");
 
     
 
@@ -1302,6 +1303,7 @@ function updateLeftEditor(){
         rank_txt_DOM.innerHTML = "[-]";
         author_DOM.innerHTML = `<span style="opacity: 0.5">Autor:</span> nikdo`;
         change_author_DOM.innerHTML = "-";
+        infinitySelectorDOM.classList.remove("active");
     }else{
         const prob = probs.find(prob => prob.id == focused_prob);
         title_DOM.value = prob.title;
@@ -1309,6 +1311,11 @@ function updateLeftEditor(){
         solution_DOM.value = prob.solution;
         rank_txt_DOM.innerHTML = `[${prob.rank}]`;
         type_txt_DOM.innerHTML = `${prob.type == "math" ? "Mat." : "Fyz."}`;
+        if (prob.infinite) {
+            infinitySelectorDOM.classList.add("active");
+        } else {
+            infinitySelectorDOM.classList.remove("active");
+        }
         if(prob.authorId != ""){
             author_DOM.innerHTML = `<span style="opacity: 0.5">Autor:</span> ${prob.authorName}`;
             if(prob.authorId == my_id){
@@ -1325,6 +1332,13 @@ function updateLeftEditor(){
 
     
 }
+
+document.getElementById("infinity-selector").addEventListener("click", function(){
+    const prob = probs.find(prob => prob.id == focused_prob);
+    if (prob == null) return;
+    prob.infinite = !prob.infinite;
+    updateLeftEditor();
+});
 
 
 //prob selector
@@ -1517,8 +1531,14 @@ prob_selector_my.addEventListener("click", function(){
     scrollToFocusedProb();
 })
 
-function filterSearch(){
-    const search = document.getElementById("problem-filter-input").value.toLowerCase();
+function filterSearch(search){
+    search = search.toLowerCase();
+
+    if (search == "*free") {
+        return probs.filter(prob => prob.authorId == "");
+    } else if (search == "*other") {
+        return probs.filter(prob => prob.authorId != my_id && prob.authorId != "");
+    }
 
     const normalize = (str) => 
         str.toLowerCase()
@@ -1532,16 +1552,17 @@ function filterSearch(){
             normalize(prob.title).includes(normalizedSearch) || 
             normalize(prob.id).includes(normalizedSearch) || 
             normalize(prob.solution).includes(normalizedSearch) || 
-            normalize(prob.content).includes(normalizedSearch)
+            normalize(prob.content).includes(normalizedSearch) ||
+            normalize(prob.authorName).includes(normalizedSearch)
         );
     });
 }
 document.getElementById("problem-filter-input").addEventListener("blur", function(){
     const search = document.getElementById("problem-filter-input").value;
     if(search.length >= 3){
-        filtered_probs = filterSearch();
+        filtered_probs = filterSearch(search);
         show_filtered = true;
-    }else{
+    } else {
         show_filtered = false;
     }
     updateProbList();

@@ -1354,10 +1354,60 @@ th:last-child, td:last-child{
     border-bottom: 2px solid #9ec5d4;
 }
 
+#infinity-selector{
+    position: relative;
+    height: 33px;
+    border: 2px solid #9dbcc5;
+    width: 60px;
+    border-radius: 5px;
+    overflow: hidden;
+    transition: all 0.3s ease-out;
+}
+#infinity-selector:hover{
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
+    transition: all 0.0s;
+}
+.active#infinity-selector{
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
+    transition: all 0.0s;
+}
+#infinity-selector-one{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    color: var(--color-secondary-dark);
+    opacity: 1;
+    transition: opacity 0.3s ease-out;
+}
+#infinity-selector:hover #infinity-selector-one{
+    opacity: 0;
+    transition: opacity 0.0s;
+}
+.active #infinity-selector-one{
+    opacity: 0;
+    transition: opacity 0.0s;
+}
 
+#infinity-selector-infinity{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
 
-/* .table-group-title{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-} */
+#infinity-selector:hover #infinity-selector-infinity{
+    opacity: 1;
+    transition: opacity 0.0s;
+}
+.active #infinity-selector-infinity{
+    opacity: 1;
+    transition: opacity 0.0s;
+}
