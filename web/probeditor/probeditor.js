@@ -1291,6 +1291,7 @@ function updateLeftEditor(){
     const solution_DOM = document.getElementById("problem-solution-input");
     const author_DOM = document.getElementById("author-name");
     const change_author_DOM = document.getElementById("change-author-button");
+    const infinitySelectorDOM = document.getElementById("infinity-selector");
 
     
 
@@ -1302,6 +1303,7 @@ function updateLeftEditor(){
         rank_txt_DOM.innerHTML = "[-]";
         author_DOM.innerHTML = `<span style="opacity: 0.5">Autor:</span> nikdo`;
         change_author_DOM.innerHTML = "-";
+        infinitySelectorDOM.classList.remove("active");
     }else{
         const prob = probs.find(prob => prob.id == focused_prob);
         title_DOM.value = prob.title;
@@ -1309,6 +1311,11 @@ function updateLeftEditor(){
         solution_DOM.value = prob.solution;
         rank_txt_DOM.innerHTML = `[${prob.rank}]`;
         type_txt_DOM.innerHTML = `${prob.type == "math" ? "Mat." : "Fyz."}`;
+        if (prob.infinite) {
+            infinitySelectorDOM.classList.add("active");
+        } else {
+            infinitySelectorDOM.classList.remove("active");
+        }
         if(prob.authorId != ""){
             author_DOM.innerHTML = `<span style="opacity: 0.5">Autor:</span> ${prob.authorName}`;
             if(prob.authorId == my_id){
@@ -1325,6 +1332,13 @@ function updateLeftEditor(){
 
     
 }
+
+document.getElementById("infinity-selector").addEventListener("click", function(){
+    const prob = probs.find(prob => prob.id == focused_prob);
+    if (prob == null) return;
+    prob.infinite = !prob.infinite;
+    updateLeftEditor();
+});
 
 
 //prob selector
