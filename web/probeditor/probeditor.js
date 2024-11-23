@@ -1517,8 +1517,14 @@ prob_selector_my.addEventListener("click", function(){
     scrollToFocusedProb();
 })
 
-function filterSearch(){
-    const search = document.getElementById("problem-filter-input").value.toLowerCase();
+function filterSearch(search){
+    search = search.toLowerCase();
+
+    if (search == "*free") {
+        return probs.filter(prob => prob.authorId == "");
+    } else if (search == "*other") {
+        return probs.filter(prob => prob.authorId != my_id && prob.authorId != "");
+    }
 
     const normalize = (str) => 
         str.toLowerCase()
@@ -1532,16 +1538,17 @@ function filterSearch(){
             normalize(prob.title).includes(normalizedSearch) || 
             normalize(prob.id).includes(normalizedSearch) || 
             normalize(prob.solution).includes(normalizedSearch) || 
-            normalize(prob.content).includes(normalizedSearch)
+            normalize(prob.content).includes(normalizedSearch) ||
+            normalize(prob.authorName).includes(normalizedSearch)
         );
     });
 }
 document.getElementById("problem-filter-input").addEventListener("blur", function(){
     const search = document.getElementById("problem-filter-input").value;
     if(search.length >= 3){
-        filtered_probs = filterSearch();
+        filtered_probs = filterSearch(search);
         show_filtered = true;
-    }else{
+    } else {
         show_filtered = false;
     }
     updateProbList();
