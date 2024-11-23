@@ -1229,7 +1229,7 @@ func DBLoadFromPB(ac string) error {
           NumSolved: map[string]int{"A": 0, "B": 0, "C": 0},
           NumIncc: map[string]int{"A": 0, "B": 0, "C": 0},
           MoneyMade: map[string]int{"A": 0, "B": 0, "C": 0},
-          MoneyHist: []moneyHistRec{{tm.GetInt("score"), ActiveContest.GetPrimitiveVal().Start.Add(time.Hour),}},
+          MoneyHist: []moneyHistRec{{tm.GetInt("score"), ActiveContest.GetPrimitiveVal().Start.Local(),}},
           Rank: -1,
           StatsPublic: false,
           RankPublic: false,
