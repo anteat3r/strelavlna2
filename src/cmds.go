@@ -246,12 +246,13 @@ func GetDump() echo.HandlerFunc {
   }
 }
 
-func CashEndp(dao *daos.Dao) echo.HandlerFunc {
-	return func(c echo.Context) error {
-    json.NewDecoder(c.Request().Body).Decode()
-		return nil
-	}
-}
+// func CashEndp(dao *daos.Dao) echo.HandlerFunc {
+// 	return func(c echo.Context) error {
+//     req := make(map[string])
+//     json.NewDecoder(c.Request().Body).Decode()
+// 		return nil
+// 	}
+// }
 
 func SendTeams(dao *daos.Dao, mailerc mailer.Mailer, timeout time.Duration) echo.HandlerFunc {
   return func(c echo.Context) error {
