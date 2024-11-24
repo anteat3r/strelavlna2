@@ -557,11 +557,12 @@ function sellProblem(){
 }
 
 function contestStateUpdated(){
-    if(contest_state == "waiting"){
+    if (contest_state == "waiting") {
         document.getElementById("wait-wrapper").classList.remove("hidden");
         document.getElementById("play-wrapper").classList.add("hidden");
         document.getElementById("results-wrapper").classList.add("hidden");
-    }else if(contest_state == "running"){
+    
+    } else if (contest_state == "running") {
         document.getElementById("wait-wrapper").classList.add("hidden");
         document.getElementById("play-wrapper").classList.remove("hidden");
         document.getElementById("results-wrapper").classList.add("hidden");
@@ -570,7 +571,9 @@ function contestStateUpdated(){
         updateFocusedProblem();
         updateProblemList();
         updateShop();
-    }else if(contest_state == "ended"){
+        adjustDivHeight();
+    
+    } else if (contest_state == "ended") {
         document.getElementById("wait-wrapper").classList.add("hidden");
         document.getElementById("play-wrapper").classList.add("hidden");
         document.getElementById("results-wrapper").classList.remove("hidden");
@@ -706,7 +709,6 @@ function update(){
     else if (contest_state == "waiting"){
         contest_state = "running";
         stopMusic();
-        adjustDivHeight();
     }
 
     if ((Math.floor(remaining / 1000) != lastSecond && remaining>=0) || (!clock_zeroed && remaining < 0) && contest_state == "running"){

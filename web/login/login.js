@@ -12,15 +12,15 @@ function checkId(id){
         .then(response => response.text())
         .then(data => {
             console.log(data);
-            if(data == "free"){
-                window.location.href = `../play/?id=${id}`;
-            }else if(data == "not running"){
-                window.location.href = `../waitroom/?id=${id}`;
-            }else if(data == "full"){
+            if (data == "free") {
+                window.location.href = `../play?id=${id}`;
+            } else if (data == "not ready") {
+                login_message.innerHTML = "*Soutěž zatím neběží";
+            } else if (data == "full") {
                 login_message.innerHTML = "*Maximální počet hráču na tým dosažen";
-            }else if(data == "admin"){
-                window.location.href = `../mod/?id=${id}`;
-            }else{
+            } else if (data == "admin") {
+                window.location.href = `../mod?id=${id}`;
+            } else {
                 id_field.value = "";
                 const url = new URL(window.location.href);
                 url.searchParams.delete('id');
