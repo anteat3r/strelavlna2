@@ -118,10 +118,10 @@ type TeamStats struct {
 
 type TeamBackup struct {
   Teams TeamS
-  Bought map[string]string
-  Pending map[string]string
-  Solved map[string]string
-  Sold map[string]string
+  Bought []string
+  Pending []string
+  Solved []string
+  Sold []string
 }
 
 type ProbS struct {
@@ -1416,23 +1416,59 @@ func DBGenProbWorkers(probsr *map[string]ProbM) error {
   return nil
 }
 
-// func DBBackTeams() {
-//   teamsb := make(map[string]TeamBackup)
-//   Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
-//     for id, tm := range v {
-//       tm.RWith(func(w TeamS) {
-//         bck := TeamBackup{
-//           Teams: w,
-//           Bought: make(map[string]string),
-//           Pending: make(map[string]string),
-//           Solved: make(map[string]string),
-//           Sold: make(map[string]string),
-//         }
-//         for id := range w.Bought {}
-//       })
-//     }
-//   })
-// }
+func DBBackTeams() error {
+  teamsb := make(map[string]TeamBackup)
+  Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+    for id, tm := range v {
+      tm.RWith(func(w TeamS) {
+        bck := TeamBackup{
+          Teams: w,
+          Bought: make([]string, 0),
+          Pending: make([]string, 0),
+          Solved: make([]string, 0),
+          Sold: make([]string, 0),
+        }
+        for id := range w.Bought { bck.Bought = append(bck.Bought, id) }
+        for id := range w.Pending { bck.Pending = append(bck.Pending, id) }
+        for id := range w.Solved { bck.Solved = append(bck.Solved, id) }
+        for id := range w.Sold { bck.Sold = append(bck.Sold, id) }
+        teamsb[id] = bck
+      })
+    }
+  })
+  bts, err := json.Marshal(teamsb)
+  if err != nil { return err }
+
+  ac := ActiveContest.GetPrimitiveVal().Id
+
+  err = os.WriteFile(
+    "/opt/strelavlna2/dist/svdataB_" + ac + ".json", 
+    bts, fs.FileMode(os.O_WRONLY | os.O_CREATE),
+  )
+  return err
+}
+
+func DBUnbackTeams() error {
+  ac := ActiveContest.GetPrimitiveVal().Id
+
+  bts, err := os.ReadFile("/opt/strelavlna2/dist/svdataB_" + ac + ".json")
+  if err != nil { return err }
+
+  teamsb := make(map[string]TeamBackup)
+  err = json.Unmarshal(bts, &teamsb)
+  if err != nil { return err }
+
+  Teams.With(func(v *map[string]*RWMutexWrap[TeamS]) {
+    for id, bck := range teamsb {
+      (*v)[id].With(func(w *TeamS) {
+        nteam := bck.Teams
+        *w = nteam
+      })
+    }
+  })
+
+  return nil
+}
 
 // func DBAdminEditProb(prob string, ndiff string, nname string, ntext string, nsol string) (teams []string, oerr error) {
 //   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {

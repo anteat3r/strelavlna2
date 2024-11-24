@@ -128,7 +128,7 @@ func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
 
     team, err := dao.FindRecordById("teams", teamid)
     if err != nil {
-      _, err := dao.FindAdminById(teamid)
+      _, err := dao.FindRecordById("correctors", teamid)
       if err != nil {
         return c.String(400, "invalid")
       } else {
