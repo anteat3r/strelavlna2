@@ -1416,23 +1416,23 @@ func DBGenProbWorkers(probsr *map[string]ProbM) error {
   return nil
 }
 
-func DBBackTeams() {
-  teamsb := make(map[string]TeamBackup)
-  Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
-    for id, tm := range v {
-      tm.RWith(func(w TeamS) {
-        bck := TeamBackup{
-          Teams: w,
-          Bought: make(map[string]string),
-          Pending: make(map[string]string),
-          Solved: make(map[string]string),
-          Sold: make(map[string]string),
-        }
-        for id := range w.Bought {}
-      })
-    }
-  })
-}
+// func DBBackTeams() {
+//   teamsb := make(map[string]TeamBackup)
+//   Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+//     for id, tm := range v {
+//       tm.RWith(func(w TeamS) {
+//         bck := TeamBackup{
+//           Teams: w,
+//           Bought: make(map[string]string),
+//           Pending: make(map[string]string),
+//           Solved: make(map[string]string),
+//           Sold: make(map[string]string),
+//         }
+//         for id := range w.Bought {}
+//       })
+//     }
+//   })
+// }
 
 // func DBAdminEditProb(prob string, ndiff string, nname string, ntext string, nsol string) (teams []string, oerr error) {
 //   oerr = App.Dao().RunInTransaction(func(txDao *daos.Dao) error {
