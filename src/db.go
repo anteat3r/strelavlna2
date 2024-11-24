@@ -116,6 +116,11 @@ type TeamStats struct {
   Money int `json:"money"`
 }
 
+type TeamBackup struct {
+  teams TeamS
+  Bought map[string]string
+}
+
 type ProbS struct {
   Id string
   Name string
