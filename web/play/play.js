@@ -576,6 +576,7 @@ function contestStateUpdated(){
     } else if (contest_state == "ended") {
         document.getElementById("wait-wrapper").classList.add("hidden");
         document.getElementById("play-wrapper").classList.add("hidden");
+        document.getElementById("constants-wrapper").classList.add("hidden");
         document.getElementById("results-wrapper").classList.remove("hidden");
     }
 }
