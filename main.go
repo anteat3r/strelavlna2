@@ -73,17 +73,15 @@ func main() {
       },
     )
 
-    // sched.MustAdd(
-    //   "dumpdb",
-    //   "* * * * *",
-    //   func() {
-    //     if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
-    //     err := src.DBDumpTeams()
-    //     if err != nil {
-    //       log.Error(err)
-    //     }
-    //   },
-    // )
+    sched.MustAdd(
+      "dumpdb",
+      "* * * * *",
+      func() {
+        if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
+        err := src.DBBackTeams()
+        if err != nil { log.Error(err) }
+      },
+    )
 
     sched.Start()
 
@@ -475,10 +473,10 @@ func main() {
     err = src.SetupInitLoadData(app.Dao())
     if err != nil { return err }
 
-    // if src.ActiveContest.GetPrimitiveVal().Id != "" {
-    //   err = src.DBLoadTeamsFromDump()
-    //   if err != nil { log.Error(err) }
-    // }
+    if src.ActiveContest.GetPrimitiveVal().Id != "" {
+      err = src.DBUnbackTeams()
+      if err != nil { log.Error(err) }
+    }
 
     return nil
   })

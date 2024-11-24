@@ -1459,12 +1459,34 @@ func DBUnbackTeams() error {
   if err != nil { return err }
 
   Teams.With(func(v *map[string]*RWMutexWrap[TeamS]) {
-    for id, bck := range teamsb {
-      (*v)[id].With(func(w *TeamS) {
-        nteam := bck.Teams
-        *w = nteam
-      })
-    }
+    Probs.With(func(u *map[string]*RWMutexWrap[ProbS]) {
+      for id, bck := range teamsb {
+        (*v)[id].With(func(w *TeamS) {
+          nteam := bck.Teams
+          for _, prid := range bck.Bought {
+            pr, ok := (*u)[prid]
+            if !ok { continue }
+            nteam.Bought[prid] = pr
+          }
+          for _, prid := range bck.Pending {
+            pr, ok := (*u)[prid]
+            if !ok { continue }
+            nteam.Pending[prid] = pr
+          }
+          for _, prid := range bck.Solved {
+            pr, ok := (*u)[prid]
+            if !ok { continue }
+            nteam.Solved[prid] = pr
+          }
+          for _, prid := range bck.Sold {
+            pr, ok := (*u)[prid]
+            if !ok { continue }
+            nteam.Sold[prid] = pr
+          }
+          *w = nteam
+        })
+      }
+    })
   })
 
   return nil
