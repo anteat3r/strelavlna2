@@ -55,6 +55,8 @@ function loadData(data){
         balance = data.moneyhist[0].money;
     }
 
+    console.log(balance_chart);
+
     if (data.rank_public) {
         setRank();
     }
