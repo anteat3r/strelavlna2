@@ -292,14 +292,14 @@ func main() {
         if c.QueryParam("i") == "" {
           return c.String(400, "invalid param")
         }
-        t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
+        t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0100")
         if err != nil { return err }
         src.ActiveContest.With(func(v *src.ActiveContStruct) {
           v.Start = t
         })
         _, err = app.Dao().DB().Update(
           "texts",
-          dbx.Params{"text": "<p>" + c.QueryParam("i") + " +0200</p>"},
+          dbx.Params{"text": "<p>" + c.QueryParam("i") + " +0100</p>"},
           dbx.HashExp{"name": "def_activecontstart"},
         ).Execute()
         if err != nil { return err }
@@ -314,14 +314,14 @@ func main() {
         if c.QueryParam("i") == "" {
           return c.String(400, "invalid param")
         }
-        t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0200")
+        t, err := time.Parse("2006-01-02T15:04 -0700", c.QueryParam("i") + " +0100")
         if err != nil { return err }
         src.ActiveContest.With(func(v *src.ActiveContStruct) {
           v.End = t
         })
         _, err = app.Dao().DB().Update(
           "texts",
-          dbx.Params{"text": "<p>" + c.QueryParam("i") + " +0200</p>"},
+          dbx.Params{"text": "<p>" + c.QueryParam("i") + " +0100</p>"},
           dbx.HashExp{"name": "def_activecontend"},
         ).Execute()
         if err != nil { return err }

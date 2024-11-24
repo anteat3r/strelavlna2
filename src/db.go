@@ -81,10 +81,10 @@ type TeamS struct {
   Id string
   Name string
   Money int
-  Bought map[string]ProbM
-  Pending map[string]ProbM
-  Solved map[string]ProbM
-  Sold map[string]ProbM
+  Bought map[string]ProbM `json:"-"`
+  Pending map[string]ProbM `json:"-"`
+  Solved map[string]ProbM `json:"-"`
+  Sold map[string]ProbM `json:"-"`
   Chat []ChatMsg
   Banned bool
   LastBanned time.Time
@@ -117,8 +117,11 @@ type TeamStats struct {
 }
 
 type TeamBackup struct {
-  teams TeamS
+  Teams TeamS
   Bought map[string]string
+  Pending map[string]string
+  Solved map[string]string
+  Sold map[string]string
 }
 
 type ProbS struct {
@@ -1234,7 +1237,7 @@ func DBLoadFromPB(ac string) error {
           NumSolved: map[string]int{"A": 0, "B": 0, "C": 0},
           NumIncc: map[string]int{"A": 0, "B": 0, "C": 0},
           MoneyMade: map[string]int{"A": 0, "B": 0, "C": 0},
-          MoneyHist: []moneyHistRec{{tm.GetInt("score"), ActiveContest.GetPrimitiveVal().Start.Local(),}},
+          MoneyHist: []moneyHistRec{{tm.GetInt("score"), ActiveContest.GetPrimitiveVal().Start,}},
           Rank: -1,
           StatsPublic: false,
           RankPublic: false,
@@ -1411,6 +1414,24 @@ func DBGenProbWorkers(probsr *map[string]ProbM) error {
     })
   }
   return nil
+}
+
+func DBBackTeams() {
+  teamsb := make(map[string]TeamBackup)
+  Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+    for id, tm := range v {
+      tm.RWith(func(w TeamS) {
+        bck := TeamBackup{
+          Teams: w,
+          Bought: make(map[string]string),
+          Pending: make(map[string]string),
+          Solved: make(map[string]string),
+          Sold: make(map[string]string),
+        }
+        for id := range w.Bought {}
+      })
+    }
+  })
 }
 
 // func DBAdminEditProb(prob string, ndiff string, nname string, ntext string, nsol string) (teams []string, oerr error) {
