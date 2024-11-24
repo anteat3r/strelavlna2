@@ -1818,3 +1818,8 @@
     margin: 0px;
     color: var(--color-secondary-dark);
 }
+
+.conversation-gif {
+    max-width: 220px;
+    height: auto;
+}

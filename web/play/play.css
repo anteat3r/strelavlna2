@@ -2236,3 +2236,8 @@ audio {
     border-color: #e44821;
     color: black;
 }
+
+.conversation-gif {
+    max-width: 220px;
+    height: auto;
+}
