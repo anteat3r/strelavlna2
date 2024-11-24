@@ -209,30 +209,30 @@ func SetupContEndp() echo.HandlerFunc {
 
     err := DBLoadFromPB(c.QueryParam("id"))
     if err != nil { return err }
-    log.Info("loaded")
+    // log.Info("loaded")
     Probs.With(func(v *map[string]*RWMutexWrap[ProbS]) {
       err = DBGenProbWorkers(v)
     })
     if err != nil { return err }
-    Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
-      for id, pr := range v {
-        pr.RWith(func(v ProbS) {
-          log.Info(id, v.Workers)
-        })
-      }
-    })
-    log.Info("gened")
+    // Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
+    //   for id, pr := range v {
+    //     pr.RWith(func(v ProbS) {
+    //       log.Info(id, v.Workers)
+    //     })
+    //   }
+    // })
+    // log.Info("gened")
 
     res, err := json.Marshal(DBData)
     if err != nil { return err }
 
-    Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
-      for id, pr := range v {
-        pr.RWith(func(v ProbS) {
-          log.Info(id, v.Workers)
-        })
-      }
-    })
+    // Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
+    //   for id, pr := range v {
+    //     pr.RWith(func(v ProbS) {
+    //       log.Info(id, v.Workers)
+    //     })
+    //   }
+    // })
 
     return c.String(200, string(res))
 	}
