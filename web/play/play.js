@@ -684,15 +684,6 @@ function update(){
             results_shown = true;
             is_loading_running = false;
 
-            setTimeout(e=>{
-                document.getElementById("results-loading-wrapper").classList.add("hidden");
-            }, 800);
-            setTimeout(e=>{
-                document.getElementById("results-wrapper").classList.add("result-wrapper-opened");
-            }, 1000);
-            setTimeout(e=>{
-                document.getElementById("results-content-wrapper").classList.remove("hidden");
-            }, 1500)
 
             
             
