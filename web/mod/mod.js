@@ -737,6 +737,20 @@ function updateChat(){
 
 
     for(const message of chat_obj.chat){
+        // conversation_wrapper.innerHTML += 
+        // `<div class="conversation-row ${message.author == "team" ? "message-their" : "message-my"}">
+        //     <p class="conversation-message">${message.content}</p>
+        // </div>`
+
+
+        let match = message.content.match(/!gif (.+)/)
+        if (match !== null) {
+            conversation_wrapper.innerHTML += 
+            `<div class="conversation-row ${message.author == "team" ? "message-their" : "message-my"}">
+                <img class="conversation-message conversation-gif" src="https://media.tenor.com/${match[1]}/hhgf.gif" />
+            </div>`;
+            continue;
+        }
         conversation_wrapper.innerHTML += 
         `<div class="conversation-row ${message.author == "team" ? "message-their" : "message-my"}">
             <p class="conversation-message">${message.content}</p>

@@ -636,55 +636,68 @@ for(item of main_wrappers){
 }
 
 function startLoadingAnimation(){
-    setTimeout(e=>{main_wrappers[0].classList.remove("invisible");}, 3000);
-    setTimeout(e=>{main_wrappers[1].classList.remove("invisible");}, 3500);
-    setTimeout(e=>{main_wrappers[2].classList.remove("invisible");}, 4000);
-    setTimeout(e=>{main_wrappers[3].classList.remove("invisible");}, 4500);
+    setTimeout(e=>{
+        document.getElementById("results-loading-wrapper").classList.add("hidden");
+    }, 800);
+    setTimeout(e=>{
+        document.getElementById("results-wrapper").classList.add("result-wrapper-opened");
+    }, 1000);
+    setTimeout(e=>{
+        document.getElementById("results-content-wrapper").classList.remove("hidden");
+    }, 1500)
 
-
-
-    setTimeout(setBalance, 1000);
-
-    animation_start_balance_chart_X = true;
-    setTimeout(e=>{animation_start_balance_chart_Y = true;}, 300);
-    setTimeout(e=>{animation_started_balance_chart = true;}, 600);
-    setTimeout(e=>{animation_start_balance_chart_ticks_X = true;}, 600);
-    setTimeout(e=>{animation_start_balance_chart_ticks_Y = true;}, 1000);
+    setTimeout(e=>{
+        setTimeout(e=>{main_wrappers[0].classList.remove("invisible");}, 3000);
+        setTimeout(e=>{main_wrappers[1].classList.remove("invisible");}, 3500);
+        setTimeout(e=>{main_wrappers[2].classList.remove("invisible");}, 4000);
+        setTimeout(e=>{main_wrappers[3].classList.remove("invisible");}, 4500);
     
-    setTimeout(e=>{animation_start_balance_chart_final_dot = true;}, 1500);
-    setTimeout(e=>{animation_start_balance_chart_final_ring = true;}, 2000);
-    setTimeout(e=>{animation_start_balance_chart_final_line = true;}, 2500);
-
-
-    setTimeout(e=>{animation_start_balance_chart_labels_outline_X = true;}, 1000);
-    setTimeout(e=>{animation_start_balance_chart_labels_fill_X = true;}, 2000);
-    setTimeout(e=>{animation_start_balance_chart_labels_outline_Y = true;}, 1400);
-    setTimeout(e=>{animation_start_balance_chart_labels_fill_Y = true;}, 2400);
-
-    setTimeout(e=>{animation_start_balance_chart_X_axis_label = true;}, 2400);
-    setTimeout(e=>{animation_start_balance_chart_Y_axis_label = true;}, 3000);
     
-
-
     
-    setTimeout(e=>{animation_started_accuracy[0] = true;}, 3500);
-    setTimeout(e=>{animation_started_accuracy[1] = true;}, 3700);
-    setTimeout(e=>{animation_started_accuracy[2] = true;}, 3900);
+        setTimeout(setBalance, 1000);
+    
+        animation_start_balance_chart_X = true;
+        setTimeout(e=>{animation_start_balance_chart_Y = true;}, 300);
+        setTimeout(e=>{animation_started_balance_chart = true;}, 600);
+        setTimeout(e=>{animation_start_balance_chart_ticks_X = true;}, 600);
+        setTimeout(e=>{animation_start_balance_chart_ticks_Y = true;}, 1000);
+        
+        setTimeout(e=>{animation_start_balance_chart_final_dot = true;}, 1500);
+        setTimeout(e=>{animation_start_balance_chart_final_ring = true;}, 2000);
+        setTimeout(e=>{animation_start_balance_chart_final_line = true;}, 2500);
+    
+    
+        setTimeout(e=>{animation_start_balance_chart_labels_outline_X = true;}, 1000);
+        setTimeout(e=>{animation_start_balance_chart_labels_fill_X = true;}, 2000);
+        setTimeout(e=>{animation_start_balance_chart_labels_outline_Y = true;}, 1400);
+        setTimeout(e=>{animation_start_balance_chart_labels_fill_Y = true;}, 2400);
+    
+        setTimeout(e=>{animation_start_balance_chart_X_axis_label = true;}, 2400);
+        setTimeout(e=>{animation_start_balance_chart_Y_axis_label = true;}, 3000);
+        
+    
+    
+        
+        setTimeout(e=>{animation_started_accuracy[0] = true;}, 3500);
+        setTimeout(e=>{animation_started_accuracy[1] = true;}, 3700);
+        setTimeout(e=>{animation_started_accuracy[2] = true;}, 3900);
+    
+        setTimeout(e=>{animation_started_income_portions[0] = true;}, 4000);
+        setTimeout(e=>{animation_started_income_portions[1] = true;}, 4200);
+        setTimeout(e=>{animation_started_income_portions[2] = true;}, 4400);
+    
+        setTimeout(e=>{animation_started_solved[0] = true;}, 4500);
+        setTimeout(e=>{animation_started_solved[1] = true;}, 4700);
+        setTimeout(e=>{animation_started_solved[2] = true;}, 4900);
+    
+        setTimeout(e=>{animation_started_sold[0] = true;}, 5000);
+        setTimeout(e=>{animation_started_sold[1] = true;}, 5200);
+        setTimeout(e=>{animation_started_sold[2] = true;}, 5400);
+    
+        setTimeout(e=>{animation_started_apm = true;}, 5000);
+        setTimeout(e=>{animation_started_capm = true;}, 5200);
+    }, 1500);
 
-    setTimeout(e=>{animation_started_income_portions[0] = true;}, 4000);
-    setTimeout(e=>{animation_started_income_portions[1] = true;}, 4200);
-    setTimeout(e=>{animation_started_income_portions[2] = true;}, 4400);
-
-    setTimeout(e=>{animation_started_solved[0] = true;}, 4500);
-    setTimeout(e=>{animation_started_solved[1] = true;}, 4700);
-    setTimeout(e=>{animation_started_solved[2] = true;}, 4900);
-
-    setTimeout(e=>{animation_started_sold[0] = true;}, 5000);
-    setTimeout(e=>{animation_started_sold[1] = true;}, 5200);
-    setTimeout(e=>{animation_started_sold[2] = true;}, 5400);
-
-    setTimeout(e=>{animation_started_apm = true;}, 5000);
-    setTimeout(e=>{animation_started_capm = true;}, 5200);
 }
 
 for(let i = 0; i < document.getElementsByClassName("results-accuracy-value-wrapper").length; i++){

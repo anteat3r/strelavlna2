@@ -391,7 +391,7 @@ function updateChat(){
             if (match !== null) {
                 conversation_wrapper.innerHTML += 
                 `<div class="conversation-row ${message.author == "team" ? "message-my" : "message-their"}">
-                    <img class="conversation-message" src="https://media.tenor.com/${match[1]}/hhgf.gif" />
+                    <img class="conversation-message conversation-gif" src="https://media.tenor.com/${match[1]}/hhgf.gif" />
                 </div>`;
                 continue;
             }
@@ -407,7 +407,7 @@ function updateChat(){
         if (match !== null) {
             conversation_wrapper.innerHTML += 
             `<div class="conversation-row ${message.author == "team" ? "message-my" : "message-their"}">
-                <img class="conversation-message" src="https://media.tenor.com/${match[1]}/hhgf.gif" />
+                <img class="conversation-message conversation-gif" src="https://media.tenor.com/${match[1]}/hhgf.gif" />
             </div>`;
             continue;
         }
@@ -683,20 +683,6 @@ function update(){
         if(results_ready && !results_shown){
             results_shown = true;
             is_loading_running = false;
-
-            setTimeout(e=>{
-                document.getElementById("results-loading-wrapper").classList.add("hidden");
-            }, 800);
-            setTimeout(e=>{
-                document.getElementById("results-wrapper").classList.add("result-wrapper-opened");
-            }, 1000);
-            setTimeout(e=>{
-                document.getElementById("results-content-wrapper").classList.remove("hidden");
-            }, 1500)
-
-            
-            
-            
         }
     }
 
