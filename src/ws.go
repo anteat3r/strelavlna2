@@ -145,7 +145,7 @@ func PlayCheckEndpoint(dao *daos.Dao) echo.HandlerFunc {
     Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
       _, ok = v[teamid]
     })
-    if !ok { return c.String(400, "invalid") }
+    if !ok { return c.String(400, "not ready") }
 
     var players *TeamChanMu
     TeamChanMap.RWith(func(v map[string]*TeamChanMu) {
