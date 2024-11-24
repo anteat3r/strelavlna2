@@ -1313,7 +1313,7 @@ function checkFocused(checkid, modid) {
     if(!check.focused_by.includes(modid)){
         check.focused_by.push(modid);
     }
-    if(modid != myId && checkid == focused_check){
+    if(modid != myId && checkid == focused_check && myRole == "manager"){
         focused_check = "";
         unfocusCheck();
         updateFocusedCheck();
