@@ -123,7 +123,7 @@ class TableRow {
 
 
 class Prob {
-    constructor(id, title, rank, type, content, solution, image, authorId, authorName, graph, infinite) {
+    constructor(id, title, rank, type, content, solution, image, authorId, authorName, graph, infinite, contests) {
       this._id = id;
       this._title = title;
       this._rank = rank;
@@ -135,6 +135,7 @@ class Prob {
       this._authorName = authorName;
       this._graph = graph;
       this._infinite = infinite;
+      this._contests = contests;
 
       this.title_modified = false;
       this.rank_modified = false;
@@ -143,8 +144,9 @@ class Prob {
       this.solution_modified = false;
       this.image_modified = false;
       this.author_modified = false;
-      this._graph_modified = false;
-      this._infinite_modified = false;
+      this.graph_modified = false;
+      this.infinite_modified = false;
+      this.contests_modified = false;
     }
   
     // Getters and setters
@@ -240,7 +242,7 @@ class Prob {
 
     set graph(newGraph) {
         changesUnsaved();
-        this._graph_modified = true;
+        this.graph_modified = true;
         this._graph = newGraph;
     }
 
@@ -250,17 +252,32 @@ class Prob {
 
     set infinite(newInfinite) {
         changesUnsaved();
-        this._infinite_modified = true;
+        this.infinite_modified = true;
         this._infinite = newInfinite;
+    }
+
+    get contests() {
+        return this._contests;
+    }
+
+    set contests(newContests) {
+        changesUnsaved();
+        this.contests_modified = true;
+        this._contests = newContests;
     }
 
     modifyGraph(){
         changesUnsaved();
-        this._graph_modified = true;
+        this.graph_modified = true;
+    }
+
+    modifyContests(){
+        changesUnsaved();
+        this.contests_modified = true;
     }
 
     pushChanges() {
-      if (!(this.title_modified || this.rank_modified || this.type_modified || this.content_modified || this.solution_modified || this.image_modified || this.author_modified || this._graph_modified || this._infinite_modified)) return;
+      if (!(this.title_modified || this.rank_modified || this.type_modified || this.content_modified || this.solution_modified || this.image_modified || this.author_modified || this.graph_modified || this.infinite_modified || this.contests_modified)) return;
 
       const update_data = {};
 
@@ -271,8 +288,9 @@ class Prob {
       if (this.solution_modified) update_data.solution = this._solution;
       if (this.image_modified) update_data.img = this._image;
       if (this.author_modified) update_data.author = this._authorId;
-      if (this._graph_modified) update_data.graph = this._graph;
-      if (this._infinite_modified) update_data.infinite = this._infinite;
+      if (this.graph_modified) update_data.graph = this._graph;
+      if (this.infinite_modified) update_data.infinite = this._infinite;
+      if (this.contests_modified) update_data.contests = this._contests;
 
       pb.collection('probs').update(this.id, update_data);
 
@@ -283,12 +301,13 @@ class Prob {
       this.solution_modified = false;
       this.image_modified = false;
       this.author_modified = false;
-      this._graph_modified = false;
-      this._infinite_modified = false;
+      this.graph_modified = false;
+      this.infinite_modified = false;
+      this.contests_modified = false;
     }
 
     isChanged() {
-        return this.title_modified || this.rank_modified || this.type_modified || this.content_modified || this.solution_modified || this.image_modified || this.author_modified || this._graph_modified || this._infinite_modified;
+        return this.title_modified || this.rank_modified || this.type_modified || this.content_modified || this.solution_modified || this.image_modified || this.author_modified || this.graph_modified || this.infinite_modified || this.contests_modified;
     }
 }
 
@@ -645,6 +664,8 @@ let show_filtered = false;
 let command = "";
 const commandInput = document.getElementById("generationeditor-command-input");
 
+let availableContests = [];
+
 
 async function login(){
     if(pb.authStore.isValid) return;
@@ -653,10 +674,11 @@ async function login(){
 }
 
 async function load(){
-    const resultProbs = await pb.collection("probs").getList(1, 100000000, { expand: "author" });
-    const resultConsts = await pb.collection("consts").getList(1, 100000000);
-    const probtItems = resultProbs.items;
-    const constsItems = resultConsts.items;
+    const resultProbs = await pb.collection("probs").getFullList({ expand: "author" });
+    const resultConsts = await pb.collection("consts").getFullList();
+    availableContests = await pb.collection("contests").getFullList();
+    const probtItems = resultProbs;
+    const constsItems = resultConsts;
     for(let item of probtItems){
         probs.push(new Prob(
             item.id,
@@ -669,7 +691,8 @@ async function load(){
             item.author,
             item.author == "" ? "" : item.expand.author.username,
             item.graph,
-            item.infinite
+            item.infinite,
+            item.contests
         ));
     }
 
@@ -684,6 +707,37 @@ async function load(){
             item.group
         ));
     }
+
+    const contestSelectorDOM = document.getElementById("contest-select-dropdown");
+    contestSelectorDOM.innerHTML = "";
+    for (const [key, value] of Object.entries(availableContests)) {
+        console.log("id: ", value.id);
+        contestSelectorDOM.innerHTML += `
+            <button class="contest-selector-item" id="${value.id}">${value.name}</button>
+        `
+
+    }
+    for (const [key, value] of Object.entries(availableContests)) {
+        document.getElementById(value.id).addEventListener("click", (e) => {
+            console.log("clicked");
+            if (focused_prob == "") return;
+
+            const prob = probs.find(prob => prob.id == focused_prob);
+            if (prob == undefined) return;
+
+            const index = prob.contests.indexOf(value.id);
+            if (index > -1) {
+                prob.contests.splice(index, 1);
+                e.target.classList.remove("selected");
+            } else {
+                prob.contests.push(value.id);
+                e.target.classList.add("selected");
+                console.log(prob.contests);
+            }
+            prob.modifyContests();
+        });
+    }
+
 }
 
 document.getElementById("save-changes-button").addEventListener("click", saveChanges);
@@ -1292,6 +1346,7 @@ function updateLeftEditor(){
     const author_DOM = document.getElementById("author-name");
     const change_author_DOM = document.getElementById("change-author-button");
     const infinitySelectorDOM = document.getElementById("infinity-selector");
+    const contestsSelectorDOM = document.getElementById("contest-select-dropdown");
 
     
 
@@ -1304,6 +1359,7 @@ function updateLeftEditor(){
         author_DOM.innerHTML = `<span style="opacity: 0.5">Autor:</span> nikdo`;
         change_author_DOM.innerHTML = "-";
         infinitySelectorDOM.classList.remove("active");
+        contestsSelectorDOM.classList.add("hidden");
     }else{
         const prob = probs.find(prob => prob.id == focused_prob);
         title_DOM.value = prob.title;
@@ -1311,6 +1367,7 @@ function updateLeftEditor(){
         solution_DOM.value = prob.solution;
         rank_txt_DOM.innerHTML = `[${prob.rank}]`;
         type_txt_DOM.innerHTML = `${prob.type == "math" ? "Mat." : "Fyz."}`;
+
         if (prob.infinite) {
             infinitySelectorDOM.classList.add("active");
         } else {
@@ -1326,6 +1383,14 @@ function updateLeftEditor(){
         }else{
             author_DOM.innerHTML = `<span style="opacity: 0.5">Autor:</span> nikdo`;
             change_author_DOM.innerHTML = "Přivlastnit";
+        }
+
+        for (const [key, value] of Object.entries(availableContests)) {
+            if (prob.contests.includes(value.id)){
+                document.getElementById(value.id).classList.add("selected");
+            } else {
+                document.getElementById(value.id).classList.remove("selected");
+            }
         }
 
     }
@@ -1771,6 +1836,10 @@ function cancleDoubleClick(){
     }
 }
 
+document.getElementById("contest-change-button").addEventListener("click", function(){
+    if (focused_prob == "") return;
+    document.getElementById("contest-select-dropdown").classList.toggle("hidden");
+});
 
 
 //adds a node to the graph
