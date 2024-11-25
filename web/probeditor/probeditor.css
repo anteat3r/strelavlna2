@@ -1204,8 +1204,6 @@ th:last-child, td:last-child{
     justify-content: start;
     align-items: center;
     gap: 20px;
-    padding-bottom: 5px;
-    padding-top: 15px;
 }
 #author-name{
     font-family: 'Lexend';
@@ -1410,4 +1408,40 @@ th:last-child, td:last-child{
 .active #infinity-selector-infinity{
     opacity: 1;
     transition: opacity 0.0s;
+}
+
+#assign-row{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 15px;
+    padding-bottom: 5px;
+}
+#contest-change-button{
+    font-family: 'Lexend';
+    font-size: 13px;
+    padding: 3px;
+    padding-inline: 6px;
+    color: var(--color-secondary-dark);
+    text-align: center;
+    border: 2px solid #c0d5dd;
+    transition: all 0.3s ease-out;
+}
+#contest-change-button:hover{
+    background-color: var(--color-secondary-dark);
+    color: white;
+    border-color: var(--color-secondary-dark);
+    transition: all 0.0s;
+}
+
+#contest-select-dropdown{
+    position: absolute;
+    top: 50px;
+    z-index: 1;
+    background-color: var(--color-secondary-white);
+    border: 2px solid var(--color-secondary-light);
+    border-radius: 5px;
+    overflow: hidden;
 }
