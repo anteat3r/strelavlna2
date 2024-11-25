@@ -478,10 +478,10 @@ func main() {
     err = src.SetupInitLoadData(app.Dao())
     if err != nil { return err }
 
-    if src.ActiveContest.GetPrimitiveVal().Id != "" {
-      err = src.DBUnbackTeams()
-      if err != nil { log.Error(err) }
-    }
+    // if src.ActiveContest.GetPrimitiveVal().Id != "" {
+    //   err = src.DBUnbackTeams()
+    //   if err != nil { log.Error(err) }
+    // }
 
     return nil
   })
