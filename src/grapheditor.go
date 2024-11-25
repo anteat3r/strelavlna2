@@ -427,7 +427,7 @@ func ParseGraph(graphs string) (Graph, error) {
           return float64(int(i[0].(float64)) % int(i[1].(float64)))
         },
       }
-    case "nocache":
+    case "nocachenumber", "nocachestring", "nocachefraction", "nocachebool":
       if len(nd.Inputs) != 1 { return nil, InvalidGraphErr{"invalid nocache node"}}
       nnnd := NoCacheNode{
         id: id,
