@@ -1472,7 +1472,8 @@ th:last-child, td:last-child{
     transition: all 0.0s;
 }
 .contest-selector-item.selected{
-    background-color: var(--color-secondary-dark);
-    color: white;
-    border-color: var(--color-secondary-dark);
+    background-color: var(--color-secondary-glow);
+    color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-light);
+    transition: all 0.3s ease-out;
 }
