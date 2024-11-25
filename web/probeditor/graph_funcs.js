@@ -51,8 +51,12 @@ export default {
     "multiplication3": (i, _, __) => i[0] * i[1] * i[2],
     "division": (i, _, __) => i[0] / i[1],
 
-    "tostring": (i, _, __) => i.toString(),
-    "fromstring": (i, _, __) => parseFloat(i),
+    "tostring": (i, _, __) => i[0].toString(),
+    "ftostring": (i, _, __) => {
+      if (i[0].den() == 1) { return i[0].num().toString(); }
+      return i[0].num().toString() + "/" + i[1].den().toString()
+    },
+    "fromstring": (i, _, __) => parseFloat(i[0]),
 
     "randomInteger": (i, _, __) => Math.floor(Math.random()*(i[0]-i[1])+i[1]),
     "randomFloat": (i, _, __) => Math.random()*(i[0]-i[1])+i[1],

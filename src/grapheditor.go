@@ -98,6 +98,15 @@ func ParseGraph(graphs string) (Graph, error) {
           return strconv.FormatFloat(i[0].(float64), 'g', -1, 64)
         },
       }
+    case "ftostring":
+      nnd = FunctionNode{
+        wtypes: []DataType{Frac},
+        fn: func(i []any) any {
+          f := i[0].(Fraction)
+          if f.y == 1 { return strconv.Itoa(f.x) }
+          return strconv.Itoa(f.x) + "/" + strconv.Itoa(f.y)
+        },
+      }
     case "fromstring":
       nnd = FunctionNode{
         wtypes: []DataType{String},

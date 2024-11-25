@@ -246,6 +246,15 @@
                 "inputTypes": ["number"],
                 "outputType": "string"
             },
+            "ftostring": {
+                "width": 60,
+                "height": 20,
+                "text": "toStr()",
+                "fontSize": 16,
+                "inputs": 1,
+                "inputTypes": ["fraction"],
+                "outputType": "string"
+            },
             "fromstring": {
                 "width": 60,
                 "height": 20,
