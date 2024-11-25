@@ -246,13 +246,20 @@ func GetDump() echo.HandlerFunc {
   }
 }
 
-// func CashEndp(dao *daos.Dao) echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-//     req := make(map[string])
-//     json.NewDecoder(c.Request().Body).Decode()
-// 		return nil
-// 	}
-// }
+func CashEndp(dao *daos.Dao) echo.HandlerFunc {
+	return func(c echo.Context) error {
+    req := make(map[string]any)
+    err := json.NewDecoder(c.Request().Body).Decode(&req)
+    if err != nil { return err }
+    switch req["typ"] {
+    case "overeni":
+      tm, err := dao.FindFirstRecordByData("teams", "card", req["id"])
+      if err != nil { return c.String(200, `{"key": "n"}`) }
+      return c.String(200, `{"key": "k", "nazev": "}` + tm.GetString("name") + `"}, "penize": "` + strconv.Itoa(tm.GetInt("score")) + `"}`)
+    }
+		return nil
+	}
+}
 
 func SendTeams(dao *daos.Dao, mailerc mailer.Mailer, timeout time.Duration) echo.HandlerFunc {
   return func(c echo.Context) error {

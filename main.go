@@ -469,6 +469,11 @@ func main() {
       apis.RequireAdminAuth(),
     )
 
+    e.Router.GET(
+      "/api/cash/",
+      src.CashEndp(app.Dao()),
+    )
+
 
     err = src.SetupInitLoadData(app.Dao())
     if err != nil { return err }
