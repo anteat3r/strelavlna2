@@ -686,7 +686,7 @@ func (v NoCacheNode) Compute(g Graph, cache PathSet) (any, error) {
   if !ok { return nil, InvalidGraphErr{"invalid ref"} }
   comp, err := nd.Compute(g, newcache)
   if err != nil { return nil, err }
-  newcache[v.id] = comp
+  cache[v.id] = comp
   return comp, nil
 }
 

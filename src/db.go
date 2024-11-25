@@ -1153,9 +1153,13 @@ func DBLoadFromPB(ac string) error {
     Infinite bool `db:"infinite"`
   }, 0)
   err = App.Dao().DB().
-    NewQuery(`select * from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
+    NewQuery(`select * from probs where contests like concat("%", {:contest}, "%")`).
     Bind(dbx.Params{"contest": ac}).
     All(&probs)
+  // err = App.Dao().DB().
+  //   NewQuery(`select * from probs where (select probs from contests where id = {:contest} limit 1) like concat("%", id, "%")`).
+  //   Bind(dbx.Params{"contest": ac}).
+  //   All(&probs)
   if err != nil { return err }
   genprobcnt := 0
   probcnts := make(map[string]int)
