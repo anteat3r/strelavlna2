@@ -676,7 +676,7 @@ async function login(){
 async function load(){
     const resultProbs = await pb.collection("probs").getFullList({ expand: "author" });
     const resultConsts = await pb.collection("consts").getFullList();
-    availableContests = await pb.collection("contests").getFullList({ filter: "public = true" });
+    availableContests = await pb.collection("contests").getFullList();
     const probtItems = resultProbs;
     const constsItems = resultConsts;
     for(let item of probtItems){
