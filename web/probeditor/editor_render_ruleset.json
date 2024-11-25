@@ -50,6 +50,10 @@
         "toStr": "tostring",
         "ts": "tostring",
 
+        "ftostring": "ftostring",
+        "ftoStr": "ftostring",
+        "fts": "ftostring",
+
         "fromstring": "fromstring",
         "fromStr": "fromstring",
         "fs": "fromstring",
