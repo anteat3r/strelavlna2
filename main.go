@@ -62,7 +62,7 @@ func main() {
         }
         for _, rec := range recs {
           dt := rec.GetDateTime("last_sent").Time()
-          if !time.Now().After(dt.Add(time.Hour * 6)) { continue }
+          if !time.Now().After(dt.Add(time.Minute)) { continue }
           err = src.TeamRegisterSendEmail(rec, app.Dao(), mailerc)
           if err != nil { log.Error(err) }
           ndt, _ := types.ParseDateTime(time.Now().Add(time.Hour * 24 * 7 * 10000))
