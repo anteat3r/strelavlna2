@@ -41,6 +41,11 @@ class Fraction {
   clone() {
     return new Fraction(this.x, this.y);
   }
+
+  toString() {
+    if (this.y == 1) { return this.x; }
+    return this.x + "/" + this.y
+  }
 }
 
 export default {
@@ -54,7 +59,7 @@ export default {
     "tostring": (i, _, __) => i[0].toString(),
     "ftostring": (i, _, __) => {
       if (i[0].den() == 1) { return i[0].num().toString(); }
-      return i[0].num().toString() + "/" + i[1].den().toString()
+      return i[0].num().toString() + "/" + i[0].den().toString()
     },
     "fromstring": (i, _, __) => parseFloat(i[0]),
 
@@ -67,6 +72,7 @@ export default {
     "setstring": (i, _, __) => i[0],
     "number": (_, v, __) => v,
     "setnumber": (i, _, __) => i[0],
+    "setfraction": (i, _, __) => i[0],
 
     "round": (i, _, __) => Math.round(i[0]),
     "roundplaces": (i, _, __) => parseFloat(i[0].toFixed(i[1])),

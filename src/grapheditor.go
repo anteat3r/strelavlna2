@@ -485,7 +485,7 @@ func ParseGraph(graphs string) (Graph, error) {
     }
     var nnd GraphNode
     switch nd.Type {
-    case "setstring", "setnumber":
+    case "setstring", "setnumber", "setfraction":
       nnd = SetNode{
         id: id,
         inp: nd.Input,
@@ -531,6 +531,7 @@ func (g Graph) Generate(text, sol string) (string, string, error) {
         case float64: ndresstr = strconv.FormatFloat(ndt, 'g', -1, 64)
         case bool: ndresstr = strconv.FormatBool(ndt)
         case Fraction: ndresstr = strconv.Itoa(ndt.x) + "/" + strconv.Itoa(ndt.y)
+          if ndt.y == 1 { ndresstr = strconv.Itoa(ndt.x) }
         default:
           fmt.Printf("%v %T %v %v\n", ndres, ndres, nd, id)
           return "", "", InvalidGraphErr{"invalid ret type"} 
