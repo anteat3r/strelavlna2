@@ -72,7 +72,7 @@ export default {
     "stringif": (i, _, __) => i[0] ? i[1] : i[2],
 
     "power": (i, _, __) => Math.pow(i[0], i[1]),
-    "square": (i, _, __) => i[0] * i[1],
+    "square": (i, _, __) => i[0] * i[0],
     "sqrt": (i, _, __) => Math.sqrt(i[0]),
     "gcd": (i, _, __) => {
       let a = Math.abs(Math.round(i[0]));

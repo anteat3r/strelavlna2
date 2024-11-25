@@ -332,7 +332,7 @@
               "height": 30,
               "text": "√",
               "fontSize": 24,
-              "inputs": 2,
+              "inputs": 1,
               "inputTypes": ["number"],
               "outputType": "number"
             },

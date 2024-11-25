@@ -1417,7 +1417,7 @@ func DBGenProbWorkers(probsr *map[string]ProbM) error {
 }
 
 func DBBackTeams() error {
-  teamsb := make(map[string]TeamBackup)
+  teamsb := make(map[string]string)
   Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
     for id, tm := range v {
       tm.RWith(func(w TeamS) {
@@ -1432,7 +1432,9 @@ func DBBackTeams() error {
         for id := range w.Pending { bck.Pending = append(bck.Pending, id) }
         for id := range w.Solved { bck.Solved = append(bck.Solved, id) }
         for id := range w.Sold { bck.Sold = append(bck.Sold, id) }
-        teamsb[id] = bck
+        bts, err := json.Marshal(bck)
+        if err != nil { log.Error(err); return }
+        teamsb[id] = string(bts)
       })
     }
   })
@@ -1454,13 +1456,16 @@ func DBUnbackTeams() error {
   bts, err := os.ReadFile("/opt/strelavlna2/dist/svdataB_" + ac + ".json")
   if err != nil { return err }
 
-  teamsb := make(map[string]TeamBackup)
+  teamsb := make(map[string]string)
   err = json.Unmarshal(bts, &teamsb)
   if err != nil { return err }
 
   Teams.With(func(v *map[string]*RWMutexWrap[TeamS]) {
     Probs.With(func(u *map[string]*RWMutexWrap[ProbS]) {
-      for id, bck := range teamsb {
+      for id, bckrs := range teamsb {
+        var bck TeamBackup
+        err := json.Unmarshal([]byte(bckrs), &bck)
+        if err != nil { log.Error(err); continue }
         (*v)[id].With(func(w *TeamS) {
           nteam := bck.Teams
           for _, prid := range bck.Bought {
