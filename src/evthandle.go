@@ -79,6 +79,7 @@ func PlayerWsHandleMsg(
     money, err := DBSell(teamM, prob)
     if err != nil { return err }
     tchan.Send("sold", prob, strconv.Itoa(money))
+    fmt.Printf("# sold %s %s %d", team, prob, money)
 
   case "buy":
     if len(m) != 2 { return eIm(msg) }
@@ -86,6 +87,7 @@ func PlayerWsHandleMsg(
     prob, money, name, text, img, remcnt, err := DBBuy(teamM, diff)
     if err != nil { return err }
     tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img, strconv.Itoa(remcnt))
+    fmt.Printf("# bought %s %s %s %d", team, prob, diff, money)
 
   // case "buyold":
   //   if len(m) != 2 { return eIm(msg) }
@@ -192,6 +194,7 @@ func AdminWsHandleMsg(
     if err != nil { return err }
     WriteTeamChan(team, "graded", prob, rcorr, strconv.Itoa(money))
     AdminSend("graded", prob, check)
+    fmt.Printf("# bought %s %s %s %d", team, prob, rcorr, money)
 
   case "chat":
     if len(m) != 4 { return eIm(msg) }
