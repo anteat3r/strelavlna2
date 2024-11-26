@@ -1,3 +1,5 @@
+import PocketBase from '../pocketbase.es.mjs';
+const pb = new PocketBase("https://strela-vlna.gchd.cz");
 const redirects = false;
 //global states
 var start_time = new Date().getTime() - 5000;
