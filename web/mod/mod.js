@@ -1,3 +1,5 @@
+import PocketBase from '../pocketbase.es.mjs';
+const pb = new PocketBase("https://strela-vlna.gchd.cz");
 const redirects = false;
 //global states
 var start_time = new Date().getTime() - 5000;
@@ -876,15 +878,25 @@ update();
 let socket;
 
 function connectWS() {
-  const searchParams = new URLSearchParams(window.location.search);
-  const id = searchParams.get("id");
-  socket = new WebSocket(`wss://strela-vlna.gchd.cz/ws/admin/play/${id}`);
-  socket.addEventListener("error", (e) => {
-      console.log(e);
-      if(redirects){
-        window.location.href = `../login/id=${id}`;
-      }
-  });
+    if(pb.authStore.isValid) {
+        socket = new WebSocket(`wss://strela-vlna.gchd.cz/ws/admin/play/${pb.authStore.model.id}`);
+        socket.addEventListener("error", (e) => {
+            console.log(e);
+            localStorage.setItem("logging_from", window.location.href);
+            window.location.href = `../adlogin`;
+        });
+    } else {
+        localStorage.setItem("logging_from", window.location.href);
+        window.location.href = "../adlogin";
+    }
+
+    console.log("websoket connected");
+
+
+
+//   const searchParams = new URLSearchParams(window.location.search);
+//   const id = searchParams.get("id");
+
 
   socket.addEventListener("open", (event) => {
     load();
