@@ -79,7 +79,7 @@ func PlayerWsHandleMsg(
     money, err := DBSell(teamM, prob)
     if err != nil { return err }
     tchan.Send("sold", prob, strconv.Itoa(money))
-    fmt.Printf("# sold %s %s %d", team, prob, money)
+    fmt.Printf("#money %s %d", team, money)
 
   case "buy":
     if len(m) != 2 { return eIm(msg) }
@@ -87,7 +87,7 @@ func PlayerWsHandleMsg(
     prob, money, name, text, img, remcnt, err := DBBuy(teamM, diff)
     if err != nil { return err }
     tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img, strconv.Itoa(remcnt))
-    fmt.Printf("# bought %s %s %s %d", team, prob, diff, money)
+    fmt.Printf("#money %s %d", team, money)
 
   // case "buyold":
   //   if len(m) != 2 { return eIm(msg) }
@@ -194,7 +194,7 @@ func AdminWsHandleMsg(
     if err != nil { return err }
     WriteTeamChan(team, "graded", prob, rcorr, strconv.Itoa(money))
     AdminSend("graded", prob, check)
-    fmt.Printf("# bought %s %s %s %d", team, prob, rcorr, money)
+    fmt.Printf("#money %s %d", team, money)
 
   case "chat":
     if len(m) != 4 { return eIm(msg) }
@@ -343,6 +343,7 @@ func AdminWsHandleMsg(
       for id, tm := range v {
         var data string
         var money int
+        tmpstats := make(map[string]string)
         tm.With(func(t *TeamS) {
           idx := slices.IndexFunc(scores, func(a teamData) bool { return a.id == id })
           t.Stats.Rank = idx+1
@@ -352,11 +353,25 @@ func AdminWsHandleMsg(
           if err != nil { log.Error(err) }
           data = string(bts)
           money = t.Money
+          for nm, mp := range map[string]map[string]ProbM{
+            "bought": t.Bought,
+            "pending": t.Pending, 
+            "solved": t.Solved,
+            "sold": t.Sold,
+          } {
+            strp := `["`
+            for id := range mp { strp += id + `","` }
+            strp = strings.TrimSuffix(strp, `,"`)
+            strp += `]`
+            tmpstats[nm] = strp
+          }
         })
         WriteTeamChan(id, "gotdata", data)
         fulldata += `"` + id + `":` + data + ","
-        _, err := App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
-        Bind(dbx.Params{"score": money, "id": id}).Execute()
+        tstats, err := json.Marshal(tmpstats)
+        if err != nil { log.Error(err) }
+        _, err = App.Dao().DB().NewQuery("update teams set score = {:score}, pstats = {:pstats} where id = {:id}").
+        Bind(dbx.Params{"score": money, "id": id, "pstats": tstats}).Execute()
         if err != nil { log.Error(err) }
       }
     })
