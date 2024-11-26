@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"slices"
+	"strconv"
 
 	// "slices"
 
@@ -1498,6 +1499,30 @@ func DBUnbackTeams() error {
     })
   })
 
+  return nil
+}
+
+func DBLoadFromLog() error {
+  bts, err := os.ReadFile("/opt/strelavlna2/sv2.log")
+  if err != nil { return err }
+
+  str := string(bts)
+
+  teamsm := make(map[string]int)
+  for _, l := range strings.Split(str, "\n") {
+    ln := strings.Split(l, " ")
+    if len(ln) != 3 { continue }
+    if ln[0] != "#money" { continue }
+    mn, _ := strconv.Atoi(ln[2])
+    teamsm[ln[1]] = mn
+  }
+  Teams.With(func(v *map[string]*RWMutexWrap[TeamS]) {
+    for id, tm := range *v {
+      tm.With(func(v *TeamS) {
+        v.Money = teamsm[id]
+      })
+    }
+  })
   return nil
 }
 
