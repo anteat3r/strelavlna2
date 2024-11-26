@@ -1,5 +1,5 @@
 var results_string = "asdhjawkjasdkj kajshd kdhgwa sjhd kjahwuka bsflahsd kjb";
-let qrcode_link = "https://strela-vlna.gchd.cz/about_us/";
+let qrcode_link = "https://forms.gle/zajpLpBssfErBdMKA";
 
 
 
