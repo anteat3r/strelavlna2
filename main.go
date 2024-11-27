@@ -86,6 +86,7 @@ func main() {
       "backscore",
       "* * * * *",
       func() {
+        if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
         log.Info("backuping")
         src.Teams.RWith(func(v map[string]src.TeamM) {
           for id, tm := range v {
@@ -110,10 +111,10 @@ func main() {
                   "teams",
                   dbx.Params{
                     "score": money,
-                    "bought": bought,
-                    "pending": pending,
-                    "solved": solved,
-                    "sold": sold,
+                    "bought": src.StringifyRefList(bought),
+                    "pending": src.StringifyRefList(pending),
+                    "solved": src.StringifyRefList(solved),
+                    "sold": src.StringifyRefList(sold),
                   },
                   dbx.HashExp{"id": id},
                 ).
