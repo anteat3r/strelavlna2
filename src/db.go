@@ -601,8 +601,9 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     for _, m := range teamS.Chat {
       chrole := "p"
       if m.Admin { chrole = "a" }
-      // probid := ""
-      // if m.Prob != nil { m.Prob.RWith(func(v ProbS) { probid = v.Id }) }
+      probid := ""
+      if m.Prob != nil { m.Prob.RWith(func(v ProbS) { probid = v.Id }) }
+      if probid != prob { continue }
       chat += chrole + "\x09" + m.Text + "\x0b"
     }
     check = GetRandomId()
