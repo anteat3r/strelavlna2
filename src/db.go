@@ -777,6 +777,8 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
     prob := checkS.Prob
     var diff string
     var probid string
+    if checkS.Msg { oerr = dbErr("grade", "cannot grade message check"); return }
+    if prob == nil { oerr = dbErr("grade", "cannot grade this check"); return }
     prob.RWith(func(v ProbS) { diff = v.Diff; probid = v.Id })
     cost, ok := GetCost("+" + diff)
     if !ok { oerr = dbErr("grade", "invalid cost"); return }
