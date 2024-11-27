@@ -62,6 +62,13 @@ func PlayerWsHandleMsg(
   readmsg := strings.Join(m, "|")
 
   defer func(){
+    r := recover()
+    if r != nil {
+      jerr := strings.ReplaceAll(fmt.Sprint(r), "\x00", "|")
+      fmt.Printf("%s *>- %s:%d <-* %s <- %s\n", formTime(), team, idx, jerr, readmsg)
+      JSONlog(team, false, true, idx, jerr)
+      return
+    }
     if oerr != nil {
       jerr := strings.ReplaceAll(oerr.Error(), "\x00", "|")
       fmt.Printf("%s *>- %s:%d <-* %s <- %s\n", formTime(), team, idx, jerr, readmsg)
@@ -384,7 +391,6 @@ func AdminWsHandleMsg(
     if err != nil { log.Error(err) }
     AdminSend("finalstats", fulldata)
 
-
   case "sendlowerrank":
     if len(m) != 1 { return eIm(msg) }
     Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
@@ -421,6 +427,22 @@ func AdminWsHandleMsg(
     if !ok { return }
     WriteTeamChan(team, "showrank")
     AdminSend("ranksent", team)
+
+  case "setmoney":
+    if len(m) != 3 { return eIm(msg) }
+    team := m[1]
+    money, err := strconv.Atoi(m[2])
+    if err != nil { return err }
+    ok := false
+    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+      var tm TeamM
+      tm, ok = v[team]
+      if !ok { return }
+      tm.With(func(w *TeamS) { w.Money += money })
+    })
+    if !ok { return nErr("invalid team") }
+    WriteTeamChan(team, "moneychanged", strconv.Itoa(money))
+    AdminSend("moneychanged", team, strconv.Itoa(money))
 
   }
 

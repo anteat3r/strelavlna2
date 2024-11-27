@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"sync"
@@ -240,6 +241,7 @@ func PlayerWsLoop(
   idx int,
   teamM TeamM,
 ) {
+  debug.SetPanicOnFault(true)
   wsrchan := make(chan string)
   go func(){
     wsrloop: for {
@@ -334,6 +336,7 @@ func AdminWsLoop(
   // adminCntMu.Lock()
   // AdminCnt += 1
   // adminCntMu.Unlock()
+  debug.SetPanicOnFault(true)
   wsrchan := make(chan string)
   go func(){
     wsrloop: for {

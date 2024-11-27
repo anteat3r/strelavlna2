@@ -73,15 +73,31 @@ func main() {
       },
     )
 
-    // sched.MustAdd(
-    //   "dumpdb",
-    //   "* * * * *",
-    //   func() {
-    //     if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
-    //     err := src.DBBackTeams()
-    //     if err != nil { log.Error(err) }
-    //   },
-    // )
+    sched.MustAdd(
+      "backscore",
+      "* * * * *",
+      func() {
+        src.Teams.RWith(func(v map[string]src.TeamM) {
+          for id, tm := range v {
+            tm.RWith(func(w src.TeamS) {
+              money := w.Money
+              for _, mp := range []map[string]src.ProbM{ w.Bought, w.Pending } {
+                for _, pr := range mp {
+                  pr.RWith(func(u src.ProbS) {
+                    cost, _ := src.GetCost(u.Diff)
+                    money += cost
+                  })
+                }
+              }
+              app.Dao().DB().
+                NewQuery("update teams set score = {:score} where id = {:id}").
+                Bind(dbx.Params{"score": money, "id": id}).
+                Execute()
+            })
+          }
+        })
+      },
+    )
 
     sched.Start()
 

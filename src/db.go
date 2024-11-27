@@ -413,7 +413,7 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
 
   team.With(func(teamS *TeamS) {
     _, ok = teamS.Bought[prob]
-    if !ok { oerr = dbErr("prob not owned") }
+    if !ok { oerr = dbErr("prob not owned"); return }
 
     teamname = teamS.Name
 
@@ -739,12 +739,12 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
     var probid string
     prob.RWith(func(v ProbS) { diff = v.Diff; probid = v.Id })
     cost, ok := GetCost("+" + diff)
-    if !ok { oerr = dbErr("grade", "invalid cost") }
+    if !ok { oerr = dbErr("grade", "invalid cost"); return }
 
     team.With(func(v *TeamS) {
       if v.Banned { oerr = dbErr("grade", "cannot grade banned team"); return }
-      _, ok = v.Pending[probid]
-      if !ok { oerr = dbErr("grade", "prob not pending"); return }
+      // _, ok = v.Pending[probid]
+      // if !ok { oerr = dbErr("grade", "prob not pending"); return }
 
       target := v.Bought
       if corr {
@@ -848,7 +848,7 @@ func DBAdminView(teamid string, probid string, sprob bool, schat bool) (text str
   var prob ProbM
   var ok bool
   Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) { prob, ok = v[probid] })
-  if !ok { oerr = dbErr("view", "invalid prob id"); return }
+  if !ok && probid != "" { oerr = dbErr("view", "invalid prob id"); return }
 
   if sprob {
     prob.RWith(func(v ProbS) {
