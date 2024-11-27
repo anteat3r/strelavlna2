@@ -513,7 +513,7 @@ func main() {
       apis.RequireAdminAuth(),
     )
 
-    e.Router.GET(
+    e.Router.POST(
       "/api/cash",
       src.CashEndp(app.Dao()),
     )
