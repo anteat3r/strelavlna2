@@ -554,7 +554,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
       for _, m := range teamS.Chat {
         chrole := "p"
         if m.Admin { chrole = "a" }
-        if "" != prob { continue }
+        if m.Prob != nil { continue }
         chat += chrole + "\x09" + m.Text + "\x0b"
       }
     })
