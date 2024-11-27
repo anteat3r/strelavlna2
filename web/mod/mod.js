@@ -1383,7 +1383,7 @@ function gotData(data) {
                     sendRank(id);
                 } else {
                     for (const [otherId, otherStats] of Object.entries(sortedData)) {
-                        if (otherStats.rank <= stats.rank) {
+                        if (otherStats.rank >= stats.rank) {
                             sendRank(otherId);
                         }
                     }
