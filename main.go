@@ -84,8 +84,9 @@ func main() {
 
     sched.MustAdd(
       "backscore",
-      "*/5 * * * *",
+      "* * * * *",
       func() {
+        log.Info("backuping")
         src.Teams.RWith(func(v map[string]src.TeamM) {
           for id, tm := range v {
             tm.RWith(func(w src.TeamS) {
@@ -120,6 +121,7 @@ func main() {
             })
           }
         })
+        log.Info("backuping done")
       },
     )
 
