@@ -1238,7 +1238,6 @@ function questioned(checkid, teamid, teamname, probid, probdiff, probname, messa
 
 
 function solved(checkid, teamid, probid, assignid, teamname, team_answer, correct_answer){
-    console.log(team_answer);
     checks.push(
         {   
             id: checkid,
@@ -1250,8 +1249,13 @@ function solved(checkid, teamid, probid, assignid, teamname, team_answer, correc
             team_message: team_answer,
             focused_by: []
         });
-    console.log(checks);
-    updateCheckList();
+    if (myRole == "worker") {
+        if (assignid.toString() == myId) {
+            updateCheckList();
+        }
+    } else {
+        updateCheckList();
+    }
 }
 
 /**@param {string} probid
@@ -1379,7 +1383,7 @@ function gotData(data) {
                     sendRank(id);
                 } else {
                     for (const [otherId, otherStats] of Object.entries(sortedData)) {
-                        if (otherStats.rank <= stats.rank) {
+                        if (otherStats.rank >= stats.rank) {
                             sendRank(otherId);
                         }
                     }
