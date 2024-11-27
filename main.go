@@ -89,6 +89,7 @@ func main() {
         log.Info("backuping")
         src.Teams.RWith(func(v map[string]src.TeamM) {
           for id, tm := range v {
+            log.Info(id)
             tm.RWith(func(w src.TeamS) {
               money := w.Money
               bought := pickProbs(w.Bought)
