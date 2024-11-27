@@ -530,6 +530,18 @@ func main() {
     return nil
   })
 
+  app.OnRecordAfterUpdateRequest("probs").Add(func(e *core.RecordUpdateEvent) error {
+    src.Probs.RWith(func(v map[string]*src.RWMutexWrap[src.ProbS]) {
+      pr, ok := v[e.Record.Id]
+      if !ok { return }
+      pr.With(func(v *src.ProbS) {
+        v.Text = e.Record.GetString("text")
+        v.Solution = e.Record.GetString("solution")
+      })
+    })
+    return nil
+  })
+
   src.App = app
 
   if err := app.Start(); err != nil {
