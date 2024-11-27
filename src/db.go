@@ -1285,7 +1285,7 @@ func DBLoadFromPB(ac string) error {
       Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
         for _, mps := range []struct{id string; mp map[string]ProbM}{
           {"bought", newteam.v.Bought},
-          {"bought", newteam.v.Pending},
+          {"pending", newteam.v.Bought},
           {"solved", newteam.v.Solved},
           {"sold", newteam.v.Sold},
         } {
