@@ -756,11 +756,8 @@ async function load(){
             ));
             updateProbList();
         } else if (e.action == "update") {
-            console.log("lalalalalalalalalalalalala");
             const prob = probs.find(prob => prob.id == e.record.id);
-            console.log(prob);
             const needUpdate = prob.title != e.record.name || prob.rank != e.record.diff || prob.author != e.record.author || prob.type != e.record.type;
-            console.log(prob.rank, e.record.diff);
             if (prob) {
                 prob._title = e.record.name;
                 prob._rank = e.record.diff;
@@ -776,7 +773,6 @@ async function load(){
             }
             if (needUpdate) {
                 updateProbList();
-                console.log("updating...");
             }
         } else if (e.action == "delete") {
             const prob = probs.find(prob => prob.id == e.record.id);
