@@ -514,7 +514,7 @@ func main() {
     )
 
     e.Router.GET(
-      "/api/cash/",
+      "/api/cash",
       src.CashEndp(app.Dao()),
     )
 
