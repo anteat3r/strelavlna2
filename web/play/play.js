@@ -737,6 +737,9 @@ function connectWS() {
   socket.addEventListener("open", (event) => {
     load();
   });
+  socket.addEventListener("close", (event) => {
+      disconnected();
+  });
 
   socket.addEventListener("message", (event) => {
     function cLe() { console.log("invalid msg", rawmsg) }
@@ -1030,8 +1033,20 @@ function graded(probid, correct, money) {
     console.log(probid, correct, money);
 }
 
+function disconnected() {
+    document.getElementById("disconnected-wrapper").classList.remove("hidden");
 
+    const txt = "Spojení přerušeno - vyčkejte chvíli a obnovte stránky";
 
+    const p = document.getElementById("disconnected-message");
+    let t = 1000;
+    for (let i = 0; i < txt.length; i++) {
+        setTimeout(() => {
+            p.innerHTML += txt[i];
+        }, t);
+        t += Math.random() * 150;
+    }
+}
 
 
 function loaded(data) {
