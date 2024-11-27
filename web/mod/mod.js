@@ -42,6 +42,8 @@ var focused_check = "";
 
 const accept_button = document.getElementById("accept");
 const reject_button = document.getElementById("reject");
+const dismiss_button = document.getElementById("chat-dismiss-button");
+
 
 const focused_check_wrapper = document.getElementById("check-wrapper");
 const mod_home_wrapper = document.getElementById("mod-home-wrapper");
@@ -53,7 +55,7 @@ updateChat();
 
 //buy events
 
-document.getElementById("chat-dismiss-button").addEventListener("click", function(){
+dismiss_button.addEventListener("click", function(){
     if(focused_check == "") return;
     const focused_check_obj = checks.find(check => check.id == focused_check);
     const chat_obj = cached_chats.find(chat => chat.teamid == focused_check_obj.teamid && chat.probid == focused_check_obj.probid);
@@ -232,15 +234,54 @@ function focusNextCheck(){
 
 document.addEventListener("keydown", function(e){
     if(e.altKey && e.key == "a"){
-        accept_button.click();
+        if (focused_check == "") return;
+        const focusedCheck = checks.find(check => check.id == focused_check);
+
+        if (focusedCheck.type == "grade") {
+            accept_button.click();
+        } else if (focusedCheck.type == "chat") {
+            dismiss_button.click();
+        } else if (focusedCheck.type == "globalchat") {
+            dismiss_button.click();
+        }
     }
 });
 
 document.addEventListener("keydown", function(e){
     if(e.altKey && e.key == "r"){
+        if (focused_check == "") return;
         reject_button.click();
     }
 });
+
+document.addEventListener("keydown", function(event) {
+    if (event.altKey && event.key === 'f') {
+        if (focusCheck == "") return;
+        event.preventDefault();
+        const chatInput = document.getElementById('chat-input');
+        if (chatInput) {
+            chatInput.focus();
+        }
+    }
+});
+
+document.addEventListener("keydown", function(event) {
+    if (event.altKey && event.key === 'n') {
+        event.preventDefault();
+        if (focused_check == "") {
+            document.getElementById(checks[0].id).click();
+            return;
+        }
+        const filtered = checks.filter(check => check.assignid == myId || myRole != "worker");
+        const idx = filtered.findIndex(check => check.id == focused_check && (check.assignid == myId || myRole != "worker"));
+        if (idx == filtered.length - 1) {
+            document.getElementById(filtered[0].id).click();
+        } else {
+            document.getElementById(filtered[idx + 1].id).click();
+        }
+    }
+});
+
 
 
 
@@ -556,7 +597,6 @@ function updateCheckList(){
     const checks_buttons = document.getElementById("checks-wrapper").getElementsByClassName("check");
     for(const button of checks_buttons){
         button.addEventListener("click", function(){
-            console.log(this.id);
             if(focused_check == this.id){
                 return;
             }
@@ -850,6 +890,9 @@ function updateClock(remaining, passed){
         second_wrapper.classList.add(`digit-${seconds}`);
     }
 }
+
+
+
 
 var lastSecond = 0;
 var clock_zeroed = false;
