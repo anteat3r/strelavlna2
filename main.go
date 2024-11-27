@@ -31,6 +31,15 @@ func customHTTPErrorHandler(c echo.Context, err error) {
   c.String(code, err.Error())
 }
 
+func pickProbs(m map[string]src.ProbM) []string {
+  res := make([]string, 0)
+  for id, _ := range m {
+    if len(id) > 15 { continue }
+    res = append(res, id)
+  }
+  return res
+}
+
 
 func main() {
   err := godotenv.Load()
@@ -75,12 +84,16 @@ func main() {
 
     sched.MustAdd(
       "backscore",
-      "* * * * *",
+      "*/5 * * * *",
       func() {
         src.Teams.RWith(func(v map[string]src.TeamM) {
           for id, tm := range v {
             tm.RWith(func(w src.TeamS) {
               money := w.Money
+              bought := pickProbs(w.Bought)
+              pending := pickProbs(w.Pending)
+              solved := pickProbs(w.Solved)
+              sold := pickProbs(w.Sold)
               for _, mp := range []map[string]src.ProbM{ w.Bought, w.Pending } {
                 for _, pr := range mp {
                   pr.RWith(func(u src.ProbS) {
@@ -89,10 +102,20 @@ func main() {
                   })
                 }
               }
-              app.Dao().DB().
-                NewQuery("update teams set score = {:score} where id = {:id}").
-                Bind(dbx.Params{"score": money, "id": id}).
+              _, err := app.Dao().DB().
+                Update(
+                  "teams",
+                  dbx.Params{
+                    "score": money,
+                    "bought": bought,
+                    "pending": pending,
+                    "solved": solved,
+                    "sold": sold,
+                  },
+                  dbx.HashExp{"id": id},
+                ).
                 Execute()
+              if err != nil { log.Error(err) }
             })
           }
         })

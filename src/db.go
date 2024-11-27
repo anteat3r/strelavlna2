@@ -71,6 +71,39 @@ func (w *RWMutexWrap[T]) GetPrimitiveVal() (v T) {
   return
 }
 
+func ParseRefList(s string) []string {
+  if s == "[]" { return []string{} }
+  s = strings.TrimPrefix(s, "[")
+  s = strings.TrimSuffix(s, "]")
+  res := strings.Split(s, ",")
+  for i, s := range res {
+    res[i] = strings.Trim(s, `"`)
+  }
+  return res
+}
+ 
+func StringifyRefList(l []string) string {
+  res := "["
+  for i, s := range l {
+    res += `"` + s + `"`
+    if i == len(l)-1 { break }
+    res += ","
+  }
+  res += "]"
+  return res
+}
+
+func RefListToInExpr(l []string) string {
+  res := "("
+  for i, s := range l {
+    res += `'` + s + `'`
+    if i == len(l)-1 { break }
+    res += ","
+  }
+  res += ")"
+  return res
+}
+
 type ChatMsg struct {
   Admin bool
   Prob ProbM
