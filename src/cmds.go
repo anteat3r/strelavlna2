@@ -249,6 +249,7 @@ func GetDump() echo.HandlerFunc {
 func CashEndp(dao *daos.Dao) echo.HandlerFunc {
   log.Info("cash hit")
 	return func(c echo.Context) error {
+    return c.String(200, "helo")
     req := make(map[string]any)
     err := json.NewDecoder(c.Request().Body).Decode(&req)
     if err != nil { return err }
