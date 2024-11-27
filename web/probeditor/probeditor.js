@@ -758,6 +758,7 @@ async function load(){
         } else if (e.action == "update") {
             const prob = probs.find(prob => prob.id == e.record.id);
             const needUpdate = prob.title != e.record.name || prob.rank != e.record.diff || prob.author != e.record.author || prob.type != e.record.type;
+            const authorChanged = prob.author != e.record.author;
             if (prob) {
                 prob._title = e.record.name;
                 prob._rank = e.record.diff;
@@ -766,7 +767,9 @@ async function load(){
                 prob._solution = e.record.solution;
                 prob._image = e.record.img;
                 prob._author = e.record.author;
-                prob._authorName = "Zatim nevim (dej f5)";
+                if (authorChanged) {
+                    prob._authorName = "Zatim nevim (dej f5)";
+                }
                 prob._graph = e.record.graph;
                 prob._infinite = e.record.infinite;
                 prob._contests = e.record.contests;
