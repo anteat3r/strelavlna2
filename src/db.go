@@ -1283,16 +1283,16 @@ func DBLoadFromPB(ac string) error {
         },
       })
       Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
-        for name, mp := range map[string]map[string]ProbM{
-          "bought": newteam.v.Bought,
-          "pending": newteam.v.Pending,
-          "solved": newteam.v.Solved,
-          "sold": newteam.v.Sold,
+        for _, mps := range []struct{id string; mp map[string]ProbM}{
+          {"bought", newteam.v.Bought},
+          {"bought", newteam.v.Pending},
+          {"solved", newteam.v.Solved},
+          {"sold", newteam.v.Sold},
         } {
-          for _, id := range tm.GetStringSlice(name) {
+          for _, id := range tm.GetStringSlice(mps.id) {
             pr, ok := v[id]
             if !ok { continue }
-            mp[id] = pr
+            mps.mp[id] = pr
           }
         }
       })
