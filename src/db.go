@@ -524,6 +524,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
 
   if prob == "" {
     team.With(func(teamS *TeamS) {
+      teamname = teamS.Name
       teamS.Chat = append(teamS.Chat, ChatMsg{false, nil, team, msg})
       var ok bool
       check, ok = teamS.ChatChecksCache[""]
@@ -571,6 +572,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
   })
 
   team.With(func(teamS *TeamS) {
+    teamname = teamS.Name
     _, bought := teamS.Bought[prob]
     _, pending := teamS.Pending[prob]
     if !bought && !pending { oerr = dbErr("chat", "prob not owned"); return }
