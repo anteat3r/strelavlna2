@@ -1036,7 +1036,7 @@ function graded(probid, correct, money) {
 function disconnected() {
     document.getElementById("disconnected-wrapper").classList.remove("hidden");
 
-    const txt = "Spojení přerušeno - vyčkejte chvíli a obnovte stránky";
+    const txt = "Spojení přerušeno - vyčkejte chvíli (30s) a obnovte stránky";
 
     const p = document.getElementById("disconnected-message");
     let t = 1000;

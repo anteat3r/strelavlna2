@@ -738,6 +738,59 @@ async function load(){
         });
     }
 
+    pb.collection('probs').subscribe('*', function (e) {
+        if (e.action == "create") {
+            probs.push(new Prob(
+                e.record.id,
+                e.record.name,
+                e.record.diff,
+                e.record.type,
+                e.record.text,
+                e.record.solution,
+                e.record.img,
+                e.record.author,
+                "Zatim nevim (dej f5)",
+                e.record.graph,
+                e.record.infinite,
+                e.record.contests
+            ));
+            updateProbList();
+        } else if (e.action == "update") {
+            console.log("lalalalalalalalalalalalala");
+            const prob = probs.find(prob => prob.id == e.record.id);
+            console.log(prob);
+            const needUpdate = prob.title != e.record.name || prob.rank != e.record.diff || prob.author != e.record.author || prob.type != e.record.type;
+            console.log(prob.rank, e.record.diff);
+            if (prob) {
+                prob._title = e.record.name;
+                prob._rank = e.record.diff;
+                prob._type = e.record.type;
+                prob._content = e.record.text;
+                prob._solution = e.record.solution;
+                prob._image = e.record.img;
+                prob._author = e.record.author;
+                prob._authorName = "Zatim nevim (dej f5)";
+                prob._graph = e.record.graph;
+                prob._infinite = e.record.infinite;
+                prob._contests = e.record.contests;
+            }
+            if (needUpdate) {
+                updateProbList();
+                console.log("updating...");
+            }
+        } else if (e.action == "delete") {
+            const prob = probs.find(prob => prob.id == e.record.id);
+            if (prob) {
+                probs.splice(probs.indexOf(prob), 1);
+                updateProbList();
+            }
+        }
+
+
+        console.log("action: ", e.action);
+        console.log("record:", e.record);
+    });
+
 }
 
 document.getElementById("save-changes-button").addEventListener("click", saveChanges);
