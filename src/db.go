@@ -902,7 +902,9 @@ func DBAdminView(teamid string, probid string, sprob bool, schat bool) (text str
       if v.Banned { banned = "yes" }
       lastbanned = v.LastBanned.Format("2006-01-02 15:04:05.000Z")
       for i, m := range v.Chat {
-        if m.Prob != prob { continue }
+        pid := ""
+        m.Prob.RWith(func(v ProbS) { pid = v.Id })
+        if pid != probid { continue }
         chrole := "p"
         if m.Admin { chrole = "a" }
         chat += chrole + "\x09" + m.Text
