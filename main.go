@@ -95,7 +95,8 @@ func main() {
               solved := pickProbs(w.Solved)
               sold := pickProbs(w.Sold)
               for _, mp := range []map[string]src.ProbM{ w.Bought, w.Pending } {
-                for _, pr := range mp {
+                for id, pr := range mp {
+                  if len(id) <= 15 { continue }
                   pr.RWith(func(u src.ProbS) {
                     cost, _ := src.GetCost(u.Diff)
                     money += cost

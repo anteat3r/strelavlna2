@@ -1282,6 +1282,20 @@ func DBLoadFromPB(ac string) error {
           TeamName: tm.GetString("name"),
         },
       })
+      Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
+        for name, mp := range map[string]map[string]ProbM{
+          "bought": newteam.v.Bought,
+          "pending": newteam.v.Pending,
+          "solved": newteam.v.Solved,
+          "sold": newteam.v.Sold,
+        } {
+          for _, id := range tm.GetStringSlice(name) {
+            pr, ok := v[id]
+            if !ok { continue }
+            mp[id] = pr
+          }
+        }
+      })
       for diff, cnt := range probcnts { newteam.v.RemProbCnt[diff] = cnt }
       (*v)[tm.Id] = &newteam
     }
