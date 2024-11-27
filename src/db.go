@@ -596,6 +596,12 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
       ocheck.With(func(checkS *CheckS) {
         checkS.Sol = msg
       })
+      for _, m := range teamS.Chat {
+        chrole := "p"
+        if m.Admin { chrole = "a" }
+        if "" != prob { continue }
+        chat += chrole + "\x09" + m.Text + "\x0b"
+      }
       return
     }
     for _, m := range teamS.Chat {
