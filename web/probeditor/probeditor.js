@@ -740,7 +740,7 @@ async function load(){
 
     pb.collection('probs').subscribe('*', function (e) {
         if (e.action == "create") {
-            if (probs.find(prob => prob.id == e.record.id)) return;
+            if (e.record.author == my_id) return;
             probs.push(new Prob(
                 e.record.id,
                 e.record.name,
