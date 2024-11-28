@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"slices"
+	"strconv"
 
 	// "slices"
 
@@ -68,6 +69,39 @@ func (w *RWMutexWrap[T]) GetPrimitiveVal() (v T) {
   defer w.m.RUnlock()
   v = w.v
   return
+}
+
+func ParseRefList(s string) []string {
+  if s == "[]" { return []string{} }
+  s = strings.TrimPrefix(s, "[")
+  s = strings.TrimSuffix(s, "]")
+  res := strings.Split(s, ",")
+  for i, s := range res {
+    res[i] = strings.Trim(s, `"`)
+  }
+  return res
+}
+ 
+func StringifyRefList(l []string) string {
+  res := "["
+  for i, s := range l {
+    res += `"` + s + `"`
+    if i == len(l)-1 { break }
+    res += ","
+  }
+  res += "]"
+  return res
+}
+
+func RefListToInExpr(l []string) string {
+  res := "("
+  for i, s := range l {
+    res += `'` + s + `'`
+    if i == len(l)-1 { break }
+    res += ","
+  }
+  res += ")"
+  return res
 }
 
 type ChatMsg struct {
@@ -412,7 +446,7 @@ func DBSolve(team TeamM, prob string, sol string) (check string, diff string, te
 
   team.With(func(teamS *TeamS) {
     _, ok = teamS.Bought[prob]
-    if !ok { oerr = dbErr("prob not owned") }
+    if !ok { oerr = dbErr("prob not owned"); return }
 
     teamname = teamS.Name
 
@@ -517,6 +551,12 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
         (*checksmap)[check] = ncheck
       })
       teamS.ChatChecksCache[""] = check
+      for _, m := range teamS.Chat {
+        chrole := "p"
+        if m.Admin { chrole = "a" }
+        if m.Prob != nil { continue }
+        chat += chrole + "\x09" + m.Text + "\x0b"
+      }
     })
 
     return
@@ -567,8 +607,9 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     for _, m := range teamS.Chat {
       chrole := "p"
       if m.Admin { chrole = "a" }
-      // probid := ""
-      // if m.Prob != nil { m.Prob.RWith(func(v ProbS) { probid = v.Id }) }
+      probid := ""
+      if m.Prob != nil { m.Prob.RWith(func(v ProbS) { probid = v.Id }) }
+      if probid != prob { continue }
       chat += chrole + "\x09" + m.Text + "\x0b"
     }
     check = GetRandomId()
@@ -736,14 +777,16 @@ func DBAdminGrade(checkid string, corr bool) (money int, final bool, oerr error)
     prob := checkS.Prob
     var diff string
     var probid string
+    if checkS.Msg { oerr = dbErr("grade", "cannot grade message check"); return }
+    if prob == nil { oerr = dbErr("grade", "cannot grade this check"); return }
     prob.RWith(func(v ProbS) { diff = v.Diff; probid = v.Id })
     cost, ok := GetCost("+" + diff)
-    if !ok { oerr = dbErr("grade", "invalid cost") }
+    if !ok { oerr = dbErr("grade", "invalid cost"); return }
 
     team.With(func(v *TeamS) {
       if v.Banned { oerr = dbErr("grade", "cannot grade banned team"); return }
-      _, ok = v.Pending[probid]
-      if !ok { oerr = dbErr("grade", "prob not pending"); return }
+      // _, ok = v.Pending[probid]
+      // if !ok { oerr = dbErr("grade", "prob not pending"); return }
 
       target := v.Bought
       if corr {
@@ -847,7 +890,7 @@ func DBAdminView(teamid string, probid string, sprob bool, schat bool) (text str
   var prob ProbM
   var ok bool
   Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) { prob, ok = v[probid] })
-  if !ok { oerr = dbErr("view", "invalid prob id"); return }
+  if !ok && probid != "" { oerr = dbErr("view", "invalid prob id"); return }
 
   if sprob {
     prob.RWith(func(v ProbS) {
@@ -868,7 +911,9 @@ func DBAdminView(teamid string, probid string, sprob bool, schat bool) (text str
       if v.Banned { banned = "yes" }
       lastbanned = v.LastBanned.Format("2006-01-02 15:04:05.000Z")
       for i, m := range v.Chat {
-        if m.Prob != prob { continue }
+        pid := ""
+        if m.Prob != nil { m.Prob.RWith(func(v ProbS) { pid = v.Id }) }
+        if pid != probid { continue }
         chrole := "p"
         if m.Admin { chrole = "a" }
         chat += chrole + "\x09" + m.Text
@@ -1248,6 +1293,20 @@ func DBLoadFromPB(ac string) error {
           TeamName: tm.GetString("name"),
         },
       })
+      Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
+        for _, mps := range []struct{id string; mp map[string]ProbM}{
+          {"bought", newteam.v.Bought},
+          {"pending", newteam.v.Bought},
+          {"solved", newteam.v.Solved},
+          {"sold", newteam.v.Sold},
+        } {
+          for _, id := range tm.GetStringSlice(mps.id) {
+            pr, ok := v[id]
+            if !ok { continue }
+            mps.mp[id] = pr
+          }
+        }
+      })
       for diff, cnt := range probcnts { newteam.v.RemProbCnt[diff] = cnt }
       (*v)[tm.Id] = &newteam
     }
@@ -1498,6 +1557,30 @@ func DBUnbackTeams() error {
     })
   })
 
+  return nil
+}
+
+func DBLoadFromLog() error {
+  bts, err := os.ReadFile("/opt/strelavlna2/sv2.log")
+  if err != nil { return err }
+
+  str := string(bts)
+
+  teamsm := make(map[string]int)
+  for _, l := range strings.Split(str, "\n") {
+    ln := strings.Split(l, " ")
+    if len(ln) != 3 { continue }
+    if ln[0] != "#money" { continue }
+    mn, _ := strconv.Atoi(ln[2])
+    teamsm[ln[1]] = mn
+  }
+  Teams.With(func(v *map[string]*RWMutexWrap[TeamS]) {
+    for id, tm := range *v {
+      tm.With(func(v *TeamS) {
+        v.Money = teamsm[id]
+      })
+    }
+  })
   return nil
 }
 

@@ -62,6 +62,13 @@ func PlayerWsHandleMsg(
   readmsg := strings.Join(m, "|")
 
   defer func(){
+    r := recover()
+    if r != nil {
+      jerr := strings.ReplaceAll(fmt.Sprint(r), "\x00", "|")
+      fmt.Printf("%s *>- %s:%d <-* %s <- %s\n", formTime(), team, idx, jerr, readmsg)
+      JSONlog(team, false, true, idx, jerr)
+      return
+    }
     if oerr != nil {
       jerr := strings.ReplaceAll(oerr.Error(), "\x00", "|")
       fmt.Printf("%s *>- %s:%d <-* %s <- %s\n", formTime(), team, idx, jerr, readmsg)
@@ -79,6 +86,7 @@ func PlayerWsHandleMsg(
     money, err := DBSell(teamM, prob)
     if err != nil { return err }
     tchan.Send("sold", prob, strconv.Itoa(money))
+    fmt.Printf("#money %s %d", team, money)
 
   case "buy":
     if len(m) != 2 { return eIm(msg) }
@@ -86,6 +94,7 @@ func PlayerWsHandleMsg(
     prob, money, name, text, img, remcnt, err := DBBuy(teamM, diff)
     if err != nil { return err }
     tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img, strconv.Itoa(remcnt))
+    fmt.Printf("#money %s %d", team, money)
 
   // case "buyold":
   //   if len(m) != 2 { return eIm(msg) }
@@ -192,6 +201,7 @@ func AdminWsHandleMsg(
     if err != nil { return err }
     WriteTeamChan(team, "graded", prob, rcorr, strconv.Itoa(money))
     AdminSend("graded", prob, check)
+    fmt.Printf("#money %s %d", team, money)
 
   case "chat":
     if len(m) != 4 { return eIm(msg) }
@@ -340,6 +350,7 @@ func AdminWsHandleMsg(
       for id, tm := range v {
         var data string
         var money int
+        tmpstats := make(map[string]string)
         tm.With(func(t *TeamS) {
           idx := slices.IndexFunc(scores, func(a teamData) bool { return a.id == id })
           t.Stats.Rank = idx+1
@@ -349,11 +360,25 @@ func AdminWsHandleMsg(
           if err != nil { log.Error(err) }
           data = string(bts)
           money = t.Money
+          for nm, mp := range map[string]map[string]ProbM{
+            "bought": t.Bought,
+            "pending": t.Pending, 
+            "solved": t.Solved,
+            "sold": t.Sold,
+          } {
+            strp := `["`
+            for id := range mp { strp += id + `","` }
+            strp = strings.TrimSuffix(strp, `,"`)
+            strp += `]`
+            tmpstats[nm] = strp
+          }
         })
         WriteTeamChan(id, "gotdata", data)
         fulldata += `"` + id + `":` + data + ","
-        _, err := App.Dao().DB().NewQuery("update teams set score = {:score} where id = {:id}").
-        Bind(dbx.Params{"score": money, "id": id}).Execute()
+        tstats, err := json.Marshal(tmpstats)
+        if err != nil { log.Error(err) }
+        _, err = App.Dao().DB().NewQuery("update teams set score = {:score}, pstats = {:pstats} where id = {:id}").
+        Bind(dbx.Params{"score": money, "id": id, "pstats": tstats}).Execute()
         if err != nil { log.Error(err) }
       }
     })
@@ -365,7 +390,6 @@ func AdminWsHandleMsg(
     Bind(dbx.Params{"stats": fulldata, "id": ac}).Execute()
     if err != nil { log.Error(err) }
     AdminSend("finalstats", fulldata)
-
 
   case "sendlowerrank":
     if len(m) != 1 { return eIm(msg) }
@@ -403,6 +427,22 @@ func AdminWsHandleMsg(
     if !ok { return }
     WriteTeamChan(team, "showrank")
     AdminSend("ranksent", team)
+
+  case "setmoney":
+    if len(m) != 3 { return eIm(msg) }
+    team := m[1]
+    money, err := strconv.Atoi(m[2])
+    if err != nil { return err }
+    ok := false
+    Teams.RWith(func(v map[string]*RWMutexWrap[TeamS]) {
+      var tm TeamM
+      tm, ok = v[team]
+      if !ok { return }
+      tm.With(func(w *TeamS) { w.Money += money })
+    })
+    if !ok { return nErr("invalid team") }
+    WriteTeamChan(team, "moneychanged", strconv.Itoa(money))
+    AdminSend("moneychanged", team, strconv.Itoa(money))
 
   }
 

@@ -31,6 +31,15 @@ func customHTTPErrorHandler(c echo.Context, err error) {
   c.String(code, err.Error())
 }
 
+func pickProbs(m map[string]src.ProbM) []string {
+  res := make([]string, 0)
+  for id, _ := range m {
+    if len(id) > 15 { continue }
+    res = append(res, id)
+  }
+  return res
+}
+
 
 func main() {
   err := godotenv.Load()
@@ -73,15 +82,50 @@ func main() {
       },
     )
 
-    // sched.MustAdd(
-    //   "dumpdb",
-    //   "* * * * *",
-    //   func() {
-    //     if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
-    //     err := src.DBBackTeams()
-    //     if err != nil { log.Error(err) }
-    //   },
-    // )
+    sched.MustAdd(
+      "backscore",
+      "* * * * *",
+      func() {
+        if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
+        log.Info("backuping")
+        src.Teams.RWith(func(v map[string]src.TeamM) {
+          for id, tm := range v {
+            log.Info(id)
+            tm.RWith(func(w src.TeamS) {
+              money := w.Money
+              bought := pickProbs(w.Bought)
+              pending := pickProbs(w.Pending)
+              solved := pickProbs(w.Solved)
+              sold := pickProbs(w.Sold)
+              for _, mp := range []map[string]src.ProbM{ w.Bought, w.Pending } {
+                for id, pr := range mp {
+                  if len(id) <= 15 { continue }
+                  pr.RWith(func(u src.ProbS) {
+                    cost, _ := src.GetCost(u.Diff)
+                    money += cost
+                  })
+                }
+              }
+              _, err := app.Dao().DB().
+                Update(
+                  "teams",
+                  dbx.Params{
+                    "score": money,
+                    "bought": src.StringifyRefList(bought),
+                    "pending": src.StringifyRefList(pending),
+                    "solved": src.StringifyRefList(solved),
+                    "sold": src.StringifyRefList(sold),
+                  },
+                  dbx.HashExp{"id": id},
+                ).
+                Execute()
+              if err != nil { log.Error(err) }
+            })
+          }
+        })
+        log.Info("backuping done")
+      },
+    )
 
     sched.Start()
 
@@ -469,8 +513,8 @@ func main() {
       apis.RequireAdminAuth(),
     )
 
-    e.Router.GET(
-      "/api/cash/",
+    e.Router.POST(
+      "/api/cash",
       src.CashEndp(app.Dao()),
     )
 
@@ -478,11 +522,23 @@ func main() {
     err = src.SetupInitLoadData(app.Dao())
     if err != nil { return err }
 
-    if src.ActiveContest.GetPrimitiveVal().Id != "" {
-      err = src.DBUnbackTeams()
-      if err != nil { log.Error(err) }
-    }
+    // if src.ActiveContest.GetPrimitiveVal().Id != "" {
+    //   err = src.DBUnbackTeams()
+    //   if err != nil { log.Error(err) }
+    // }
 
+    return nil
+  })
+
+  app.OnRecordAfterUpdateRequest("probs").Add(func(e *core.RecordUpdateEvent) error {
+    src.Probs.RWith(func(v map[string]*src.RWMutexWrap[src.ProbS]) {
+      pr, ok := v[e.Record.Id]
+      if !ok { return }
+      pr.With(func(v *src.ProbS) {
+        v.Text = e.Record.GetString("text")
+        v.Solution = e.Record.GetString("solution")
+      })
+    })
     return nil
   })
 

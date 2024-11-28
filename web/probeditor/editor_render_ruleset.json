@@ -50,6 +50,10 @@
         "toStr": "tostring",
         "ts": "tostring",
 
+        "ftostring": "ftostring",
+        "ftoStr": "ftostring",
+        "fts": "ftostring",
+
         "fromstring": "fromstring",
         "fromStr": "fromstring",
         "fs": "fromstring",
@@ -75,6 +79,10 @@
         "setnumber": "setnumber",
         "setnum": "setnumber",
         "sn": "setnumber",
+
+        "setfraction": "setfraction",
+        "setfrc": "setfraction",
+        "sf": "setfraction",
 
         "constant": "constant",
         "const": "constant",
@@ -244,6 +252,15 @@
                 "fontSize": 16,
                 "inputs": 1,
                 "inputTypes": ["number"],
+                "outputType": "string"
+            },
+            "ftostring": {
+                "width": 60,
+                "height": 20,
+                "text": "toStr()",
+                "fontSize": 16,
+                "inputs": 1,
+                "inputTypes": ["fraction"],
                 "outputType": "string"
             },
             "fromstring": {
@@ -684,6 +701,12 @@
                 "value": "set()",
                 "fontSize": 18,
                 "inputType": "number"
+            },
+            "setfraction": {
+                "height": 30,
+                "value": "set()",
+                "fontSize": 18,
+                "inputType": "fraction"
             },
             "redo": {
                 "height": 30,

@@ -98,6 +98,15 @@ func ParseGraph(graphs string) (Graph, error) {
           return strconv.FormatFloat(i[0].(float64), 'g', -1, 64)
         },
       }
+    case "ftostring":
+      nnd = FunctionNode{
+        wtypes: []DataType{Frac},
+        fn: func(i []any) any {
+          f := i[0].(Fraction)
+          if f.y == 1 { return strconv.Itoa(f.x) }
+          return strconv.Itoa(f.x) + "/" + strconv.Itoa(f.y)
+        },
+      }
     case "fromstring":
       nnd = FunctionNode{
         wtypes: []DataType{String},
@@ -418,7 +427,7 @@ func ParseGraph(graphs string) (Graph, error) {
           return float64(int(i[0].(float64)) % int(i[1].(float64)))
         },
       }
-    case "nocache":
+    case "nocachenumber", "nocachestring", "nocachefraction", "nocachebool":
       if len(nd.Inputs) != 1 { return nil, InvalidGraphErr{"invalid nocache node"}}
       nnnd := NoCacheNode{
         id: id,
@@ -476,7 +485,7 @@ func ParseGraph(graphs string) (Graph, error) {
     }
     var nnd GraphNode
     switch nd.Type {
-    case "setstring", "setnumber":
+    case "setstring", "setnumber", "setfraction":
       nnd = SetNode{
         id: id,
         inp: nd.Input,
@@ -522,6 +531,7 @@ func (g Graph) Generate(text, sol string) (string, string, error) {
         case float64: ndresstr = strconv.FormatFloat(ndt, 'g', -1, 64)
         case bool: ndresstr = strconv.FormatBool(ndt)
         case Fraction: ndresstr = strconv.Itoa(ndt.x) + "/" + strconv.Itoa(ndt.y)
+          if ndt.y == 1 { ndresstr = strconv.Itoa(ndt.x) }
         default:
           fmt.Printf("%v %T %v %v\n", ndres, ndres, nd, id)
           return "", "", InvalidGraphErr{"invalid ret type"} 

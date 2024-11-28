@@ -247,15 +247,51 @@ func GetDump() echo.HandlerFunc {
 }
 
 func CashEndp(dao *daos.Dao) echo.HandlerFunc {
+  log.Info("cash hit")
 	return func(c echo.Context) error {
-    req := make(map[string]any)
+    req := make(map[string]string)
     err := json.NewDecoder(c.Request().Body).Decode(&req)
     if err != nil { return err }
     switch req["typ"] {
     case "overeni":
       tm, err := dao.FindFirstRecordByData("teams", "card", req["id"])
       if err != nil { return c.String(200, `{"key": "n"}`) }
-      return c.String(200, `{"key": "k", "nazev": "}` + tm.GetString("name") + `"}, "penize": "` + strconv.Itoa(tm.GetInt("score")) + `"}`)
+      return c.JSON(200, map[string]string{
+        "key": "k",
+        "nazev": tm.GetString("name"),
+        "penize": strconv.Itoa(tm.GetInt("score")),
+      })
+    case "akce":
+      switch req["akce"] {
+      case "0":
+        tm, err := dao.FindFirstRecordByData("teams", "card", req["id"])
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        cost, ok := GetCost("+" + req["id"])
+        if !ok { return c.String(200, `{"key": "n"}`) }
+        tm.Set("score", tm.GetInt("score") + cost)
+        err = dao.Save(tm)
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        return c.String(200, `{"key": "k"}`)
+      case "1":
+        tm, err := dao.FindFirstRecordByData("teams", "card", req["id"])
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        cost, ok := GetCost(req["id"])
+        if !ok { return c.String(200, `{"key": "n"}`) }
+        if tm.GetInt("score") < cost { return c.String(200, `{"key": "n"}`) }
+        tm.Set("score", tm.GetInt("score") - cost)
+        err = dao.Save(tm)
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        return c.String(200, `{"key": "k"}`)
+      case "2":
+        tm, err := dao.FindFirstRecordByData("teams", "card", req["id"])
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        cost, ok := GetCost("-" + req["id"])
+        if !ok { return c.String(200, `{"key": "n"}`) }
+        tm.Set("score", tm.GetInt("score") + cost)
+        err = dao.Save(tm)
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        return c.String(200, `{"key": "k"}`)
+      }
     }
 		return nil
 	}

@@ -1,3 +1,5 @@
+import PocketBase from '../pocketbase.es.mjs';
+const pb = new PocketBase("https://strela-vlna.gchd.cz");
 const redirects = false;
 //global states
 var start_time = new Date().getTime() - 5000;
@@ -40,6 +42,8 @@ var focused_check = "";
 
 const accept_button = document.getElementById("accept");
 const reject_button = document.getElementById("reject");
+const dismiss_button = document.getElementById("chat-dismiss-button");
+
 
 const focused_check_wrapper = document.getElementById("check-wrapper");
 const mod_home_wrapper = document.getElementById("mod-home-wrapper");
@@ -51,7 +55,7 @@ updateChat();
 
 //buy events
 
-document.getElementById("chat-dismiss-button").addEventListener("click", function(){
+dismiss_button.addEventListener("click", function(){
     if(focused_check == "") return;
     const focused_check_obj = checks.find(check => check.id == focused_check);
     const chat_obj = cached_chats.find(chat => chat.teamid == focused_check_obj.teamid && chat.probid == focused_check_obj.probid);
@@ -230,15 +234,54 @@ function focusNextCheck(){
 
 document.addEventListener("keydown", function(e){
     if(e.altKey && e.key == "a"){
-        accept_button.click();
+        if (focused_check == "") return;
+        const focusedCheck = checks.find(check => check.id == focused_check);
+
+        if (focusedCheck.type == "grade") {
+            accept_button.click();
+        } else if (focusedCheck.type == "chat") {
+            dismiss_button.click();
+        } else if (focusedCheck.type == "globalchat") {
+            dismiss_button.click();
+        }
     }
 });
 
 document.addEventListener("keydown", function(e){
     if(e.altKey && e.key == "r"){
+        if (focused_check == "") return;
         reject_button.click();
     }
 });
+
+document.addEventListener("keydown", function(event) {
+    if (event.altKey && event.key === 'f') {
+        if (focusCheck == "") return;
+        event.preventDefault();
+        const chatInput = document.getElementById('chat-input');
+        if (chatInput) {
+            chatInput.focus();
+        }
+    }
+});
+
+document.addEventListener("keydown", function(event) {
+    if (event.altKey && event.key === 'n') {
+        event.preventDefault();
+        if (focused_check == "") {
+            document.getElementById(checks[0].id).click();
+            return;
+        }
+        const filtered = checks.filter(check => check.assignid == myId || myRole != "worker");
+        const idx = filtered.findIndex(check => check.id == focused_check && (check.assignid == myId || myRole != "worker"));
+        if (idx == filtered.length - 1) {
+            document.getElementById(filtered[0].id).click();
+        } else {
+            document.getElementById(filtered[idx + 1].id).click();
+        }
+    }
+});
+
 
 
 
@@ -554,7 +597,6 @@ function updateCheckList(){
     const checks_buttons = document.getElementById("checks-wrapper").getElementsByClassName("check");
     for(const button of checks_buttons){
         button.addEventListener("click", function(){
-            console.log(this.id);
             if(focused_check == this.id){
                 return;
             }
@@ -849,6 +891,9 @@ function updateClock(remaining, passed){
     }
 }
 
+
+
+
 var lastSecond = 0;
 var clock_zeroed = false;
 function update(){
@@ -876,15 +921,25 @@ update();
 let socket;
 
 function connectWS() {
-  const searchParams = new URLSearchParams(window.location.search);
-  const id = searchParams.get("id");
-  socket = new WebSocket(`wss://strela-vlna.gchd.cz/ws/admin/play/${id}`);
-  socket.addEventListener("error", (e) => {
-      console.log(e);
-      if(redirects){
-        window.location.href = `../login/id=${id}`;
-      }
-  });
+    if(pb.authStore.isValid) {
+        socket = new WebSocket(`wss://strela-vlna.gchd.cz/ws/admin/play/${pb.authStore.model.id}`);
+        socket.addEventListener("error", (e) => {
+            console.log(e);
+            localStorage.setItem("logging_from", window.location.href);
+            window.location.href = `../adlogin`;
+        });
+    } else {
+        localStorage.setItem("logging_from", window.location.href);
+        window.location.href = "../adlogin";
+    }
+
+    console.log("websoket connected");
+
+
+
+//   const searchParams = new URLSearchParams(window.location.search);
+//   const id = searchParams.get("id");
+
 
   socket.addEventListener("open", (event) => {
     load();
@@ -1226,7 +1281,6 @@ function questioned(checkid, teamid, teamname, probid, probdiff, probname, messa
 
 
 function solved(checkid, teamid, probid, assignid, teamname, team_answer, correct_answer){
-    console.log(team_answer);
     checks.push(
         {   
             id: checkid,
@@ -1238,8 +1292,13 @@ function solved(checkid, teamid, probid, assignid, teamname, team_answer, correc
             team_message: team_answer,
             focused_by: []
         });
-    console.log(checks);
-    updateCheckList();
+    if (myRole == "worker") {
+        if (assignid.toString() == myId) {
+            updateCheckList();
+        }
+    } else {
+        updateCheckList();
+    }
 }
 
 /**@param {string} probid
@@ -1367,7 +1426,7 @@ function gotData(data) {
                     sendRank(id);
                 } else {
                     for (const [otherId, otherStats] of Object.entries(sortedData)) {
-                        if (otherStats.rank <= stats.rank) {
+                        if (otherStats.rank >= stats.rank) {
                             sendRank(otherId);
                         }
                     }

@@ -309,13 +309,13 @@ func TeamRegisterConfirmEndp(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerF
     comp, err := dao.FindRecordById("contests", res.GetString("contest"))
     if err != nil { return err }
 
-    if comp.GetDateTime("registration_start").Time().After(time.Now()) {
-      return c.String(400, "contest registration has not yet started")
-    }
+    // if comp.GetDateTime("registration_start").Time().After(time.Now()) {
+    //   return c.String(400, "contest registration has not yet started")
+    // }
 
-    if comp.GetDateTime("registration_end").Time().Before(time.Now()) {
-      return c.String(400, "contest registration has already ended")
-    }
+    // if comp.GetDateTime("registration_end").Time().Before(time.Now()) {
+    //   return c.String(400, "contest registration has already ended")
+    // }
 
     school, err := dao.FindRecordById("skoly", res.GetString("school"))
     if err != nil { return err }
