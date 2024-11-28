@@ -93,6 +93,7 @@ func PlayerWsHandleMsg(
     diff := m[1]
     prob, money, name, text, img, remcnt, err := DBBuy(teamM, diff)
     if err != nil { return err }
+    if diff == "A" { remcnt = -1 }
     tchan.Send("bought", prob, diff, strconv.Itoa(money), name, text, img, strconv.Itoa(remcnt))
     fmt.Printf("#money %s %d", team, money)
 
