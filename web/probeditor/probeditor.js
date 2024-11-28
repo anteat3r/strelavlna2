@@ -738,6 +738,60 @@ async function load(){
         });
     }
 
+    pb.collection('probs').subscribe('*', function (e) {
+        if (e.action == "create") {
+            if (e.record.author == my_id) return;
+            probs.push(new Prob(
+                e.record.id,
+                e.record.name,
+                e.record.diff,
+                e.record.type,
+                e.record.text,
+                e.record.solution,
+                e.record.img,
+                e.record.author,
+                "Zatim nevim (dej f5)",
+                e.record.graph,
+                e.record.infinite,
+                e.record.contests
+            ));
+            updateProbList();
+        } else if (e.action == "update") {
+            const prob = probs.find(prob => prob.id == e.record.id);
+            const needUpdate = prob.title != e.record.name || prob.rank != e.record.diff || prob.author != e.record.author || prob.type != e.record.type;
+            const authorChanged = prob.author != e.record.author;
+            if (prob) {
+                prob._title = e.record.name;
+                prob._rank = e.record.diff;
+                prob._type = e.record.type;
+                prob._content = e.record.text;
+                prob._solution = e.record.solution;
+                prob._image = e.record.img;
+                prob._author = e.record.author;
+                if (authorChanged) {
+                    prob._authorName = "Zatim nevim (dej f5)";
+                }
+                prob._graph = e.record.graph;
+                prob._infinite = e.record.infinite;
+                prob._contests = e.record.contests;
+            }
+            if (needUpdate) {
+                updateProbList();
+            }
+        } else if (e.action == "delete") {
+            if (!probs.find(prob => prob.id == e.record.id)) return;
+            const prob = probs.find(prob => prob.id == e.record.id);
+            if (prob) {
+                probs.splice(probs.indexOf(prob), 1);
+                updateProbList();
+            }
+        }
+
+
+        console.log("action: ", e.action);
+        console.log("record:", e.record);
+    });
+
 }
 
 document.getElementById("save-changes-button").addEventListener("click", saveChanges);
@@ -1427,12 +1481,16 @@ function updateProbList(){
         probs_c = probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.authorId == my_id) && (prob.type == type_filter || type_filter == "all"));
     }
 
-    prob_list_a.innerHTML = "";
-    prob_list_b.innerHTML = "";
-    prob_list_c.innerHTML = "";
+    let a_str = "";
+    let b_str = "";
+    let c_str = "";
+
+    // prob_list_a.innerHTML = "";
+    // prob_list_b.innerHTML = "";
+    // prob_list_c.innerHTML = "";
 
     for(let item of probs_a){
-        prob_list_a.innerHTML += `
+        a_str += `
             <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}${author_filter == "all" ? (item.authorId == my_id ? " my" : item.authorId == "" ? " free" : " another") : ""}">
                 <h2 class="problem-selector-title">${item.title}</h2>
                 <h2 class="problem-selector-rank">[A]</h2>
@@ -1440,7 +1498,7 @@ function updateProbList(){
         `;
     }
     for(let item of probs_b){
-        prob_list_b.innerHTML += `
+        b_str += `
             <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}${author_filter == "all" ? (item.authorId == my_id ? " my" : item.authorId == "" ? " free" : " another") : ""}">
                 <h2 class="problem-selector-title">${item.title}</h2>
                 <h2 class="problem-selector-rank">[B]</h2>
@@ -1448,13 +1506,17 @@ function updateProbList(){
         `;
     }
     for(let item of probs_c){
-        prob_list_c.innerHTML += `
+        c_str += `
             <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}${author_filter == "all" ? (item.authorId == my_id ? " my" : item.authorId == "" ? " free" : " another") : ""}">
                 <h2 class="problem-selector-title">${item.title}</h2>
                 <h2 class="problem-selector-rank">[C]</h2>
             </div>  
         `;
     }
+
+    prob_list_a.innerHTML = a_str;
+    prob_list_b.innerHTML = b_str;
+    prob_list_c.innerHTML = c_str;
 
     if(!document.getElementById(focused_prob)){
         focused_prob = "";
