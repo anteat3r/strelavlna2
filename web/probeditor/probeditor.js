@@ -1479,12 +1479,16 @@ function updateProbList(){
         probs_c = probs.filter(prob => prob.rank == "C" && (author_filter == "all" || prob.authorId == my_id) && (prob.type == type_filter || type_filter == "all"));
     }
 
-    prob_list_a.innerHTML = "";
-    prob_list_b.innerHTML = "";
-    prob_list_c.innerHTML = "";
+    let a_str = "";
+    let b_str = "";
+    let c_str = "";
+
+    // prob_list_a.innerHTML = "";
+    // prob_list_b.innerHTML = "";
+    // prob_list_c.innerHTML = "";
 
     for(let item of probs_a){
-        prob_list_a.innerHTML += `
+        a_str += `
             <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}${author_filter == "all" ? (item.authorId == my_id ? " my" : item.authorId == "" ? " free" : " another") : ""}">
                 <h2 class="problem-selector-title">${item.title}</h2>
                 <h2 class="problem-selector-rank">[A]</h2>
@@ -1492,7 +1496,7 @@ function updateProbList(){
         `;
     }
     for(let item of probs_b){
-        prob_list_b.innerHTML += `
+        b_str += `
             <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}${author_filter == "all" ? (item.authorId == my_id ? " my" : item.authorId == "" ? " free" : " another") : ""}">
                 <h2 class="problem-selector-title">${item.title}</h2>
                 <h2 class="problem-selector-rank">[B]</h2>
@@ -1500,13 +1504,17 @@ function updateProbList(){
         `;
     }
     for(let item of probs_c){
-        prob_list_c.innerHTML += `
+        c_str += `
             <div id="${item.id}" class="problem${focused_prob == item.id ? " selected" : ""}${author_filter == "all" ? (item.authorId == my_id ? " my" : item.authorId == "" ? " free" : " another") : ""}">
                 <h2 class="problem-selector-title">${item.title}</h2>
                 <h2 class="problem-selector-rank">[C]</h2>
             </div>  
         `;
     }
+
+    prob_list_a.innerHTML = a_str;
+    prob_list_b.innerHTML = b_str;
+    prob_list_c.innerHTML = c_str;
 
     if(!document.getElementById(focused_prob)){
         focused_prob = "";
