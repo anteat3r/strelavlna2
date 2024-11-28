@@ -1125,7 +1125,11 @@ function loaded(data) {
         loadData(JSON.parse(data.stats));
     }
     // loadData(data.stats);
-    remaining = [-1, data.remprobscnt.B, data.remprobscnt.C];
+    remaining = [
+        -1,
+        data.remprobscnt.B !== undefined ? data.remprobscnt.B : 0,
+        data.remprobscnt.C !== undefined ? data.remprobscnt.C : 0
+    ];
 
     updatePriceList();
     updateProblemList();
