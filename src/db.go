@@ -326,7 +326,7 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
           _, solved := teamS.Solved[id]
           _, sold := teamS.Sold[id]
           queued := false
-          if probS.Graph == nil {
+          if probS.Graph != nil {
             _, ok := teamS.GenProbCache[probS.Id]
             if ok { queued = true }
           }
@@ -353,9 +353,11 @@ func DBBuy(team TeamM, diff string) (prob string, money int, name string, text s
     var nid string
     probM.RWith(func(v ProbS) {
       nid = v.Id
-      teamS.RemProbCnt[diff]--
-      remcnt = teamS.RemProbCnt[diff]
-      if v.Graph == nil { return }
+      if v.Graph == nil { 
+        teamS.RemProbCnt[diff]--
+        remcnt = teamS.RemProbCnt[diff]
+        return
+      }
       var sol string
       var err error
       text, sol, err = v.Graph.Generate(v.Text, v.Solution)
