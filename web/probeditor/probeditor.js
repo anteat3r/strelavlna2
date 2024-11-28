@@ -740,6 +740,7 @@ async function load(){
 
     pb.collection('probs').subscribe('*', function (e) {
         if (e.action == "create") {
+            if (probs.find(prob => prob.id == e.record.id)) return;
             probs.push(new Prob(
                 e.record.id,
                 e.record.name,
@@ -778,6 +779,7 @@ async function load(){
                 updateProbList();
             }
         } else if (e.action == "delete") {
+            if (!probs.find(prob => prob.id == e.record.id)) return;
             const prob = probs.find(prob => prob.id == e.record.id);
             if (prob) {
                 probs.splice(probs.indexOf(prob), 1);
