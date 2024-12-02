@@ -518,6 +518,12 @@ func main() {
       src.CashEndp(app.Dao()),
     )
 
+    e.Router.GET(
+      "/api/admin/paperprobs",
+      src.GenProbPaper(app.Dao()),
+      apis.RequireAdminAuth(),
+    )
+
 
     err = src.SetupInitLoadData(app.Dao())
     if err != nil { return err }

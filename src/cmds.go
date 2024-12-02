@@ -1,7 +1,10 @@
 package src
 
 import (
+	"bytes"
 	"encoding/json"
+	"html/template"
+
 	// "fmt"
 	"math/rand"
 	"net/mail"
@@ -469,4 +472,120 @@ func SetupInitLoadData(dao *daos.Dao) error {
     })
   }
   return nil
+}
+
+type PaperProb struct {
+  Diff string
+  Name string
+  Index int
+  Text string
+  Img string
+  Buy int
+  Sell int
+  Solve int
+}
+
+type PaperSol struct {
+  Name string
+  Index int
+  Solution string
+}
+
+type _dbProb struct{
+  Id string `db:"id"`
+  Name string `db:"name"`
+  Diff string `db:"diff"`
+  Img string `db:"img"`
+  Author string `db:"author"`
+  Text string `db:"text"`
+  Graph string `db:"graph"`
+  Solution string `db:"solution"`
+  Infinite bool `db:"infinite"`
+}
+
+func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
+  return func(c echo.Context) error {
+    cid := c.QueryParam("id")
+    if cid == "" { return c.String(400, "invalid contest id ") }
+    probs := make([]_dbProb, 0)
+    err := dao.DB().
+      NewQuery(`select * from probs where contests like concat("%", {:contest}, "%")`).
+      Bind(dbx.Params{"contest": cid}).
+      All(&probs)
+    if err != nil { return err }
+
+    slices.SortFunc(probs, func(a, b _dbProb) int {
+      return len(b.Text) - len(a.Text)
+    })
+
+    pprobs := make([]PaperProb, 0, len(probs))
+    psols := make([]PaperSol, 0, len(probs))
+    i := 1
+    for _, pr := range probs {
+      buycost, ok := GetCost(pr.Diff)
+      if !ok { return nErr("invalid diff") }
+      sellcost, ok := GetCost("-" + pr.Diff)
+      if !ok { return nErr("invalid diff") }
+      solvecost, ok := GetCost("+" + pr.Diff)
+      if !ok { return nErr("invalid diff") }
+      if pr.Graph == `{"nodes":{"basic":{},"get":{},"set":{}}` {
+        pprobs = append(pprobs, PaperProb{
+          Diff: pr.Diff,
+          Name: pr.Name,
+          Index: i,
+          Text: pr.Text,
+          Img: "",
+          Buy: buycost,
+          Sell: sellcost,
+          Solve: solvecost,
+        })
+        psols = append(psols, PaperSol{
+          Name: pr.Name,
+          Index: i,
+          Solution: pr.Solution,
+        })
+        i++
+        continue
+      }
+      graph, err := ParseGraph(pr.Graph)
+      if err != nil { return err }
+      cnt := 1; if pr.Infinite { cnt = 5 }
+      for range cnt {
+        text, sol, err := graph.Generate(pr.Text, pr.Solution)
+        if err != nil { return err }
+        pprobs = append(pprobs, PaperProb{
+          Diff: pr.Diff,
+          Name: pr.Name,
+          Index: i,
+          Text: text,
+          Img: "",
+          Buy: buycost,
+          Sell: sellcost,
+          Solve: solvecost,
+        })
+        psols = append(psols, PaperSol{
+          Name: pr.Name,
+          Index: i,
+          Solution: sol,
+        })
+        i++
+      }
+    }
+
+    funcsmap := template.FuncMap{ "iseven": func(i int) bool { return i % 2 == 0 } }
+
+    bts, err := os.ReadFile("/opt/strelavlna2/prob_templ.tex")
+    if err != nil { return err }
+
+    tmpl, err := template.New("probs_papers").Funcs(funcsmap).Parse(string(bts))
+    if err != nil { return err }
+
+    renbuf := bytes.Buffer{}
+    err = tmpl.Execute(&renbuf, pprobs)
+    if err != nil { return err }
+
+    papers := renbuf.String()
+
+    return c.String(200, papers)
+  }
 }
