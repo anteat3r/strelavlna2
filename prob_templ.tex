@@ -26,7 +26,7 @@
 \begin{longtable}{|c|c|}
 \hline
 {{range $idx, $prob := .}}
-  \parbox[t]{0.49\textwidth}{\sf\large\textbf{\Ovalbox{ {{.Diff}} } {{.Name}} } \hfill\small {{.Index} \\ \\
+  \parbox[t]{0.49\textwidth}{\sf\large\textbf{\Ovalbox{ {{.Diff}} } {{.Name}} } \hfill\small {{.Index}} \\ \\
 \normalsize { {{.Text}} } \\
 {{if eq .Img ""}}
 \includegraphics[width=0.49\textwidth]{ {{.Img}} } \\
@@ -45,3 +45,11 @@
 \end{longtable}
 \end{center}
 \end{document}
+
+
+\parbox[t]{0.49\textwidth}{\sf\large\textbf{\Ovalbox{ {{- o.obtiznost -}} } {{ o.typ }}-{{- o.cislo -}} }
+\normalsize { \unicodefont {{ o.zadani }} } \\
+{% if o.obrazek %}
+\includegraphics[width=0.49\textwidth]{ {{ o.obrazek.name }} } \\
+{% endif %}
+\vfill \center \textbf{Cena {{ o.cenik.0 }}\dopplercoin \hfill  Bazar {{ o.cenik.2 }}\dopplercoin \hfill Odměna {{ o.cenik.1 }}\dopplercoin}\\ \vspace{6pt} }
