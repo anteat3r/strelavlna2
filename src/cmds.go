@@ -249,6 +249,8 @@ func GetDump() echo.HandlerFunc {
   }
 }
 
+var DIFFS = [3]string{"A", "B", "C"}
+
 func CashEndp(dao *daos.Dao) echo.HandlerFunc {
   log.Info("cash hit")
 	return func(c echo.Context) error {
@@ -269,7 +271,9 @@ func CashEndp(dao *daos.Dao) echo.HandlerFunc {
       case "0":
         tm, err := dao.FindFirstRecordByData("teams", "card", req["id"])
         if err != nil { return c.String(200, `{"key": "n"}`) }
-        cost, ok := GetCost("+" + req["id"])
+        diffn, err := strconv.Atoi(req["uloha"])
+        if err != nil { return err }
+        cost, ok := GetCost("+" + DIFFS[diffn])
         if !ok { return c.String(200, `{"key": "n"}`) }
         tm.Set("score", tm.GetInt("score") + cost)
         err = dao.Save(tm)
@@ -278,7 +282,9 @@ func CashEndp(dao *daos.Dao) echo.HandlerFunc {
       case "1":
         tm, err := dao.FindFirstRecordByData("teams", "card", req["id"])
         if err != nil { return c.String(200, `{"key": "n"}`) }
-        cost, ok := GetCost(req["id"])
+        diffn, err := strconv.Atoi(req["uloha"])
+        if err != nil { return err }
+        cost, ok := GetCost(DIFFS[diffn])
         if !ok { return c.String(200, `{"key": "n"}`) }
         if tm.GetInt("score") < cost { return c.String(200, `{"key": "n"}`) }
         tm.Set("score", tm.GetInt("score") - cost)
@@ -288,7 +294,9 @@ func CashEndp(dao *daos.Dao) echo.HandlerFunc {
       case "2":
         tm, err := dao.FindFirstRecordByData("teams", "card", req["id"])
         if err != nil { return c.String(200, `{"key": "n"}`) }
-        cost, ok := GetCost("-" + req["id"])
+        diffn, err := strconv.Atoi(req["uloha"])
+        if err != nil { return err }
+        cost, ok := GetCost("-" + DIFFS[diffn])
         if !ok { return c.String(200, `{"key": "n"}`) }
         tm.Set("score", tm.GetInt("score") + cost)
         err = dao.Save(tm)
