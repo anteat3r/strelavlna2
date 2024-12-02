@@ -524,6 +524,12 @@ func main() {
       apis.RequireAdminAuth(),
     )
 
+    e.Router.GET(
+      "/api/admin/upgradeteams",
+      src.UpgradeTeams(app.Dao()),
+      apis.RequireAdminAuth(),
+    )
+
 
     err = src.SetupInitLoadData(app.Dao())
     if err != nil { return err }

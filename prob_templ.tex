@@ -26,7 +26,7 @@
 \begin{longtable}{|c|c|}
 \hline
 {{range $idx, $prob := .}}
-  \parbox[t]{0.49\textwidth}{\sf\large\textbf{\Ovalbox{ {{.Diff}} } {{.Name}} } \hfill\small {{.Index}} \\ \\
+  \parbox[t]{0.49\textwidth}{\sf\large\textbf{\Ovalbox{ {{.Diff}} } {{.Name}} } \hfill\small {{.Index}} \\
 \normalsize { {{.Text}} } \\
 {{if not (eq .Img "")}}
 \includegraphics[width=0.49\textwidth]{ {{.Img}} } \\

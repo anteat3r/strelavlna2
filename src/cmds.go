@@ -519,6 +519,38 @@ func SetupInitLoadData(dao *daos.Dao) error {
   return nil
 }
 
+func UpgradeTeams(dao *daos.Dao) echo.HandlerFunc {
+  return func(c echo.Context) error {
+    oldc := c.QueryParam("oid")
+    if oldc == "" { return c.String(400, "invalid oid") }
+    newc := c.QueryParam("nid")
+    if newc == "" { return c.String(400, "invalid nid") }
+
+    teams, err := dao.FindRecordsByFilter(
+      "teams",
+      "contest = {:id}",
+      "-score",
+      15, 0,
+      dbx.Params{"id": oldc},
+    )
+    if err != nil { return err }
+
+    coll, err := dao.FindCollectionByNameOrId("teams")
+    if err != nil { return err }
+
+    for _, tm := range teams {
+      ntm := models.NewRecord(coll)
+      ntm.Load(tm.PublicExport())
+      ntm.Set("contest", newc)
+      ntm.Set("score", 100)
+      err := dao.SaveRecord(ntm)
+      if err != nil { return err }
+    }
+
+    return nil
+  }
+}
+
 type PaperProb struct {
   Diff string
   Name string
