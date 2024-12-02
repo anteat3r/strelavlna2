@@ -29,9 +29,9 @@
   \parbox[t]{0.49\textwidth}{\sf\large\textbf{\Ovalbox{ {{.Diff}} } {{.Name}} } \hfill\small {{.Index} \\ \\
 \normalsize { {{.Text}} } \\
 {{if eq .Img ""}}
-\includegraphics[width=0.49\textwidth]{ {{ o.obrazek.name }} } \\
+\includegraphics[width=0.49\textwidth]{ {{.Img}} } \\
 {{end}}
-\vfill \center \textbf{Cena {{.Buy} \hfill Prodej {{.Sell}} \hfill Odměna {{.Solve}} }\\ \vspace{6pt} }
+  \vfill \center \textbf{Cena {{.Buy}} \hfill Prodej {{.Sell}} \hfill Odměna {{.Solve}} }\\ \vspace{6pt} }
 {{if iseven $idx}}
 \\ \hline
 {{else}}
