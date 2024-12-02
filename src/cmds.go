@@ -303,6 +303,43 @@ func CashEndp(dao *daos.Dao) echo.HandlerFunc {
         if err != nil { return c.String(200, `{"key": "n"}`) }
         return c.String(200, `{"key": "k"}`)
       }
+    case "vratit":  
+      switch req["akce"] {
+      case "0":
+        tm, err := dao.FindFirstRecordByData("teams", "card", req["id"])
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        diffn, err := strconv.Atoi(req["uloha"])
+        if err != nil { return err }
+        cost, ok := GetCost("+" + DIFFS[diffn])
+        if !ok { return c.String(200, `{"key": "n"}`) }
+        tm.Set("score", tm.GetInt("score") - cost)
+        err = dao.Save(tm)
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        return c.String(200, `{"key": "k"}`)
+      case "1":
+        tm, err := dao.FindFirstRecordByData("teams", "card", req["id"])
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        diffn, err := strconv.Atoi(req["uloha"])
+        if err != nil { return err }
+        cost, ok := GetCost(DIFFS[diffn])
+        if !ok { return c.String(200, `{"key": "n"}`) }
+        if tm.GetInt("score") < cost { return c.String(200, `{"key": "n"}`) }
+        tm.Set("score", tm.GetInt("score") + cost)
+        err = dao.Save(tm)
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        return c.String(200, `{"key": "k"}`)
+      case "2":
+        tm, err := dao.FindFirstRecordByData("teams", "card", req["id"])
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        diffn, err := strconv.Atoi(req["uloha"])
+        if err != nil { return err }
+        cost, ok := GetCost("-" + DIFFS[diffn])
+        if !ok { return c.String(200, `{"key": "n"}`) }
+        tm.Set("score", tm.GetInt("score") - cost)
+        err = dao.Save(tm)
+        if err != nil { return c.String(200, `{"key": "n"}`) }
+        return c.String(200, `{"key": "k"}`)
+      }
     }
 		return nil
 	}
@@ -480,6 +517,38 @@ func SetupInitLoadData(dao *daos.Dao) error {
     })
   }
   return nil
+}
+
+func UpgradeTeams(dao *daos.Dao) echo.HandlerFunc {
+  return func(c echo.Context) error {
+    oldc := c.QueryParam("oid")
+    if oldc == "" { return c.String(400, "invalid oid") }
+    newc := c.QueryParam("nid")
+    if newc == "" { return c.String(400, "invalid nid") }
+
+    teams, err := dao.FindRecordsByFilter(
+      "teams",
+      "contest = {:id}",
+      "-score",
+      15, 0,
+      dbx.Params{"id": oldc},
+    )
+    if err != nil { return err }
+
+    coll, err := dao.FindCollectionByNameOrId("teams")
+    if err != nil { return err }
+
+    for _, tm := range teams {
+      ntm := models.NewRecord(coll)
+      ntm.Load(tm.PublicExport())
+      ntm.Set("contest", newc)
+      ntm.Set("score", 100)
+      err := dao.SaveRecord(ntm)
+      if err != nil { return err }
+    }
+
+    return nil
+  }
 }
 
 type PaperProb struct {
