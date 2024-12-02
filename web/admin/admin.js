@@ -104,6 +104,18 @@ $("#setup-set").addEventListener("click", async () => {clown();
   console.log(sres);
 });
 
+$("#papers-set").addEventListener("click", async () => {clown();
+  const res = await fetch(
+    `/api/admin/paperprobs?id=${ $("#papers-inp").value }`,
+    {headers: {"Authorization": pb.authStore.token},
+  })
+  let sres = await res.text();
+  console.log(sres);
+  if (!res.ok) { alert(sres); return; }
+  $("#dump-p").innerHTML = sres;
+});
+
+
 $("#migrate-set").addEventListener("click", async () => {clown();
   const res = await fetch(
     `/api/admin/migrateregreq`,
