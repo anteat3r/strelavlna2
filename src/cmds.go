@@ -659,7 +659,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
         psols = append(psols, PaperSol{
           Name: latexEscape(pr.Name),
           Index: i,
-          Solution: latexEscape(pr.Solution),
+          Solution: latexEscapeComment(pr.Solution),
         })
         i++
         continue
@@ -682,9 +682,9 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
           Solve: solvecost,
         })
         psols = append(psols, PaperSol{
-          Name: pr.Name,
+          Name: latexEscape(pr.Name),
           Index: i,
-          Solution: latexEscape(sol),
+          Solution: latexEscapeComment(sol),
         })
         i++
       }
