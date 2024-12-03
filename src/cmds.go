@@ -734,7 +734,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
     if err != nil { return err }
 
     papers_sol := renbuf.String()
-    papers_sol = html.UnescapeString(papers)
+    papers_sol = html.UnescapeString(papers_sol)
 
     return c.String(200, papers + "\n\n\n" + papers_sol)
   }
