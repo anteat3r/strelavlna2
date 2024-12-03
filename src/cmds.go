@@ -651,7 +651,9 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
       if !ok { return nErr("invalid diff") }
       solvecost, ok := GetCost("+" + pr.Diff)
       if !ok { return nErr("invalid diff") }
-      imgsurls += "https://strela-vlna.gchd.cz/api/files/probs/" + pr.Id + "/" + pr.Img + " "
+      if pr.Img != "" {
+        imgsurls += "https://strela-vlna.gchd.cz/api/files/probs/" + pr.Id + "/" + pr.Img + " "
+      }
       if pr.Graph == `{"nodes":{"basic":{},"get":{},"set":{}}` {
         pprobs = append(pprobs, PaperProb{
           Id: pr.Id,
