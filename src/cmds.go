@@ -565,6 +565,8 @@ type PaperProb struct {
   Buy int
   Sell int
   Solve int
+  TeamName string
+  Id string
 }
 
 type PaperSol struct {
@@ -633,6 +635,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
       if !ok { return nErr("invalid diff") }
       if pr.Graph == `{"nodes":{"basic":{},"get":{},"set":{}}` {
         pprobs = append(pprobs, PaperProb{
+          Id: pr.Id,
           Diff: pr.Diff,
           Name: latexEscape(pr.Name),
           Index: i,
@@ -657,6 +660,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
         text, sol, err := graph.Generate(pr.Text, pr.Solution)
         if err != nil { return err }
         pprobs = append(pprobs, PaperProb{
+          Id: pr.Id,
           Diff: pr.Diff,
           Name: latexEscape(pr.Name),
           Index: i,
@@ -675,6 +679,23 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
       }
     }
 
+    teams, err := dao.FindRecordsByFilter(
+      "teams",
+      "contest = {:contest}",
+      "created",
+      0, 0,
+    )
+    if err != nil { return err }
+
+    npprobs := make([]PaperProb, 0)
+    for _, tm := range teams {
+      for _, pr := range pprobs {
+        npr := pr
+        npr.TeamName = tm.GetString("name")
+        npprobs = append(npprobs, pr)
+      }
+    }
+
     funcsmap := template.FuncMap{ "iseven": func(i int) bool { return i % 2 == 0 } }
 
     bts, err := os.ReadFile("/opt/strelavlna2/prob_templ.tex")
@@ -689,7 +710,20 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
 
     papers := renbuf.String()
     papers = html.UnescapeString(papers)
+    
+    bts, err = os.ReadFile("/opt/strelavlna2/prob_sol_templ.tex")
+    if err != nil { return err }
 
-    return c.String(200, papers)
+    tmpl, err = template.New("probs_sol_papers").Parse(string(bts))
+    if err != nil { return err }
+
+    renbuf = bytes.Buffer{}
+    err = tmpl.Execute(&renbuf, pprobs)
+    if err != nil { return err }
+
+    papers_sol := renbuf.String()
+    papers_sol = html.UnescapeString(papers)
+
+    return c.String(200, papers + "\n\n\n" + papers_sol)
   }
 }

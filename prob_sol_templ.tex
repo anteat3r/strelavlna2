@@ -1,0 +1,21 @@
+\documentclass[a4paper,11pt]{article}
+\batchmode
+\usepackage[utf8]{inputenc}
+\usepackage[czech]{babel}
+\setlength{\hoffset}{-3.0cm}
+\setlength{\voffset}{-4.2cm}
+\setlength{\textheight}{29cm}
+\setlength{\textwidth}{19cm}
+\usepackage{multicol}
+\setlength\columnseprule{0.5pt}
+\begin{document}
+\begin{flushleft}
+\begin{multicols}{3}
+\begin{itemize}
+\setlength\itemsep{-1pt}
+{{range $idx, $sol := range .}}
+  \item[\textbf{ {{.Index}}. {{.Name}} }] {{.Solution}}
+\end{itemize}  
+\end{multicols}
+\end{flushleft}
+\end{document}
