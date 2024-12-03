@@ -582,14 +582,14 @@ type _dbProb struct{
 
 func latexEscape(s string) string {
   res := s
-  res = strings.ReplaceAll(s, `%`, `\%`)
-  res = strings.ReplaceAll(s, `{`, `\{`)
-  res = strings.ReplaceAll(s, `}`, `\}`)
-  res = strings.ReplaceAll(s, `&`, `\&`)
-  res = strings.ReplaceAll(s, `^`, `\^`)
-  res = strings.ReplaceAll(s, `#`, `\#`)
-  res = strings.ReplaceAll(s, `_`, `\_`)
-  res = strings.ReplaceAll(s, `$`, `\$`)
+  res = strings.ReplaceAll(res, `%`, `\%`)
+  res = strings.ReplaceAll(res, `{`, `\{`)
+  res = strings.ReplaceAll(res, `}`, `\}`)
+  res = strings.ReplaceAll(res, `&`, `\&`)
+  res = strings.ReplaceAll(res, `^`, `\^`)
+  res = strings.ReplaceAll(res, `#`, `\#`)
+  res = strings.ReplaceAll(res, `_`, `\_`)
+  res = strings.ReplaceAll(res, `$`, `\$`)
   return res
 }
 
