@@ -628,7 +628,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
 
     probs := make([]_dbProb, 0)
     err = dao.DB().
-      NewQuery(`select p.id, p.name, p.dif, p.img, p.author, p.text, p.graph, p.solution, p.infinite, a.username as author_name, a.socials as author_socials from probs as p where p.contests like concat("%", {:contest}, "%")`).
+      NewQuery(`select p.id, p.name, p.diff, p.img, p.author, p.text, p.graph, p.solution, p.infinite, a.username as author_name, a.socials as author_socials from probs as p where p.contests like concat("%", {:contest}, "%")`).
       Bind(dbx.Params{"contest": cid}).
       All(&probs)
     if err != nil { return err }
