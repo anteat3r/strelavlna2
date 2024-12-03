@@ -730,7 +730,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
     if err != nil { return err }
 
     renbuf = bytes.Buffer{}
-    err = tmpl.Execute(&renbuf, pprobs)
+    err = tmpl.Execute(&renbuf, psols)
     if err != nil { return err }
 
     papers_sol := renbuf.String()
