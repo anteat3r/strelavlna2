@@ -128,7 +128,7 @@ $("#papers-set").addEventListener("click", async () => {clown();
 
 $("#upgrade-set").addEventListener("click", async () => {clown();
   const res = await fetch(
-    `/api/admin/upgradeteams?oid=${ $("#upgrade-old-inp").value }&oid=${ $("#upgrade-new-inp").value }`,
+    `/api/admin/upgradeteams?oid=${ $("#upgrade-old-inp").value }&nid=${ $("#upgrade-new-inp").value }`,
     {headers: {"Authorization": pb.authStore.token},
   })
   let sres = await res.text();
