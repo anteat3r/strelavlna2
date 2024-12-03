@@ -253,8 +253,8 @@ func GetDump() echo.HandlerFunc {
 var DIFFS = [3]string{"A", "B", "C"}
 
 func CashEndp(dao *daos.Dao) echo.HandlerFunc {
-  log.Info("cash hit")
 	return func(c echo.Context) error {
+    log.Info("cash hit")
     if c.Request().Header.Get("Authorization") != os.Getenv("CASH_AUTH_TOKEN") { return nErr("invalid auth token") }
     req := make(map[string]string)
     err := json.NewDecoder(c.Request().Body).Decode(&req)
