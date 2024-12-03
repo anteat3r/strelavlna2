@@ -26,10 +26,10 @@
   {{if not (eq .Img "")}}
   \includegraphics[width=0.49\textwidth]{ {{.Img}} }  \\ 
   {{end}}
-  \vfill \center{ {{.TeamName}} \hfill {{.Id}} \\ }
   {{if not (eq .AuthorSocials "")}}
   \vfill \center{ Autor úlohy: {{.AuthorName}} {{.AuthorSocials}} \hfill \\ }
   {{end}} }
+  \vfill \center{ {{.TeamName}} \hfill {{.Id}} \\ }
   {{if iseven $idx}}
     \\ \hline
   {{else}}
