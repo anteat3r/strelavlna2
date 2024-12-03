@@ -705,7 +705,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
       for _, pr := range pprobs {
         npr := pr
         npr.TeamName = tm.GetString("name")
-        npprobs = append(npprobs, pr)
+        npprobs = append(npprobs, npr)
       }
     }
 
