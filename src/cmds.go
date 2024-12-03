@@ -581,6 +581,12 @@ type _dbProb struct{
   Infinite bool `db:"infinite"`
 }
 
+func latexEscapeComment(s string) string {
+  res := s
+  res = strings.ReplaceAll(res, `%`, `\%`)
+  return res
+}
+
 func latexEscape(s string) string {
   res := s
   res = strings.ReplaceAll(res, `%`, `\%`)
@@ -624,7 +630,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
           Diff: pr.Diff,
           Name: latexEscape(pr.Name),
           Index: i,
-          Text: latexEscape(pr.Text),
+          Text: latexEscapeComment(pr.Text),
           Img: "",
           Buy: buycost,
           Sell: sellcost,
@@ -648,7 +654,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
           Diff: pr.Diff,
           Name: latexEscape(pr.Name),
           Index: i,
-          Text: latexEscape(text),
+          Text: latexEscapeComment(text),
           Img: "",
           Buy: buycost,
           Sell: sellcost,
