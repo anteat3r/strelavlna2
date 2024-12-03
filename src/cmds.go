@@ -546,6 +546,7 @@ func UpgradeTeams(dao *daos.Dao) echo.HandlerFunc {
     for _, tm := range teams {
       ntm := models.NewRecord(coll)
       ntm.Load(tm.PublicExport())
+      ntm.RefreshId()
       ntm.Set("contest", newc)
       ntm.Set("score", 100)
       err := dao.SaveRecord(ntm)
