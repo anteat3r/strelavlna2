@@ -15,6 +15,7 @@
 \setlength\itemsep{-1pt}
 {{range $idx, $sol := .}}
   \item[\textbf{ {{.Index}}. {{.Name}} }] {{.Solution}}
+{{end}}
 \end{itemize}  
 \end{multicols}
 \end{flushleft}
