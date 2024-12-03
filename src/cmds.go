@@ -695,6 +695,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
       "contest = {:contest}",
       "created",
       0, 0,
+      dbx.Params{"contest": cid},
     )
     if err != nil { return err }
 
