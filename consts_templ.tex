@@ -11,10 +11,11 @@
 \begin{document}
 \begin{flushleft}
 \begin{multicols}{2}
+\sf\large{\textbf{ Tabulka konstant }}
 \begin{itemize}
 \setlength\itemsep{-1pt}
 {{range $idx, $sol := .}}
-  \item[]\textbf{ {{.Index}}. {{.Name}} } {{.Solution}}
+  \item[]\textbf{ {{.Name}} {{.Symbol}} } {{.Value}} {{.Unit}} {{.Desc}}
 {{end}}
 \end{itemize}  
 \end{multicols}
