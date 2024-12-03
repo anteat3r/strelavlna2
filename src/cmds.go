@@ -612,8 +612,19 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
   return func(c echo.Context) error {
     cid := c.QueryParam("id")
     if cid == "" { return c.String(400, "invalid contest id ") }
+
+    consts := make([]Constant, 0)
+    err := App.Dao().DB().
+      NewQuery(`select * from consts`).All(&consts)
+    if err != nil { return err }
+    Consts.With(func(v *map[string]Constant) {
+      for _, cnst := range consts {
+        (*v)[cnst.Id] = cnst
+      }
+    })
+
     probs := make([]_dbProb, 0)
-    err := dao.DB().
+    err = dao.DB().
       NewQuery(`select * from probs where contests like concat("%", {:contest}, "%")`).
       Bind(dbx.Params{"contest": cid}).
       All(&probs)
