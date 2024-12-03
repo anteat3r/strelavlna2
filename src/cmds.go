@@ -621,7 +621,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
       if pr.Graph == `{"nodes":{"basic":{},"get":{},"set":{}}` {
         pprobs = append(pprobs, PaperProb{
           Diff: pr.Diff,
-          Name: pr.Name,
+          Name: latexEscape(pr.Name),
           Index: i,
           Text: latexEscape(pr.Text),
           Img: "",
@@ -630,9 +630,9 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
           Solve: solvecost,
         })
         psols = append(psols, PaperSol{
-          Name: pr.Name,
+          Name: latexEscape(pr.Name),
           Index: i,
-          Solution: pr.Solution,
+          Solution: latexEscape(pr.Solution),
         })
         i++
         continue
@@ -645,7 +645,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
         if err != nil { return err }
         pprobs = append(pprobs, PaperProb{
           Diff: pr.Diff,
-          Name: pr.Name,
+          Name: latexEscape(pr.Name),
           Index: i,
           Text: latexEscape(text),
           Img: "",
@@ -656,7 +656,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
         psols = append(psols, PaperSol{
           Name: pr.Name,
           Index: i,
-          Solution: sol,
+          Solution: latexEscape(sol),
         })
         i++
       }
