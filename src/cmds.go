@@ -255,6 +255,7 @@ var DIFFS = [3]string{"A", "B", "C"}
 func CashEndp(dao *daos.Dao) echo.HandlerFunc {
   log.Info("cash hit")
 	return func(c echo.Context) error {
+    if c.Request().Header.Get("Authorization") != os.Getenv("CASH_AUTH_TOKEN") { return nErr("invalid auth token") }
     req := make(map[string]string)
     err := json.NewDecoder(c.Request().Body).Decode(&req)
     if err != nil { return err }
@@ -584,6 +585,7 @@ type _dbProb struct{
 func latexEscapeComment(s string) string {
   res := s
   res = strings.ReplaceAll(res, `%`, `\%`)
+  res = strings.ReplaceAll(res, `<br>`, `\n`)
   return res
 }
 
@@ -597,6 +599,7 @@ func latexEscape(s string) string {
   res = strings.ReplaceAll(res, `#`, `\#`)
   res = strings.ReplaceAll(res, `_`, `\_`)
   res = strings.ReplaceAll(res, `$`, `\$`)
+  res = strings.ReplaceAll(res, `<br>`, `\n`)
   return res
 }
 
