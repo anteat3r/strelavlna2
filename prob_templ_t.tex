@@ -26,24 +26,13 @@
 
 \begin{longtable}{|c|c|}
 \hline
-{{range $idx, $prob := .}}
-  \parbox[t]{0.49\textwidth}{\sf\large\textbf{\Ovalbox{ {{.Diff}} } {{.Name}} } \hfill\small {{.Index}} \\ \\
-\normalsize { {{.Text}} } \\
-{{if not (eq .Img "")}}
-\includegraphics[width=0.49\textwidth]{ {{.Img}} } \\
-{{end}}
-  % &
+  \parbox[t]{0.49\textwidth}{\sf\large\textbf{\Ovalbox{ Brukvice Krakatice } Kruh } \hfill\small Bububu \\ \\
+\normalsize { Hohoho } \\
  % }
-  \vfill \center\textbf{Cena {{.Buy}} \hfill Prodej {{.Sell}} \hfill Odměna {{.Solve}} } \\ \vspace{6pt} }
-{{if iseven $idx}}
+  \vfill \center\textbf{Cena 699 \hfill Prodej 374 \hfill Odměna 7832 } \\ \vspace{6pt} }
 \\ \hline
-{{else}}
 &
-{{end}}
-{{end}}
-{{if not (iseven (len .))}}
 \\
-{{end}}
 \hline
 \end{longtable}
 \end{center}
