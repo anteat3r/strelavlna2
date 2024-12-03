@@ -580,6 +580,19 @@ type _dbProb struct{
   Infinite bool `db:"infinite"`
 }
 
+func latexEscape(s string) string {
+  res := s
+  res = strings.ReplaceAll(s, `%`, `\%`)
+  res = strings.ReplaceAll(s, `{`, `\{`)
+  res = strings.ReplaceAll(s, `}`, `\}`)
+  res = strings.ReplaceAll(s, `&`, `\&`)
+  res = strings.ReplaceAll(s, `^`, `\^`)
+  res = strings.ReplaceAll(s, `#`, `\#`)
+  res = strings.ReplaceAll(s, `_`, `\_`)
+  res = strings.ReplaceAll(s, `$`, `\$`)
+  return res
+}
+
 func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
   return func(c echo.Context) error {
     cid := c.QueryParam("id")
