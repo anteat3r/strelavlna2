@@ -1,7 +1,6 @@
 \documentclass[a4paper,12pt]{article}
 \batchmode
 \usepackage[utf8]{inputenc}
-% \usepackage[czech]{babel}
 \setlength{\hoffset}{-3.0cm}
 \setlength{\voffset}{-4.2cm}
 \setlength{\textheight}{27.5cm}
@@ -9,19 +8,14 @@
 \usepackage{longtable}
 \usepackage{fancybox}
 \usepackage{textcomp}
-% \usepackage{lualatex-math}
 \usepackage{amsmath}
 \usepackage{amssymb}
-% \usepackage{unicode-math}
 \usepackage{graphicx}
 \usepackage[T1]{fontenc}
 
-% \newcommand{\dopplercoin}{D\makebox[0pt]{\raisebox{1pt}{=}}C}
-% \newfontfamily\unicodefont{Lato}
-
 \begin{document}
 \begin{center}
-\renewcommand{\arraystretch}{2.5} % Default value: 1
+\renewcommand{\arraystretch}{2.5}
 \pagenumbering{gobble}
 
 \begin{longtable}{|c|c|}
@@ -30,10 +24,12 @@
   \parbox[t]{0.49\textwidth}{\sf\large\textbf{\Ovalbox{ {{.Diff}} } {{.Name}} } \hfill\small {{.Index}} \\ \\
   \normalsize { {{.Text}} } \\
   {{if not (eq .Img "")}}
-  \href{ https://strela-vlna.gchd.cz/api/files/probs/{{.Id}}/{{.Img}} }{ \includegraphics[width=0.49\textwidth]{ {{.Img}} } } \\ 
+  \includegraphics[width=0.49\textwidth]{ {{.Img}} }  \\ 
   {{end}}
-  \vfill \center{ {{.TeamName}} \hfill {{.Id}} \\ } }
-    % \vfill \center\textbf{Cena {{.Buy}} \hfill Prodej {{.Sell}} \hfill Odměna {{.Solve}} } \\ \vspace{6pt} }
+  \vfill \center{ {{.TeamName}} \hfill {{.Id}} \\ }
+  {{if not (eq .AuthorSocials "")}}
+  \vfill \center{ Autor úlohy: {{.AuthorName}} {{.AuthorSocials}} \hfill \\ }
+  {{end}} }
   {{if iseven $idx}}
     \\ \hline
   {{else}}

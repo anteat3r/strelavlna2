@@ -586,6 +586,8 @@ type _dbProb struct{
   Graph string `db:"graph"`
   Solution string `db:"solution"`
   Infinite bool `db:"infinite"`
+  AuthorName string `db:"author_name"`
+  AuthorSocials string `db:"author_socials"`
 }
 
 func latexEscapeComment(s string) string {
@@ -626,7 +628,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
 
     probs := make([]_dbProb, 0)
     err = dao.DB().
-      NewQuery(`select * from probs where contests like concat("%", {:contest}, "%")`).
+      NewQuery(`select p.id, p.name, p.dif, p.img, p.author, p.text, p.graph, p.solution, p.infinite, a.username as author_name, a.socials as author_socials from probs as p where p.contests like concat("%", {:contest}, "%")`).
       Bind(dbx.Params{"contest": cid}).
       All(&probs)
     if err != nil { return err }
@@ -634,6 +636,8 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
     slices.SortFunc(probs, func(a, b _dbProb) int {
       return len(b.Text) - len(a.Text)
     })
+
+    imgsurls := ""
 
     pprobs := make([]PaperProb, 0, len(probs))
     psols := make([]PaperSol, 0, len(probs))
@@ -645,6 +649,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
       if !ok { return nErr("invalid diff") }
       solvecost, ok := GetCost("+" + pr.Diff)
       if !ok { return nErr("invalid diff") }
+      imgsurls += "https://strela-vlna.gchd.cz/api/files/probs/" + pr.Id + "/" + pr.Img + " "
       if pr.Graph == `{"nodes":{"basic":{},"get":{},"set":{}}` {
         pprobs = append(pprobs, PaperProb{
           Id: pr.Id,
@@ -737,6 +742,6 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
     papers_sol := renbuf.String()
     papers_sol = html.UnescapeString(papers_sol)
 
-    return c.String(200, papers + "\n\n\n" + papers_sol)
+    return c.String(200, papers + "\n\n\n" + papers_sol + "\n\n\n" + imgsurls)
   }
 }
