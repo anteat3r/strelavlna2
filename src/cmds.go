@@ -3,6 +3,7 @@ package src
 import (
 	"bytes"
 	"encoding/json"
+	"html"
 	"html/template"
 
 	// "fmt"
@@ -675,6 +676,7 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
     if err != nil { return err }
 
     papers := renbuf.String()
+    papers = html.UnescapeString(papers)
 
     return c.String(200, papers)
   }
