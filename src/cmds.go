@@ -568,6 +568,8 @@ type PaperProb struct {
   Solve int
   TeamName string
   Id string
+  AuthorName string
+  AuthorSocials string
 }
 
 type PaperSol struct {
@@ -661,6 +663,8 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
           Buy: buycost,
           Sell: sellcost,
           Solve: solvecost,
+          AuthorName: pr.AuthorName,
+          AuthorSocials: pr.AuthorSocials,
         })
         psols = append(psols, PaperSol{
           Name: latexEscape(pr.Name),
@@ -686,6 +690,8 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
           Buy: buycost,
           Sell: sellcost,
           Solve: solvecost,
+          AuthorName: pr.AuthorName,
+          AuthorSocials: pr.AuthorSocials,
         })
         psols = append(psols, PaperSol{
           Name: latexEscape(pr.Name),
