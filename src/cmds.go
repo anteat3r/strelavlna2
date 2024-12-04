@@ -724,6 +724,8 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
 
     funcsmap := template.FuncMap{ "iseven": func(i int) bool { return i % 2 == 0 } }
 
+
+
     bts, err := os.ReadFile("/opt/strelavlna2/prob_templ.tex")
     if err != nil { return err }
 
@@ -736,6 +738,9 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
 
     papers := renbuf.String()
     papers = html.UnescapeString(papers)
+
+
+
     
     bts, err = os.ReadFile("/opt/strelavlna2/prob_sol_templ.tex")
     if err != nil { return err }
@@ -750,6 +755,22 @@ func GenProbPaper(dao *daos.Dao) echo.HandlerFunc {
     papers_sol := renbuf.String()
     papers_sol = html.UnescapeString(papers_sol)
 
-    return c.String(200, papers + "\n\n\n" + papers_sol + "\n\n\n" + imgsurls)
+
+
+    
+    bts, err = os.ReadFile("/opt/strelavlna2/consts_templ.tex")
+    if err != nil { return err }
+
+    tmpl, err = template.New("probs_consts").Parse(string(bts))
+    if err != nil { return err }
+
+    renbuf = bytes.Buffer{}
+    err = tmpl.Execute(&renbuf, consts)
+    if err != nil { return err }
+
+    papers_consts := renbuf.String()
+    papers_consts = html.UnescapeString(papers_sol)
+
+    return c.String(200, papers + "\n\n\n" + papers_sol + "\n\n\n" + papers_consts + "\n\n\n" + imgsurls)
   }
 }
