@@ -9,14 +9,13 @@
 \usepackage{longtable}
 
 \begin{document}
-\begin{flushleft}
-\sf\large{\textbf{ Tabulka konstant }}
+\center\sf\large{\textbf{ Tabulka konstant }} \\
 \setlength\itemsep{-1pt}
 \begin{longtable}{|c|c|}
+\\ \hline
 {{range $idx, $sol := .}}
-  \textbf{ {{.Name}} } {{.Symbol}} & = {{.Value}} {{.Unit}} {{.Desc}}
+  \textbf{ {{.Name}} } & {{.Symbol}} = {{.Value}} {{.Unit}} {{.Desc}}
   \\ \hline
 {{end}}
 \end{longtable}
-\end{flushleft}
 \end{document}
