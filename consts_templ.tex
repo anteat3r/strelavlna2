@@ -14,9 +14,11 @@
 \sf\large{\textbf{ Tabulka konstant }}
 \begin{itemize}
 \setlength\itemsep{-1pt}
+\begin{aligned}
 {{range $idx, $sol := .}}
-  \item[]\textbf{ {{.Name}} {{.Symbol}} } {{.Value}} {{.Unit}} {{.Desc}}
+  \item[]\textbf{ {{.Name}} & {{.Symbol}} } = {{.Value}} {{.Unit}} {{.Desc}}
 {{end}}
+\end{aligned}
 \end{itemize}  
 \end{multicols}
 \end{flushleft}
