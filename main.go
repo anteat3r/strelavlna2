@@ -167,6 +167,14 @@ func main() {
         return c.Redirect(301, url)
       },
     )
+    e.Router.GET(
+      "/s/:name",
+      func(c echo.Context) error {
+        url, ok := urls[c.PathParam("name")]
+        if !ok { return c.String(400, "not found") }
+        return c.Redirect(301, url)
+      },
+    )
 
     // PathParams o (okres)
     e.Router.GET(
