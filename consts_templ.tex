@@ -6,20 +6,17 @@
 \setlength{\voffset}{-4.2cm}
 \setlength{\textheight}{29cm}
 \setlength{\textwidth}{19cm}
-\usepackage{multicol}
-\setlength\columnseprule{0.5pt}
+\usepackage{longtable}
+
 \begin{document}
 \begin{flushleft}
-\begin{multicols}{2}
 \sf\large{\textbf{ Tabulka konstant }}
-\begin{itemize}
 \setlength\itemsep{-1pt}
-\begin{aligned}
+\begin{longtable}{|c|c|}
 {{range $idx, $sol := .}}
-  \item[]\textbf{ {{.Name}} & {{.Symbol}} } = {{.Value}} {{.Unit}} {{.Desc}}
+  \textbf{ {{.Name}} } {{.Symbol}} & = {{.Value}} {{.Unit}} {{.Desc}}
+  \\ \hline
 {{end}}
-\end{aligned}
-\end{itemize}  
-\end{multicols}
+\end{longtable}
 \end{flushleft}
 \end{document}
