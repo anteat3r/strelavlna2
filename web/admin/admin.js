@@ -277,7 +277,9 @@ $("#dashboard-s").addEventListener("click", async () => {
     dashboard.set(e.record.id, {name: e.record.name, score: e.record.score});
   })
   let sres = "";
-  for (let it of Array.from(dashboard.values()).sort((a, b) => a.score - b.score)) {
+  let arr = Array.from(dashboard.values());
+  arr.sort((a, b) => a.score - b.score)
+  for (let it of arr) {
     sres += `<li>${it.name}:${30-it.name.length}it.score</li>`;
   }
   console.log(sres);
