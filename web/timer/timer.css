@@ -89,7 +89,7 @@ button {
     padding: 0px;
 }
 #price-list-item-a-wrapper{
-    background-color: #c6ffe2;
+    background-color: #30cf7e;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }
@@ -102,32 +102,32 @@ button {
     font-family: 'Lexend';
     font-size: 50px;
     font-weight: 500;
-    color: #c6ffe2;
+    color: black;
     text-align: center;
 }
 
 #price-list-a-buy{
-    background-color: #c6ffe2;
+    background-color: #30cf7e;
     font-family: 'Lexend';
     font-size: 30px;
     text-align: center;
-    color: #30cf7e;
+    color: black;
     font-weight: 700;
 }
 #price-list-a-solve{
-    background-color: #c6ffe2;
+    background-color: #30cf7e;
     font-family: 'Lexend';
     font-size: 30px;
     text-align: center;
-    color: #30cf7e;
+    color: black;
     font-weight: 700;
 }
 #price-list-a-sell{
-    background-color: #c6ffe2;
+    background-color: #30cf7e;
     font-family: 'Lexend';
     font-size: 30px;
     text-align: center;
-    color: #30cf7e;
+    color: black;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     font-weight: 700;
@@ -141,7 +141,7 @@ button {
     padding: 0px;
 }
 #price-list-item-b-wrapper{
-    background-color: #b2e9ff;
+    background-color: #3eb1df;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }
@@ -154,32 +154,32 @@ button {
     font-family: 'Lexend';
     font-size: 50px;
     font-weight: 500;
-    color: #b2e9ff;
+    color: black;
     text-align: center;
 }
 
 #price-list-b-buy{
-    background-color: #b2e9ff;
+    background-color: #3eb1df;
     font-family: 'Lexend';
     font-size: 30px;
     text-align: center;
-    color: #3eb1df;
+    color: black;
     font-weight: 700;
 }
 #price-list-b-solve{
-    background-color: #b2e9ff;
+    background-color: #3eb1df;
     font-family: 'Lexend';
     font-size: 30px;
     text-align: center;
-    color: #3eb1df;
+    color: black;
     font-weight: 700;
 }
 #price-list-b-sell{
-    background-color: #b2e9ff;
+    background-color: #3eb1df;
     font-family: 'Lexend';
     font-size: 30px;
     text-align: center;
-    color: #3eb1df;
+    color: black;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     font-weight: 700;
@@ -193,7 +193,7 @@ button {
     padding: 0px;
 }
 #price-list-item-c-wrapper{
-    background-color: #ffd1c3;
+    background-color: #e45528;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }
@@ -206,32 +206,32 @@ button {
     font-family: 'Lexend';
     font-size: 50px;
     font-weight: 500;
-    color: #ffd1c3;
+    color: black;
     text-align: center;
 }
 
 #price-list-c-buy{
-    background-color: #ffd1c3;
+    background-color: #e45528;
     font-family: 'Lexend';
     font-size: 30px;
     text-align: center;
-    color: #e45528;
+    color: black;
     font-weight: 700;
 }
 #price-list-c-solve{
-    background-color: #ffd1c3;
+    background-color: #e45528;
     font-family: 'Lexend';
     font-size: 30px;
     text-align: center;
-    color: #e45528;
+    color: black;
     font-weight: 700;
 }
 #price-list-c-sell{
-    background-color: #ffd1c3;
+    background-color: #e45528;
     font-family: 'Lexend';
     font-size: 30px;
     text-align: center;
-    color: #e45528;
+    color: black;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     font-weight: 700;
