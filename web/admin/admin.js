@@ -275,7 +275,7 @@ $("#dashboard-s").addEventListener("click", async () => {
     filter: "contest = 'ommq0ktvg397pow'",
   })
   console.log(teams);
-  for (let it of teams) {
+  for (let it of teams.items) {
     dashboard.set(it.id, {name: it.name, score: it.score})
   }
   let sres = "";
