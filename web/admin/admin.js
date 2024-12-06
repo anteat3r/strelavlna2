@@ -272,15 +272,14 @@ let dashboard = new Map();
 
 $("#dashboard-s").addEventListener("click", async () => {
   pb.collection("teams").subscribe("*", (e) => {
-    console.log(e);
     if (e.action != "update") { return; }
     if (e.record.contest != "ommq0ktvg397pow") { return; }
     dashboard.set(e.record.id, {name: e.record.name, score: e.record.score});
-    console.log(Array.from(dashboard.values()));
   })
   let sres = "";
   for (let it of Array.from(dashboard.values()).sort((a, b) => a.score - b.score)) {
     sres += `<li>${it.name}:${30-it.name.length}it.score</li>`;
   }
+  console.log(sres);
   $("#dashboard").innerHTML = sres;
 });
