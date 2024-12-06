@@ -276,7 +276,7 @@ $("#dashboard-s").addEventListener("click", async () => {
     if (e.action != "update") { return; }
     if (e.record.contest != "ommq0ktvg397pow") { return; }
     dashboard.set(e.record.id, {name: e.record.name, score: e.record.score});
-    console.log(dashboard.values());
+    console.log(Array.from(dashboard.values()));
   })
   let sres = "";
   for (let it of Array.from(dashboard.values()).sort((a, b) => a.score - b.score)) {
