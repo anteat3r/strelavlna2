@@ -19,41 +19,42 @@
 			</div>
 		</header>
 		<div id="main">
-			<div class="timer-wrapper">
-				<div class="prices">
-					<h1>Ceník</h1>
-					<table>
+			<div class="all-wrapper">
+				<div id="price-list-wrapper">
+					<h2 id="price-list-title">Ceník</h2>
+					<table id="price-list-items-wrapper">
 						<thead>
-							<tr>
-								<th>Úloha</th>
-								<th>Nákup</th>
-								<th>Vyřešení</th>
-								<th>Prodej</th>
+							<tr id="price-list-row-names">
+								<th class="price-list-empty"></th>
+								<th id="price-list-name-buy" class="price-list-name">Nákup</th>
+								<th id="price-list-name-solve" class="price-list-name">Vyřešení</th>
+								<th id="price-list-name-sell" class="price-list-name">Prodej</th>
 							</tr>
 						</thead>
 						<tbody>
-							<tr>
-								<td>A</td>
-								<td>30 DC</td>
-								<td>40 DC</td>
-								<td>25 DC</td>
+							<tr id="price-list-row-a">
+								<td id="price-list-item-a-wrapper"><h2 id="price-list-item-a">A</h2></td>
+								<td id="price-list-a-buy">30 DC</td>
+								<td id="price-list-a-solve">40 DC</td>
+								<td id="price-list-a-sell">25 DC</td>
 							</tr>
-							<tr>
-								<td>B</td>
-								<td>80 DC</td>
-								<td>130 DC</td>
-								<td>40 DC</td>
+							<tr id="price-list-row-b">
+								<td id="price-list-item-b-wrapper"><h2 id="price-list-item-b">B</h2></td>
+								<td id="price-list-b-buy">80 DC</td>
+								<td id="price-list-b-solve">130 DC</td>
+								<td id="price-list-b-sell">40 DC</td>
 							</tr>
-							<tr>
-								<td>C</td>
-								<td>130 DC</td>
-								<td>240 DC</td>
-								<td>65 DC</td>
+							<tr id="price-list-row-c">
+								<td id="price-list-item-c-wrapper"><h2 id="price-list-item-c">C</h2></td>
+								<td id="price-list-c-buy">130 DC</td>
+								<td id="price-list-c-solve">240 DC</td>
+								<td id="price-list-c-sell">65 DC</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
-				<div>
+				<div class="timer-wrapper">
+					<h2 id="timer-title">Začínáme za:</h2>
 					<div class="timer" id="timer-display">
 						00:00:00
 					</div>

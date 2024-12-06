@@ -38,8 +38,202 @@ button {
     background-color: var(--color-main-white);
     box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.5);
 }
-.timer-wrapper{
+.all-wrapper{
     display: flex;
     margin-top: 25vh;
     justify-content: space-around;
+}
+#price-list-wrapper{
+    padding: 30px;
+    padding-left: 50px;
+    padding-top: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateY(-100px);
+}
+
+#price-list-title{
+    font-family: 'Lexend';
+    font-size: 70px;
+    font-weight: 500;
+    letter-spacing: 20px;
+    color: var(--color-secondary-dark);
+    border-bottom: 2px var(--color-secondary-dark) dashed;
+    padding-bottom: 15px;
+    width: 500px;
+    text-align: center;
+    margin-bottom: 5px;
+    margin-top: 0px;
+    transform: translateX(25px);
+}
+#price-list-items-wrapper{
+    border-spacing: 0 10px;
+}
+#price-list-items-wrapper th{
+    width: 130px;
+    text-align: center;
+    font-family: 'Lexend';
+    font-size: 25px;
+    font-weight: 500;
+    color: var(--color-secondary-dark);
+}
+
+#price-list-items-wrapper td{
+    padding: 0px;
+}
+
+#price-list-row-a{
+    margin: 20px;
+    margin-inline: 0px;
+    padding: 0px;
+}
+#price-list-item-a-wrapper{
+    background-color: #c6ffe2;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+#price-list-item-a{
+    margin: 0px;
+    margin-right: 40px;
+    padding: 10px;
+    background-color: #30cf7e;
+    border-radius: 5px;
+    font-family: 'Lexend';
+    font-size: 50px;
+    font-weight: 500;
+    color: #c6ffe2;
+    text-align: center;
+}
+
+#price-list-a-buy{
+    background-color: #c6ffe2;
+    font-family: 'Lexend';
+    font-size: 30px;
+    text-align: center;
+    color: #30cf7e;
+}
+#price-list-a-solve{
+    background-color: #c6ffe2;
+    font-family: 'Lexend';
+    font-size: 30px;
+    text-align: center;
+    color: #30cf7e;
+}
+#price-list-a-sell{
+    background-color: #c6ffe2;
+    font-family: 'Lexend';
+    font-size: 30px;
+    text-align: center;
+    color: #30cf7e;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+
+
+#price-list-row-b{
+    margin: 20px;
+    margin-inline: 0px;
+    padding: 0px;
+}
+#price-list-item-b-wrapper{
+    background-color: #b2e9ff;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+#price-list-item-b{
+    margin: 0px;
+    margin-right: 40px;
+    padding: 10px;
+    background-color: #3eb1df;
+    border-radius: 5px;
+    font-family: 'Lexend';
+    font-size: 50px;
+    font-weight: 500;
+    color: #b2e9ff;
+    text-align: center;
+}
+
+#price-list-b-buy{
+    background-color: #b2e9ff;
+    font-family: 'Lexend';
+    font-size: 30px;
+    text-align: center;
+    color: #3eb1df;
+}
+#price-list-b-solve{
+    background-color: #b2e9ff;
+    font-family: 'Lexend';
+    font-size: 30px;
+    text-align: center;
+    color: #3eb1df;
+}
+#price-list-b-sell{
+    background-color: #b2e9ff;
+    font-family: 'Lexend';
+    font-size: 30px;
+    text-align: center;
+    color: #3eb1df;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+
+
+#price-list-row-c{
+    margin: 20px;
+    margin-inline: 0px;
+    padding: 0px;
+}
+#price-list-item-c-wrapper{
+    background-color: #ffd1c3;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+#price-list-item-c{
+    margin: 0px;
+    margin-right: 40px;
+    padding: 10px;
+    background-color: #e45528;
+    border-radius: 5px;
+    font-family: 'Lexend';
+    font-size: 50px;
+    font-weight: 500;
+    color: #ffd1c3;
+    text-align: center;
+}
+
+#price-list-c-buy{
+    background-color: #ffd1c3;
+    font-family: 'Lexend';
+    font-size: 30px;
+    text-align: center;
+    color: #e45528;
+}
+#price-list-c-solve{
+    background-color: #ffd1c3;
+    font-family: 'Lexend';
+    font-size: 30px;
+    text-align: center;
+    color: #e45528;
+}
+#price-list-c-sell{
+    background-color: #ffd1c3;
+    font-family: 'Lexend';
+    font-size: 30px;
+    text-align: center;
+    color: #e45528;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+.timer-wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#timer-title{
+    font-family: 'Lexend';
+    font-size: 30px;
+    font-family: 700;
 }

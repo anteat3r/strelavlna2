@@ -44,15 +44,17 @@ document.getElementById('start-timer').addEventListener('click', () => {
         if (currentTime >= endTime) {
             clearInterval(timerInterval);
             timerDisplay.textContent = '00:00:00';
+            document.getElementById("timer-title").innerHTML = "Soutež skončila";
             return;
         }
 
         
         if (currentTime < startTime) {
-            const timer = endTime - startTime;
+            const timer = startTime - currentTime;
             const hours = Math.floor((timer / (1000 * 60 * 60)) % 24);
             const minutes = Math.floor((timer / (1000 * 60)) % 60);
             const seconds = Math.floor((timer / 1000) % 60);
+            document.getElementById("timer-title").innerHTML = "Začínáme za:";
 
             timerDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         } else {
@@ -60,6 +62,8 @@ document.getElementById('start-timer').addEventListener('click', () => {
             const hours = Math.floor((remainingTime / (1000 * 60 * 60)) % 24);
             const minutes = Math.floor((remainingTime / (1000 * 60)) % 60);
             const seconds = Math.floor((remainingTime / 1000) % 60);
+            document.getElementById("timer-title").innerHTML = "Soutěž běží";
+
 
             timerDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
