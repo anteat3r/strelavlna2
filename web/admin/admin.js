@@ -274,6 +274,7 @@ $("#dashboard-s").addEventListener("click", async () => {
   let teams = await pb.collection("teams").getList(1, 30, {
     filter: "contest = 'ommq0ktvg397pow'",
   })
+  console.log(teams);
   for (let it of teams) {
     dashboard.set(it.id, {name: it.name, score: it.score})
   }
