@@ -280,5 +280,5 @@ $("#dashboard-s").addEventListener("click", async () => {
   for (let it of Array.from(dashboard.values()).sort((a, b) => a.score - b.score)) {
     sres += `<li>${it.name}:${30-it.name.length}it.score</li>`;
   }
-  $("#deshboard").innerHTML = sres;
+  $("#dashboard").innerHTML = sres;
 });
