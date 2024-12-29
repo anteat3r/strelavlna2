@@ -1,4 +1,27 @@
 {
+  "2024":[
+      {
+        "type": "vlna",
+        "id": "2024_vlna",
+        "title": "Dopplerova vlna 2024",
+        "placeNameOnline1": "Weberovci B",
+        "placeNameOnline2": "Fantastická pětka",
+        "placeNameOnline3": "Lobkovičáci",
+        "placeNameNormal1": "",
+        "placeNameNormal2": "",
+        "placeNameNormal3": "",
+        "schoolOnline1": "",
+        "schoolOnline2": "",
+        "schoolOnline3": "",
+        "schoolNormal1": "",
+        "schoolNormal2": "",
+        "schoolNormal3": "",
+        "imageLink1": "../images/placeholder.png",
+        "imageLink2": "../images/placeholder.png",
+        "imageLink3": "../images/placeholder.png",
+        "galleryLink": "about:blank"
+      }
+      ],
     "2023": [
       {
         "type": "strela",
