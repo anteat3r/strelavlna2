@@ -106,7 +106,34 @@ func main() {
                   })
                 }
               }
-              _, err := app.Dao().DB().
+              encstats, err := json.Marshal(w.Stats)
+              if err != nil { log.Error(err); return }
+              encchat, err := json.Marshal(w.Chat)
+              if err != nil { log.Error(err); return }
+              checkscache := make([]src.CheckM, 0, len(w.ChatChecksCache) + len(w.SolChecksCache))
+              src.Checks.RWith(func(v map[string]*src.RWMutexWrap[src.CheckS]) {
+                for _, chid := range w.ChatChecksCache {
+                  check, ok := v[chid]
+                  if !ok { continue }
+                  check.RWith(func(v src.CheckS) {
+                    if len(v.ProbId) > 15 { ok = false }
+                  })
+                  if !ok { continue }
+                  checkscache = append(checkscache, check)
+                }
+                for _, chid := range w.SolChecksCache {
+                  check, ok := v[chid]
+                  if !ok { continue }
+                  check.RWith(func(v src.CheckS) {
+                    if len(v.ProbId) > 15 { ok = false }
+                  })
+                  if !ok { continue }
+                  checkscache = append(checkscache, check)
+                }
+              })
+              encchecks, err := json.Marshal(checkscache)
+              if err != nil { log.Error(err); return }
+              _, err = app.Dao().DB().
                 Update(
                   "teams",
                   dbx.Params{
@@ -115,6 +142,9 @@ func main() {
                     "pending": src.StringifyRefList(pending),
                     "solved": src.StringifyRefList(solved),
                     "sold": src.StringifyRefList(sold),
+                    "stats": string(encstats),
+                    "chat": string(encchat),
+                    "checks": string(encchecks),
                   },
                   dbx.HashExp{"id": id},
                 ).
