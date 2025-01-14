@@ -90,7 +90,7 @@ func main() {
         log.Info("backuping")
         src.Teams.RWith(func(v map[string]src.TeamM) {
           for id, tm := range v {
-            log.Info(id)
+            // log.Info(id)
             tm.RWith(func(w src.TeamS) {
               money := w.Money
               bought := pickProbs(w.Bought)
@@ -112,8 +112,8 @@ func main() {
               if err != nil { log.Error(err); return }
               checkscache := make([]string, 0, len(w.ChatChecksCache) + len(w.SolChecksCache))
               src.Checks.RWith(func(v map[string]*src.RWMutexWrap[src.CheckS]) {
-                for prid, chid := range w.ChatChecksCache {
-                  log.Info(chid, prid)
+                for _, chid := range w.ChatChecksCache {
+                  // log.Info(chid, prid)
                   check, ok := v[chid]
                   if !ok { continue }
                   var chres []byte
@@ -125,8 +125,8 @@ func main() {
                   if !ok { continue }
                   checkscache = append(checkscache, string(chres))
                 }
-                for prid, chid := range w.SolChecksCache {
-                  log.Info(chid, prid)
+                for _, chid := range w.SolChecksCache {
+                  // log.Info(chid, prid)
                   check, ok := v[chid]
                   if !ok { continue }
                   var chres []byte
