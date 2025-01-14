@@ -1300,32 +1300,34 @@ func DBLoadFromPB(ac string) error {
       })
       if tm.GetString("stats") != "null" {
         err := json.Unmarshal([]byte(tm.GetString("stats")), &newteam.v.Stats)
-        if err != nil { log.Error(err); return }
+        if err != nil { log.Error(err) }
       }
       if tm.GetString("chat") != "null" {
         err := json.Unmarshal([]byte(tm.GetString("chat")), &newteam.v.Chat)
-        if err != nil { log.Error(err); return }
+        if err != nil { log.Error(err)  }
       }
       checks := make([]CheckM, 0)
       err := json.Unmarshal([]byte(tm.GetString("checks")), &checks)
-      if err != nil { log.Error(err); return }
+      if err != nil { log.Error(err) }
       Probs.RWith(func(w map[string]*RWMutexWrap[ProbS]) {
-        Checks.With(func(u *map[string]*RWMutexWrap[CheckS]) {
-          for _, check := range checks {
-            prob, ok := w[check.v.ProbId]
-            if !ok { log.Error("prob not found", check); continue }
-            check.v.Prob = prob
-            team, ok := (*v)[check.v.TeamId]
-            if !ok { log.Error("prob not found", check); continue }
-            check.v.Team = team
-            (*u)[check.v.Id] = check
-            if check.v.Msg {
-              newteam.v.ChatChecksCache[check.v.ProbId] = check.v.Id
-            } else {
-              newteam.v.SolChecksCache[check.v.ProbId] = check.v.Id
+        if err == nil {
+          Checks.With(func(u *map[string]*RWMutexWrap[CheckS]) {
+            for _, check := range checks {
+              prob, ok := w[check.v.ProbId]
+              if !ok { log.Error("prob not found", check); continue }
+              check.v.Prob = prob
+              team, ok := (*v)[check.v.TeamId]
+              if !ok { log.Error("prob not found", check); continue }
+              check.v.Team = team
+              (*u)[check.v.Id] = check
+              if check.v.Msg {
+                newteam.v.ChatChecksCache[check.v.ProbId] = check.v.Id
+              } else {
+                newteam.v.SolChecksCache[check.v.ProbId] = check.v.Id
+              }
             }
-          }
-        })
+          })
+        }
         for _, mps := range []struct{id string; mp map[string]ProbM}{
           {"bought", newteam.v.Bought},
           {"pending", newteam.v.Pending},
