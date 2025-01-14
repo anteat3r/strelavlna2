@@ -84,7 +84,7 @@ func main() {
 
     sched.MustAdd(
       "backscore",
-      "*/3 * * * *",
+      "*/1 * * * *",
       func() {
         if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
         log.Info("backuping")
