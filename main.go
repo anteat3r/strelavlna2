@@ -110,25 +110,31 @@ func main() {
               if err != nil { log.Error(err); return }
               encchat, err := json.Marshal(w.Chat)
               if err != nil { log.Error(err); return }
-              checkscache := make([]src.CheckM, 0, len(w.ChatChecksCache) + len(w.SolChecksCache))
+              checkscache := make([]string, 0, len(w.ChatChecksCache) + len(w.SolChecksCache))
               src.Checks.RWith(func(v map[string]*src.RWMutexWrap[src.CheckS]) {
                 for _, chid := range w.ChatChecksCache {
                   check, ok := v[chid]
                   if !ok { continue }
+                  var chres []byte
                   check.RWith(func(v src.CheckS) {
-                    if len(v.ProbId) > 15 { ok = false }
+                    if len(v.ProbId) > 15 { ok = false; return }
+                    chres, err = json.Marshal(v)
+                    if err != nil { log.Error(err); ok = false }
                   })
                   if !ok { continue }
-                  checkscache = append(checkscache, check)
+                  checkscache = append(checkscache, string(chres))
                 }
                 for _, chid := range w.SolChecksCache {
                   check, ok := v[chid]
                   if !ok { continue }
+                  var chres []byte
                   check.RWith(func(v src.CheckS) {
-                    if len(v.ProbId) > 15 { ok = false }
+                    if len(v.ProbId) > 15 { ok = false; return }
+                    chres, err = json.Marshal(v)
+                    if err != nil { log.Error(err); ok = false }
                   })
                   if !ok { continue }
-                  checkscache = append(checkscache, check)
+                  checkscache = append(checkscache, string(chres))
                 }
               })
               encchecks, err := json.Marshal(checkscache)

@@ -1306,24 +1306,28 @@ func DBLoadFromPB(ac string) error {
         err := json.Unmarshal([]byte(tm.GetString("chat")), &newteam.v.Chat)
         if err != nil { log.Error(err)  }
       }
-      checks := make([]CheckM, 0)
+      checks := make([]string, 0)
       err := json.Unmarshal([]byte(tm.GetString("checks")), &checks)
       if err != nil { log.Error(err) }
       Probs.RWith(func(w map[string]*RWMutexWrap[ProbS]) {
         if err == nil {
           Checks.With(func(u *map[string]*RWMutexWrap[CheckS]) {
-            for _, check := range checks {
-              prob, ok := w[check.v.ProbId]
+            for _, checkstr := range checks {
+              check := CheckS{}
+              err := json.Unmarshal([]byte(checkstr), &check)
+              if err != nil { log.Error(err); continue }
+              prob, ok := w[check.ProbId]
               if !ok { log.Error("prob not found", check); continue }
-              check.v.Prob = prob
-              team, ok := (*v)[check.v.TeamId]
+              check.Prob = prob
+              team, ok := (*v)[check.TeamId]
               if !ok { log.Error("prob not found", check); continue }
-              check.v.Team = team
-              (*u)[check.v.Id] = check
-              if check.v.Msg {
-                newteam.v.ChatChecksCache[check.v.ProbId] = check.v.Id
+              check.Team = team
+              ncheck := NewRWMutexWrap(check)
+              (*u)[check.Id] = &ncheck
+              if check.Msg {
+                newteam.v.ChatChecksCache[check.ProbId] = check.Id
               } else {
-                newteam.v.SolChecksCache[check.v.ProbId] = check.v.Id
+                newteam.v.SolChecksCache[check.ProbId] = check.Id
               }
             }
           })
