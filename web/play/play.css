@@ -2284,3 +2284,19 @@ audio {
         opacity: 0.0;
     }
 }
+
+#form-link-wrapper{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 15px;
+    align-items: center;
+
+    font-family: 'Lexend';
+
+}
+
+#form-link{
+    font-family: 'Lexend';
+}
