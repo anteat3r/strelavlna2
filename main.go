@@ -84,7 +84,7 @@ func main() {
 
     sched.MustAdd(
       "backscore",
-      "*/3 * * * *",
+      "*/1 * * * *",
       func() {
         if src.ActiveContest.GetPrimitiveVal().Id == "" { return }
         log.Info("backuping")
@@ -112,7 +112,8 @@ func main() {
               if err != nil { log.Error(err); return }
               checkscache := make([]string, 0, len(w.ChatChecksCache) + len(w.SolChecksCache))
               src.Checks.RWith(func(v map[string]*src.RWMutexWrap[src.CheckS]) {
-                for _, chid := range w.ChatChecksCache {
+                for prid, chid := range w.ChatChecksCache {
+                  log.Info(chid, prid)
                   check, ok := v[chid]
                   if !ok { continue }
                   var chres []byte
@@ -124,7 +125,8 @@ func main() {
                   if !ok { continue }
                   checkscache = append(checkscache, string(chres))
                 }
-                for _, chid := range w.SolChecksCache {
+                for prid, chid := range w.SolChecksCache {
+                  log.Info(chid, prid)
                   check, ok := v[chid]
                   if !ok { continue }
                   var chres []byte

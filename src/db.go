@@ -1317,11 +1317,9 @@ func DBLoadFromPB(ac string) error {
               err := json.Unmarshal([]byte(checkstr), &check)
               if err != nil { log.Error(err); continue }
               prob, ok := w[check.ProbId]
-              if !ok { log.Error("prob not found", check); continue }
+              if !ok && check.ProbId != "" { log.Error("prob not found", check); continue }
               check.Prob = prob
-              team, ok := (*v)[check.TeamId]
-              if !ok { log.Error("prob not found", check); continue }
-              check.Team = team
+              check.Team = &newteam
               ncheck := NewRWMutexWrap(check)
               (*u)[check.Id] = &ncheck
               if check.Msg {
@@ -1347,7 +1345,7 @@ func DBLoadFromPB(ac string) error {
         }
         for i, chmsg := range newteam.v.Chat {
           pr, ok := w[chmsg.ProbId]
-          if !ok { log.Error("invalid probid in chat ", newteam.v.Name, chmsg.ProbId); continue }
+          if !ok && chmsg.ProbId != "" { log.Error("invalid probid in chat ", newteam.v.Name, chmsg.ProbId); continue }
           newteam.v.Chat[i].Prob = pr
         }
       })
