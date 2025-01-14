@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"maps"
 	"os"
 	"slices"
 	"strconv"
@@ -106,8 +107,8 @@ func RefListToInExpr(l []string) string {
 
 type ChatMsg struct {
   Admin bool
-  Prob ProbM
-  Team TeamM
+  Prob ProbM `json:"-"`
+  ProbId string
   Text string
 }
 
@@ -173,9 +174,9 @@ type ProbM = *RWMutexWrap[ProbS]
 
 type CheckS struct {
   Id string
-  Prob ProbM
+  Prob ProbM `json:"-"`
   ProbId string
-  Team TeamM
+  Team TeamM `json:"-"`
   TeamId string
   Msg bool
   Sol string
@@ -527,7 +528,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
 
   if prob == "" {
     team.With(func(teamS *TeamS) {
-      teamS.Chat = append(teamS.Chat, ChatMsg{false, nil, team, msg})
+      teamS.Chat = append(teamS.Chat, ChatMsg{false, nil, "", msg})
       var ok bool
       check, ok = teamS.ChatChecksCache[""]
       if ok {
@@ -583,7 +584,7 @@ func DBPlayerMsg(team TeamM, prob string, msg string) (upd bool, teamname string
     _, bought := teamS.Bought[prob]
     _, pending := teamS.Pending[prob]
     if !bought && !pending { oerr = dbErr("chat", "prob not owned"); return }
-    teamS.Chat = append(teamS.Chat, ChatMsg{false, probres, team, msg})
+    teamS.Chat = append(teamS.Chat, ChatMsg{false, probres, prob, msg})
     check, ok = teamS.SolChecksCache[prob]
     if ok {
       upd = true
@@ -843,7 +844,7 @@ func DBAdminMsg(teamid string, probid string, text string) (oerr error) {
       v.Chat = append(v.Chat, ChatMsg{
         true,
         nil,
-        team,
+        "",
         text,
       })
     })
@@ -863,7 +864,7 @@ func DBAdminMsg(teamid string, probid string, text string) (oerr error) {
     v.Chat = append(v.Chat, ChatMsg{
       true,
       prob,
-      team,
+      probid,
       text,
     })
   })
@@ -1260,6 +1261,7 @@ func DBLoadFromPB(ac string) error {
   if err != nil { return err }
   Teams.With(func(v *map[string]*RWMutexWrap[TeamS]) {
     for _, tm := range teams {
+      tmprobcnts := maps.Clone(probcnts)
       newteam := NewRWMutexWrap(TeamS{
         Id: tm.Id,
         Name: tm.GetString("name"),
@@ -1296,21 +1298,60 @@ func DBLoadFromPB(ac string) error {
           TeamName: tm.GetString("name"),
         },
       })
-      Probs.RWith(func(v map[string]*RWMutexWrap[ProbS]) {
+      if tm.GetString("stats") != "null" {
+        err := json.Unmarshal([]byte(tm.GetString("stats")), &newteam.v.Stats)
+        if err != nil { log.Error(err) }
+      }
+      if tm.GetString("chat") != "null" {
+        err := json.Unmarshal([]byte(tm.GetString("chat")), &newteam.v.Chat)
+        if err != nil { log.Error(err)  }
+      }
+      checks := make([]string, 0)
+      err := json.Unmarshal([]byte(tm.GetString("checks")), &checks)
+      if err != nil { log.Error(err) }
+      Probs.RWith(func(w map[string]*RWMutexWrap[ProbS]) {
+        if err == nil {
+          Checks.With(func(u *map[string]*RWMutexWrap[CheckS]) {
+            for _, checkstr := range checks {
+              check := CheckS{}
+              err := json.Unmarshal([]byte(checkstr), &check)
+              if err != nil { log.Error(err); continue }
+              prob, ok := w[check.ProbId]
+              if !ok { log.Error("prob not found", check); continue }
+              check.Prob = prob
+              team, ok := (*v)[check.TeamId]
+              if !ok { log.Error("prob not found", check); continue }
+              check.Team = team
+              ncheck := NewRWMutexWrap(check)
+              (*u)[check.Id] = &ncheck
+              if check.Msg {
+                newteam.v.ChatChecksCache[check.ProbId] = check.Id
+              } else {
+                newteam.v.SolChecksCache[check.ProbId] = check.Id
+              }
+            }
+          })
+        }
         for _, mps := range []struct{id string; mp map[string]ProbM}{
           {"bought", newteam.v.Bought},
-          {"pending", newteam.v.Bought},
+          {"pending", newteam.v.Pending},
           {"solved", newteam.v.Solved},
           {"sold", newteam.v.Sold},
         } {
           for _, id := range tm.GetStringSlice(mps.id) {
-            pr, ok := v[id]
+            pr, ok := w[id]
             if !ok { continue }
             mps.mp[id] = pr
+            pr.RWith(func(w ProbS) { tmprobcnts[w.Diff]-- })
           }
         }
+        for i, chmsg := range newteam.v.Chat {
+          pr, ok := w[chmsg.ProbId]
+          if !ok { log.Error("invalid probid in chat ", newteam.v.Name, chmsg.ProbId); continue }
+          newteam.v.Chat[i].Prob = pr
+        }
       })
-      for diff, cnt := range probcnts { newteam.v.RemProbCnt[diff] = cnt }
+      for diff, cnt := range tmprobcnts { newteam.v.RemProbCnt[diff] = cnt }
       (*v)[tm.Id] = &newteam
     }
   })

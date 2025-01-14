@@ -267,3 +267,36 @@ $("#dump-set").addEventListener("click", async () => {clown();
   }
   $("#dump-p").innerHTML = sres;
 });
+
+let dashboard = new Map();
+
+$("#dashboard-s").addEventListener("click", async () => {
+  let teams = await pb.collection("teams").getList(1, 30, {
+    filter: "contest = 'ommq0ktvg397pow'",
+  })
+  console.log(teams);
+  for (let it of teams.items) {
+    dashboard.set(it.id, {name: it.name, score: it.score})
+  }
+  let sres = "";
+  let arr = Array.from(dashboard.values());
+  arr.sort((a, b) => b.score - a.score)
+  for (let it of arr) {
+    sres += `<li>${it.name}:${" ".repeat(30-it.name.length)}${it.score}</li>`;
+  }
+  console.log(sres);
+  $("#dashboard").innerHTML = sres;
+  pb.collection("teams").subscribe("*", (e) => {
+    if (e.action != "update") { return; }
+    if (e.record.contest != "ommq0ktvg397pow") { return; }
+    dashboard.set(e.record.id, {name: e.record.name, score: e.record.score});
+    let sres = "";
+    let arr = Array.from(dashboard.values());
+    arr.sort((a, b) => b.score - a.score)
+    for (let it of arr) {
+      sres += `<li>${it.name}:${" ".repeat(30-it.name.length)}${it.score}</li>`;
+    }
+    console.log(sres);
+    $("#dashboard").innerHTML = sres;
+  })
+});
