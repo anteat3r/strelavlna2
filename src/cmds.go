@@ -316,40 +316,49 @@ func CashEndp(dao *daos.Dao) echo.HandlerFunc {
           return c.String(200, `{"key": "k"}`)
         }
       case "vratit":  
+        countstr := req["pocet"]
+        count, err := strconv.Atoi(countstr)
+        if err != nil { return err }
         switch req["akce"] {
         case "0":
-          tm, err := txDao.FindFirstRecordByData("teams", "card", req["id"])
-          if err != nil { return c.String(200, `{"key": "n"}`) }
-          diffn, err := strconv.Atoi(req["uloha"])
-          if err != nil { return err }
-          cost, ok := GetCost("+" + DIFFS[diffn])
-          if !ok { return c.String(200, `{"key": "n"}`) }
-          tm.Set("score", tm.GetInt("score") - cost)
-          err = txDao.Save(tm)
-          if err != nil { return c.String(200, `{"key": "n"}`) }
+          for range count {
+            tm, err := txDao.FindFirstRecordByData("teams", "card", req["id"])
+            if err != nil { return c.String(200, `{"key": "n"}`) }
+            diffn, err := strconv.Atoi(req["uloha"])
+            if err != nil { return err }
+            cost, ok := GetCost("+" + DIFFS[diffn])
+            if !ok { return c.String(200, `{"key": "n"}`) }
+            tm.Set("score", tm.GetInt("score") - cost)
+            err = txDao.Save(tm)
+            if err != nil { return c.String(200, `{"key": "n"}`) }
+          }
           return c.String(200, `{"key": "k"}`)
         case "1":
-          tm, err := txDao.FindFirstRecordByData("teams", "card", req["id"])
-          if err != nil { return c.String(200, `{"key": "n"}`) }
-          diffn, err := strconv.Atoi(req["uloha"])
-          if err != nil { return err }
-          cost, ok := GetCost(DIFFS[diffn])
-          if !ok { return c.String(200, `{"key": "n"}`) }
-          if tm.GetInt("score") < cost { return c.String(200, `{"key": "n"}`) }
-          tm.Set("score", tm.GetInt("score") + cost)
-          err = txDao.Save(tm)
-          if err != nil { return c.String(200, `{"key": "n"}`) }
+          for range count {
+            tm, err := txDao.FindFirstRecordByData("teams", "card", req["id"])
+            if err != nil { return c.String(200, `{"key": "n"}`) }
+            diffn, err := strconv.Atoi(req["uloha"])
+            if err != nil { return err }
+            cost, ok := GetCost(DIFFS[diffn])
+            if !ok { return c.String(200, `{"key": "n"}`) }
+            if tm.GetInt("score") < cost { return c.String(200, `{"key": "n"}`) }
+            tm.Set("score", tm.GetInt("score") + cost)
+            err = txDao.Save(tm)
+            if err != nil { return c.String(200, `{"key": "n"}`) }
+          }
           return c.String(200, `{"key": "k"}`)
         case "2":
-          tm, err := txDao.FindFirstRecordByData("teams", "card", req["id"])
-          if err != nil { return c.String(200, `{"key": "n"}`) }
-          diffn, err := strconv.Atoi(req["uloha"])
-          if err != nil { return err }
-          cost, ok := GetCost("-" + DIFFS[diffn])
-          if !ok { return c.String(200, `{"key": "n"}`) }
-          tm.Set("score", tm.GetInt("score") - cost)
-          err = txDao.Save(tm)
-          if err != nil { return c.String(200, `{"key": "n"}`) }
+          for range count {
+            tm, err := txDao.FindFirstRecordByData("teams", "card", req["id"])
+            if err != nil { return c.String(200, `{"key": "n"}`) }
+            diffn, err := strconv.Atoi(req["uloha"])
+            if err != nil { return err }
+            cost, ok := GetCost("-" + DIFFS[diffn])
+            if !ok { return c.String(200, `{"key": "n"}`) }
+            tm.Set("score", tm.GetInt("score") - cost)
+            err = txDao.Save(tm)
+            if err != nil { return c.String(200, `{"key": "n"}`) }
+          }
           return c.String(200, `{"key": "k"}`)
         }
       }
