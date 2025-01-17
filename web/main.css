@@ -199,6 +199,9 @@
     flex: 1;
     margin-right: 15px;
 }
+.team-row-sendrank{
+    display: none;
+}
 
 @media (max-width: 700px){
     .grid-main-a{
