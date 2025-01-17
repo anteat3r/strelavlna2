@@ -260,9 +260,6 @@ func CashEndp(dao *daos.Dao) echo.HandlerFunc {
     err := json.NewDecoder(c.Request().Body).Decode(&req)
     if err != nil { return err }
     dao.RunInTransaction(func(txDao *daos.Dao) error {
-      countstr := req["pocet"]
-      count, err := strconv.Atoi(countstr)
-      if err != nil { return err }
       switch req["typ"] {
       case "overeni":
         tm, err := txDao.FindFirstRecordByData("teams", "card", req["id"])
@@ -273,6 +270,9 @@ func CashEndp(dao *daos.Dao) echo.HandlerFunc {
           "penize": strconv.Itoa(tm.GetInt("score")),
         })
       case "akce":
+        countstr := req["pocet"]
+        count, err := strconv.Atoi(countstr)
+        if err != nil { return err }
         switch req["akce"] {
         case "0":
           for range count {
@@ -316,6 +316,9 @@ func CashEndp(dao *daos.Dao) echo.HandlerFunc {
           return c.String(200, `{"key": "k"}`)
         }
       case "vratit":  
+        countstr := req["pocet"]
+        count, err := strconv.Atoi(countstr)
+        if err != nil { return err }
         switch req["akce"] {
         case "0":
           for range count {
