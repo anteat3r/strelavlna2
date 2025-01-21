@@ -263,7 +263,7 @@ func CashEndp(dao *daos.Dao) echo.HandlerFunc {
       switch req["typ"] {
       case "overeni":
         tm, err := txDao.FindFirstRecordByData("teams", "card", req["id"])
-        if err != nil { return c.String(200, `{"key": "n"}`) }
+        if err != nil { log.Error(err); return c.String(200, `{"key": "n"}`) }
         return c.JSON(200, map[string]string{
           "key": "k",
           "nazev": tm.GetString("name"),
