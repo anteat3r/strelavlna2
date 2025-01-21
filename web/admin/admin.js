@@ -288,7 +288,7 @@ $("#dashboard-s").addEventListener("click", async () => {
   $("#dashboard").innerHTML = sres;
   pb.collection("teams").subscribe("*", (e) => {
     if (e.action != "update") { return; }
-    if (e.record.contest != "ommq0ktvg397pow") { return; }
+    if (e.record.contest != "uvqa6e2dkpc34l6") { return; }
     dashboard.set(e.record.id, {name: e.record.name, score: e.record.score});
     let sres = "";
     let arr = Array.from(dashboard.values());
