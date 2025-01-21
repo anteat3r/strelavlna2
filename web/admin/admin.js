@@ -272,7 +272,7 @@ let dashboard = new Map();
 
 $("#dashboard-s").addEventListener("click", async () => {
   let teams = await pb.collection("teams").getList(1, 30, {
-    filter: "contest = 'ommq0ktvg397pow'",
+    filter: "contest = 'uvqa6e2dkpc34l6'",
   })
   console.log(teams);
   for (let it of teams.items) {
