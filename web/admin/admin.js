@@ -293,7 +293,7 @@ $("#dashboard-s").addEventListener("click", async () => {
     let sres = "";
     let arr = Array.from(dashboard.values());
     arr.sort((a, b) => b.score - a.score)
-    for (let [idx, it] of arr) {
+    for (let [idx, it] of arr.entries()) {
       sres += `<li>${idx+1}. ${it.name}:${" ".repeat(30-it.name.length)}${it.score}</li>`;
     }
     console.log(sres);
