@@ -178,6 +178,8 @@ $("#query-set").addEventListener("click", async () => {clown();
   }
   if (sres == "") { sres = "<nil> <nil>" }
   let pres = "";
+  console.log(sres);
+  console.log(JSON.parse(sres));
   for (const [idx, r] of JSON.parse(sres)) {
     // pres += `<span style="color: blue;">` + r.id + ":</span><br>"
     let mklen = 0;
