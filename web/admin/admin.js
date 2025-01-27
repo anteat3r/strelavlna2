@@ -195,7 +195,7 @@ $("#query-set").addEventListener("click", async () => {clown();
     pres += "<br>"
   }
   $("#query-p").innerHTML = pres;
-  for (const [idx, r] of rres) {
+  for (const [idx, r] of Object.entries(rres)) {
     for (const [key, value] of Object.entries(r)) {
       if (value.length > 50) {
         $(`#dots-${idx}-${key}`).addEventListener("click", () => {
