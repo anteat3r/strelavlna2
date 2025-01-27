@@ -178,9 +178,8 @@ $("#query-set").addEventListener("click", async () => {clown();
   }
   if (sres == "") { sres = "<nil> <nil>" }
   let pres = "";
-  console.log(sres);
-  console.log(JSON.parse(sres));
-  for (const [idx, r] of JSON.parse(sres)) {
+  let rres = JSON.parse(sres);
+  for (const [idx, r] of Object.entries(rres)) {
     // pres += `<span style="color: blue;">` + r.id + ":</span><br>"
     let mklen = 0;
     for (const key of Object.keys(r)) {
@@ -196,7 +195,7 @@ $("#query-set").addEventListener("click", async () => {clown();
     pres += "<br>"
   }
   $("#query-p").innerHTML = pres;
-  for (const [idx, r] of JSON.parse(sres)) {
+  for (const [idx, r] of rres) {
     for (const [key, value] of Object.entries(r)) {
       if (value.length > 50) {
         $(`#dots-${idx}-${key}`).addEventListener("click", () => {
