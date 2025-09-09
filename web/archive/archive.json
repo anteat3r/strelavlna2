@@ -1,6 +1,27 @@
 {
   "2024":[
       {
+        "type": "strela",
+        "id": "2024_vlna",
+        "title": "Pražská střela 2024*",
+        "placeNameOnline1": "Táborská",
+        "placeNameOnline2": "Jílováci3",
+        "placeNameOnline3": "Sněhuláci",
+        "placeNameNormal1": "Jílováci2",
+        "placeNameNormal2": "Jílováci3",
+        "placeNameNormal3": "Gama",
+        "schoolOnline1": "",
+        "schoolOnline2": "",
+        "schoolOnline3": "",
+        "schoolNormal1": "",
+        "schoolNormal2": "",
+        "schoolNormal3": "",
+        "imageLink1": "../images/placeholder.png",
+        "imageLink2": "../images/placeholder.png",
+        "imageLink3": "../images/placeholder.png",
+        "galleryLink": "about:blank"
+      },
+      {
         "type": "vlna",
         "id": "2024_vlna",
         "title": "Dopplerova vlna 2024",
