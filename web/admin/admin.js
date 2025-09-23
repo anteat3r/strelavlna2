@@ -16,7 +16,7 @@ function clown() {  {
 
 const pb = new PocketBase("https://strela-vlna.gchd.cz");
 if (pb.authStore.isValid) {
-  // $("#title").innerHTML = pb.authStore.model.email;
+  $("#title").innerHTML = pb.authStore.model.email;
 }
 
 $("#auth-login").addEventListener("click", async () => {
@@ -29,7 +29,6 @@ $("#auth-login").addEventListener("click", async () => {
 
 $("#auth-clear").addEventListener("click", async () => {
   pb.authStore.clear();
-  console.log(res);
 });
 
 $("#activec-load").addEventListener("click", async () => {clown();
