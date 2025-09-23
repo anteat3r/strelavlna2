@@ -27,7 +27,7 @@ $("#auth-login").addEventListener("click", async () => {
   console.log(res);
 });
 
-$("#auth-logout").addEventListener("click", async () => {
+$("#auth-clear").addEventListener("click", async () => {
   pb.authStore.clear();
   console.log(res);
 });
