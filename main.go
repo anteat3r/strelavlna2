@@ -600,6 +600,10 @@ func main() {
     return nil
   })
 
+	app.OnRecordAfterCreateRequest("teams").Add(func(e *core.RecordCreateEvent) error {
+		return nil
+	})
+
   src.App = app
 
   if err := app.Start(); err != nil {
