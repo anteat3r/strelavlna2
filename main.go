@@ -49,7 +49,7 @@ func main() {
 
 	app.OnServe().BindFunc(func(e *core.ServeEvent) error {
 		e.Router.GET(
-			"/",
+			"/{path...}",
 			apis.Static(os.DirFS("../web"), true),
 		)
 
