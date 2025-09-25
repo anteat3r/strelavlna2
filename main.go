@@ -53,7 +53,7 @@ func main() {
 			apis.Static(os.DirFS("../web"), true),
 		)
 
-		return nil
+		return e.Next()
 	})
 
   // app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
