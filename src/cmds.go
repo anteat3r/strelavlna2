@@ -432,7 +432,7 @@ func SendSpam(dao *daos.Dao, mailerc mailer.Mailer) echo.HandlerFunc {
       Email1 string `db:"email_1"`
       Email2 string `db:"email_2"`
     }{}
-    err = dao.DB().NewQuery("SELECT email_1, email_2 FROM skoly").
+    err = dao.DB().NewQuery("SELECT email_1, email_2 FROM skoly WHERE spam = true").
       All(&res)
     if err != nil { return err }
     adrs := make([]mail.Address, 0)
