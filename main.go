@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
 	// "strconv"
 	// "strings"
 	// "time"
@@ -15,6 +16,8 @@ import (
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/cron"
+
 	// "github.com/pocketbase/pocketbase/tools/cron"
 	// "github.com/pocketbase/pocketbase/tools/types"
 
@@ -51,6 +54,15 @@ func main() {
 		e.Router.GET(
 			"/{path...}",
 			apis.Static(os.DirFS("../web"), true),
+		)
+
+		sched := cron.New()
+
+		sched.Add(
+			"spam",
+			"@hourly",
+			func() {
+			}
 		)
 
 		return e.Next()
