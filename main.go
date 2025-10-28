@@ -2,6 +2,7 @@ package main
 
 import (
 	// "encoding/json"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -18,6 +19,7 @@ import (
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+
 	// "github.com/pocketbase/pocketbase/tools/cron"
 
 	// "github.com/pocketbase/pocketbase/tools/cron"
@@ -87,6 +89,35 @@ func main() {
 				return e.JSON(200, res)
 			},
 		)
+
+		e.Router.POST("/loadprobs", func(e *core.RequestEvent) error {
+
+			body, err := io.ReadAll(e.Request.Body)
+			if err != nil { return err }
+			e.Request.Body.Close()
+
+			data := []map[string]string{}
+			err = json.Unmarshal(body, &data)
+			if err != nil { return err }
+
+			coll, _ := e.App.FindCollectionByNameOrId("probs")
+
+			for _, prob := range data {
+				rec := core.NewRecord(coll)
+				rec.Set("id", prob["id"])
+				rec.Set("name", prob["name"])
+				rec.Set("diff", prob["diff"])
+				rec.Set("type", prob["type"])
+				rec.Set("text", prob["text"])
+				rec.Set("answer", prob["solution"])
+				rec.Set("author", prob["author"])
+				rec.Set("infinite", prob["infinite"] == "1")
+				err = e.App.Save(rec)
+				if err != nil { return err }
+			}
+
+			return e.String(200, "ok")
+		})
 
 		// sched := cron.New()
 		//
