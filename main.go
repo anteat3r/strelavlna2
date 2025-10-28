@@ -55,6 +55,35 @@ func main() {
   app := pocketbase.New()
 
 	app.OnServe().BindFunc(func(e *core.ServeEvent) error {
+		e.Router.POST("/api/loadprobs", func(e *core.RequestEvent) error {
+
+			body, err := io.ReadAll(e.Request.Body)
+			if err != nil { return err }
+			e.Request.Body.Close()
+
+			data := []map[string]string{}
+			err = json.Unmarshal(body, &data)
+			if err != nil { return err }
+
+			coll, _ := e.App.FindCollectionByNameOrId("probs")
+
+			for _, prob := range data {
+				rec := core.NewRecord(coll)
+				rec.Set("id", prob["id"])
+				rec.Set("name", prob["name"])
+				rec.Set("diff", prob["diff"])
+				rec.Set("type", prob["type"])
+				rec.Set("text", prob["text"])
+				rec.Set("answer", prob["solution"])
+				rec.Set("author", prob["author"])
+				rec.Set("infinite", prob["infinite"] == "1")
+				err = e.App.Save(rec)
+				if err != nil { return err }
+			}
+
+			return e.String(200, "ok")
+		})
+
 		e.Router.GET(
 			"/{path...}",
 			apis.Static(os.DirFS("../web"), true),
@@ -90,34 +119,6 @@ func main() {
 			},
 		)
 
-		e.Router.POST("/api/loadprobs", func(e *core.RequestEvent) error {
-
-			body, err := io.ReadAll(e.Request.Body)
-			if err != nil { return err }
-			e.Request.Body.Close()
-
-			data := []map[string]string{}
-			err = json.Unmarshal(body, &data)
-			if err != nil { return err }
-
-			coll, _ := e.App.FindCollectionByNameOrId("probs")
-
-			for _, prob := range data {
-				rec := core.NewRecord(coll)
-				rec.Set("id", prob["id"])
-				rec.Set("name", prob["name"])
-				rec.Set("diff", prob["diff"])
-				rec.Set("type", prob["type"])
-				rec.Set("text", prob["text"])
-				rec.Set("answer", prob["solution"])
-				rec.Set("author", prob["author"])
-				rec.Set("infinite", prob["infinite"] == "1")
-				err = e.App.Save(rec)
-				if err != nil { return err }
-			}
-
-			return e.String(200, "ok")
-		})
 
 		// sched := cron.New()
 		//
