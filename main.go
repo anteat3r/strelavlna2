@@ -90,7 +90,7 @@ func main() {
 			},
 		)
 
-		e.Router.POST("/loadprobs", func(e *core.RequestEvent) error {
+		e.Router.POST("/api/loadprobs", func(e *core.RequestEvent) error {
 
 			body, err := io.ReadAll(e.Request.Body)
 			if err != nil { return err }
