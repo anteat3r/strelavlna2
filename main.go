@@ -111,7 +111,7 @@ func main() {
 				rec.Set("text", prob["text"])
 				rec.Set("answer", prob["solution"])
 				rec.Set("author", prob["author"])
-				rec.Set("contests", prob["contests"])
+				// rec.Set("contests", prob["contests"])
 				rec.Set("infinite", prob["infinite"] == "1")
 				err = e.App.Save(rec)
 				if err != nil { return err }
