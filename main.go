@@ -2,9 +2,12 @@ package main
 
 import (
 	// "encoding/json"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+
 	// "strconv"
 	// "strings"
 	// "time"
@@ -12,9 +15,13 @@ import (
 	// "github.com/anteat3r/strelavlna2/src"
 	"github.com/labstack/echo/v5"
 	// "github.com/pocketbase/dbx"
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+
+	// "github.com/pocketbase/pocketbase/tools/cron"
+
 	// "github.com/pocketbase/pocketbase/tools/cron"
 	// "github.com/pocketbase/pocketbase/tools/types"
 
@@ -52,6 +59,75 @@ func main() {
 			"/{path...}",
 			apis.Static(os.DirFS("../web"), true),
 		)
+
+		e.Router.POST(
+			"/sql",
+			func(e *core.RequestEvent) error {
+				data, err := io.ReadAll(e.Request.Body)
+				if err != nil { return err }
+				body := string(data)
+
+				e.Request.Body.Close()
+
+				rows, err := app.DB().NewQuery(body).Rows()
+				if err != nil { return err }
+
+				res := []map[string]string{}
+
+				for rows.Next() {
+					row := dbx.NullStringMap{}
+					err := rows.ScanMap(row)
+					if err != nil { return err }
+					rrow := map[string]string{}
+					for k, v := range row {
+						if !v.Valid { continue }
+						rrow[k] = v.String
+					}
+					res = append(res, rrow)
+				}
+
+				return e.JSON(200, res)
+			},
+		)
+
+		e.Router.POST("/api/loadprobs", func(e *core.RequestEvent) error {
+
+			body, err := io.ReadAll(e.Request.Body)
+			if err != nil { return err }
+			e.Request.Body.Close()
+
+			data := []map[string]string{}
+			err = json.Unmarshal(body, &data)
+			if err != nil { return err }
+
+			coll, _ := e.App.FindCollectionByNameOrId("probs")
+
+			for _, prob := range data {
+				rec := core.NewRecord(coll)
+				rec.Set("id", prob["id"])
+				rec.Set("name", prob["name"])
+				rec.Set("diff", prob["diff"])
+				rec.Set("type", prob["type"])
+				rec.Set("text", prob["text"])
+				rec.Set("answer", prob["solution"])
+				rec.Set("author", prob["author"])
+				// rec.Set("contests", prob["contests"])
+				rec.Set("infinite", prob["infinite"] == "1")
+				err = e.App.Save(rec)
+				if err != nil { return err }
+			}
+
+			return e.String(200, "ok")
+		})
+
+		// sched := cron.New()
+		//
+		// sched.Add(
+		// 	"spam",
+		// 	"@hourly",
+		// 	func() {
+		// 	}
+		// )
 
 		return e.Next()
 	})
